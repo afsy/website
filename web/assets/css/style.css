@@ -17,7 +17,6 @@ abbr[title] {
 
 footer {
     padding-top: 40px;
-    height: 200px;
 }
 
 footer ul img {
@@ -31,7 +30,6 @@ header {
 }
 
 .symfony {
-    text-align: left;
     font-style: italic;
     font-size: 12px;
     padding: 20px 100px;
