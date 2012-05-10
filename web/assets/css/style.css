@@ -29,10 +29,10 @@ header {
     margin-bottom: 60px;
 }
 
-.symfony {
+.mention {
     font-style: italic;
     font-size: 12px;
-    padding: 20px 100px;
+    margin: 20px 60px;
 }
 
 .members {
