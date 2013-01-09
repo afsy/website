@@ -2,7 +2,6 @@
 
 namespace Afsy\Bundle\AdminBundle\Admin;
 
-use Afsy\Bundle\AdminBundle\Form\MarkdownType;
 use Sonata\AdminBundle\Admin\Admin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
