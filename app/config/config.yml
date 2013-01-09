@@ -85,6 +85,11 @@ hwi_oauth:
             scope:               "SCOPE_EMAIL SCOPE_LOCATION SCOPE_PUBLIC"
             user_response_class: 'Afsy\Bundle\AdminBundle\OAuth\Response\SensioConnectUserResponse'
 
+knp_paginator:
+    page_range: 5                      # default page range used in pagination control
+    template:
+        pagination: AfsyFrontBundle:Blog:sliding.html.twig     # sliding pagination controls template
+
 fpn_tag:
     model:
         tag_class:     Afsy\Bundle\CoreBundle\Entity\Tag

@@ -18,16 +18,16 @@ class BlogController extends Controller
     /**
      * homepage
      */
-    public function indexAction($year = null, $month = null)
+    public function indexAction()
     {
-        $repository = $this->getDoctrine()->getRepository('AfsyCoreBundle:Article');
-        $repository->setPaginator($this->get('knp_paginator'));
-        $articles = $repository->getAll($year, $month);
-        $dates = $repository->getDateArray();
+        $query = $this->getDoctrine()->getRepository('AfsyCoreBundle:Article')->getQuery();
+        $pagination = $this->get('knp_paginator')->paginate(
+            $query,
+            $this->get('request')->query->get('page', 1)
+        );
 
         return $this->render('AfsyFrontBundle:Blog:index.html.twig', array(
-            'articles' => $articles,
-            'dates' => $dates
+            'pagination' => $pagination
         ));
     }
 
