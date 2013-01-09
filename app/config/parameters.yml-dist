@@ -13,3 +13,6 @@ parameters:
 
     locale:            fr
     secret:            ThisTokenIsNotSoSecretChangeIt
+
+    sensio_connect.client_id:     coucou
+    sensio_connect.client_secret: poney
