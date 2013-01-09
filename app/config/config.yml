@@ -80,8 +80,8 @@ hwi_oauth:
     resource_owners:
         sensio_connect:
             type:                sensio_connect
-            client_id:           26ec35c4f94a7edacae7f9da569668e9c6075de5ed00eb9155afa494bd04571e
-            client_secret:       f58e49e48001c568e156b5b79803b38f62bea8fb0781586113ea039c081fc7b3
+            client_id:           "%sensio_connect.client_id%"
+            client_secret:       "%sensio_connect.client_secret%"
             scope:               "SCOPE_EMAIL SCOPE_LOCATION SCOPE_PUBLIC"
             user_response_class: 'Afsy\Bundle\AdminBundle\OAuth\Response\SensioConnectUserResponse'
 
