@@ -1,1 +1,16 @@
+# junk
 .DS_Store
+.project
+.settings
+
+# sf2
+web/bundles/
+app/bootstrap.php.cache
+app/cache/*
+app/logs/*
+build/
+vendor
+app/config/parameters.yml
+web/css/compiled
+web/js/compiled
+composer.phar

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xml:lang="fr-FR">
+    <id>JoliCode blog</id>
+    <link type="text/html" rel="alternate" href="{{ url('blog_home') }}"/>
+
+    {% if tag is null %}
+        <title>JoliCode blog - les derniers articles</title>
+    {% else %}
+        <title>JoliCode blog - derniers articles au sujet de "{{ tag.name }}"</title>
+    {% endif %}
+    <updated>{{ 'now'|date('c') }}</updated>
+
+    {%- for post in articles %}
+    <entry>
+        <id>{{ post.slug }}</id>
+        <published>{{ post.publishedat|date('c') }}</published>
+        <link type="text/html" rel="alternate" href="{{ url('blog_show', {'slug': post.slug}) }}"/>
+        <title>{{ post.title }}</title>
+        <author>
+            <name>JoliCode Team</name>
+            <uri>http://jolicode.com/</uri>
+        </author>
+        <content type="html">
+            {{ post.body }}
+        </content>
+    </entry>
+    {%- endfor %}
+</feed>

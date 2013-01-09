@@ -1,0 +1,23 @@
+homepage:
+    pattern:  /
+    defaults: { _controller: AfsyFrontBundle:Blog:index }
+
+feed_atom:
+    pattern: /feed.atom
+    defaults: { _controller: AfsyFrontBundle:Blog:feed }
+
+blog_home:
+    pattern: /blog
+    defaults: { _controller: AfsyFrontBundle:Blog:index }
+
+blog_show:
+    pattern: /blog/{slug}
+    defaults: { _controller: AfsyFrontBundle:Blog:show }
+
+blog_preview:
+    pattern: /blog/preview/{slug}
+    defaults: { _controller: AfsyFrontBundle:Blog:show, preview: true }
+
+blog_show_tag:
+    pattern: /blog/tag/{name}
+    defaults: { _controller: AfsyFrontBundle:Blog:showTag }

@@ -1,0 +1,30 @@
+{% spaceless %}
+<div class="row">
+    <div class="span5">
+        <p>
+            {{ article.map | raw }}
+        </p>
+    </div>
+    <div class="span7 sf-event">
+        <h2><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h2>
+        <span class="date">publié le {{ article.publishedAt | localizeddate('long', 'none') }}</span>
+
+        {{ article.body | raw }}
+
+        {% if article.eventUrl %}
+            <p>
+                <a class="btn" href="{{ article.eventUrl }}">Inscription gratuite &raquo;</a>
+            </p>
+        {% endif %}
+
+        <ul class="tags">
+            {% for tag in article.tags %}
+                <li>
+                    <a href="{{ url('blog_show_tag', {'name': tag.name}) }}" title="{{ tag.name }}">{{ tag.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<hr/>
+{% endspaceless %}

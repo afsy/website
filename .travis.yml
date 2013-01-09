@@ -1,0 +1,21 @@
+language: php
+
+php:
+  - 5.3.3
+  - 5.3
+  - 5.4
+
+before_script: composer install
+
+
+before_script:
+  - cp app/config/parameters.yml-dist app/config/parameters.yml
+  - curl -s http://getcomposer.org/installer | php -- --quiet
+  - php composer.phar install
+  - php app/console doctrine:schema:create -n
+  - php app/console doctrine:fixtures:load -n
+  - mkdir -p app/cache app/logs
+  - sudo chmod -R 777 app/cache app/logs
+
+script:
+    - phpunit -c app/

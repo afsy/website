@@ -1,0 +1,9 @@
+{% extends 'AfsyFrontBundle::layout.html.twig' %}
+
+{% block page_title %}
+    - {{ article.title }}
+{% endblock %}
+
+{% block body %}
+    {% include 'AfsyFrontBundle:Blog:_article.html.twig' with {'article': article} %}
+{% endblock %}

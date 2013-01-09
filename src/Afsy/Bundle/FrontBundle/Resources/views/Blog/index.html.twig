@@ -1,0 +1,13 @@
+{% extends 'AfsyFrontBundle::layout.html.twig' %}
+
+{% block page_title %}
+    - tous les articles
+{% endblock %}
+
+{% block body %}
+    {% for article in articles %}
+        {% include 'AfsyFrontBundle:Blog:_article.html.twig' with {'article': article} %}
+    {% else %}
+        <p class="text-error">Il n'y a aucun article.</p>
+    {% endfor %}
+{% endblock %}
