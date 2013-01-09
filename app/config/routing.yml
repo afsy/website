@@ -18,8 +18,15 @@ logout:
     pattern:   /logout
 
 # Site / Admin
-AfsyFrontBundle:
+afsy_front_bundle:
     resource: "@AfsyFrontBundle/Resources/config/routing.yml"
+
+admin_redirect:
+    pattern: /admin
+    defaults:
+        _controller: FrameworkBundle:Redirect:urlRedirect
+        path: /admin/dashboard
+        permanent: false
 
 admin:
     resource: '@SonataAdminBundle/Resources/config/routing/sonata_admin.xml'

@@ -7,7 +7,7 @@ class ArticleRepository extends EntityRepository
     /**
      * Get the articles list
      *
-     * @param  array   $constraints
+     * @param  array $constraints
      * @return mixed
      */
     public function getQuery()
