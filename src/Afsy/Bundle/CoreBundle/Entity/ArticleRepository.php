@@ -16,7 +16,7 @@ class ArticleRepository extends EntityRepository
     /**
      * Get the articles list, eventually constrained on a given year and month
      *
-     * @param  array   $constraints
+     * @param  array $constraints
      * @return mixed
      */
     public function getAll($constraints)
@@ -40,6 +40,7 @@ class ArticleRepository extends EntityRepository
         }
 
         $query = $qb->getQuery();
+
         return isset($constraints['page']) ? $this->paginator->paginate($query, $constraints['page'], $this->pageSize)->getItems() : $query->getResult();
     }
 

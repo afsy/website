@@ -30,7 +30,8 @@ class AuthorEntityProvider implements OAuthAwareUserProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function loadUserByOAuthUserResponse(UserResponseInterface $response) {
+    public function loadUserByOAuthUserResponse(UserResponseInterface $response)
+    {
         $email = $response->getEmail();
         $user = $this->em->getRepository('AfsyCoreBundle:Author')->findOneBy(array('email' => $email));
 

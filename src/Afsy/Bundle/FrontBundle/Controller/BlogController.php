@@ -2,9 +2,6 @@
 
 namespace Afsy\Bundle\FrontBundle\Controller;
 
-use Afsy\Bundle\CoreBundle\Entity\Author;
-use Afsy\Bundle\CoreBundle\Entity\Tag;
-
 use Afsy\Bundle\CoreBundle\Entity\Article;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
