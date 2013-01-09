@@ -41,6 +41,9 @@ class AuthorEntityProvider implements OAuthAwareUserProviderInterface
             $user->setEmail($email);
             $user->setName($response->getRealName());
             $user->setCity($response->getCity());
+
+            // explicitely set the enabled status to false, as new members should not be enabled by default.
+            // they have to be enabled by an admin first
             $user->setIsEnabled(false);
 
             $this->em->persist($user);
