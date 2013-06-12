@@ -25,7 +25,7 @@ class Author implements UserInterface
     /**
      * @var string
      * @ORM\Column(type="string", length=255)
-     * @Assert\MaxLength(255)
+     * @Assert\Length(max=255)
      * @Assert\NotBlank()
      */
     protected $name;
@@ -33,7 +33,7 @@ class Author implements UserInterface
     /**
      * @var string
      * @ORM\Column(type="string", length=255)
-     * @Assert\MaxLength(255)
+     * @Assert\Length(max=255)
      * @Assert\NotBlank()
      */
     protected $city;

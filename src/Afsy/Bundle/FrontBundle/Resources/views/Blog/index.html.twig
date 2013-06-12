@@ -11,5 +11,5 @@
         <p class="text-error">Il n'y a aucun article.</p>
     {% endfor %}
 
-    {{ pagination.render()|raw }}
+    {{ knp_pagination_render(pagination) }}
 {% endblock %}

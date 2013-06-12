@@ -26,7 +26,7 @@ class Article implements Taggable
     /**
      * @var string
      * @ORM\Column(type="string", length=255)
-     * @Assert\MaxLength(255)
+     * @Assert\Length(max=255)
      * @Assert\NotBlank()
      */
     protected $title;
@@ -80,7 +80,7 @@ class Article implements Taggable
     /**
      * @var string
      * @ORM\Column(type="string", length=255)
-     * @Assert\MaxLength(255)
+     * @Assert\Length(max=255)
      * @Assert\NotBlank()
      */
     protected $city;
