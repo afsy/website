@@ -34,7 +34,7 @@ class AuthorAdmin extends Admin
     public function validate(ErrorElement $errorElement, $object)
     {
         $errorElement->with('name')
-                     ->assertMaxLength(array('limit' => 255))
+                     ->assertLength(array('max' => 255))
                      ->end();
     }
 }
