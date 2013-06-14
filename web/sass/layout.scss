@@ -1,0 +1,66 @@
+/*  LAYOUT.CSS
+    Structure graphique du site
+    contient des styles en reference à plusieurs elements structurants :
+    header, container, footer, navigation, ...
+-------------------------------------------------------------------------------------------------------- */
+
+@charset "UTF-8";
+@import "partials/variables.scss";
+
+
+    .container {
+        max-width: 1000px;
+        margin : 0 auto;
+    }
+
+/* ----------------------------------------------------
+    :: Header
+------------------------------------------------------- */
+
+    header{
+        background : #000 image-url('header-bg.png') top center no-repeat;
+        color : $white;
+        text-align : center;
+        padding : 1.5em 0;
+    }
+
+    .logo a {
+        @include inline-block;
+        @include hide-text;
+        background : transparent image-url('logo.png') 0 0 no-repeat;
+        width : image-width('logo.png');
+        height : image-height('logo.png');
+    }
+
+
+
+    .presentation {
+        background-color : $green;
+        color : $white;
+        padding : 1.5em 0;
+    }
+
+/* ----------------------------------------------------
+    :: Articles
+------------------------------------------------------- */
+
+    article {
+        margin : 1.5em 0;
+        background-color:$white;
+
+        .date {
+            text-transform : uppercase;
+            color : $text-grey;
+        }
+    }
+
+
+
+/* ----------------------------------------------------
+    :: Footer
+------------------------------------------------------- */
+
+    footer{
+        background : $black;
+        color : $white;
+    }

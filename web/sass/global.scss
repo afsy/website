@@ -1,0 +1,326 @@
+
+/*  GLOBAL.CSS
+    Contient les classes utilitaires disponibles à travers le site entier :
+    typographie, alignement, boutons, modal, tooltip,...
+-------------------------------------------------------------------------------------------------------- */
+
+@charset "UTF-8";
+@import "partials/variables.scss";
+@import "partials/mixins.scss";
+
+*{
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+
+body {
+	font-family: "Muli", "Helvetica", Arial, sans-serif;
+	background : $grey;
+	margin : 0 auto;
+	font-size: 13px;
+	line-height  : 1.5;
+	color: $black ;
+	-webkit-font-smoothing: antialiased;
+}
+
+
+/*  --------------------------------------------------
+	:: Typography
+-------------------------------------------------- */
+
+	em, i, .italic { font-style: italic; line-height: inherit; }
+	strong, b { font-weight: bold; line-height: inherit; }
+	small{ font-size: 90%; line-height: inherit; }
+	big{ font-size: 200%; line-height: inherit; }
+	.uppercase { text-transform : uppercase; }
+
+	/* Titles ------------------  */
+
+	  h1,
+	  h2,
+	  h3,
+	  h4,
+	  h5,
+	  h6 {
+	  		font-weight: normal;
+		  	font-style: normal;
+		  	text-rendering: optimizelegibility;
+		}
+		h1 {
+		  	font-size: 2.2em;
+		}
+		h2 {
+		 	font-size: 1.7em;
+		}
+		h3 {
+		  	font-size: 1.5em;
+		}
+		h4 {
+			font-size: 1.3em;
+		}
+		h5 {
+		  	font-size: 1.1em;
+		}
+		h6 {
+		  	font-size: 1em;
+		}
+
+
+
+	/* Paragraph ------------------  */
+
+		p 		{ font-size: 1em; }
+		.small 	{ font-size: 0.85em;}
+		p img 	{ margin: 0; }
+
+
+	/* Links ------------------  */
+		a { color: inherit; *color: expression(this.parentNode.currentStyle['color']); text-decoration: none; line-height: inherit; cursor : pointer;  }
+		p a, p a:visited { line-height: inherit; }
+		a img { border: none; }
+
+		h1 a,h2 a,h3 a,h4 a,h5 a,h6 a { color : inherit; }
+
+		li img {display : block; }
+
+
+/*  --------------------------------------------------
+	:: Font
+	-------------------------------------------------- */
+
+
+	@include font-face("Museo", font-files("museo_slab_500-webfont.ttf", "museo_slab_500italic-webfont.otf", "museo_slab_500-webfont.eot", "museo_slab_500-webfont.svg"));
+
+	.museo {
+		font-family : "Museo", serif;
+		font-weight: normal;
+	}
+
+
+	@include font-face("Muli", font-files("Muli-Regular-webfont.ttf", "Muli-Regular-webfont.otf", "Muli-Regular-webfont.eot", "Muli-Regular-webfont.svg"));
+
+
+
+/*  --------------------------------------------------
+	:: Colors
+	-------------------------------------------------- */
+
+	.white 	{ color : $white; }
+	.blue 	{ color : $blue; }
+
+/*  --------------------------------------------------
+	:: Lists
+	-------------------------------------------------- */
+
+	ul { list-style: none outside; }
+	ol { list-style: decimal; }
+
+	ol,
+	ul.square,
+	ul.circle,
+	ul.disc { margin-left: 30px; }
+
+	ul.square { list-style: square outside; text-align : left; }
+	ul.square li{ margin : 5px 0;  }
+
+	ul.circle { list-style: circle outside; }
+	ul.disc { list-style: disc outside; }
+	ul.large li { line-height: 21px; }
+
+
+/* --------------------------------------------------
+	:: Misc
+---------------------------------------------------*/
+
+	.left         { float: left;}
+	.right        { float: right;}
+	.none         { float : none; }
+	.text-left    { text-align: left; }
+	.text-right   { text-align: right; }
+	.text-center  { text-align: center; }
+	.inline , .list-horizontal li { @include inline-block;*vertical-align: middle;       margin-right : 5px; &:last-child{margin-right : 0;} }
+	.vertical-align {@include inline-block; *vertical-align: middle;}
+	img.vertical-align, {margin-right: 5px;}
+
+/* --------------------------------------------------
+	:: Alignement
+---------------------------------------------------*/
+
+	.row:before,
+	.row:after,
+	.clearfix:before,
+	.clearfix:after,
+	.row .row.collapse:before,
+	.row .row.collapse:after{
+		content:""; display:table;
+	}
+	.row:after,
+	.clearfix:after,
+	.row .row.collapse:after,
+	.row .row:after,
+	.row .row:before,
+	.row .row:after {
+		clear: both;
+	}
+
+	.row,.clearfix { zoom: 1; }
+	.relative {position : relative; }
+
+
+
+/* --------------------------------------------------
+	:: Margins
+---------------------------------------------------*/
+
+	.mg-page    	{  margin : $mg; }
+	.mg-top     	{  margin-top : $mg; }
+	.mg-top-s   	{  margin-top :10px; }
+	.mg-bottom  	{  margin-bottom : $mg; }
+	.mg-bottom-s  	{  margin-bottom : 5px; }
+	.mg-left    	{  margin-left : $mg; }
+	.mg-right   	{  margin-right : $mg; }
+	.mg-lg      	{  margin : 0 $mg; }
+	.mg-ht      	{  margin : $mg 0 ; }
+
+
+/* --------------------------------------------------
+	:: Padding
+---------------------------------------------------*/
+
+	.pd-page    {  padding : $mg; }
+	.pd-top     {  padding-top : $mg; }
+	.pd-bottom  {  padding-bottom : $mg !important; }
+	.pd-left    {  padding-left : $mg; }
+	.pd-right   {  padding-right : $mg; }
+	.pd-lg      {  padding : 0 $mg; }
+	.pd-ht      {  padding : $mg 0 ; }
+	.no-marg 	{margin : 0 !important; }
+	.no-pd 		{ padding : 0 !important; }
+	.fixpd 		{ margin-right : 15px; margin-left: 15px; }
+
+/*  --------------------------------------------------
+	:: btns
+-------------------------------------------------- */
+
+	button,
+	.btn {
+		background : $blue;
+		width: auto;
+		@include inline-block;
+		*vertical-align: middle;
+		color: $white;
+		cursor: pointer;
+		font-family: inherit;
+		font-weight: bold;
+		margin: 0;
+		padding: 10px 20px 11px;
+		text-align: center;
+		text-decoration: none;
+		font-size: 12px;
+		line-height: 15px;
+		border: 0 none;
+		*border: 0;
+	}
+
+	.btn.tiny 	{ font-size: 10px; padding: 5px 10px 6px; }
+	.btn.small 	{ font-size: 11px; padding: 7px 14px 8px; }
+	.btn.medium { font-size: 14px; }
+	.btn.large 	{ font-size: 17px; padding: 15px 30px 16px; }
+	.btn.expand { width: 100%; text-align: center; }
+
+	.btn.pink 	{ @include btn($pink); text-transform: uppercase;  }
+	.btn.grey 	{ @include btn($grey-light); }
+	.btn.blue 	{ @include btn($blue); text-transform: uppercase;  }
+	.btn.red 	{ @include btn($red); }
+
+	.btn.disabled,
+	.btn[disabled],
+	.btn.disabled:hover,
+	.btn[disabled]:hover {
+		@include opacity(0.6);
+		cursor: default;
+	}
+
+	input[type="file"],
+	input[type="image"],
+	input[type="submit"],
+	input[type="reset"],
+	input[type="button"],
+	input[type="radio"],
+	input[type="checkbox"] {
+	  width: auto;
+	}
+
+
+	button.btn::-moz-focus-inner,
+	input[type="submit"].btn::-moz-focus-inner {
+	  padding: 0;
+	  border: 0;
+	}
+
+/*  --------------------------------------------------
+	:: Box
+-------------------------------------------------- */
+
+	.panel {
+		background-color : $grey-light;
+		border : 1px solid $grey-border ;
+		padding : 15px;
+	}
+
+
+/*  --------------------------------------------------
+	:: Sep
+-------------------------------------------------- */
+
+	hr {
+		color: $grey-light;
+		background-color: $grey-border;
+		height: 1px;
+		border: 0;
+		margin : $mg 0;
+	}
+
+/*  --------------------------------------------------
+	:: Table
+-------------------------------------------------- */
+
+
+	table {
+	    background-color: transparent;
+	    max-width: 100%;
+	    width: 100%;
+	    table-layout: fixed;
+	}
+
+		table th {
+		    text-align: left;
+		    text-transform: uppercase;
+		  	font-weight: bold;
+		}
+
+		table th, table td {
+		    line-height: 20px;
+		    padding: 8px;
+		    text-align: left;
+		    vertical-align: top;
+		}
+
+
+	/* Stripped table ------------------*/
+
+	table.stripped{
+		border-collapse: collapse;
+	    border-spacing: 0;
+	}
+
+	table.stripped tr.even{
+		background-color : $white;
+	}
+
+
+
+
+
