@@ -1,0 +1,50 @@
+@charset "UTF-8";
+
+
+
+
+@mixin wrap-text{
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis; /* pour Opera 9 */
+    text-overflow: ellipsis; /* pour le reste du monde */
+    max-width: 100%;
+}
+
+
+@mixin btn($color) {
+    background-color : $color;
+    border : 1px solid darken($color, 10%);
+    &:hover{
+        background-color: lighten($color, 5%);
+
+    }
+    &:active{
+        background-color: darken($color, 5%);
+    }
+}
+
+
+@mixin input-placeholder($color) {
+  &.placeholder {
+    color: $color;
+    }
+  &:-moz-placeholder {
+    color: $color;
+    }
+  &::-webkit-input-placeholder {
+    color: $color;
+    }
+}
+
+
+@mixin input-spacing($width) {
+    width : $width - 1%;
+    margin-right : 0.6%;
+    &:last-child {
+        margin-right : 0;
+    }
+}
+
+
+

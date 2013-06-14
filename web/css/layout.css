@@ -1,0 +1,84 @@
+@charset "UTF-8";
+/*  LAYOUT.CSS
+    Structure graphique du site
+    contient des styles en reference à plusieurs elements structurants :
+    header, container, footer, navigation, ...
+-------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Imports Compass !important!
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Margin
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Widths
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Font
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Colors
+------------------------------------------------------- */
+/* Text ----------------- */
+/* line 11, ../sass/layout.scss */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ----------------------------------------------------
+    :: Header
+------------------------------------------------------- */
+/* line 20, ../sass/layout.scss */
+header {
+  background: black url('/img/header-bg.png?1371221496') top center no-repeat;
+  color: white;
+  text-align: center;
+  padding: 1.5em 0;
+}
+
+/* line 27, ../sass/layout.scss */
+.logo a {
+  display: -moz-inline-stack;
+  display: inline-block;
+  vertical-align: middle;
+  *vertical-align: auto;
+  zoom: 1;
+  *display: inline;
+  text-indent: -119988px;
+  overflow: hidden;
+  text-align: left;
+  background: transparent url('/img/logo.png?1371221323') 0 0 no-repeat;
+  width: 207px;
+  height: 118px;
+}
+
+/* line 37, ../sass/layout.scss */
+.presentation {
+  background-color: #1fbba6;
+  color: white;
+  padding: 1.5em 0;
+}
+
+/* ----------------------------------------------------
+    :: Articles
+------------------------------------------------------- */
+/* line 47, ../sass/layout.scss */
+article {
+  margin: 1.5em 0;
+  background-color: white;
+}
+/* line 51, ../sass/layout.scss */
+article .date {
+  text-transform: uppercase;
+  color: #979faa;
+}
+
+/* ----------------------------------------------------
+    :: Footer
+------------------------------------------------------- */
+/* line 63, ../sass/layout.scss */
+footer {
+  background: #353535;
+  color: white;
+}

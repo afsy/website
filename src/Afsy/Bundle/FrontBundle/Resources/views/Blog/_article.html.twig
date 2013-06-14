@@ -1,13 +1,13 @@
 {% spaceless %}
-<div class="row">
-    <div class="span5">
-        <p>
+
+<article class="row">
+    <div class="large-4 columns">
             {{ article.map | raw }}
-        </p>
     </div>
-    <div class="span7 sf-event">
-        <h2><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h2>
-        <span class="date">publié le {{ article.publishedAt | localizeddate('long', 'none') }}</span>
+
+    <div class="large-6 columns sf-event">
+        <h3 class="museo"><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h3>
+        <p class="date">publié le {{ article.publishedAt | localizeddate('long', 'none') }}</p>
 
         {{ article.body | raw }}
 
@@ -25,6 +25,6 @@
             {% endfor %}
         </ul>
     </div>
-</div>
-<hr/>
+</article>
+
 {% endspaceless %}
