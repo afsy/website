@@ -44,6 +44,7 @@ body {
 	  h4,
 	  h5,
 	  h6 {
+			line-height: normal;
 	  		font-weight: normal;
 		  	font-style: normal;
 		  	text-rendering: optimizelegibility;
@@ -58,7 +59,7 @@ body {
 		  	font-size: 1.5em;
 		}
 		h4 {
-			font-size: 1.3em;
+			font-size: 1.2em;
 		}
 		h5 {
 		  	font-size: 1.1em;
@@ -85,6 +86,13 @@ body {
 
 		li img {display : block; }
 
+	/* Images ------------------  */
+
+	img{
+		max-width: 100%;
+		display: block;
+		width: auto;
+	}
 
 /*  --------------------------------------------------
 	:: Font
@@ -206,20 +214,17 @@ body {
 
 	button,
 	.btn {
-		background : $blue;
+		background : $orange;
 		width: auto;
 		@include inline-block;
 		*vertical-align: middle;
 		color: $white;
 		cursor: pointer;
 		font-family: inherit;
-		font-weight: bold;
 		margin: 0;
-		padding: 10px 20px 11px;
+		padding: 8px 15px;
 		text-align: center;
 		text-decoration: none;
-		font-size: 12px;
-		line-height: 15px;
 		border: 0 none;
 		*border: 0;
 	}
@@ -230,10 +235,7 @@ body {
 	.btn.large 	{ font-size: 17px; padding: 15px 30px 16px; }
 	.btn.expand { width: 100%; text-align: center; }
 
-	.btn.pink 	{ @include btn($pink); text-transform: uppercase;  }
-	.btn.grey 	{ @include btn($grey-light); }
-	.btn.blue 	{ @include btn($blue); text-transform: uppercase;  }
-	.btn.red 	{ @include btn($red); }
+
 
 	.btn.disabled,
 	.btn[disabled],

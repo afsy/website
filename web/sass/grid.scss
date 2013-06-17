@@ -14,14 +14,20 @@
 
 
 	.row {width: 100%; max-width:1000px;*zoom: 1; }
-	.row .column,.row .columns {position: relative;padding-left: 0.5em;padding-right: 0.5em;width: 100%;float: left; }
+	.row .column,.row .columns {position: relative;width: 100%;float: left; }
 	.row.collapse .column,.row.collapse .columns {position: relative;padding-left: 0;padding-right: 0;float: left; }
-	.row .row {width: auto;margin : 0 -0.5em; max-width: none;*zoom: 1; }
+	.row .row {width: auto; max-width: none;*zoom: 1; }
 	.row .row.collapse {width: auto;margin: 0;max-width: none;*zoom: 1; }
 
 
+	.row.space-small {
+		.column,.columns{padding-left: 0.5em;padding-right: 0.5em;}
+		.row {margin : 0 -0.5em;}
+	}
+
+
 	@media only screen {
-		.row .column,.row .columns {position: relative;padding-left: 0.5em;padding-right: 0.5em;float: left; }
+		.row .column,.row .columns {position: relative;float: left; }
 		[class*="column"] + [class*="column"]:last-child {float: right; }
 		[class*="column"] + [class*="column"].end {float: left; }
 
