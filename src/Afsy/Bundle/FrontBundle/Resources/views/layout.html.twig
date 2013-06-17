@@ -16,26 +16,29 @@
           <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
 
-        {% stylesheets
-            'bundles/afsyfront/css/bootstrap.css'
-            'bundles/afsyfront/css/bootstrap-responsive.css'
-            'bundles/afsyfront/css/style.css'
-            filter='cssrewrite,yui_css' output='css/compiled/main.css'
-            output='css/afsy.css' %}
-            <link rel="stylesheet" type="text/css" media="screen" href="{{ asset_url }}" />
-        {% endstylesheets %}
+         {% block stylesheets %}
+            <link href="{{ asset("css/reset.css") }}" rel="stylesheet">
+            <link href="{{ asset("css/global.css") }}" rel="stylesheet">
+            <link href="{{ asset("css/layout.css") }}" rel="stylesheet">
+            <link href="{{ asset("css/common.css") }}" rel="stylesheet">
+            <link href="{{ asset("css/app.css") }}" rel="stylesheet">
+            <link href="{{ asset("css/grid.css") }}" rel="stylesheet">
+            <link href="{{ asset("css/icons.css") }}" rel="stylesheet">
+        {% endblock %}
 
         <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
     </head>
     <body>
-        <div class="container">
-            {% include 'AfsyFrontBundle::header.html.twig' %}
 
+        {% include 'AfsyFrontBundle::header.html.twig' %}
+
+        <div class="container">
             {% block body %}{% endblock %}
-        </div>
+        </diV>
 
         {% block footer %}
             {% include 'AfsyFrontBundle::footer.html.twig' %}
         {% endblock %}
     </body>
 </html>
+

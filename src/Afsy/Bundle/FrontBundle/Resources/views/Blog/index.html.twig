@@ -5,11 +5,16 @@
 {% endblock %}
 
 {% block body %}
+
+    <h4 class="event museo"><i class="icon-calendar-white"></i> Prochains événements</h4>
+
     {% for article in pagination %}
         {% include 'AfsyFrontBundle:Blog:_article.html.twig' with {'article': article} %}
     {% else %}
         <p class="text-error">Il n'y a aucun article.</p>
     {% endfor %}
+
+    <h4 class="event museo"><i class="icon-calendar-white"></i> événements passés</h4>
 
     {{ knp_pagination_render(pagination) }}
 {% endblock %}

@@ -1,0 +1,152 @@
+/*  LAYOUT.CSS
+    Structure graphique du site
+    contient des styles en reference à plusieurs elements structurants :
+    header, container, footer, navigation, ...
+-------------------------------------------------------------------------------------------------------- */
+
+@charset "UTF-8";
+@import "partials/variables.scss";
+
+
+    .container {
+        max-width: 1000px;
+        margin : 0 auto;
+    }
+
+/* ----------------------------------------------------
+    :: Header
+------------------------------------------------------- */
+
+    header[role="main"]{
+        background : #000 image-url('header-bg.png') top center no-repeat;
+        color : $white;
+        text-align : center;
+        padding : 2em 0;
+        h1,h2,h5{ margin-bottom : 1em;}
+        .container {position : relative; }
+    }
+
+    .logo a {
+        @include inline-block;
+        @include hide-text;
+        background : transparent image-url('logo.png') 0 0 no-repeat;
+        width : image-width('logo.png');
+        height : image-height('logo.png');
+    }
+
+
+    .presentation {
+        background-color : $green;
+        color : $white;
+        padding : 1.5em 0;
+        margin-bottom: 1em;
+        text-align :center;
+        .icon {
+            height : 50px;
+        }
+    }
+
+    ul.contact{
+        position : absolute;
+        top : 0; right : 0;
+        li a{
+            padding : 10px;
+            display: block;
+            &:hover {
+                background-color : $green;
+            }
+        }
+    }
+
+
+
+/* ----------------------------------------------------
+    :: Listing articles
+------------------------------------------------------- */
+
+    h4.event {
+        @include inline-block;
+        padding : 10px;
+        background-color: #000;
+        color: $white;
+        text-transform: uppercase;
+    }
+
+
+/* ----------------------------------------------------
+    :: Articles
+------------------------------------------------------- */
+
+    article {
+        margin : 1.5em 0;
+        background-color:$white;
+
+        header {
+            margin-bottom : 1em ;
+            .large-3{ text-align: right; }
+        }
+
+        .sf-event {
+            padding : 1em;
+        }
+
+        address {
+            background-color: $blue;
+            color: $white;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .date {
+            text-transform : uppercase;
+            color : $text-grey;
+        }
+
+        .tags {
+            margin-top : 1em ;
+            li {
+                color : $text-grey;
+                text-transform : uppercase;
+                &:after { content: ","; }
+                &:last-child:after { content: ""; }
+            }
+        }
+    }
+
+
+
+/* ----------------------------------------------------
+    :: Footer
+------------------------------------------------------- */
+
+    footer{
+        background : $black;
+        color : $white;
+        margin-top: 1em;
+    }
+
+    .members {
+        .picture {position : relative; }
+        img {
+            display: inline;
+        }
+        span{
+            background : transparent image-url('member-mask.png') top center no-repeat;
+            display: block;
+            height : 100%;
+            width : 100%;
+            position : absolute; top : 0;
+        }
+        h6{
+            color : $green ;
+            text-transform: uppercase;
+        }
+    }
+
+    .mention {
+        font-size: 10px;
+        padding : 0.5em 0;
+        border-top : 1px solid #555;
+        color : #777;
+        text-align : center;
+    }

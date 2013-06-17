@@ -1,30 +1,45 @@
 {% spaceless %}
-<div class="row">
-    <div class="span5">
-        <p>
-            {{ article.map | raw }}
-        </p>
+
+<article class="row">
+    <div class="large-4 columns">
+        {{ article.map | raw }}
+        <address>
+            Pub The Lions<br>
+            120 rue Montmartre<br>
+            75002 Paris
+        </address>
     </div>
-    <div class="span7 sf-event">
-        <h2><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h2>
-        <span class="date">publié le {{ article.publishedAt | localizeddate('long', 'none') }}</span>
+
+    <div class="large-8 columns sf-event">
+        <header class="row">
+            <div class="large-9 columns">
+                <h3 class="museo"><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h3>
+                <p class="date"><i class="icon-time-grey"></i>publié le {{ article.publishedAt | localizeddate('long', 'none') }}</p>
+            </div>
+            <div class="large-3 columns">
+                {#% if article.eventUrl %#}
+                    <a class="btn" href="{{ article.eventUrl }}">Inscription gratuite <i class="icon-arrow-white"></i></a>
+                {#% endif %#}
+            </div>
+        </header>
 
         {{ article.body | raw }}
 
-        {% if article.eventUrl %}
-            <p>
-                <a class="btn" href="{{ article.eventUrl }}">Inscription gratuite &raquo;</a>
-            </p>
-        {% endif %}
+        <ul class="tags list-horizontal">
+            <li>tag</li>
+            <li>tag</li>
+            <li>tag</li>
+            <li>tag</li>
 
-        <ul class="tags">
             {% for tag in article.tags %}
                 <li>
                     <a href="{{ url('blog_show_tag', {'name': tag.name}) }}" title="{{ tag.name }}">{{ tag.name }}</a>
                 </li>
             {% endfor %}
         </ul>
+
     </div>
-</div>
-<hr/>
+
+</article>
+
 {% endspaceless %}
