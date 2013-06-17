@@ -67,20 +67,25 @@ header[role="main"] .container {
   color: white;
   padding: 1.5em 0;
   margin-bottom: 1em;
+  text-align: center;
+}
+/* line 44, ../sass/layout.scss */
+.presentation .icon {
+  height: 50px;
 }
 
-/* line 45, ../sass/layout.scss */
+/* line 49, ../sass/layout.scss */
 ul.contact {
   position: absolute;
   top: 0;
   right: 0;
 }
-/* line 48, ../sass/layout.scss */
+/* line 52, ../sass/layout.scss */
 ul.contact li a {
   padding: 10px;
   display: block;
 }
-/* line 51, ../sass/layout.scss */
+/* line 55, ../sass/layout.scss */
 ul.contact li a:hover {
   background-color: #1fbba6;
 }
@@ -88,7 +93,7 @@ ul.contact li a:hover {
 /* ----------------------------------------------------
     :: Listing articles
 ------------------------------------------------------- */
-/* line 63, ../sass/layout.scss */
+/* line 67, ../sass/layout.scss */
 h4.event {
   display: -moz-inline-stack;
   display: inline-block;
@@ -105,49 +110,49 @@ h4.event {
 /* ----------------------------------------------------
     :: Articles
 ------------------------------------------------------- */
-/* line 76, ../sass/layout.scss */
+/* line 80, ../sass/layout.scss */
 article {
   margin: 1.5em 0;
   background-color: white;
 }
-/* line 80, ../sass/layout.scss */
+/* line 84, ../sass/layout.scss */
 article header {
   margin-bottom: 1em;
 }
-/* line 82, ../sass/layout.scss */
+/* line 86, ../sass/layout.scss */
 article header .large-3 {
   text-align: right;
 }
-/* line 85, ../sass/layout.scss */
+/* line 89, ../sass/layout.scss */
 article .sf-event {
   padding: 1em;
 }
-/* line 89, ../sass/layout.scss */
+/* line 93, ../sass/layout.scss */
 article address {
   background-color: #14b9d6;
   color: white;
   font-style: italic;
   text-align: center;
 }
-/* line 96, ../sass/layout.scss */
+/* line 100, ../sass/layout.scss */
 article .date {
   text-transform: uppercase;
   color: #979faa;
 }
-/* line 101, ../sass/layout.scss */
+/* line 105, ../sass/layout.scss */
 article .tags {
   margin-top: 1em;
 }
-/* line 103, ../sass/layout.scss */
+/* line 107, ../sass/layout.scss */
 article .tags li {
   color: #979faa;
   text-transform: uppercase;
 }
-/* line 106, ../sass/layout.scss */
+/* line 110, ../sass/layout.scss */
 article .tags li:after {
   content: ",";
 }
-/* line 107, ../sass/layout.scss */
+/* line 111, ../sass/layout.scss */
 article .tags li:last-child:after {
   content: "";
 }
@@ -155,27 +160,41 @@ article .tags li:last-child:after {
 /* ----------------------------------------------------
     :: Footer
 ------------------------------------------------------- */
-/* line 118, ../sass/layout.scss */
+/* line 122, ../sass/layout.scss */
 footer {
   background: #353535;
   color: white;
   margin-top: 1em;
 }
 
-/* line 125, ../sass/layout.scss */
+/* line 129, ../sass/layout.scss */
 .members .picture {
   position: relative;
 }
-/* line 126, ../sass/layout.scss */
+/* line 130, ../sass/layout.scss */
 .members img {
   display: inline;
 }
-/* line 129, ../sass/layout.scss */
+/* line 133, ../sass/layout.scss */
 .members span {
-  background: transparent url('/img/member-mask.png?1371463179') 0 0 no-repeat;
+  background: transparent url('/img/member-mask.png?1371463179') top center no-repeat;
   display: block;
   height: 100%;
   width: 100%;
   position: absolute;
   top: 0;
+}
+/* line 140, ../sass/layout.scss */
+.members h6 {
+  color: #1fbba6;
+  text-transform: uppercase;
+}
+
+/* line 146, ../sass/layout.scss */
+.mention {
+  font-size: 10px;
+  padding: 0.5em 0;
+  border-top: 1px solid #555;
+  color: #777;
+  text-align: center;
 }

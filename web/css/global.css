@@ -472,37 +472,42 @@ button,
   border: 0 none;
   *border: 0;
 }
+/* line 231, ../sass/global.scss */
+button:hover,
+.btn:hover {
+  background: #f0691d;
+}
 
-/* line 232, ../sass/global.scss */
+/* line 234, ../sass/global.scss */
 .btn.tiny {
   font-size: 10px;
   padding: 5px 10px 6px;
 }
 
-/* line 233, ../sass/global.scss */
+/* line 235, ../sass/global.scss */
 .btn.small {
   font-size: 11px;
   padding: 7px 14px 8px;
 }
 
-/* line 234, ../sass/global.scss */
+/* line 236, ../sass/global.scss */
 .btn.medium {
   font-size: 14px;
 }
 
-/* line 235, ../sass/global.scss */
+/* line 237, ../sass/global.scss */
 .btn.large {
   font-size: 17px;
   padding: 15px 30px 16px;
 }
 
-/* line 236, ../sass/global.scss */
+/* line 238, ../sass/global.scss */
 .btn.expand {
   width: 100%;
   text-align: center;
 }
 
-/* line 243, ../sass/global.scss */
+/* line 244, ../sass/global.scss */
 .btn.disabled,
 .btn[disabled],
 .btn.disabled:hover,
@@ -512,7 +517,7 @@ button,
   cursor: default;
 }
 
-/* line 254, ../sass/global.scss */
+/* line 255, ../sass/global.scss */
 input[type="file"],
 input[type="image"],
 input[type="submit"],
@@ -523,7 +528,7 @@ input[type="checkbox"] {
   width: auto;
 }
 
-/* line 260, ../sass/global.scss */
+/* line 261, ../sass/global.scss */
 button.btn::-moz-focus-inner,
 input[type="submit"].btn::-moz-focus-inner {
   padding: 0;
@@ -533,7 +538,7 @@ input[type="submit"].btn::-moz-focus-inner {
 /*  --------------------------------------------------
 	:: Box
 -------------------------------------------------- */
-/* line 269, ../sass/global.scss */
+/* line 270, ../sass/global.scss */
 .panel {
   background-color: #eeeeee;
   border: 1px solid #dadada;
@@ -543,7 +548,7 @@ input[type="submit"].btn::-moz-focus-inner {
 /*  --------------------------------------------------
 	:: Sep
 -------------------------------------------------- */
-/* line 280, ../sass/global.scss */
+/* line 281, ../sass/global.scss */
 hr {
   color: #eeeeee;
   background-color: #dadada;
@@ -555,7 +560,7 @@ hr {
 /*  --------------------------------------------------
 	:: Table
 -------------------------------------------------- */
-/* line 293, ../sass/global.scss */
+/* line 294, ../sass/global.scss */
 table {
   background-color: transparent;
   max-width: 100%;
@@ -563,14 +568,14 @@ table {
   table-layout: fixed;
 }
 
-/* line 300, ../sass/global.scss */
+/* line 301, ../sass/global.scss */
 table th {
   text-align: left;
   text-transform: uppercase;
   font-weight: bold;
 }
 
-/* line 306, ../sass/global.scss */
+/* line 307, ../sass/global.scss */
 table th, table td {
   line-height: 20px;
   padding: 8px;
@@ -579,13 +584,13 @@ table th, table td {
 }
 
 /* Stripped table ------------------*/
-/* line 316, ../sass/global.scss */
+/* line 317, ../sass/global.scss */
 table.stripped {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-/* line 321, ../sass/global.scss */
+/* line 322, ../sass/global.scss */
 table.stripped tr.even {
   background-color: white;
 }

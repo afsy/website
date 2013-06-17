@@ -40,6 +40,10 @@
         color : $white;
         padding : 1.5em 0;
         margin-bottom: 1em;
+        text-align :center;
+        .icon {
+            height : 50px;
+        }
     }
 
     ul.contact{
@@ -127,11 +131,22 @@
             display: inline;
         }
         span{
-            background : transparent image-url('member-mask.png') 0 0 no-repeat;
+            background : transparent image-url('member-mask.png') top center no-repeat;
             display: block;
             height : 100%;
             width : 100%;
             position : absolute; top : 0;
         }
+        h6{
+            color : $green ;
+            text-transform: uppercase;
+        }
+    }
 
+    .mention {
+        font-size: 10px;
+        padding : 0.5em 0;
+        border-top : 1px solid #555;
+        color : #777;
+        text-align : center;
     }
