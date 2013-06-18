@@ -37,6 +37,7 @@ class LoadArticleData extends AbstractFixture implements OrderedFixtureInterface
             $entity = new Article();
             $entity->setBody($article['body']);
             $entity->setCity($article['city']);
+            $entity->setAddress("Pub The Lions\n120 rue Montmartre\n75002 Paris");
             $entity->setIsPublished(true);
             $entity->setMap($article['map']);
             $entity->setMarkdownBody('html content loaded, please do not edit this post');

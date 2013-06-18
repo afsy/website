@@ -75,6 +75,12 @@ class Article implements Taggable
      * @var string
      * @ORM\Column(type="text", nullable=true)
      */
+    protected $address;
+
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
     protected $map;
 
     /**
@@ -116,7 +122,7 @@ class Article implements Taggable
 
     public function __toString()
     {
-        return $this->title;
+        return $this->title ?: 'n/a';
     }
 
     /**
@@ -468,5 +474,22 @@ class Article implements Taggable
     public function setTagsList($tags_list)
     {
         $this->tags_list = $tags_list;
+    }
+
+
+    /**
+     * @param string $address
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddress()
+    {
+        return $this->address;
     }
 }
