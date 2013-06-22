@@ -47,10 +47,10 @@ class Article implements Taggable
 
     /**
      * @var string
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", name="markdown_body")
      * @Assert\NotBlank()
      */
-    protected $markdown_body;
+    protected $markdownBody;
 
     /**
      * @var string
@@ -61,15 +61,21 @@ class Article implements Taggable
 
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", name="published_at")
      */
-    protected $published_at;
+    protected $publishedAt;
 
     /**
      * @var string
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="text", nullable=true, name="event_url")
      */
-    protected $event_url;
+    protected $eventUrl;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true, name="event_date")
+     */
+    protected $eventDate;
 
     /**
      * @var string
@@ -93,9 +99,9 @@ class Article implements Taggable
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", name="is_published")
      */
-    protected $is_published;
+    protected $isPublished;
 
     /**
      * @var ArrayCollection
@@ -109,20 +115,30 @@ class Article implements Taggable
 
     /**
      * The same as tags but as a comma separated list
-     * @var string $tags_list
+     *
+     * @var string $tagsList
      */
-    protected $tags_list = false;
+    protected $tagsList = false;
 
     public function __construct()
     {
         $this->authors      = new ArrayCollection();
         $this->tags         = new ArrayCollection();
-        $this->published_at = new \DateTime();
+        $this->publishedAt = new \DateTime();
     }
 
     public function __toString()
     {
         return $this->title ?: 'n/a';
+    }
+
+    public function isEventStarted()
+    {
+        if (!$this->eventDate) {
+            return false;
+        }
+
+        return new \DateTime() < $this->eventDate;
     }
 
     /**
@@ -182,26 +198,49 @@ class Article implements Taggable
     }
 
     /**
-     * Set event_url
+     * Set event date
+     *
+     * @param  \DateTime  $date
+     * @return Article
+     */
+    public function setEventDate(\DateTime $date)
+    {
+        $this->eventDate = $date;
+
+        return $this;
+    }
+
+    /**
+     * Returns event date
+     *
+     * @return \DateTime
+     */
+    public function getEventDate()
+    {
+        return $this->eventDate;
+    }
+
+    /**
+     * Set eventUrl
      *
      * @param  string  $eventUrl
      * @return Article
      */
     public function setEventUrl($eventUrl)
     {
-        $this->event_url = $eventUrl;
+        $this->eventUrl = $eventUrl;
 
         return $this;
     }
 
     /**
-     * Get event_url
+     * Get eventUrl
      *
      * @return string
      */
     public function getEventUrl()
     {
-        return $this->event_url;
+        return $this->eventUrl;
     }
 
     /**
@@ -302,9 +341,9 @@ class Article implements Taggable
      * @param  text    $markdownBody
      * @return Article
      */
-    public function setMarkdownBody($markdown_body)
+    public function setMarkdownBody($markdownBody)
     {
-        $this->markdown_body = $markdown_body;
+        $this->markdownBody = $markdownBody;
 
         return $this;
     }
@@ -316,58 +355,58 @@ class Article implements Taggable
      */
     public function getMarkdownBody()
     {
-        return $this->markdown_body;
+        return $this->markdownBody;
     }
 
     public function getShortBody()
     {
-        return strip_tags( substr($this->getBody(), 0, 250) );
+        return strip_tags(substr($this->getBody(), 0, 250));
     }
 
     /**
-     * Set published_at
+     * Set publishedAt
      *
      * @param  datetime $publishedAt
      * @return Article
      */
     public function setPublishedAt($publishedAt)
     {
-        $this->published_at = $publishedAt;
+        $this->publishedAt = $publishedAt;
 
         return $this;
     }
 
     /**
-     * Get published_at
+     * Get publishedAt
      *
      * @return datetime
      */
     public function getPublishedAt()
     {
-        return $this->published_at;
+        return $this->publishedAt;
     }
 
     /**
-     * Set is_published
+     * Set isPublished
      *
      * @param  boolean $isPublished
      * @return Article
      */
     public function setIsPublished($isPublished)
     {
-        $this->is_published = $isPublished;
+        $this->isPublished = $isPublished;
 
         return $this;
     }
 
     /**
-     * Get is_published
+     * Get isPublished
      *
      * @return boolean
      */
     public function getIsPublished()
     {
-        return $this->is_published;
+        return $this->isPublished;
     }
 
     /**
@@ -446,16 +485,16 @@ class Article implements Taggable
      */
     public function getTagsList()
     {
-        if ($this->tags_list === false) {
-            $this->tags_list = array();
+        if (!$this->tagsList) {
+            $this->tagsList = array();
             foreach ($this->getTags() as $tag) {
-                $this->tags_list[] = $tag->getName();
+                $this->tagsList[] = $tag->getName();
             }
-            $this->tags_list = implode(', ', $this->tags_list);
+            $this->tagsList = implode(', ', $this->tagsList);
         }
 
         // force lowercase
-        return strtolower($this->tags_list);
+        return strtolower($this->tagsList);
     }
 
     public function getTaggableType()
@@ -469,11 +508,11 @@ class Article implements Taggable
     }
 
     /**
-     * @param string $tags_list
+     * @param string $tagsList
      */
-    public function setTagsList($tags_list)
+    public function setTagsList($tagsList)
     {
-        $this->tags_list = $tags_list;
+        $this->tagsList = $tagsList;
     }
 
 

@@ -14,13 +14,6 @@ class LoadArticleData extends AbstractFixture implements OrderedFixtureInterface
             'title' => 'Introduction au composant Config',
             'body' => '<p>
                     <strong>Mercredi 9 mai 2012</strong>, <strong>de 19h à 20h</strong>, la société <a href="http://www.theodo.fr/">Theodo</a> accueille <strong>Christophe Coevet</strong> (<a href="https://twitter.com/#!/Stof70">Stof70</a>) qui présentera une introduction au composant autonome &laquo; Config &raquo; de Symfony. Cette conférence mettra en avant l\'utilité de ce composant et sa mise en oeuvre pratique au sein des bundles. Christophe mettra aussi l\'accent sur l\'utilisation de ce composant en dehors du contexte de Symfony. La soirée se terminera par un pot général au pub <strong>The Lions</strong>.
-                </p>
-                <p>
-                    <address>
-                        Pub The Lions<br>
-                        120 rue Montmartre<br>
-                        75002 Paris
-                    </address>
                 </p>',
             'city' => 'Paris',
             'tags' => array('Config', 'Paris', 'config'),

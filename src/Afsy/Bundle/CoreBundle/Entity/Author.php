@@ -183,9 +183,10 @@ class Author implements UserInterface
 
     public function getPublishedArticles()
     {
-        return array_filter($this->getArticles()->toArray(),
-                array('\Afsy\Bundle\CoreBundle\Entity\ArticleRepository',
-                        'isPublished'));
+        return array_filter(
+            $this->getArticles()->toArray(),
+            array(__NAMESPACE__.'\\ArticleRepository', 'isPublished')
+        );
     }
 
     /**
