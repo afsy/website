@@ -48,7 +48,6 @@ body {
 	  		font-weight: normal;
 		  	font-style: normal;
 		  	text-rendering: optimizelegibility;
-		  	a { color: inherit; *color: expression(this.parentNode.currentStyle['color']);}
 		}
 		h1 {
 		  	font-size: 2.2em;
@@ -79,7 +78,7 @@ body {
 
 
 	/* Links ------------------  */
-		a { color: $blue; text-decoration: none; line-height: inherit; cursor : pointer;  }
+		a { color: inherit; *color: expression(this.parentNode.currentStyle['color']); text-decoration: none; line-height: inherit; cursor : pointer;  }
 		p a, p a:visited { line-height: inherit; }
 		a img { border: none; }
 
@@ -123,7 +122,7 @@ body {
 	:: Lists
 	-------------------------------------------------- */
 
-	ul { list-style: square inside; margin-left: 2em; }
+	ul { list-style: none outside; }
 	ol { list-style: decimal; }
 
 	ol,
@@ -131,6 +130,8 @@ body {
 	ul.circle,
 	ul.disc { margin-left: 30px; }
 
+	ul.square { list-style: square outside; text-align : left; }
+	ul.square li{ margin : 5px 0;  }
 
 	ul.circle { list-style: circle outside; }
 	ul.disc { list-style: disc outside; }
@@ -230,11 +231,12 @@ body {
 		&:hover{background : darken($orange, 5%);}
 	}
 
-	.btn.tiny 	{ font-size: 10px; padding: 5px 10px 6px; }
-	.btn.small 	{ font-size: 11px; padding: 7px 14px 8px; }
-	.btn.medium { font-size: 14px; }
-	.btn.large 	{ font-size: 17px; padding: 15px 30px 16px; }
-	.btn.expand { width: 100%; text-align: center; }
+	.btn.register { display: block; }
+	.btn.tiny     { font-size: 10px; padding: 5px 10px 6px; }
+	.btn.small    { font-size: 11px; padding: 7px 14px 8px; }
+	.btn.medium   { font-size: 14px; }
+	.btn.large    { font-size: 17px; padding: 15px 30px 16px; }
+	.btn.expand   { width: 100%; text-align: center; }
 
 
 	.btn.disabled,

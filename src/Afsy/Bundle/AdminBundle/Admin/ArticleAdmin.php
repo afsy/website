@@ -21,18 +21,23 @@ class ArticleAdmin extends Admin
     protected function configureFormFields(FormMapper $formMapper)
     {
         $formMapper
-            ->add('title')
-            ->add('body', null, array('required' => false, 'attr' => array('class' => 'hidden html-body')))
-            ->add('markdown_body', null, array('required' => false, 'attr' => array('class' => 'hidden markdown-body')))
-            ->with('Options', array('collapsed' => true))
+            ->with('General')
+                ->add('title')
+                ->add('body', null, array('required' => false, 'attr' => array('class' => 'hidden html-body')))
+                ->add('markdown_body', null, array('required' => false, 'attr' => array('class' => 'hidden markdown-body')))
+            ->end()
+            ->with('Options')
                 ->add('language', 'choice', array('choices' => array('fr' => 'French', 'en' => 'English')))
                 ->add('published_at')
                 ->add('is_published', null, array('required' => false))
                 ->add('authors')
+                ->add('tags_list', 'text', array('required' => true, 'attr' => array('class' => 'jquery-tag-it')))
+            ->end()
+            ->with('Location')
                 ->add('city')
                 ->add('event_url')
+                ->add('address')
                 ->add('map')
-                ->add('tags_list', 'text', array('required' => true, 'attr' => array('class' => 'jquery-tag-it')))
             ->end()
         ;
     }

@@ -83,14 +83,12 @@
 
         header {
             margin-bottom : 1em ;
-            line-height: 1.8;
+            .large-3{ text-align: right; }
         }
 
         .sf-event {
             padding : 1em;
         }
-
-        p { line-height: 1.8;}
 
         address {
             background-color: $blue;
@@ -102,7 +100,6 @@
         .date {
             text-transform : uppercase;
             color : $text-grey;
-            margin-top : 0.5em;
         }
 
         .tags {
@@ -117,27 +114,6 @@
     }
 
 
-    .pagination {
-        text-align: center;
-        margin-top : 1em ;
-
-        li {
-            list-style: none;
-            @include inline-block;
-
-            a {
-                padding : 5px 10px;
-                color : $black;
-                border: 2px solid $black ;
-                &:hover {
-                    border-color : $green;
-                    color : $white;
-                    background-color : $green;
-                }
-            }
-        }
-    }
-
 
 /* ----------------------------------------------------
     :: Footer
@@ -147,7 +123,6 @@
         background : $black;
         color : $white;
         margin-top: 1em;
-        a {color : $white;}
     }
 
     .members {
