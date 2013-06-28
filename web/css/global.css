@@ -82,85 +82,97 @@ h6 {
   font-style: normal;
   text-rendering: optimizelegibility;
 }
+/* line 51, ../sass/global.scss */
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  color: inherit;
+  *color: expression(this.parentNode.currentStyle['color']);
+}
 
-/* line 52, ../sass/global.scss */
+/* line 53, ../sass/global.scss */
 h1 {
   font-size: 2.2em;
 }
 
-/* line 55, ../sass/global.scss */
+/* line 56, ../sass/global.scss */
 h2 {
   font-size: 1.7em;
 }
 
-/* line 58, ../sass/global.scss */
+/* line 59, ../sass/global.scss */
 h3 {
   font-size: 1.5em;
 }
 
-/* line 61, ../sass/global.scss */
+/* line 62, ../sass/global.scss */
 h4 {
   font-size: 1.2em;
 }
 
-/* line 64, ../sass/global.scss */
+/* line 65, ../sass/global.scss */
 h5 {
   font-size: 1.1em;
 }
 
-/* line 67, ../sass/global.scss */
+/* line 68, ../sass/global.scss */
 h6 {
   font-size: 1em;
 }
 
 /* Paragraph ------------------  */
-/* line 75, ../sass/global.scss */
+/* line 76, ../sass/global.scss */
 p {
   font-size: 1em;
 }
 
-/* line 76, ../sass/global.scss */
+/* line 77, ../sass/global.scss */
 .small {
   font-size: 0.85em;
 }
 
-/* line 77, ../sass/global.scss */
+/* line 78, ../sass/global.scss */
 p img {
   margin: 0;
 }
 
 /* Links ------------------  */
-/* line 81, ../sass/global.scss */
+/* line 82, ../sass/global.scss */
 a {
-  color: inherit;
-  *color: expression(this.parentNode.currentStyle['color']);
+  color: #14b9d6;
+  text-decoration: none;
+  line-height: inherit;
+  cursor: pointer;
   text-decoration: none;
   line-height: inherit;
   cursor: pointer;
 }
 
-/* line 82, ../sass/global.scss */
+/* line 83, ../sass/global.scss */
 p a, p a:visited {
   line-height: inherit;
 }
 
-/* line 83, ../sass/global.scss */
+/* line 84, ../sass/global.scss */
 a img {
   border: none;
 }
 
-/* line 85, ../sass/global.scss */
+/* line 86, ../sass/global.scss */
 h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
   color: inherit;
 }
 
-/* line 87, ../sass/global.scss */
+/* line 88, ../sass/global.scss */
 li img {
   display: block;
 }
 
 /* Images ------------------  */
-/* line 91, ../sass/global.scss */
+/* line 92, ../sass/global.scss */
 img {
   max-width: 100%;
   display: block;
@@ -175,7 +187,7 @@ img {
   src: url('/fonts/museo_slab_500-webfont.ttf') format('truetype'), url('/fonts/museo_slab_500italic-webfont.otf') format('opentype'), url('/fonts/museo_slab_500-webfont.eot') format('embedded-opentype'), url('/fonts/museo_slab_500-webfont.svg') format('svg');
 }
 
-/* line 104, ../sass/global.scss */
+/* line 105, ../sass/global.scss */
 .museo {
   font-family: "Museo", serif;
   font-weight: normal;
@@ -189,12 +201,12 @@ img {
 /*  --------------------------------------------------
 	:: Colors
 	-------------------------------------------------- */
-/* line 118, ../sass/global.scss */
+/* line 119, ../sass/global.scss */
 .white {
   color: white;
 }
 
-/* line 119, ../sass/global.scss */
+/* line 120, ../sass/global.scss */
 .blue {
   color: #14b9d6;
 }
@@ -202,17 +214,18 @@ img {
 /*  --------------------------------------------------
 	:: Lists
 	-------------------------------------------------- */
-/* line 125, ../sass/global.scss */
+/* line 126, ../sass/global.scss */
 ul {
-  list-style: none outside;
+  list-style: square inside;
+  margin-left: 2em;
 }
 
-/* line 126, ../sass/global.scss */
+/* line 127, ../sass/global.scss */
 ol {
   list-style: decimal;
 }
 
-/* line 131, ../sass/global.scss */
+/* line 132, ../sass/global.scss */
 ol,
 ul.square,
 ul.circle,
@@ -220,28 +233,28 @@ ul.disc {
   margin-left: 30px;
 }
 
-/* line 133, ../sass/global.scss */
+/* line 134, ../sass/global.scss */
 ul.square {
   list-style: square outside;
   text-align: left;
 }
 
-/* line 134, ../sass/global.scss */
+/* line 135, ../sass/global.scss */
 ul.square li {
   margin: 5px 0;
 }
 
-/* line 136, ../sass/global.scss */
+/* line 137, ../sass/global.scss */
 ul.circle {
   list-style: circle outside;
 }
 
-/* line 137, ../sass/global.scss */
+/* line 138, ../sass/global.scss */
 ul.disc {
   list-style: disc outside;
 }
 
-/* line 138, ../sass/global.scss */
+/* line 139, ../sass/global.scss */
 ul.large li {
   line-height: 21px;
 }
@@ -249,37 +262,37 @@ ul.large li {
 /* --------------------------------------------------
 	:: Misc
 ---------------------------------------------------*/
-/* line 145, ../sass/global.scss */
+/* line 146, ../sass/global.scss */
 .left {
   float: left;
 }
 
-/* line 146, ../sass/global.scss */
+/* line 147, ../sass/global.scss */
 .right {
   float: right;
 }
 
-/* line 147, ../sass/global.scss */
+/* line 148, ../sass/global.scss */
 .none {
   float: none;
 }
 
-/* line 148, ../sass/global.scss */
+/* line 149, ../sass/global.scss */
 .text-left {
   text-align: left;
 }
 
-/* line 149, ../sass/global.scss */
+/* line 150, ../sass/global.scss */
 .text-right {
   text-align: right;
 }
 
-/* line 150, ../sass/global.scss */
+/* line 151, ../sass/global.scss */
 .text-center {
   text-align: center;
 }
 
-/* line 151, ../sass/global.scss */
+/* line 152, ../sass/global.scss */
 .inline, .list-horizontal li {
   display: -moz-inline-stack;
   display: inline-block;
@@ -290,12 +303,12 @@ ul.large li {
   *vertical-align: middle;
   margin-right: 5px;
 }
-/* line 151, ../sass/global.scss */
+/* line 152, ../sass/global.scss */
 .inline:last-child, .list-horizontal li:last-child {
   margin-right: 0;
 }
 
-/* line 152, ../sass/global.scss */
+/* line 153, ../sass/global.scss */
 .vertical-align {
   display: -moz-inline-stack;
   display: inline-block;
@@ -306,7 +319,7 @@ ul.large li {
   *vertical-align: middle;
 }
 
-/* line 153, ../sass/global.scss */
+/* line 154, ../sass/global.scss */
 img.vertical-align {
   margin-right: 5px;
 }
@@ -314,7 +327,7 @@ img.vertical-align {
 /* --------------------------------------------------
 	:: Alignement
 ---------------------------------------------------*/
-/* line 164, ../sass/global.scss */
+/* line 165, ../sass/global.scss */
 .row:before,
 .row:after,
 .clearfix:before,
@@ -325,7 +338,7 @@ img.vertical-align {
   display: table;
 }
 
-/* line 172, ../sass/global.scss */
+/* line 173, ../sass/global.scss */
 .row:after,
 .clearfix:after,
 .row .row.collapse:after,
@@ -335,12 +348,12 @@ img.vertical-align {
   clear: both;
 }
 
-/* line 176, ../sass/global.scss */
+/* line 177, ../sass/global.scss */
 .row, .clearfix {
   zoom: 1;
 }
 
-/* line 177, ../sass/global.scss */
+/* line 178, ../sass/global.scss */
 .relative {
   position: relative;
 }
@@ -348,47 +361,47 @@ img.vertical-align {
 /* --------------------------------------------------
 	:: Margins
 ---------------------------------------------------*/
-/* line 185, ../sass/global.scss */
+/* line 186, ../sass/global.scss */
 .mg-page {
   margin: 20px;
 }
 
-/* line 186, ../sass/global.scss */
+/* line 187, ../sass/global.scss */
 .mg-top {
   margin-top: 20px;
 }
 
-/* line 187, ../sass/global.scss */
+/* line 188, ../sass/global.scss */
 .mg-top-s {
   margin-top: 10px;
 }
 
-/* line 188, ../sass/global.scss */
+/* line 189, ../sass/global.scss */
 .mg-bottom {
   margin-bottom: 20px;
 }
 
-/* line 189, ../sass/global.scss */
+/* line 190, ../sass/global.scss */
 .mg-bottom-s {
   margin-bottom: 5px;
 }
 
-/* line 190, ../sass/global.scss */
+/* line 191, ../sass/global.scss */
 .mg-left {
   margin-left: 20px;
 }
 
-/* line 191, ../sass/global.scss */
+/* line 192, ../sass/global.scss */
 .mg-right {
   margin-right: 20px;
 }
 
-/* line 192, ../sass/global.scss */
+/* line 193, ../sass/global.scss */
 .mg-lg {
   margin: 0 20px;
 }
 
-/* line 193, ../sass/global.scss */
+/* line 194, ../sass/global.scss */
 .mg-ht {
   margin: 20px 0;
 }
@@ -396,52 +409,52 @@ img.vertical-align {
 /* --------------------------------------------------
 	:: Padding
 ---------------------------------------------------*/
-/* line 200, ../sass/global.scss */
+/* line 201, ../sass/global.scss */
 .pd-page {
   padding: 20px;
 }
 
-/* line 201, ../sass/global.scss */
+/* line 202, ../sass/global.scss */
 .pd-top {
   padding-top: 20px;
 }
 
-/* line 202, ../sass/global.scss */
+/* line 203, ../sass/global.scss */
 .pd-bottom {
   padding-bottom: 20px !important;
 }
 
-/* line 203, ../sass/global.scss */
+/* line 204, ../sass/global.scss */
 .pd-left {
   padding-left: 20px;
 }
 
-/* line 204, ../sass/global.scss */
+/* line 205, ../sass/global.scss */
 .pd-right {
   padding-right: 20px;
 }
 
-/* line 205, ../sass/global.scss */
+/* line 206, ../sass/global.scss */
 .pd-lg {
   padding: 0 20px;
 }
 
-/* line 206, ../sass/global.scss */
+/* line 207, ../sass/global.scss */
 .pd-ht {
   padding: 20px 0;
 }
 
-/* line 207, ../sass/global.scss */
+/* line 208, ../sass/global.scss */
 .no-marg {
   margin: 0 !important;
 }
 
-/* line 208, ../sass/global.scss */
+/* line 209, ../sass/global.scss */
 .no-pd {
   padding: 0 !important;
 }
 
-/* line 209, ../sass/global.scss */
+/* line 210, ../sass/global.scss */
 .fixpd {
   margin-right: 15px;
   margin-left: 15px;
@@ -450,7 +463,7 @@ img.vertical-align {
 /*  --------------------------------------------------
 	:: btns
 -------------------------------------------------- */
-/* line 216, ../sass/global.scss */
+/* line 217, ../sass/global.scss */
 button,
 .btn {
   background: #f27935;
@@ -472,42 +485,47 @@ button,
   border: 0 none;
   *border: 0;
 }
-/* line 231, ../sass/global.scss */
+/* line 232, ../sass/global.scss */
 button:hover,
 .btn:hover {
   background: #f0691d;
 }
 
-/* line 234, ../sass/global.scss */
+/* line 235, ../sass/global.scss */
+.btn.register {
+  display: block;
+}
+
+/* line 236, ../sass/global.scss */
 .btn.tiny {
   font-size: 10px;
   padding: 5px 10px 6px;
 }
 
-/* line 235, ../sass/global.scss */
+/* line 237, ../sass/global.scss */
 .btn.small {
   font-size: 11px;
   padding: 7px 14px 8px;
 }
 
-/* line 236, ../sass/global.scss */
+/* line 238, ../sass/global.scss */
 .btn.medium {
   font-size: 14px;
 }
 
-/* line 237, ../sass/global.scss */
+/* line 239, ../sass/global.scss */
 .btn.large {
   font-size: 17px;
   padding: 15px 30px 16px;
 }
 
-/* line 238, ../sass/global.scss */
+/* line 240, ../sass/global.scss */
 .btn.expand {
   width: 100%;
   text-align: center;
 }
 
-/* line 244, ../sass/global.scss */
+/* line 246, ../sass/global.scss */
 .btn.disabled,
 .btn[disabled],
 .btn.disabled:hover,
@@ -517,7 +535,7 @@ button:hover,
   cursor: default;
 }
 
-/* line 255, ../sass/global.scss */
+/* line 257, ../sass/global.scss */
 input[type="file"],
 input[type="image"],
 input[type="submit"],
@@ -528,7 +546,7 @@ input[type="checkbox"] {
   width: auto;
 }
 
-/* line 261, ../sass/global.scss */
+/* line 263, ../sass/global.scss */
 button.btn::-moz-focus-inner,
 input[type="submit"].btn::-moz-focus-inner {
   padding: 0;
@@ -538,7 +556,7 @@ input[type="submit"].btn::-moz-focus-inner {
 /*  --------------------------------------------------
 	:: Box
 -------------------------------------------------- */
-/* line 270, ../sass/global.scss */
+/* line 272, ../sass/global.scss */
 .panel {
   background-color: #eeeeee;
   border: 1px solid #dadada;
@@ -548,7 +566,7 @@ input[type="submit"].btn::-moz-focus-inner {
 /*  --------------------------------------------------
 	:: Sep
 -------------------------------------------------- */
-/* line 281, ../sass/global.scss */
+/* line 283, ../sass/global.scss */
 hr {
   color: #eeeeee;
   background-color: #dadada;
@@ -560,7 +578,7 @@ hr {
 /*  --------------------------------------------------
 	:: Table
 -------------------------------------------------- */
-/* line 294, ../sass/global.scss */
+/* line 296, ../sass/global.scss */
 table {
   background-color: transparent;
   max-width: 100%;
@@ -568,14 +586,14 @@ table {
   table-layout: fixed;
 }
 
-/* line 301, ../sass/global.scss */
+/* line 303, ../sass/global.scss */
 table th {
   text-align: left;
   text-transform: uppercase;
   font-weight: bold;
 }
 
-/* line 307, ../sass/global.scss */
+/* line 309, ../sass/global.scss */
 table th, table td {
   line-height: 20px;
   padding: 8px;
@@ -584,13 +602,13 @@ table th, table td {
 }
 
 /* Stripped table ------------------*/
-/* line 317, ../sass/global.scss */
+/* line 319, ../sass/global.scss */
 table.stripped {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-/* line 322, ../sass/global.scss */
+/* line 324, ../sass/global.scss */
 table.stripped tr.even {
   background-color: white;
 }

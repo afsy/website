@@ -6,7 +6,7 @@
         <address>
             {{ article.address | nl2br }}
         </address>
-        <div class="columns">
+        <div>
             {% if article.eventUrl and not article.eventStarted %}
                 <a class="btn register" href="{{ article.eventUrl }}">Inscription gratuite <i class="icon-arrow-white"></i></a>
             {% endif %}
@@ -14,11 +14,9 @@
     </div>
 
     <div class="large-8 columns sf-event">
-        <header class="row">
-            <div class="large-9 columns">
+        <header>
                 <h3 class="museo"><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h3>
-                <p class="date"><i class="icon-time-grey"></i>publié le {{ article.publishedAt | localizeddate('long', 'none') }}</p>
-            </div>
+                <p class="date"><i class="icon-time-grey"></i>le {{ article.publishedAt | localizeddate('long', 'none') }}</p>
         </header>
 
         {{ article.body | raw }}
