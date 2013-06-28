@@ -31,7 +31,7 @@
 ------------------------------------------------------- */
 /* line 20, ../sass/layout.scss */
 header[role="main"] {
-  background: black url('/img/header-bg.png?1371221496') top center no-repeat;
+  background: black url('/img/header-bg.png?1372419126') top center no-repeat;
   color: white;
   text-align: center;
   padding: 2em 0;
@@ -56,7 +56,7 @@ header[role="main"] .container {
   text-indent: -119988px;
   overflow: hidden;
   text-align: left;
-  background: transparent url('/img/logo.png?1371221323') 0 0 no-repeat;
+  background: transparent url('/img/logo.png?1372419126') 0 0 no-repeat;
   width: 207px;
   height: 118px;
 }
@@ -118,79 +118,113 @@ article {
 /* line 84, ../sass/layout.scss */
 article header {
   margin-bottom: 1em;
-}
-/* line 86, ../sass/layout.scss */
-article header .large-3 {
-  text-align: right;
+  line-height: 1.8;
 }
 /* line 89, ../sass/layout.scss */
 article .sf-event {
   padding: 1em;
 }
 /* line 93, ../sass/layout.scss */
+article p {
+  line-height: 1.8;
+}
+/* line 95, ../sass/layout.scss */
 article address {
   background-color: #14b9d6;
   color: white;
   font-style: italic;
   text-align: center;
 }
-/* line 100, ../sass/layout.scss */
+/* line 102, ../sass/layout.scss */
 article .date {
   text-transform: uppercase;
   color: #979faa;
+  margin-top: 0.5em;
 }
-/* line 105, ../sass/layout.scss */
+/* line 108, ../sass/layout.scss */
 article .tags {
   margin-top: 1em;
 }
-/* line 107, ../sass/layout.scss */
+/* line 110, ../sass/layout.scss */
 article .tags li {
   color: #979faa;
   text-transform: uppercase;
 }
-/* line 110, ../sass/layout.scss */
+/* line 113, ../sass/layout.scss */
 article .tags li:after {
   content: ",";
 }
-/* line 111, ../sass/layout.scss */
+/* line 114, ../sass/layout.scss */
 article .tags li:last-child:after {
   content: "";
+}
+
+/* line 120, ../sass/layout.scss */
+.pagination {
+  text-align: center;
+  margin-top: 1em;
+}
+/* line 124, ../sass/layout.scss */
+.pagination li {
+  list-style: none;
+  display: -moz-inline-stack;
+  display: inline-block;
+  vertical-align: middle;
+  *vertical-align: auto;
+  zoom: 1;
+  *display: inline;
+}
+/* line 128, ../sass/layout.scss */
+.pagination li a {
+  padding: 5px 10px;
+  color: #353535;
+  border: 2px solid #353535;
+}
+/* line 132, ../sass/layout.scss */
+.pagination li a:hover {
+  border-color: #1fbba6;
+  color: white;
+  background-color: #1fbba6;
 }
 
 /* ----------------------------------------------------
     :: Footer
 ------------------------------------------------------- */
-/* line 122, ../sass/layout.scss */
+/* line 146, ../sass/layout.scss */
 footer {
   background: #353535;
   color: white;
   margin-top: 1em;
 }
+/* line 150, ../sass/layout.scss */
+footer a {
+  color: white;
+}
 
-/* line 129, ../sass/layout.scss */
+/* line 154, ../sass/layout.scss */
 .members .picture {
   position: relative;
 }
-/* line 130, ../sass/layout.scss */
+/* line 155, ../sass/layout.scss */
 .members img {
   display: inline;
 }
-/* line 133, ../sass/layout.scss */
+/* line 158, ../sass/layout.scss */
 .members span {
-  background: transparent url('/img/member-mask.png?1371463179') top center no-repeat;
+  background: transparent url('/img/member-mask.png?1372419127') top center no-repeat;
   display: block;
   height: 100%;
   width: 100%;
   position: absolute;
   top: 0;
 }
-/* line 140, ../sass/layout.scss */
+/* line 165, ../sass/layout.scss */
 .members h6 {
   color: #1fbba6;
   text-transform: uppercase;
 }
 
-/* line 146, ../sass/layout.scss */
+/* line 171, ../sass/layout.scss */
 .mention {
   font-size: 10px;
   padding: 0.5em 0;
