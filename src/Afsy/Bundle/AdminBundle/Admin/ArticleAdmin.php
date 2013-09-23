@@ -57,7 +57,7 @@ class ArticleAdmin extends Admin
         $listMapper
             ->addIdentifier('title')
             ->add('is_published')
-            ->add('published_at')
+            ->add('published_at', 'datetime')
             ->add('city')
             ->add('authors')
             ->add('_action', 'actions', array(
