@@ -28,14 +28,15 @@ class ArticleAdmin extends Admin
             ->end()
             ->with('Options')
                 ->add('language', 'choice', array('choices' => array('fr' => 'French', 'en' => 'English')))
-                ->add('published_at', 'datetime')
-                ->add('is_published', 'checkbox', array('required' => false))
+                ->add('publishedAt')
+                ->add('isPublished', null, array('required' => false))
                 ->add('authors')
                 ->add('tags_list', 'text', array('required' => true, 'attr' => array('class' => 'jquery-tag-it')))
             ->end()
             ->with('Location')
                 ->add('city')
-                ->add('event_url', 'text')
+                ->add('eventUrl')
+                ->add('eventDate')
                 ->add('address')
                 ->add('map')
             ->end()
@@ -46,7 +47,7 @@ class ArticleAdmin extends Admin
     {
         $datagridMapper
             ->add('title')
-            ->add('is_published')
+            ->add('isPublished')
             ->add('city')
             ->add('authors')
         ;
@@ -56,8 +57,8 @@ class ArticleAdmin extends Admin
     {
         $listMapper
             ->addIdentifier('title')
-            ->add('is_published')
-            ->add('published_at', 'datetime')
+            ->add('isPublished')
+            ->add('publishedAt')
             ->add('city')
             ->add('authors')
             ->add('_action', 'actions', array(
