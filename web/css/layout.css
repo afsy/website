@@ -134,7 +134,7 @@ article address {
   color: white;
   font-style: italic;
   text-align: center;
-  margin-bottom: 1em;
+  padding: .5em;
 }
 /* line 103, ../sass/layout.scss */
 article .date {
