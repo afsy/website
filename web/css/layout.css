@@ -234,3 +234,14 @@ footer a {
   color: #777;
   text-align: center;
 }
+
+
+
+#error404 {
+  margin: 230px auto;
+  width: 700px;
+}
+
+#error404 h2 {
+  font-size: 40px;
+}
