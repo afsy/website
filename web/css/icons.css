@@ -19,7 +19,7 @@
     :: Icons
 ------------------------------------------------------- */
 /* line 114, icon/*.png */
-.icon-sprite, .icon-arrow-white, .icon-beer-white, .icon-calendar-white, .icon-conf-white, .icon-github-white, .icon-linkedin-white, .icon-mail-white, .icon-sf-white, .icon-time-grey, .icon-twitter-white {
+.icon-sprite, .icon-arrow-white, .icon-beer-white, .icon-calendar-white, .icon-conf-white, .icon-github-white, .icon-linkedin-white, .icon-mail-white, .icon-sf-white, .icon-time-grey, .icon-twitter-white, .icon-meetup-white {
   background: url('/img/icon-s6f4acc72ba.png') no-repeat;
 }
 
@@ -89,6 +89,13 @@
 /* line 60, ../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/utilities/sprites/_base.scss */
 .icon-twitter-white {
   background-position: 0 -150px;
+  height: 20px;
+  width: 24px;
+}
+
+/* line 60, ../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/utilities/sprites/_base.scss */
+.icon-meetup-white {
+  background-position: 0 -246px;
   height: 20px;
   width: 24px;
 }
