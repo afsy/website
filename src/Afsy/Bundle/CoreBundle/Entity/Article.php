@@ -138,7 +138,7 @@ class Article implements Taggable
             return false;
         }
 
-        return new \DateTime() < $this->eventDate;
+        return new \Datetime() > $this->eventDate;
     }
 
     /**

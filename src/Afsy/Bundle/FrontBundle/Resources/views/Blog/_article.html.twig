@@ -15,8 +15,8 @@
 
     <div class="large-8 columns sf-event">
         <header>
-                <h3 class="museo"><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h3>
-                <p class="date"><i class="icon-time-grey"></i>le {{ article.publishedAt | localizeddate('long', 'none') }}</p>
+            <h3 class="museo"><a href="{{ url('blog_show', {'slug': article.slug}) }}">{{ article.title }}</a></h3>
+            <p class="date"><i class="icon-time-grey"></i>le {{ article.eventDate | localizeddate('long', 'short', null, null, "dd/MM/yyyy 'à' HH:mm") }} (annoncé le {{ article.publishedAt | localizeddate('long', 'none') }})</p>
         </header>
 
         {{ article.body | raw }}

@@ -29,7 +29,7 @@ class ArticleRepository extends EntityRepository
             ->createQueryBuilder('a')
             ->andWhere('a.isPublished = :published')
             ->andWhere('a.publishedAt < :now')
-            ->orderBy('a.publishedAt', 'DESC')
+            ->orderBy('a.eventDate', 'DESC')
         ;
 
         if ($limit) {

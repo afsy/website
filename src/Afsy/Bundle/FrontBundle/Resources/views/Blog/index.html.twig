@@ -5,16 +5,24 @@
 {% endblock %}
 
 {% block body %}
-
-    <h4 class="event museo"><i class="icon-calendar-white"></i> Prochains événements</h4>
+    {% set future = 0 %}
+    {% set past = 0 %}
 
     {% for article in pagination %}
+        {% if future == 0 and not article.eventStarted %}
+            {% set future = 1 %}
+            <h4 class="event museo"><i class="icon-calendar-white"></i> Prochains événements</h4>
+        {% endif %}
+
+        {% if past == 0 and article.eventStarted %}
+            {% set past = 1 %}
+            <h4 class="event museo"><i class="icon-calendar-white"></i> événements passés</h4>
+        {% endif %}
+
         {% include 'AfsyFrontBundle:Blog:_article.html.twig' with {'article': article} %}
     {% else %}
         <p class="text-error">Il n'y a aucun article.</p>
     {% endfor %}
-
-    <h4 class="event museo"><i class="icon-calendar-white"></i> événements passés</h4>
 
     {{ knp_pagination_render(pagination) }}
 {% endblock %}

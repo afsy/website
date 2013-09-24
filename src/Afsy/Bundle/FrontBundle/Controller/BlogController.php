@@ -7,6 +7,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+
 /**
  * Blog controller
  */
@@ -14,6 +16,8 @@ class BlogController extends Controller
 {
     /**
      * homepage
+     *
+     * @Template()
      */
     public function indexAction()
     {
@@ -23,11 +27,12 @@ class BlogController extends Controller
             $this->get('request')->query->get('page', 1)
         );
 
-        return $this->render('AfsyFrontBundle:Blog:index.html.twig', array(
-            'pagination' => $pagination
-        ));
+        return array('pagination' => $pagination);
     }
 
+    /**
+     * @Template()
+     */
     public function showAction(Article $article, $preview = false)
     {
         if (!$preview && !$article->getIsPublished()) {
@@ -37,9 +42,7 @@ class BlogController extends Controller
         $tagManager = $this->get('fpn_tag.tag_manager');
         $tagManager->loadTagging($article);
 
-        return $this->render('AfsyFrontBundle:Blog:show.html.twig', array(
-            'article' => $article,
-        ));
+        return array('article' => $article);
     }
 
     public function feedAction()
