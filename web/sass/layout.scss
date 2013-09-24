@@ -97,7 +97,7 @@
             color: $white;
             font-style: italic;
             text-align: center;
-            margin-bottom: 1em;
+            padding: .5em;
         }
 
         .date {
@@ -119,16 +119,17 @@
 
     .pagination {
         text-align: center;
-        margin-top : 1em ;
+        margin: 4em;
 
         li {
             list-style: none;
             @include inline-block;
 
             a {
+                border-radius: 15px;
                 padding : 5px 10px;
                 color : $black;
-                border: 2px solid $black ;
+                border: 1px solid $black;
                 &:hover {
                     border-color : $green;
                     color : $white;

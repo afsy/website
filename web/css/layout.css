@@ -163,7 +163,7 @@ article .tags li:last-child:after {
 /* line 120, ../sass/layout.scss */
 .pagination {
   text-align: center;
-  margin-top: 1em;
+  margin: 4em;
 }
 /* line 124, ../sass/layout.scss */
 .pagination li {
@@ -177,9 +177,10 @@ article .tags li:last-child:after {
 }
 /* line 128, ../sass/layout.scss */
 .pagination li a {
+  border-radius: 15px;
   padding: 5px 10px;
   color: #353535;
-  border: 2px solid #353535;
+  border: 1px solid #353535;
 }
 /* line 132, ../sass/layout.scss */
 .pagination li a:hover {
