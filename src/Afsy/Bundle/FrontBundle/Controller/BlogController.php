@@ -3,6 +3,8 @@
 namespace Afsy\Bundle\FrontBundle\Controller;
 
 use Afsy\Bundle\CoreBundle\Entity\Article;
+use Afsy\Bundle\CoreBundle\Entity\Tag;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -43,6 +45,23 @@ class BlogController extends Controller
         $tagManager->loadTagging($article);
 
         return array('article' => $article);
+    }
+
+    /**
+     * @Template("AfsyFrontBundle:Blog:index.html.twig")
+     */
+    public function showTagAction(Tag $tag)
+    {
+        $query = $this->getDoctrine()->getRepository('AfsyCoreBundle:Article')->getQueryForTag($tag);
+        $pagination = $this->get('knp_paginator')->paginate(
+            $query,
+            $this->get('request')->query->get('page', 1)
+        );
+
+        return array(
+            'pagination' => $pagination,
+            'tag' => $tag
+        );
     }
 
     public function feedAction()

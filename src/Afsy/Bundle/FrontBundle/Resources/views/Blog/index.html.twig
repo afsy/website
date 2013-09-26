@@ -1,7 +1,11 @@
 {% extends 'AfsyFrontBundle::layout.html.twig' %}
 
 {% block page_title %}
-    - tous les articles
+{% if tag is defined %}
+    {{- '- tous les articles parlant de "' ~ tag.name ~ '"' -}}
+{% else %}
+    {{- '- tous les articles' -}}
+{% endif %}
 {% endblock %}
 
 {% block body %}
@@ -11,12 +15,24 @@
     {% for article in pagination %}
         {% if future == 0 and not article.eventStarted %}
             {% set future = 1 %}
-            <h4 class="event museo"><i class="icon-calendar-white"></i> Prochains événements</h4>
+            <h4 class="event museo"><i class="icon-calendar-white"></i>
+                {% if tag is defined %}
+                    Prochains événements au sujet de "{{ tag.name }}"
+                {% else %}
+                    Prochains événements
+                {% endif %}
+            </h4>
         {% endif %}
 
         {% if past == 0 and article.eventStarted %}
             {% set past = 1 %}
-            <h4 class="event museo"><i class="icon-calendar-white"></i> événements passés</h4>
+            <h4 class="event museo"><i class="icon-calendar-white"></i>
+                {% if tag is defined %}
+                    Événements passés au sujet de "{{ tag.name }}"
+                {% else %}
+                    Événements passés
+                {% endif %}
+            </h4>
         {% endif %}
 
         {% include 'AfsyFrontBundle:Blog:_article.html.twig' with {'article': article} %}

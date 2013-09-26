@@ -3,18 +3,38 @@
 namespace Afsy\Bundle\CoreBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Afsy\Bundle\CoreBundle\Entity\Tag;
 
 class ArticleRepository extends EntityRepository
 {
     /**
      * Get the articles list
      *
-     * @param  array $constraints
-     * @return mixed
+     * @return \Doctrine\ORM\QueryBuilder
      */
     public function getQuery()
     {
         return $this->getLastQueryBuilder()->getQuery();
+    }
+
+    /**
+     * Returns a query builder for articles tagged with a certain tag
+     *
+     * @param  Tag $tag
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    public function getQueryForTag(Tag $tag)
+    {
+        $qb = $this->getLastQueryBuilder();
+        $ids = $this->getEntityManager()
+                    ->getRepository('AfsyCoreBundle:Tag')
+                    ->getResourceIdsForTag('article_tag', $tag->getName());
+
+        if (count($ids) >= 1) {
+            $qb->andWhere($qb->expr()->in('a.id', $ids));
+        }
+
+        return $qb->getQuery();
     }
 
     /**

@@ -3,7 +3,7 @@
     <id>Afsy</id>
     <link type="text/html" rel="alternate" href="{{ url('blog_home') }}"/>
 
-    {% if tag is null %}
+    {% if tag is not defined %}
         <title>Afsy - les derniers articles</title>
     {% else %}
         <title>Afsy - derniers articles au sujet de "{{ tag.name }}"</title>
