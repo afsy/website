@@ -28,6 +28,11 @@ class BlogController extends Controller
             $query,
             $this->get('request')->query->get('page', 1)
         );
+        $tagManager = $this->get('fpn_tag.tag_manager');
+
+        foreach ($pagination as $article) {
+            $tagManager->loadTagging($article);
+        }
 
         return array('pagination' => $pagination);
     }
@@ -57,6 +62,11 @@ class BlogController extends Controller
             $query,
             $this->get('request')->query->get('page', 1)
         );
+        $tagManager = $this->get('fpn_tag.tag_manager');
+
+        foreach ($pagination as $article) {
+            $tagManager->loadTagging($article);
+        }
 
         return array(
             'pagination' => $pagination,

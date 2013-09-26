@@ -107,12 +107,18 @@
         }
 
         .tags {
+            margin-left : 0 ;
             margin-top : 1em ;
             li {
-                color : $text-grey;
+                background-color: $blue;
+                border-radius: 3px;
+                line-height: 16px;
+                padding: 1px 5px;
+                color : $blue;
                 text-transform : uppercase;
-                &:after { content: ","; }
-                &:last-child:after { content: ""; }
+            }
+            a {
+                color: $white
             }
         }
     }

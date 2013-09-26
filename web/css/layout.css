@@ -144,20 +144,21 @@ article .date {
 }
 /* line 109, ../sass/layout.scss */
 article .tags {
+  margin-left: 0;
   margin-top: 1em;
 }
 /* line 111, ../sass/layout.scss */
 article .tags li {
-  color: #979faa;
+  background-color: #14b9d6;
+  border-radius: 3px;
+  line-height: 16px;
+  padding: 1px 5px;
+  color: #14b9d6;
   text-transform: uppercase;
 }
-/* line 114, ../sass/layout.scss */
-article .tags li:after {
-  content: ",";
-}
-/* line 115, ../sass/layout.scss */
-article .tags li:last-child:after {
-  content: "";
+/* line 119, ../sass/layout.scss */
+article .tags li a {
+  color: #fff;
 }
 
 /* line 120, ../sass/layout.scss */
