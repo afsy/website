@@ -46,9 +46,21 @@ class AventController extends Controller
 
         $twig = $this->get('twig');
 
+        $today = date('d');
+        $kept = array();
+
+        foreach ($this->slugs[$year] as $slug => $template) {
+            // Thanks, all articles start with '0X'
+            $day = (int) $slug;
+
+            if ($this->futureEnabled || $year < date('Y') || date('m') == 12 && $day <= $today) {
+                $kept[$slug] = $template;
+            }
+        }
+
         return array_map(function ($template) use ($twig) {
             return $twig->loadTemplate($template);
-        }, $this->slugs[$year]);
+        }, $kept);
     }
 
     private function validateDate($year, $day = null)
