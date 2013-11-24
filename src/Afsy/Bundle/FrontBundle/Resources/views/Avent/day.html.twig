@@ -17,13 +17,35 @@
 {% block body %}
     <p><a href="{{ path('avent', {year: year}) }}">Revenir à la liste complète des articles {{ year }}</a></p>
     <hr />
-    {% block article_content %}
-        <p>Ici va le contenu de l'article.</p>
-    {% endblock %}
+    <div class="avent-article">
+        {% block article_content %}
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+        {% endblock %}
+    </div>
     <hr />
-    {% block article_avatar %}
-        <img src="/img/logo.png" />
-    {% endblock %}
-    <h2>{% block article_author '' %}</h2>
-    {% block article_bio '' %}
+    <div class="avent-author-block">
+        <div class="avatar">
+            {% block article_avatar %}
+                <img src="{{ asset('bundles/afsyfront/images/avent/avatar-empty.png') }}" />
+            {% endblock %}
+        </div>
+        <div class="content">
+            {% block article_bio %}
+                <h2><a href="{% block author_url '#' %}">{% block article_author 'Prénom Nom' %}</a></h2>
+                <p>Ceci est une petite bio pour permettre à l\'auteur de parler de lui et de sa boîte.</p>
+                <p>Il pourra aussi partager ses passions, il pourra <a href="#">mettre des liens</a>...</p>
+                <marquee>voir même des &lt;marquee&gt;</marquee>
+            {% endblock %}
+        </div>
+    </div>
 {% endblock %}

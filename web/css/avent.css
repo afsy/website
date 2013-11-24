@@ -1,0 +1,58 @@
+@charset "UTF-8";
+/*  AVENT.CSS
+    CSS du calendrier de l'avent
+-------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Imports Compass !important!
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Margin
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Widths
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Font
+------------------------------------------------------- */
+/* ----------------------------------------------------
+    :: Colors
+------------------------------------------------------- */
+/* Text ----------------- */
+/* line 11, ../sass/avent.scss */
+.avent-author-block {
+  overflow: auto;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  background-color: #e3e3e6;
+  padding: 15px;
+}
+/* line 18, ../sass/avent.scss */
+.avent-author-block > div.avatar {
+  float: left;
+  width: 90px;
+  overflow: hidden;
+}
+/* line 23, ../sass/avent.scss */
+.avent-author-block > div.content {
+  width: 600px;
+  padding-left: 15px;
+  float: left;
+}
+/* line 25, ../sass/avent.scss */
+.avent-author-block > div.content > h2 > a {
+  color: #14b9d6;
+}
+
+/* line 34, ../sass/avent.scss */
+.avent-article h1, .avent-article h2, .avent-article h3, .avent-article h4 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+/* line 39, ../sass/avent.scss */
+.avent-article p, .avent-article > ul {
+  margin-top: 0.5em;
+}
+/* line 43, ../sass/avent.scss */
+.avent-article pre {
+  font-family: monospace;
+}
