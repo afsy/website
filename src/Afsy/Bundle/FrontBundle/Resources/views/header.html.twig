@@ -1,11 +1,14 @@
+{% set header_expanded = header_expanded is defined ? header_expanded : true %}
 <header role="main">
     <div class="container">
         <h1 class="logo"><a href="{{ asset('/') }}">Association Francophone des Utilisateurs de Symfony</a></h1>
+        {% if header_expanded %}
         <h2 class="museo uppercase">Association Francophone des Utilisateurs de Symfony</h2>
-        <h5>Groupe de professionnels du web passionnés par le framework PHP Symfony.</h5>
-        <p>
-            <a class="btn" href="http://groups.google.com/group/asso-afsy?hl=fr">Rejoindre la liste de discussion <i class="icon-arrow-white"></i></a>
-        </p>
+            <h5>Groupe de professionnels du web passionnés par le framework PHP Symfony.</h5>
+            <p>
+                <a class="btn" href="http://groups.google.com/group/asso-afsy?hl=fr">Rejoindre la liste de discussion <i class="icon-arrow-white"></i></a>
+            </p>
+        {% endif %}
         <ul class="contact list-horizontal">
             <li><a href="mailto:asso.afsy@gmail.com"><i class="icon-mail-white"></i></a></li>
             <li><a href="https://twitter.com/assoafsy"><i class="icon-twitter-white"></i></a></li>
@@ -16,22 +19,23 @@
     </div>
 </header>
 
-<section class="presentation">
-    <div class="container row">
-         <div class="large-4 columns">
-            <p class="icon hide-for-small"><i class="icon-sf-white"></i></p>
-            <p>Notre objectif consiste à promouvoir l'utilisation du framework Symfony et évangéliser les bonnes pratiques de développement auprès des entreprises et des universitaires.</p>
+{% if header_expanded %}
+    <section class="presentation">
+        <div class="container row">
+             <div class="large-4 columns">
+                <p class="icon hide-for-small"><i class="icon-sf-white"></i></p>
+                <p>Notre objectif consiste à promouvoir l'utilisation du framework Symfony et évangéliser les bonnes pratiques de développement auprès des entreprises et des universitaires.</p>
+            </div>
+            <div class="large-4 columns">
+                <p class="icon hide-for-small"><i class="icon-conf-white"></i></p>
+                <p>Pour ce faire, nous organisons ponctuellement des soirées gratuites accompagnées de conférences ou d'ateliers de découverte de Symfony ainsi que les traditionnels « sfPots ».</p>
+            </div>
+            <div class="large-4 columns">
+                <p class="icon hide-for-small"><i class="icon-beer-white"></i></p>
+                <p>Les « sfPots » sont des rendez-vous sociaux informels, gratuits et ouverts à tous. Ils prennent place une fois par mois autour d'une ou deux mini conférences qui se prolongent autour d'une bière ou d'un repas dans un bar, un pub ou un restaurant.</p>
+            </div>
         </div>
-        <div class="large-4 columns">
-            <p class="icon hide-for-small"><i class="icon-conf-white"></i></p>
-            <p>Pour ce faire, nous organisons ponctuellement des soirées gratuites accompagnées de conférences ou d'ateliers de découverte de Symfony ainsi que les traditionnels « sfPots ».</p>
-        </div>
-        <div class="large-4 columns">
-            <p class="icon hide-for-small"><i class="icon-beer-white"></i></p>
-            <p>Les « sfPots » sont des rendez-vous sociaux informels, gratuits et ouverts à tous. Ils prennent place une fois par mois autour d'une ou deux mini conférences qui se prolongent autour d'une bière ou d'un repas dans un bar, un pub ou un restaurant.</p>
-        </div>
-    </div>
-</section>
+    </section>
+{% endif %}
 
-
-
+{{ header_extra|default('') }}

@@ -1,0 +1,29 @@
+{% extends 'AfsyFrontBundle::layout.html.twig' %}
+
+{% set header_expanded = false %}
+
+{% block page_title %}
+    {{- "- calendrier de l'avent " ~ year ~ " - " ~ block('article_title') -}}
+{% endblock %}
+
+{% set header_extra %}
+    <section class="presentation">
+        <div class="container row">
+            <h3><a href="{{ path('avent', {year: year}) }}">Calendrier de l'avent de l'Afsy {{ year }}</a></h3>
+        </div>
+    </section>
+{% endset %}
+
+{% block body %}
+    <p><a href="{{ path('avent', {year: year}) }}">Revenir à la liste complète des articles {{ year }}</a></p>
+    <hr />
+    {% block article_content %}
+        <p>Ici va le contenu de l'article.</p>
+    {% endblock %}
+    <hr />
+    {% block article_avatar %}
+        <img src="/img/logo.png" />
+    {% endblock %}
+    <h2>{% block article_author '' %}</h2>
+    {% block article_bio '' %}
+{% endblock %}

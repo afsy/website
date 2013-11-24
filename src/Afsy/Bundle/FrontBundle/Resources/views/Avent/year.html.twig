@@ -1,0 +1,31 @@
+{% extends 'AfsyFrontBundle::layout.html.twig' %}
+
+{% set header_expanded = false %}
+
+{% block page_title %}
+    {{- "- calendrier de l'avent " ~ year -}}
+{% endblock %}
+
+{% set header_extra %}
+    <section class="presentation">
+        <div class="container row">
+            <h3>Calendrier de l'avent de l'Afsy {{ year }}</h3>
+        </div>
+    </section>
+{% endset %}
+
+{% block body %}
+    {% set day = 1 %}
+    <ul class="avent-year-list">
+        {% for slug, template in days %}
+            <li>
+
+                <a href="{{ path('avent_day', {year: year, slug: slug}) }}">{{ template.renderBlock('article_title', {}) }}</a>
+            </li>
+            {% set day = day + 1 %}
+        {% endfor %}
+        {% for missing_day in day..24 %}
+            <li>{{ missing_day }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

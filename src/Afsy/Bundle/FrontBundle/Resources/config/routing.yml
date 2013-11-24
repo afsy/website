@@ -21,3 +21,11 @@ blog_preview:
 blog_show_tag:
     pattern: /blog/tag/{name}
     defaults: { _controller: AfsyFrontBundle:Blog:showTag }
+
+avent:
+    pattern: /avent/{year}
+    defaults: { _controller: AfsyFrontBundle:Avent:index }
+
+avent_day:
+    pattern: /avent/{year}/{slug}
+    defaults: { _controller: AfsyFrontBundle:Avent:day }
