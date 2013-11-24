@@ -73,7 +73,7 @@ class Article implements Taggable
 
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetime", name="event_date")
+     * @ORM\Column(type="datetime", name="event_date", nullable=true)
      */
     protected $eventDate;
 
