@@ -20,6 +20,10 @@ $margin: 30px;
         width: $size;
         overflow: hidden;
     }
+    > div.content-hero {
+        font-size: 1.4em;
+        text-align: center;
+    }
     > div.content {
         width: 600px;
         > h2 > a {

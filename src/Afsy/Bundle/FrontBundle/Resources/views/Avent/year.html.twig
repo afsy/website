@@ -15,17 +15,25 @@
 {% endset %}
 
 {% block body %}
-    {% set day = 1 %}
-    <ul class="avent-year-list">
-        {% for slug, template in days %}
-            <li>
-
-                <a href="{{ path('avent_day', {year: year, slug: slug}) }}">{{ template.renderBlock('article_title', {}) }}</a>
-            </li>
-            {% set day = day + 1 %}
-        {% endfor %}
-        {% for missing_day in day..24 %}
-            <li>{{ missing_day }}</li>
-        {% endfor %}
-    </ul>
+    {% set day = 0 %}
+    {% for slug, template in days %}
+        <div class="avent-author-block">
+            <div class="avatar">
+                {{ template.renderBlock('article_avatar', {}) }}
+            </div>
+            <div class="content">
+                <h2><a href="{{ path('avent_day', {year: year, slug: slug}) }}">{{ template.renderBlock('article_title', {}) }}</a></h2>
+                <p>Écrit par <a href="{{ template.renderBlock('article_url', {}) }}">{{ template.renderBlock('article_author', {}) }}</a></p>
+            </div>
+        </div>
+        {% set day = day + 1 %}
+    {% endfor %}
+    {% if day < 24 %}
+        <div class="avent-author-block">
+            <div class="content-hero">
+                <em>Encore {{ 24 - day }} article{{ day < 23 ? 's' :'' }} à venir, revenez demain !</em>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
+
