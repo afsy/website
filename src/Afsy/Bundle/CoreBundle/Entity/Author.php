@@ -56,7 +56,7 @@ class Author implements UserInterface
 
     /**
      * @ORM\ManyToMany(targetEntity="Article", mappedBy="authors")
-     * @ORM\OrderBy({"published_at" = "DESC"})
+     * @ORM\OrderBy({"publishedAt" = "DESC"})
      */
     protected $articles;
 
