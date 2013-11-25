@@ -1,0 +1,50 @@
+/*  AVENT.CSS
+    CSS du calendrier de l'avent
+-------------------------------------------------------------------------------------------------------- */
+
+@charset "UTF-8";
+@import "partials/variables.scss";
+
+$size: 90px;
+$margin: 30px;
+
+.avent-author-block {
+    overflow: auto;
+    margin-top: $margin;
+    margin-bottom: $margin;
+    background-color: #e3e3e6;
+    padding: $margin/2;
+
+    > div.avatar {
+        float: left;
+        width: $size;
+        overflow: hidden;
+    }
+    > div.content-hero {
+        font-size: 1.4em;
+        text-align: center;
+    }
+    > div.content {
+        width: 600px;
+        > h2 > a {
+            color: $blue;
+        }
+        padding-left: $margin/2;
+        float: left;
+    }
+}
+
+.avent-article {
+    h1, h2, h3, h4 {
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+    }
+
+    p, > ul {
+        margin-top: 0.5em;
+    }
+
+    pre {
+        font-family: monospace;
+    }
+}

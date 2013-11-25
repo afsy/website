@@ -1,0 +1,51 @@
+{% extends 'AfsyFrontBundle::layout.html.twig' %}
+
+{% set header_expanded = false %}
+
+{% block page_title %}
+    {{- "- calendrier de l'avent " ~ year ~ " - " ~ block('article_title') -}}
+{% endblock %}
+
+{% set header_extra %}
+    <section class="presentation">
+        <div class="container row">
+            <h3><a href="{{ path('avent', {year: year}) }}">Calendrier de l'avent de l'Afsy {{ year }}</a></h3>
+        </div>
+    </section>
+{% endset %}
+
+{% block body %}
+    <p><a href="{{ path('avent', {year: year}) }}">Revenir à la liste complète des articles {{ year }}</a></p>
+    <hr />
+    <div class="avent-article">
+        {% block article_content %}
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+            <p>bla bla</p>
+        {% endblock %}
+    </div>
+    <hr />
+    <div class="avent-author-block">
+        <div class="avatar">
+            {% block article_avatar %}
+                <img src="{{ asset('bundles/afsyfront/images/avent/avatar-empty.png') }}" />
+            {% endblock %}
+        </div>
+        <div class="content">
+            {% block article_bio %}
+                <h2><a href="{% block author_url '#' %}">{% block article_author 'Prénom Nom' %}</a></h2>
+                <p>Ceci est une petite bio pour permettre à l\'auteur de parler de lui et de sa boîte.</p>
+                <p>Il pourra aussi partager ses passions, il pourra <a href="#">mettre des liens</a>...</p>
+                <marquee>voir même des &lt;marquee&gt;</marquee>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

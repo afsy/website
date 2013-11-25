@@ -1,0 +1,57 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title 'Jour 01 - Cet article n est pas encore écrit' %}
+
+{% block article_content %}
+    <h1>Un example d'article</h1>
+
+    <p>Ceci est un fichier d'example qui contient quelques instructions.</p>
+
+    <h2>Installation</h2>
+
+    <p>Utilisez Composer pour installer les dépendences du projet en exécutant la commande suivante :</p>
+
+    <pre class="no-highlight"><code>$ cd /path/to/calendar
+    $ /path/to/composer.phar install
+    </code></pre>
+
+    <p>Les paquets sont installés dans un dossier <code>vendor/</code> à la racine du projet.</p>
+
+    <h2>Nommage des fichiers</h2>
+
+    <p>Le <code>00</code> dans le nom du fichier <code>00-Sample.md</code> correspond au jour de publication de l'article sur le site de l'AFSY.</p>
+
+    <h2>Génération du calendrier</h2>
+
+    <p>La génération du calendrier de l'avent est réalisée grâce à la console du dossier <code>bin</code>.</p>
+
+    <p>Il suffit d'exécuter la commande <code>./bin/console afsy:calendar</code> pour construire tout le calendrier.</p>
+
+    <p>Dans votre terminal, exécutez la commande suivante:</p>
+
+    <pre class="no-highlight"><code>$ cd /path/to/calendar
+    $ ./bin/console afsy:calendar
+    </code></pre>
+
+    <p>Les fichiers sont générés dans le répertoire <code>build/</code>.</p>
+
+    <h2>Ecriture d'un article</h2>
+
+    <p>Les articles sont écrits au format Markdown étendu.</p>
+
+    <p>Le parser Markdown supporte la syntaxe de base de Markdown ainsi qu'une syntaxe étendue incluant notamment :</p>
+
+    <ul>
+    <li>Les tableaux HTML</li>
+    <li>Les <code>fenced</code> blocs de code</li>
+    </ul>
+
+    <p>La documentation de la syntaxe Markdown se trouve aux urls suivantes :</p>
+
+    <ul>
+    <li><a href="http://daringfireball.net/projects/markdown/syntax">Markdown Syntax</a></li>
+    <li><a href="http://michelf.ca/projects/php-markdown/extra">Markdown Extra Syntax</a></li>
+    </ul>
+{% endblock %}
