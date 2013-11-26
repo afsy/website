@@ -18,6 +18,8 @@
             <h3><a href="{{ path('avent', {year: year}) }}">Calendrier de l'avent de l'Afsy {{ year }}</a></h3>
         </div>
     </section>
+
+    {% include('AfsyFrontBundle:Avent:_snow.html.twig') %}
 {% endset %}
 
 {% block body %}
