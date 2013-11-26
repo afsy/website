@@ -39,40 +39,39 @@
 }
 /* line 28, ../sass/avent.scss */
 .avent-author-block > div.content {
-  width: 510px;
   padding-left: 15px;
-  float: left;
+  margin-left: 195px;
 }
-/* line 30, ../sass/avent.scss */
+/* line 29, ../sass/avent.scss */
 .avent-author-block > div.content > h2 > a {
   color: #353535;
 }
-/* line 37, ../sass/avent.scss */
+/* line 36, ../sass/avent.scss */
 .avent-author-block > div.date {
   float: left;
   padding-right: 15px;
 }
-/* line 42, ../sass/avent.scss */
+/* line 41, ../sass/avent.scss */
 .avent-author-block div.extract {
   margin-top: 10px;
   color: #979faa;
 }
 
-/* line 49, ../sass/avent.scss */
+/* line 48, ../sass/avent.scss */
 .avent-article h1, .avent-article h2, .avent-article h3, .avent-article h4 {
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
-/* line 54, ../sass/avent.scss */
+/* line 53, ../sass/avent.scss */
 .avent-article p, .avent-article > ul {
   margin-top: 0.5em;
 }
-/* line 58, ../sass/avent.scss */
+/* line 57, ../sass/avent.scss */
 .avent-article pre {
   font-family: monospace;
 }
 
-/* line 64, ../sass/avent.scss */
+/* line 63, ../sass/avent.scss */
 .calendar_date {
   width: 90px;
   height: auto;
@@ -88,21 +87,21 @@
   -moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
 }
-/* line 78, ../sass/avent.scss */
+/* line 77, ../sass/avent.scss */
 .calendar_date p {
   font-family: Helvetica, sans-serif;
-  font-size: 53px;
+  font-size: 40px;
   text-align: center;
   color: #333;
   font-weight: bold;
 }
-/* line 83, ../sass/avent.scss */
+/* line 82, ../sass/avent.scss */
 .calendar_date p span {
   background: #d10000;
   background: linear-gradient(top, #d10000 0%, #7a0909 100%);
   background: -moz-linear-gradient(top, #d10000 0%, #7a0909 100%);
   background: -webkit-linear-gradient(top, #d10000 0%, #7a0909 100%);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   color: #fff;
   text-transform: uppercase;
@@ -111,28 +110,5 @@
   border-radius: 0 0 10px 10px;
   -moz-border-radius: 0 0 10px 10px;
   -webkit-border-radius: 0 0 10px 10px;
-  padding: 6px 0 6px 0;
-}
-
-/* line 99, ../sass/avent.scss */
-.calendar_date2 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0px;
-  height: 0px;
-  border-style: solid;
-  border-width: 70px 70px 0 0;
-  border-color: #000000 transparent transparent transparent;
-}
-/* line 109, ../sass/avent.scss */
-.calendar_date2 p {
-  position: absolute;
-  color: white;
-  top: -64px;
-  left: 0;
-  width: 42px;
-  text-align: center;
-  font-size: 22px;
-  font-weight: bold;
+  padding: 2px 0 4px 0;
 }
