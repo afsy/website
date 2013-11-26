@@ -59,6 +59,23 @@ $margin: 30px;
     }
 }
 
+.avent-navigation {
+    a { color: $green; font-weight: bold; }
+    list-style: none; margin: 20px 0 0 0; padding: 0; overflow: auto;
+
+     li {
+        width: 33%;
+        box-sizing: border-box;
+        float: left;
+
+        &.next {
+            text-align: right;
+        }
+        &.up {
+            text-align: center;
+        }
+     }
+}
 
 .calendar_date {
     width: 90px; height: auto;

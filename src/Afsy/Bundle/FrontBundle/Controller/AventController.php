@@ -4,6 +4,7 @@ namespace Afsy\Bundle\FrontBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AventController extends Controller
 {
@@ -43,7 +44,48 @@ class AventController extends Controller
         $day = (int) $slug;
         $this->validateDate($year, $day);
 
-        return $this->render($yearSlugs[$slug], array('day' => $day));
+        list($prev_template, $prev_slug) = $this->getPrev($yearSlugs, $slug);
+
+        // For the next we check the date + 1
+        try
+        {
+          $next_template = null;
+          $next_slug = null;
+          $this->validateDate($year, $day+1);
+          list($next_template, $next_slug) = $this->getNext($yearSlugs, $slug);
+        } catch(NotFoundHttpException $e) {}
+
+        return $this->render($yearSlugs[$slug], array(
+          'day'       => $day,
+          'prev'      => $prev_template ? $this->get('twig')->loadTemplate($prev_template) : null,
+          'prev_slug' => $prev_slug,
+          'next'      => $next_template ? $this->get('twig')->loadTemplate($next_template) : null,
+          'next_slug' => $next_slug,
+        ));
+    }
+
+    private function getPrev($slugs, $current_slug)
+    {
+      // Get the previous article, tricky! :)
+      reset($slugs);
+      while(key($slugs) !== null && key($slugs) !== $current_slug)
+      {
+        next($slugs);
+      }
+
+      return array(prev($slugs), key($slugs));
+    }
+
+    private function getNext($slugs, $current_slug)
+    {
+      // Get the previous article, tricky! :)
+      reset($slugs);
+      while(key($slugs) !== null && key($slugs) !== $current_slug)
+      {
+        next($slugs);
+      }
+
+      return array(next($slugs), key($slugs));
     }
 
     private function loadYearData($year)
