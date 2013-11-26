@@ -24,44 +24,55 @@
   margin-bottom: 30px;
   background-color: #e3e3e6;
   padding: 15px;
+  position: relative;
 }
-/* line 18, ../sass/avent.scss */
+/* line 19, ../sass/avent.scss */
 .avent-author-block > div.avatar {
   float: left;
   width: 90px;
   overflow: hidden;
 }
-/* line 23, ../sass/avent.scss */
+/* line 24, ../sass/avent.scss */
 .avent-author-block > div.content-hero {
   font-size: 1.4em;
   text-align: center;
 }
-/* line 27, ../sass/avent.scss */
+/* line 28, ../sass/avent.scss */
 .avent-author-block > div.content {
-  width: 600px;
+  width: 510px;
   padding-left: 15px;
   float: left;
 }
-/* line 29, ../sass/avent.scss */
+/* line 30, ../sass/avent.scss */
 .avent-author-block > div.content > h2 > a {
-  color: #14b9d6;
+  color: #353535;
+}
+/* line 37, ../sass/avent.scss */
+.avent-author-block > div.date {
+  float: left;
+  padding-right: 15px;
+}
+/* line 42, ../sass/avent.scss */
+.avent-author-block div.extract {
+  margin-top: 10px;
+  color: #979faa;
 }
 
-/* line 38, ../sass/avent.scss */
+/* line 49, ../sass/avent.scss */
 .avent-article h1, .avent-article h2, .avent-article h3, .avent-article h4 {
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
-/* line 43, ../sass/avent.scss */
+/* line 54, ../sass/avent.scss */
 .avent-article p, .avent-article > ul {
   margin-top: 0.5em;
 }
-/* line 47, ../sass/avent.scss */
+/* line 58, ../sass/avent.scss */
 .avent-article pre {
   font-family: monospace;
 }
 
-/* line 53, ../sass/avent.scss */
+/* line 64, ../sass/avent.scss */
 .calendar_date {
   width: 90px;
   height: auto;
@@ -77,14 +88,15 @@
   -moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
 }
-/* line 67, ../sass/avent.scss */
+/* line 78, ../sass/avent.scss */
 .calendar_date p {
   font-family: Helvetica, sans-serif;
   font-size: 53px;
   text-align: center;
   color: #333;
+  font-weight: bold;
 }
-/* line 71, ../sass/avent.scss */
+/* line 83, ../sass/avent.scss */
 .calendar_date p span {
   background: #d10000;
   background: linear-gradient(top, #d10000 0%, #7a0909 100%);
@@ -100,4 +112,27 @@
   -moz-border-radius: 0 0 10px 10px;
   -webkit-border-radius: 0 0 10px 10px;
   padding: 6px 0 6px 0;
+}
+
+/* line 99, ../sass/avent.scss */
+.calendar_date2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0px;
+  height: 0px;
+  border-style: solid;
+  border-width: 70px 70px 0 0;
+  border-color: #000000 transparent transparent transparent;
+}
+/* line 109, ../sass/avent.scss */
+.calendar_date2 p {
+  position: absolute;
+  color: white;
+  top: -64px;
+  left: 0;
+  width: 42px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
 }

@@ -16,17 +16,32 @@
 
 {% block body %}
     {% set day = 0 %}
+    {% set total_day = days|length %}
+
     {% for slug, template in days %}
         <div class="avent-author-block">
+            <div class="date">
+                <a href="{{ path('avent_day', {year: year, slug: slug}) }}">
+                    {{ template.renderBlock('article_date2', {'day': total_day}) }}
+                </a>
+            </div>
+
             <div class="avatar">
                 {{ template.renderBlock('article_avatar', {}) }}
             </div>
+
             <div class="content">
                 <h2><a href="{{ path('avent_day', {year: year, slug: slug}) }}">{{ template.renderBlock('article_title', {}) }}</a></h2>
+
                 <p>Écrit par <a href="{{ template.renderBlock('article_url', {}) }}">{{ template.renderBlock('article_author', {}) }}</a></p>
+
+                <div class="extract">
+                    {{ template.renderBlock('article_content', {}) | afsy_extract | raw }}
+                </div>
             </div>
         </div>
         {% set day = day + 1 %}
+        {% set total_day = total_day - 1 %}
     {% endfor %}
     {% if day < 24 %}
         <div class="avent-author-block">

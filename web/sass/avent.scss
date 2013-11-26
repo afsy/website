@@ -14,6 +14,7 @@ $margin: 30px;
     margin-bottom: $margin;
     background-color: #e3e3e6;
     padding: $margin/2;
+    position: relative;
 
     > div.avatar {
         float: left;
@@ -25,12 +26,22 @@ $margin: 30px;
         text-align: center;
     }
     > div.content {
-        width: 600px;
+        width: 600px - 90px;
         > h2 > a {
-            color: $blue;
+            color: $black;
         }
         padding-left: $margin/2;
         float: left;
+    }
+
+    > div.date {
+        float: left;
+        padding-right: $margin/2;
+    }
+
+    div.extract {
+        margin-top: 10px;
+        color:$text-grey;
     }
 }
 
@@ -67,6 +78,7 @@ $margin: 30px;
     p {
         font-family: Helvetica, sans-serif;
         font-size: 53px; text-align: center; color: #333;
+        font-weight: bold;
 
         span {
             background: #d10000;
@@ -81,5 +93,27 @@ $margin: 30px;
             -webkit-border-radius: 0 0 10px 10px;
             padding: 6px 0 6px 0;
         }
+    }
+}
+
+.calendar_date2 {
+    position: absolute;
+    top:0;
+    left:0;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 70px 70px 0 0;
+    border-color: #000000 transparent transparent transparent;
+
+    p {
+        position: absolute;
+        color:white;
+        top: -64px;
+        left: 0;
+        width: 42px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
     }
 }

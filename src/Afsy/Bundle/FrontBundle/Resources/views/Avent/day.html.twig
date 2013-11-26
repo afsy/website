@@ -6,6 +6,18 @@
     {{- "- calendrier de l'avent " ~ year ~ " - " ~ block('article_title') -}}
 {% endblock %}
 
+{% block article_date %}
+    <div class="calendar_date">
+    	<p>{{ day }} <span>Décembre</span></p>
+    </div>
+{% endblock %}
+
+{% block article_date2 %}
+    <div class="calendar_date2">
+        <p>{{ day }}</p>
+    </div>
+{% endblock %}
+
 {% set header_extra %}
     <section class="presentation">
         <div class="container row">
@@ -36,9 +48,7 @@
     <div class="avent-author-block">
         <div class="avatar">
             {% block article_avatar %}
-                <div class="calendar_date">
-                	<p>25 <span>Décembre</span></p>
-                </div>
+                <img src="{{ asset('bundles/afsyfront/images/avent/avatar-empty.png') }}" />
             {% endblock %}
         </div>
         <div class="content">

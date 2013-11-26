@@ -11,12 +11,14 @@ class AventController extends Controller
     protected $enabledYears = array('2013');
 
     protected $slugs = array(
+        // Last articles top
         2013 => array(
-            '01-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
-            '02-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
-            '03-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
-            '04-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            '06-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
             '05-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            '04-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            '03-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            '02-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            '01-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
         )
     );
 
@@ -41,7 +43,7 @@ class AventController extends Controller
         $day = (int) $slug;
         $this->validateDate($year, $day);
 
-        return $this->render($yearSlugs[$slug]);
+        return $this->render($yearSlugs[$slug], array('day' => $day));
     }
 
     private function loadYearData($year)
