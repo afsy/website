@@ -14,6 +14,7 @@ $margin: 30px;
     margin-bottom: $margin;
     background-color: #e3e3e6;
     padding: $margin/2;
+    position: relative;
 
     > div.avatar {
         float: left;
@@ -25,12 +26,21 @@ $margin: 30px;
         text-align: center;
     }
     > div.content {
-        width: 600px;
         > h2 > a {
-            color: $blue;
+            color: $black;
         }
         padding-left: $margin/2;
+        margin-left: $size*2 + $margin/2;
+    }
+
+    > div.date {
         float: left;
+        padding-right: $margin/2;
+    }
+
+    div.extract {
+        margin-top: 10px;
+        color:$text-grey;
     }
 }
 
@@ -46,5 +56,58 @@ $margin: 30px;
 
     pre {
         font-family: monospace;
+    }
+}
+
+.avent-navigation {
+    a { color: $green; font-weight: bold; }
+    list-style: none; margin: 20px 0 0 0; padding: 0; overflow: auto;
+
+     li {
+        width: 33%;
+        box-sizing: border-box;
+        float: left;
+
+        &.next {
+            text-align: right;
+        }
+        &.up {
+            text-align: center;
+        }
+     }
+}
+
+.calendar_date {
+    width: 90px; height: auto;
+    background: #fcfcfc;
+    background: linear-gradient(top, #fcfcfc 0%,#dad8d8 100%);
+    background: -moz-linear-gradient(top, #fcfcfc 0%, #dad8d8 100%);
+    background: -webkit-linear-gradient(top, #fcfcfc 0%,#dad8d8 100%);
+    border: 1px solid #d2d2d2;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+    -webkit-box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+
+    p {
+        font-family: Helvetica, sans-serif;
+        font-size: 40px; text-align: center; color: #333;
+        font-weight: bold;
+
+        span {
+            background: #d10000;
+            background: linear-gradient(top, #d10000 0%, #7a0909 100%);
+            background: -moz-linear-gradient(top, #d10000 0%, #7a0909 100%);
+            background: -webkit-linear-gradient(top, #d10000 0%, #7a0909 100%);
+            font-size: 13px; font-weight: bold; color: #fff; text-transform: uppercase;
+            display: block;
+            border-top: 3px solid #a13838;
+            border-radius: 0 0 10px 10px;
+            -moz-border-radius: 0 0 10px 10px;
+            -webkit-border-radius: 0 0 10px 10px;
+            padding: 2px 0 4px 0;
+        }
     }
 }

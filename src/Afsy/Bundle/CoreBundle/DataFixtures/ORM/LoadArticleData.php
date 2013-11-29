@@ -12,11 +12,13 @@ class LoadArticleData extends AbstractFixture implements OrderedFixtureInterface
     protected $articles = array(
         array(
             'title' => 'Calendrier de l\'avent 2013 par l\'Afsy',
-            'body' => '<p>Pour les fêtes de cette fin d\'année, l\'Afsy vous a concocté <strong>un calendrier de l\'avent</strong>, avec du PHP dedans.</p><p>Rendez-vous sur <a href="/app_dev.php/avent/2013">cette page</a>',
+            'body' => '<p>Pour les fêtes de cette fin d\'année, l\'Afsy vous a concocté <strong>un calendrier de l\'avent</strong>,
+            avec du PHP dedans.</p><p>Rendez-vous sur <a href="/app_dev.php/avent/2013">cette page</a>',
             'city' => 'Paris',
             'tags' => array('Config', 'Paris', 'config'),
             'published_at' => '2012-05-09',
-            'map' => '<img src="http://www.homelifeweekly.com/wp-content/uploads/noel-christmas-card-printable-design.png" width="333" height="184" />'
+            'address' => '',
+            'map' => '<a href="/avent/2013"><img src="http://www.homelifeweekly.com/wp-content/uploads/noel-christmas-card-printable-design.png" width="333" height="184" /></a>'
         ),
         array(
             'title' => 'Introduction au composant Config',
@@ -25,6 +27,7 @@ class LoadArticleData extends AbstractFixture implements OrderedFixtureInterface
                 </p>',
             'city' => 'Paris',
             'tags' => array('Noel', 'Avent'),
+            'address' => "Pub The Lions\n120 rue Montmartre\n75002 Paris",
             'published_at' => '2013-11-23',
             'map' => '<img src="http://maps.google.com/maps/api/staticmap?center=48.867804,2.343843&amp;zoom=16&amp;markers=size:mid|color:green|120+rue+Montmartre,+Paris&amp;path=color:0x0000FFff|weight:10|48.88435,2.40034&amp;size=470x260&amp;sensor=true" alt="" />'
         )
@@ -38,7 +41,7 @@ class LoadArticleData extends AbstractFixture implements OrderedFixtureInterface
             $entity = new Article();
             $entity->setBody($article['body']);
             $entity->setCity($article['city']);
-            $entity->setAddress("Pub The Lions\n120 rue Montmartre\n75002 Paris");
+            $entity->setAddress($article['address']);
             $entity->setIsPublished(true);
             $entity->setMap($article['map']);
             $entity->setMarkdownBody('html content loaded, please do not edit this post');

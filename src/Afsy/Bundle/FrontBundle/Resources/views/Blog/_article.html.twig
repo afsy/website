@@ -3,14 +3,18 @@
 <article class="row">
     <div class="large-4 columns">
         {{ article.map | raw }}
-        <address>
-            {{ article.address | nl2br }}
-        </address>
-        <div>
-            {% if article.eventUrl and not article.eventStarted %}
+
+        {% if article.address %}
+            <address>
+                {{ article.address | nl2br }}
+            </address>
+        {% endif %}
+
+        {% if article.eventUrl and not article.eventStarted %}
+            <div>
                 <a class="btn register" href="{{ article.eventUrl }}">Inscription gratuite <i class="icon-arrow-white"></i></a>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     </div>
 
     <div class="large-8 columns sf-event">

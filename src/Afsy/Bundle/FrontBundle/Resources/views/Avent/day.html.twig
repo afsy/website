@@ -6,17 +6,47 @@
     {{- "- calendrier de l'avent " ~ year ~ " - " ~ block('article_title') -}}
 {% endblock %}
 
+{% block article_date %}
+    <div class="calendar_date">
+    	<p title="{{ day }} décembre {{ year }}">{{ day }} <span>Décembre</span></p>
+    </div>
+{% endblock %}
+
 {% set header_extra %}
     <section class="presentation">
         <div class="container row">
             <h3><a href="{{ path('avent', {year: year}) }}">Calendrier de l'avent de l'Afsy {{ year }}</a></h3>
         </div>
     </section>
+
+    {% include('AfsyFrontBundle:Avent:_snow.html.twig') %}
 {% endset %}
 
 {% block body %}
-    <p><a href="{{ path('avent', {year: year}) }}">Revenir à la liste complète des articles {{ year }}</a></p>
+    <ul class="avent-navigation">
+        <li class="prev">
+            {% if prev_slug %}
+                <a href="{{ path('avent_day', {year: year, slug: prev_slug}) }}">&lt; {{ prev.renderBlock('article_title', {}) }}</a>
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </li>
+
+        <li class="up">
+            <a href="{{ path('avent', {year: year}) }}">Revenir à la liste complète des articles {{ year }}</a>
+        </li>
+
+        <li class="next">
+            {% if next_slug %}
+                <a href="{{ path('avent_day', {year: year, slug: next_slug}) }}">{{ next.renderBlock('article_title', {}) }} &gt;</a>
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </li>
+    </ul>
+
     <hr />
+
     <div class="avent-article">
         {% block article_content %}
             <p>bla bla</p>
@@ -34,11 +64,16 @@
     </div>
     <hr />
     <div class="avent-author-block">
+        <div class="date">
+            {{ block('article_date', {'day': day}) }}
+        </div>
+
         <div class="avatar">
             {% block article_avatar %}
                 <img src="{{ asset('bundles/afsyfront/images/avent/avatar-empty.png') }}" />
             {% endblock %}
         </div>
+
         <div class="content">
             {% block article_bio %}
                 <h2><a href="{% block author_url '#' %}">{% block article_author 'Prénom Nom' %}</a></h2>
