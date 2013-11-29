@@ -31,6 +31,14 @@ class AventController extends Controller
         ));
     }
 
+    public function feedAction($year)
+    {
+        return $this->render('AfsyFrontBundle:Avent:year_'.$year.'.atom.twig', array(
+            'year' => $year,
+            'days' => $this->loadYearData($year)
+        ));
+    }
+
     public function dayAction($year, $slug)
     {
         $this->validateDate($year);
