@@ -70,35 +70,40 @@
 .avent-article pre {
   font-family: monospace;
 }
+/* line 61, ../sass/avent.scss */
+.avent-article .img-article {
+  float: left;
+  margin: 0px 15px 5px 0px;
+}
 
-/* line 62, ../sass/avent.scss */
+/* line 68, ../sass/avent.scss */
 .avent-navigation {
   list-style: none;
   margin: 20px 0 0 0;
   padding: 0;
   overflow: auto;
 }
-/* line 63, ../sass/avent.scss */
+/* line 69, ../sass/avent.scss */
 .avent-navigation a {
   color: #1fbba6;
   font-weight: bold;
 }
-/* line 66, ../sass/avent.scss */
+/* line 72, ../sass/avent.scss */
 .avent-navigation li {
   width: 33%;
   box-sizing: border-box;
   float: left;
 }
-/* line 71, ../sass/avent.scss */
+/* line 77, ../sass/avent.scss */
 .avent-navigation li.next {
   text-align: right;
 }
-/* line 74, ../sass/avent.scss */
+/* line 80, ../sass/avent.scss */
 .avent-navigation li.up {
   text-align: center;
 }
 
-/* line 80, ../sass/avent.scss */
+/* line 86, ../sass/avent.scss */
 .calendar_date {
   width: 90px;
   height: auto;
@@ -114,7 +119,7 @@
   -moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
 }
-/* line 94, ../sass/avent.scss */
+/* line 100, ../sass/avent.scss */
 .calendar_date p {
   font-family: Helvetica, sans-serif;
   font-size: 40px;
@@ -122,7 +127,7 @@
   color: #333;
   font-weight: bold;
 }
-/* line 99, ../sass/avent.scss */
+/* line 105, ../sass/avent.scss */
 .calendar_date p span {
   background: #d10000;
   background: linear-gradient(top, #d10000 0%, #7a0909 100%);
