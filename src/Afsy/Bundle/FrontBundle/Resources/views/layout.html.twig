@@ -16,7 +16,7 @@
           <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
 
-         {% block stylesheets %}
+        {% block stylesheets %}
             <link href="{{ asset("css/reset.css") }}" rel="stylesheet"/>
             <link href="{{ asset("css/global.css") }}" rel="stylesheet"/>
             <link href="{{ asset("css/layout.css") }}" rel="stylesheet"/>
@@ -27,7 +27,9 @@
             <link href="{{ asset("css/avent.css") }}" rel="stylesheet"/>
         {% endblock %}
 
-        <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
+        {% block atom_feed %}
+            <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
+        {% endblock %}
     </head>
     <body>
 

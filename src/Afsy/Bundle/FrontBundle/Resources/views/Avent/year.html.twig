@@ -1,5 +1,10 @@
 {% extends 'AfsyFrontBundle::layout.html.twig' %}
 
+{% block atom_feed %}
+    <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
+    <link rel="alternate" type="application/atom+xml" title="AFSY - calendrier de l'avent {{ year }}" href="{{ url('avent_feed_atom', { year: year}) }}"/>
+{% endblock %}
+
 {% set header_expanded = false %}
 
 {% block page_title %}
