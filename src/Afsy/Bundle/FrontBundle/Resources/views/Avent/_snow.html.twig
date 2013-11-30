@@ -80,6 +80,12 @@
         }
 
         function movesnow() {
+            // Do not move the snow if not visible!
+            if (document.body.scrollTop > marginbottom) {
+                timer = window.setTimeout(movesnow, 50);
+                return;
+            }
+
             for (i = 0; i <= snowmax; i++) {
                 crds[i] += x_mv[i];
                 snow[i].posy += snow[i].sink;
