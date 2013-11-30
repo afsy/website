@@ -25,6 +25,14 @@ class AventController extends Controller
 
     public function indexAction($year)
     {
+        // redirect to the most recent year
+        if (null === $year) {
+            $years = array_keys($this->slugs);
+            krsort($years);
+
+            return $this->redirect($this->generateUrl('avent', array('year' => current($years))));
+        }
+
         return $this->render('AfsyFrontBundle:Avent:year_'.$year.'.html.twig', array(
             'year' => $year,
             'days' => $this->loadYearData($year)

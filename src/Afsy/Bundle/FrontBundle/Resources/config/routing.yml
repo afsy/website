@@ -24,7 +24,7 @@ blog_show_tag:
 
 avent:
     pattern: /avent/{year}
-    defaults: { _controller: AfsyFrontBundle:Avent:index }
+    defaults: { _controller: AfsyFrontBundle:Avent:index, year: null }
 
 avent_feed_atom:
     pattern: /avent/{year}/feed.atom
