@@ -14,12 +14,12 @@ class AventController extends Controller
     protected $slugs = array(
         // Last articles top
         2013 => array(
-            '06-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
-            '05-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            '01-Presentation-AFSY' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            /*'05-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
             '04-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
             '03-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
             '02-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
-            '01-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
+            '01-Komen-Kon-Fé-Du-PHP' => "AfsyFrontBundle:Avent:day_2013_01.html.twig",*/
         )
     );
 
