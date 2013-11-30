@@ -8,9 +8,11 @@
 
 {% block article_date %}
     <div class="calendar_date">
-    	<p title="{{ day }} décembre {{ year }}">{{ day }} <span>Décembre</span></p>
+        <p title="{{ day }} décembre {{ year }}">{{ day }} <span>Décembre</span></p>
     </div>
 {% endblock %}
+
+{% block article_date_atom %}{{ day }}/12/{{ year }}{% endblock %}
 
 {% set header_extra %}
     <section class="presentation">

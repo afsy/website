@@ -1,26 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xml:lang="fr-FR">
-    <id>Afsy - avent {{ year }}</id>
+    <id>{{ url('avent', {year: year}) }}</id>
     <title>Calendrier de l'avent de l'Afsy {{ year }}</title>
-    <link type="text/html" rel="alternate" href="http://www.afsy.fr/avent/{{ year }}"/>
+    <link type="text/html" rel="alternate" href="{{ url('avent', {year: year}) }}"/>
+    <link type="application/rss+xml" rel="self" href="{{ url('avent_feed_atom', {year: year}) }}"/>
     <updated>{{ 'now'|date('c') }}</updated>
 
+    {% set day = 0 %}
+    {% set total_day = days|length %}
+
     {% for slug, template in days %}
+
     <entry>
-        <id>{{ path('avent_day', {year: year, slug: slug}) }}</id>
-        <published>{{ "now"|date(DATE_ATOM) }}</published>
-        <link type="text/html" rel="alternate" href="{{ path('avent_day', {year: year, slug: slug}) }}"/>
+        <id>{{ url('avent_day', {year: year, slug: slug}) }}</id>
+        <published>{{ template.renderBlock('article_date_atom', {'day': total_day, 'year': year})|date('c') }}</published>
+        <updated>{{ template.renderBlock('article_date_atom', {'day': total_day, 'year': year})|date('c') }}</updated>
+        <link type="text/html" rel="alternate" href="{{ url('avent_day', {year: year, slug: slug}) }}"/>
         <title>{{ template.renderBlock('article_title', {}) }}</title>
         <author>
             <name>{{ template.renderBlock('article_author', {}) }}</name>
             <uri>{{ template.renderBlock('author_url', {}) }}</uri>
         </author>
-        <content type="html">
+        <content type="html"><![CDATA[
             {{ template.renderBlock('article_content', {}) }}
 
             {{ template.renderBlock('article_bio', {}) }}
-        </content>
+        ]]></content>
+
+        {% set day = day + 1 %}
+        {% set total_day = total_day - 1 %}
     </entry>
+
     {% endfor %}
 
 </feed>
