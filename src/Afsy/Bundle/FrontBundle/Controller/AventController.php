@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AventController extends Controller
 {
-    protected $futureEnabled = true; // useful for dev
+    protected $futureEnabled = false; // useful for dev
     protected $enabledYears = array('2013');
 
     protected $slugs = array(
