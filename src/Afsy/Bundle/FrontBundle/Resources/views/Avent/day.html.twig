@@ -2,15 +2,22 @@
 
 {% set header_expanded = false %}
 
+{% block atom_feed %}
+    <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
+    <link rel="alternate" type="application/atom+xml" title="AFSY - calendrier de l'avent {{ year }}" href="{{ url('avent_feed_atom', { year: year}) }}"/>
+{% endblock %}
+
 {% block page_title %}
     {{- "- calendrier de l'avent " ~ year ~ " - " ~ block('article_title') -}}
 {% endblock %}
 
 {% block article_date %}
     <div class="calendar_date">
-    	<p title="{{ day }} décembre {{ year }}">{{ day }} <span>Décembre</span></p>
+        <p title="{{ day }} décembre {{ year }}">{{ day }} <span>Décembre</span></p>
     </div>
 {% endblock %}
+
+{% block article_date_atom %}{{ day }}/12/{{ year }}{% endblock %}
 
 {% set header_extra %}
     <section class="presentation">
