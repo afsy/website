@@ -76,6 +76,7 @@ class AventController extends Controller
             'prev_slug' => $prev_slug,
             'next'      => $next_template ? $this->get('twig')->loadTemplate($next_template) : null,
             'next_slug' => $next_slug,
+            'slug'      => $slug
         ));
     }
 
