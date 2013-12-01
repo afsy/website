@@ -16,7 +16,7 @@
             {% block sonata_pre_fieldsets %}{% endblock %}
 
             {% for name, form_group in admin.formgroups %}
-                <fieldset {% if form_group.collapsed %}class="sonata-ba-fielset-collapsed"{% endif %}>
+                <fieldset {% if form_group.collapsed %}class="sonata-ba-fieldset-collapsed"{% endif %}>
                     <legend>
                         {% if form_group.collapsed %}
                             <a href="" class="sonata-ba-collapsed" title="{% trans from 'SonataAdminBundle' %}link_expand{% endtrans %}">{{ name|trans({}, admin.translationdomain) }}</a>

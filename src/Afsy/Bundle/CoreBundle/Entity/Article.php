@@ -3,7 +3,7 @@
 namespace Afsy\Bundle\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use \Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use DoctrineExtensions\Taggable\Taggable;
@@ -435,6 +435,7 @@ class Article implements Taggable
     /**
      * Set authors
      *
+     * @param ArrayCollection $authors
      * @return Article
      */
     public function setAuthors(ArrayCollection $authors)

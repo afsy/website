@@ -98,10 +98,8 @@ class ArticleRepository extends EntityRepository
             return array();
         }
 
-        $qb = $this
-            ->getLastQueryBuilder($limit)
-            ->andWhere($qb->expr()->in('a.id', $ids))
-        ;
+        $qb = $this->getLastQueryBuilder($limit);
+        $qb->andWhere($qb->expr()->in('a.id', $ids));
 
         return $qb->getQuery()->execute();
     }
