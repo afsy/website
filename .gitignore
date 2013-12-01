@@ -2,6 +2,7 @@
 .DS_Store
 .project
 .settings
+.idea
 
 # sf2
 web/bundles/

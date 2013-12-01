@@ -2,6 +2,19 @@
 
 {% set header_expanded = false %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="http://yandex.st/highlightjs/7.5/styles/default.min.css"/>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="http://yandex.st/highlightjs/7.5/highlight.min.js"></script>
+    <script type="text/javascript">
+      hljs.initHighlightingOnLoad();
+    </script>
+{% endblock javascripts %}
+
 {% block atom_feed %}
     <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
     <link rel="alternate" type="application/atom+xml" title="AFSY - calendrier de l'avent {{ year }}" href="{{ url('avent_feed_atom', { year: year}) }}"/>
