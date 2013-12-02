@@ -9,15 +9,37 @@
 
 <h2>Qu'est-ce que Propel ?</h2>
 
-<p><img src="{{ asset('bundles/afsyfront/images/avent/03-propel-fitness-water.jpg') }}" class="img-article" alt="" /> Propel est un ORM (Object Relational Mapping) pour les bases de type SQL (MySQL, SQLite, Oracle, PostgreSQL) construit sur le design pattern ActiveRecord. Il vous permet donc d'accéder à vos bases avec un ensemble de classes représentant vos tables. Et, avec l'aide d'une API simple, il vous permet de manipuler facilement vos données.</p>
+<p>
+    <img src="{{ asset('bundles/afsyfront/images/avent/03-propel-fitness-water.jpg') }}" class="img-article" alt="" />
+    Propel est un <abbr title="Object Relational Mapping" lang="en">ORM</abbr>
+    (<span lang="en">Object Relational Mapping</span>) pour les bases de type
+    SQL (MySQL, SQLite, Oracle, PostgreSQL) construit sur le design pattern
+    <em>ActiveRecord</em>. Il vous permet donc d'accéder à vos bases avec un
+    ensemble de classes représentant vos tables. Et, avec l'aide d'une API
+    simple, il vous permet de manipuler facilement vos données.
+</p>
 
-<p>Mais ce n'est pas tout, Propel vous permet aussi de réaliser vos migrations de bases de données, pour prendre en compte facilement les mises à jour ou rollbacks de structure lors de vos passages de mises en prod.</p>
+<p>
+    Mais ce n'est pas tout, Propel réalise aussi vos migrations de bases de
+    données, pour prendre en compte les mises à jour ou annulations de structure
+    lors de vos passages de mise en production.
+</p>
 
-<p>Enfin, Propel vous permet de générer vos objets à partir d'une base existante. Idéal pour reprendre un bon vieux code que vous auriez pu écrire en PDO ou avec un autre ORM.</p>
+<p>
+    Enfin, Propel vous permet de générer vos objets à partir d'une base de
+    données existante. Idéal pour reprendre un bon vieux code que vous auriez pu
+    écrire en <abbr title="PHP Data Object">PDO</abbr> ou avec un autre ORM.
+</p>
 
 <h2>Propel ce n'est plus <code>new Criteria()</code></h2>
 
-<p>Si vous êtes resté à la version 1.4 de Propel que l'on connaissait packagé par défaut avec symfony 1.x, vous avez loupé l'introduction de l'ActiveQuery. Pour que vous puissiez vous en mordre les doigts après l'illustration suivante, sachez que c'était déjà dispo dans symfony 1 avec <a href="http://www.symfony-project.org/plugins/sfPropel15Plugin">sfPropel15Plugin</a>.</p>
+<p>
+    Si vous êtes resté à la version 1.4 de Propel embarqué par défaut avec
+    symfony 1.x, alors vous avez loupé l'introduction de l'<em>ActiveQuery</em>.
+    Pour que vous puissiez vous en mordre les doigts après l'illustration
+    suivante, sachez que c'était déjà disponible dans symfony 1 avec le plugin
+    <a href="http://www.symfony-project.org/plugins/sfPropel15Plugin">sfPropel15Plugin</a>.
+</p>
 
 <p>Disons donc avant :</p>
 
@@ -29,17 +51,22 @@ $c->add(JobeetJobPeer::CREATED_AT, time() - 86400 * 30, Criteria::GREATER_THAN);
 $jobs = JobeetJobPeer::doSelect($c);
 </code></pre>
 
-Et après :
+<p>
+    Et après :
+</p>
 
 <pre><code class="language-php">
 &lt;?php
 
 $jobs = JobeetJobQuery::create()
     ->recentlyCreated(30)
-    ->find();
+    ->find()
+;
 </code></pre>
 
-Idem pour les jointures et les sous-requêtes :
+<p>
+    Idem pour les jointures et les sous-requêtes :
+</p>
 
 <pre><code class="language-php">
 &lt;?php
@@ -52,7 +79,9 @@ $c->add(JobCategoryPeer::NAME, 'truc%', Criteria::LIKE);
 $jobs = JobeetJobPeer::doSelect($c);
 </code></pre>
 
-Et après :
+<p>
+    Et après :
+</p>
 
 <pre><code class="language-php">
 &lt;?php
@@ -62,36 +91,62 @@ $jobs = JobeetJobQuery::create()
         ->filterByName('truc%') // Va automatiquement passer en mode LIKE
     ->endUse()
     ->recentlyCreated(30)
-    ->find();
+    ->find()
+;
 </code></pre>
 
-<p>On a donc aujourd'hui une écriture de nos requêtes très proche de nos objets et très simple à manipuler.</p>
+<p>
+    On a donc aujourd'hui une écriture de nos requêtes très proche de nos objets
+    et très facile à manipuler.
+</p>
 
 <h2>Propel dans Symfony2 au quotidien</h2>
 
-<p>Non, il n'y a pas que Doctrine2. Propel existe et est intégré de manière native dans <a href="https://github.com/symfony/symfony/tree/master/src/Symfony/Bridge/Propel1" target="_blank">Symfony2</a>.</p>
+<p>
+    Non, il n'y a pas que Doctrine2. Propel existe et est intégré nativement
+    dans Symfony2 grâce aux classes de l'espace de nommage <a href="https://github.com/symfony/symfony/tree/master/src/Symfony/Bridge/Propel1" target="_blank"><code>Symfony\Bridge\Propel1</code></a>.
+</p>
 
-<p>William Durand, actuel lead du projet Propel, a rédigé de nombreux "<a href="http://propelorm.org/Propel/documentation/#working-with-symfony2" target="_blank">How-to avec Symfony2</a>" dans la doc de Propel pour les usages dans les formulaires, le composant sécurité de Symfony, etc ...</p>
+<p>
+    William Durand, actuel responsable du projet Propel, a rédigé de nombreux
+    « <a href="http://propelorm.org/Propel/documentation/#working-with-symfony2" target="_blank">How-to avec Symfony2</a> »
+    dans la documentation officielle de Propel afin d'apprendre les usages de
+    Propel avec les formulaires, ou bien le composant sécurité de Symfony, etc.
+</p>
 
-<p>Pour les bundles du quotidien, c'est pareil. La plupart des bundles que nous utilisons (FOSUser, AdminGenerator, SonataAdmin, Faker, Pagerfanta ...) fonctionnent comme un charme avec Propel.</p>
+<p>
+    Pour les <span lang="en">bundles</span> du quotidien, c'est pareil. La
+    plupart des <span lang="en">bundles</span> que nous utilisons
+    (<code>FOSUserBundle</code>, <code>AdminGeneratorBundle</code>,
+    <code>SonataAdminBundle</code>, <code>FakerBundle</code>,
+    <code>PagerfantaBundle</code> etc.) fonctionnent comme un charme avec
+    Propel.
+</p>
 
-<p>Et avec ses <a href="http://propelorm.org/Propel/cookbook/user-contributed-behaviors.html#symfony2-2x-behaviors" target="_blank">behaviors spécifiques</a>, c'est encore, plus simple (Gestion d'événements Symfony2, tagger ces objets).</p>
+<p>
+    Et avec ses <a href="http://propelorm.org/Propel/cookbook/user-contributed-behaviors.html#symfony2-2x-behaviors" target="_blank">comportements spécifiques</a>
+    (<span lang="en"><em>behaviors</em></span>), c'est encore plus simple :
+    gestion d'événements Symfony2, tagger ces objets, etc.
+</p>
 
 <h2>Prêt à l'utiliser en 3 étapes</h2>
 
-<h3>1. Installation avecll composer</h3>
+<h3>1. Installation avec <span lang="en">Composer</span></h3>
 
-<p>Ajouter dans votre composer :</p>
+<p>Ajouter dans votre <span lang="en">Composer</span> :</p>
 
-<pre><code>
+<pre><code class="language-javascript">
 "require": {
     "propel/propel-bundle": "1.2.*",
 }
 </code></pre>
 
-<h3>2. Création du schema</h3>
+<h3>2. Création du schéma</h3>
 
-<p>Dans votre bundle, créez votre fichier <strong>Resources/config/schema.xml</strong></p>
+<p>
+    Dans votre bundle, créez votre fichier
+    <strong>Resources/config/schema.xml</strong>.
+</p>
 
 <pre><code class="language-xml">
 &lt;database name="default"
@@ -108,7 +163,7 @@ $jobs = JobeetJobQuery::create()
 &lt;/database&gt;
 </code></pre>
 
-<p>Ensuite on exécute simplement :</p>
+<p>Ensuite on exécute simplement les commandes suivantes :</p>
 
 <pre><code>
 php app/console propel:database:drop --force --connection=default
@@ -120,9 +175,13 @@ php app/console propel:sql:insert --force --connection=default
 
 <h3>3. Génération de fixtures</h3>
 
-<p>Vous pouvez même utiliser Faker en natif, avec les <a href="https://github.com/propelorm/PropelBundle/blob/1.2/Resources/doc/fixtures.markdown#using-faker-in-yaml-fixtures" target="_blank">fixtures du PropelBundle</a>.</p>
+<p>
+    Vous pouvez même utiliser Faker en natif, avec les <a href="https://github.com/propelorm/PropelBundle/blob/1.2/Resources/doc/fixtures.markdown#using-faker-in-yaml-fixtures" target="_blank">fixtures du PropelBundle</a>.
+</p>
 
-<p>Créez le fichier <strong>Resources/fixtures/001-books.yml</strong>:</p>
+<p>
+    Créez le fichier <strong>Resources/fixtures/001-books.yml</strong> :
+</p>
 
 <pre><code class="language-yaml">
 Compagny\ModelBundle\Propel\Bookstore\Book:
@@ -134,14 +193,18 @@ Compagny\ModelBundle\Propel\Bookstore\Book:
         isbn: 1225
 </code></pre>
 
-<p>Et exécutez simplement :</p>
+<p>
+    Et exécutez simplement :
+</p>
 
 <pre class="no-highlight"><code>php app/console propel:fixtures:load @CompagnyModelBundle
 </code></pre>
 
 <h3>4. Vous êtes prêt !</h3>
 
-<p>Il ne vous reste plus qu'à créer votre controller pour lister vos livres :</p>
+<p>
+    Il ne vous reste plus qu'à créer votre contrôleur pour lister vos livres :
+</p>
 
 <pre class="php"><code>&lt;?php
 
@@ -177,166 +240,192 @@ class ListController extends Controller
 
 <h2>Performances</h2>
 
-<p>La performance de nos applications PHP est de plus en plus souvent une question importante. Alors oui, Propel n'est pas aussi performant que PDO puisqu'il est basé dessus. Mais ne comparons pas l'incomparrable. Regardont plutôt ce qu'il en est entre Propel et Doctrine2. Pour ne pas être accusé de publicité mensongère, je n'ai pas fait moi même le test !</p>
+<p>
+    La performance de nos applications PHP est de plus en plus souvent une
+    question importante. Alors oui, Propel n'est pas aussi performant que
+    <abbr title="PHP Data Object">PDO</abbr> puisqu'il est basé dessus. Mais ne
+    comparons pas l'incomparable. Regardons plutôt ce qu'il en est entre Propel
+    et Doctrine2. Pour ne pas être accusé de publicité mensongère, je n'ai pas
+    réalisé moi même le test !
+</p>
 
 <table class="stripped">
-<thead>
-<tr>
-  <th>Librairie</th>
-  <th>Insert (ms)</th>
-  <th>findPk (ms)</th>
-  <th>complex (ms)</th>
-  <th>hydrate (ms)</th>
-  <th>with (ms)</th>
-  <th>real memory usage (bytes)</th>
-  <th>temps total (s)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="even">
-  <td>PDO</td>
-  <td class="text-right">71</td>
-  <td class="text-right">78</td>
-  <td class="text-right">58</td>
-  <td class="text-right">57</td>
-  <td class="text-right">55</td>
-  <td class="text-right">768,832</td>
-  <td class="text-right">0.32</td>
-</tr>
-<tr>
-  <td>Propel16</td>
-  <td class="text-right">181</td>
-  <td class="text-right">121</td>
-  <td class="text-right">85</td>
-  <td class="text-right">151</td>
-  <td class="text-right">166</td>
-  <td class="text-right">9,699,328</td>
-  <td class="text-right">0.71</td>
-</tr>
-<tr class="even">
-  <td>Propel16WithCache</td>
-  <td class="text-right">117</td>
-  <td class="text-right">67</td>
-  <td class="text-right">76</td>
-  <td class="text-right">129</td>
-  <td class="text-right">130</td>
-  <td class="text-right">9,699,328</td>
-  <td class="text-right">0.53</td>
-</tr>
-<tr>
-  <td>Propel17</td>
-  <td class="text-right">167</td>
-  <td class="text-right">105</td>
-  <td class="text-right">82</td>
-  <td class="text-right">151</td>
-  <td class="text-right">166</td>
-  <td class="text-right">9,437,184</td>
-  <td class="text-right">0.68</td>
-</tr>
-<tr class="even">
-  <td>Propel17WithCache</td>
-  <td class="text-right">118</td>
-  <td class="text-right">69</td>
-  <td class="text-right">70</td>
-  <td class="text-right">117</td>
-  <td class="text-right">109</td>
-  <td class="text-right">9,699,328</td>
-  <td class="text-right">0.49</td>
-</tr>
-<tr>
-  <td>Propel20</td>
-  <td class="text-right">184</td>
-  <td class="text-right">118</td>
-  <td class="text-right">88</td>
-  <td class="text-right">179</td>
-  <td class="text-right">180</td>
-  <td class="text-right">5,767,168</td>
-  <td class="text-right">0.75</td>
-</tr>
-<tr class="even">
-  <td>Propel20WithCache</td>
-  <td class="text-right">126</td>
-  <td class="text-right">76</td>
-  <td class="text-right">79</td>
-  <td class="text-right">150</td>
-  <td class="text-right">144</td>
-  <td class="text-right">5,767,168</td>
-  <td class="text-right">0.58</td>
-</tr>
-<tr>
-  <td>Propel20FormatOnDemand</td>
-  <td class="text-right">129</td>
-  <td class="text-right">76</td>
-  <td class="text-right">78</td>
-  <td class="text-right">146</td>
-  <td class="text-right">145</td>
-  <td class="text-right">5,767,168</td>
-  <td class="text-right">0.58</td>
-</tr>
-<tr class="even">
-  <td>Doctrine24</td>
-  <td class="text-right">305</td>
-  <td class="text-right">260</td>
-  <td class="text-right">152</td>
-  <td class="text-right">458</td>
-  <td class="text-right">461</td>
-  <td class="text-right">16,252,928</td>
-  <td class="text-right">1.67</td>
-</tr>
-<tr>
-  <td>Doctrine24WithCache</td>
-  <td class="text-right">305</td>
-  <td class="text-right">251</td>
-  <td class="text-right">81</td>
-  <td class="text-right">283</td>
-  <td class="text-right">211</td>
-  <td class="text-right">16,777,216</td>
-  <td class="text-right">1.17</td>
-</tr>
-<tr class="even">
-  <td>Doctrine24ArrayHydrate</td>
-  <td class="text-right">304</td>
-  <td class="text-right">256</td>
-  <td class="text-right">82</td>
-  <td class="text-right">158</td>
-  <td class="text-right">137</td>
-  <td class="text-right">15,728,640</td>
-  <td class="text-right">0.97</td>
-</tr>
-<tr>
-  <td>Doctrine24ScalarHydrate</td>
-  <td class="text-right">306</td>
-  <td class="text-right">252</td>
-  <td class="text-right">82</td>
-  <td class="text-right">127</td>
-  <td class="text-right">114</td>
-  <td class="text-right">15,728,640</td>
-  <td class="text-right">0.92</td>
-</tr>
-<tr class="even">
-  <td>Doctrine24WithoutProxies</td>
-  <td class="text-right">304</td>
-  <td class="text-right">252</td>
-  <td class="text-right">83</td>
-  <td class="text-right">214</td>
-  <td class="text-right">307</td>
-  <td class="text-right">15,990,784</td>
-  <td class="text-right">1.20</td>
-</tr>
-</tbody>
+    <thead>
+        <tr>
+          <th>Librairie</th>
+          <th>Insert (ms)</th>
+          <th>findPk (ms)</th>
+          <th>complex (ms)</th>
+          <th>hydrate (ms)</th>
+          <th>with (ms)</th>
+          <th>real memory usage (bytes)</th>
+          <th>temps total (s)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="even">
+          <td>PDO</td>
+          <td class="text-right">71</td>
+          <td class="text-right">78</td>
+          <td class="text-right">58</td>
+          <td class="text-right">57</td>
+          <td class="text-right">55</td>
+          <td class="text-right">768,832</td>
+          <td class="text-right">0.32</td>
+        </tr>
+        <tr>
+          <td>Propel16</td>
+          <td class="text-right">181</td>
+          <td class="text-right">121</td>
+          <td class="text-right">85</td>
+          <td class="text-right">151</td>
+          <td class="text-right">166</td>
+          <td class="text-right">9,699,328</td>
+          <td class="text-right">0.71</td>
+        </tr>
+        <tr class="even">
+          <td>Propel16WithCache</td>
+          <td class="text-right">117</td>
+          <td class="text-right">67</td>
+          <td class="text-right">76</td>
+          <td class="text-right">129</td>
+          <td class="text-right">130</td>
+          <td class="text-right">9,699,328</td>
+          <td class="text-right">0.53</td>
+        </tr>
+        <tr>
+          <td>Propel17</td>
+          <td class="text-right">167</td>
+          <td class="text-right">105</td>
+          <td class="text-right">82</td>
+          <td class="text-right">151</td>
+          <td class="text-right">166</td>
+          <td class="text-right">9,437,184</td>
+          <td class="text-right">0.68</td>
+        </tr>
+        <tr class="even">
+          <td>Propel17WithCache</td>
+          <td class="text-right">118</td>
+          <td class="text-right">69</td>
+          <td class="text-right">70</td>
+          <td class="text-right">117</td>
+          <td class="text-right">109</td>
+          <td class="text-right">9,699,328</td>
+          <td class="text-right">0.49</td>
+        </tr>
+        <tr>
+          <td>Propel20</td>
+          <td class="text-right">184</td>
+          <td class="text-right">118</td>
+          <td class="text-right">88</td>
+          <td class="text-right">179</td>
+          <td class="text-right">180</td>
+          <td class="text-right">5,767,168</td>
+          <td class="text-right">0.75</td>
+        </tr>
+        <tr class="even">
+          <td>Propel20WithCache</td>
+          <td class="text-right">126</td>
+          <td class="text-right">76</td>
+          <td class="text-right">79</td>
+          <td class="text-right">150</td>
+          <td class="text-right">144</td>
+          <td class="text-right">5,767,168</td>
+          <td class="text-right">0.58</td>
+        </tr>
+        <tr>
+          <td>Propel20FormatOnDemand</td>
+          <td class="text-right">129</td>
+          <td class="text-right">76</td>
+          <td class="text-right">78</td>
+          <td class="text-right">146</td>
+          <td class="text-right">145</td>
+          <td class="text-right">5,767,168</td>
+          <td class="text-right">0.58</td>
+        </tr>
+        <tr class="even">
+          <td>Doctrine24</td>
+          <td class="text-right">305</td>
+          <td class="text-right">260</td>
+          <td class="text-right">152</td>
+          <td class="text-right">458</td>
+          <td class="text-right">461</td>
+          <td class="text-right">16,252,928</td>
+          <td class="text-right">1.67</td>
+        </tr>
+        <tr>
+          <td>Doctrine24WithCache</td>
+          <td class="text-right">305</td>
+          <td class="text-right">251</td>
+          <td class="text-right">81</td>
+          <td class="text-right">283</td>
+          <td class="text-right">211</td>
+          <td class="text-right">16,777,216</td>
+          <td class="text-right">1.17</td>
+        </tr>
+        <tr class="even">
+          <td>Doctrine24ArrayHydrate</td>
+          <td class="text-right">304</td>
+          <td class="text-right">256</td>
+          <td class="text-right">82</td>
+          <td class="text-right">158</td>
+          <td class="text-right">137</td>
+          <td class="text-right">15,728,640</td>
+          <td class="text-right">0.97</td>
+        </tr>
+        <tr>
+          <td>Doctrine24ScalarHydrate</td>
+          <td class="text-right">306</td>
+          <td class="text-right">252</td>
+          <td class="text-right">82</td>
+          <td class="text-right">127</td>
+          <td class="text-right">114</td>
+          <td class="text-right">15,728,640</td>
+          <td class="text-right">0.92</td>
+        </tr>
+        <tr class="even">
+          <td>Doctrine24WithoutProxies</td>
+          <td class="text-right">304</td>
+          <td class="text-right">252</td>
+          <td class="text-right">83</td>
+          <td class="text-right">214</td>
+          <td class="text-right">307</td>
+          <td class="text-right">15,990,784</td>
+          <td class="text-right">1.20</td>
+        </tr>
+    </tbody>
 </table>
 
-<p>Plus les valeurs de ces colonnes sont faibles, plus la librairie est performante sur la base des tests effectués. Nous visualisons donc bien dans ce tableau que Propel est un ORM rapide et peu consommateur de mémoire. (<a href="https://github.com/propelorm/Propel2/issues/478" target="_blank">source https://github.com/propelorm/Propel2/issues/478</a>)</p>
+<p>
+    Plus les valeurs de ces colonnes sont faibles, plus la librairie est
+    performante sur la base des tests effectués. Nous visualisons donc bien dans
+    ce tableau que Propel est un ORM rapide et peu consommateur de mémoire. (<a href="https://github.com/propelorm/Propel2/issues/478" target="_blank">source https://github.com/propelorm/Propel2/issues/478</a>).
+</p>
 
-<p>Vous pouvez <a href="https://github.com/vlastv/php-orm-benchmark" target="_blank">rejouer vous même</a> ce test.</p>
+<p>
+    Vous pouvez d'ailleurs <a href="https://github.com/vlastv/php-orm-benchmark" target="_blank">rejouer vous même</a> ce test.
+</p>
 
-<p>Le truc, c'est que la plupart du temps, l'origine du problème à la base, ce n'est pas l'ORM, mais le developpeur ! Oui, vous savez quand on oublie un index ou quand on remonte toute la base pour récuperer la premiere ligne ! Pour mieux gérer tout cela, Propel nous permet plusieurs choses :</p>
+<p>
+    Le truc, c'est que la plupart du temps, l'origine du problème à la base, ce
+    n'est pas l'ORM, mais le développeur ! Oui, vous savez quand on oublie un
+    index ou quand on remonte toute la base pour récupérer la première ligne !
+    Pour mieux gérer tout cela, Propel nous permet plusieurs choses :
+</p>
 
-<h3>Un <em>explain</em> plan</h3>
+<h3>Un <em>Explain</em> plan</h3>
 
-<p>L'explain plan est une requête SQL un peu spécifique permettant de mieux visualiser les index que nous avons utilisés et de mieux les comprendre. Ce dernier est inclus dans la debug bar de Symfony2, mais aussi de symfony1 avec sfPropel15Plugin.</p>
+<p>
+    L'<span lang="en">explain plan</span> est une requête
+    <abbr title="Standard Query Langage" lang="en">SQL</abbr> un peu spécifique
+    qui permet de mieux visualiser les index que nous avons utilisé et de mieux
+    les comprendre. Ce dernier est inclus dans la barre de débogage de Symfony2,
+    mais aussi dans celle de symfony1 avec le <code>sfPropel15Plugin</code>.
+</p>
 
-<p><img src="{{ asset('bundles/afsyfront/images/avent/03-propel-explain.png') }}" alt="Propel explain plan" /></p>
+<p>
+    <img src="{{ asset('bundles/afsyfront/images/avent/03-propel-explain.png') }}" alt="Propel explain plan" />
+</p>
 
 <p>Vous pouvez aussi exécuter cette requête d'explain hors symfony :</p>
 
@@ -345,7 +434,10 @@ class ListController extends Controller
 
 <h3>Des méthodes simples</h3>
 
-<p>Propel vous aide à faire la différence entre <code>find</code> et <code>findOne</code> ou encore <code>count</code>.</p>
+<p>
+    Propel vous aide à faire la différence entre <code>find</code> et
+    <code>findOne</code> ou encore <code>count</code>.
+</p>
 
 <p>Vous n'avez donc plus de raisons d'écrire :</p>
 
@@ -356,43 +448,75 @@ class ListController extends Controller
 }
 </code></pre>
 
-<p>La requête ci-dessus a pour effet de remonter toute la base, de créer autant d'objets PHP que de lignes dans votre base. Si votre DBA voit celà et décide de vous assassiner, nous considérerons que c'était un suicide ! La solution :</p>
+<p>
+    La requête ci-dessus a pour effet de remonter toute la base, de créer autant
+    d'objets PHP que de lignes dans votre base. Si votre administrateur de bases
+    de données voit cela et décide de vous assassiner, nous considérerons que
+    c'était un suicide ! La solution :
+</p>
 
 <pre class="php"><code>$count = BookQuery::create()-&gt;count();
 </code></pre>
 
-<p>Idem pour avoir le premier livre on n'écrit surtout pas :</p>
+<p>Idem pour avoir le premier livre, nous n'écrirons surtout pas :</p>
 
 <pre class="php"><code>BookQuery::create()-&gt;find()-&gt;getFirst();
 </code></pre>
 
-<p>mais simplement :</p>
+<p>mais tout simplement :</p>
 
 <pre class="php"><code>BookQuery::create()-&gt;findOne();
 </code></pre>
 
 <h3>Du code généré</h3>
 
-<p>Le fait que Propel ne fasse pas d'introspection au runtime, mais se base sur un code généré, lui permet de s'exécuter rapidement. Cela vous permet d'apprendre à l'utiliser tout aussi rapidement, en ouvrant ses fichiers ou en laissant simplement votre IDE les lire.</p>
+<p>
+    Le fait que Propel ne fasse pas d'introspection à l'exécution, mais se base
+    sur un code généré, lui permet de s'exécuter rapidement. Cela vous permet
+    d'apprendre à l'utiliser tout aussi rapidement, en ouvrant ses fichiers ou
+    en laissant simplement votre IDE les lire.
+</p>
 
-<h3>Des requêtes faciles à lire et à débugguer</h3>
+<h3>Des requêtes faciles à lire et à déboguer</h3>
 
-<p>Propel, contrairement à Doctrine2, ne réécrit pas vos alias de table ou de colonnes, ce qui permet de plus facilement lire vos requêtes et donc de comprendre le pourquoi du comment votre requête ne fonctionne pas.</p>
+<p>
+    Propel, contrairement à Doctrine2, ne réécrit pas vos alias de table ou de
+    colonnes, ce qui permet de plus facilement lire vos requêtes et donc de
+    comprendre le pourquoi du comment votre requête ne fonctionne pas.
+</p>
 
 <h2>Propel2 : Le retour</h2>
 
-<p>Le voilà enfin, la version 2 de Propel pointe le bout de son nez. Que contient-elle de nouveau ?</p>
+<p>
+    Le voilà enfin, la version 2 de Propel pointe le bout de son nez. Que
+    contient-elle de nouveau ?
+</p>
 
 <ul>
-<li>Une version avec <a href="http://www.php-fig.org/">des standards de code</a> PSR-0, PSR-1, PSR-2, PSR-3</li>
-<li>La suppression des classes Peer : un reste de l'époque de Criteria de la version 1.4, plein de méthode statiques, enfin révolue.</li>
-<li>Une conteneur de service permettant de manipuler plus efficacement les éléments transverses (eg: Connection, Logger).</li>
-<li>Plusieurs réfactoring du Core.</li>
+    <li>
+        Une version avec
+        <a href="http://www.php-fig.org/">des standards de code</a>
+        PSR-0, PSR-1, PSR-2, PSR-3
+    </li>
+    <li>
+        La suppression des classes <code lang="en">Peer</code> : un reste de
+        l'époque de <code lang="en">Criteria</code> de la version 1.4, plein de
+        méthode statiques, enfin révolue.
+    </li>
+    <li>
+        Un conteneur de service permettant de manipuler plus efficacement les
+        objets transverses tels que les connexions à la base de données ou le
+        système de logs.
+    </li>
+    <li>Plusieurs remaniements du coeur.</li>
 </ul>
 
 <h2>En conclusion</h2>
 
-<p>Propel est simple, rapide et efficace, l'essayez sur votre prochain projet, c'est l'adopter !</p>
+<p>
+    Propel est simple, rapide et efficace, l'essayez sur votre prochain projet,
+    c'est l'adopter !
+</p>
 {% endblock %}
 
 {% block article_avatar %}
@@ -402,12 +526,18 @@ class ListController extends Controller
 {% block article_bio %}
 <h2><a href="{% block author_url %}http://fr.linkedin.com/pub/c%C3%A9dric-lombardot/23/110/217/{% endblock %}" target="_blank">{% block article_author %}Cédric Lombardot{% endblock %}</a></h2>
 <p>
-    Cédric est avant tout un passioné du développement web et un amoureux de Symfony et de Propel.
+    Cédric est avant tout un passionné du développement web et un amoureux de
+    Symfony et de Propel.
 </p>
 <p>
-    Auteur de nombreux plugins et bundle symfony 1 et 2. Après avoir travaillé pour plusieurs clients / sociétés dont un grand groupe média et après avoir enseigné à l'IUT de Bourgogne. Cédric est désormais associé fondateur et directeur technique de <a href="https://www.youcare.fr" target="_blank">youcare.fr</a>
+    Auteur de nombreux plugins et bundle symfony 1 et 2. Après avoir travaillé
+    pour plusieurs clients / sociétés dont un grand groupe média et après avoir
+    enseigné à l'IUT de Bourgogne, Cédric est désormais associé fondateur et
+    directeur technique de
+    <a href="https://www.youcare.fr" target="_blank">youcare.fr</a>
 </p>
 <p>
-    Sur Twitter : <a href="https://twitter.com/cedriclombardot">@cedriclombardot</a>
+    Sur Twitter :
+    <a href="https://twitter.com/cedriclombardot">@cedriclombardot</a>
 </p>
 {% endblock %}
