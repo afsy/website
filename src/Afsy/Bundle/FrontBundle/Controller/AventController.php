@@ -56,15 +56,10 @@ class AventController extends Controller
         $day = (int) $slug;
         $this->validateDate($year, $day);
 
-        list($prev_template, $prev_slug) = $this->getPrev($yearSlugs, $slug);
+        list($prev_template, $prev_slug) = $this->getPrev($yearSlugs, $slug, $year);
 
         // For the next we check the date + 1
-        try {
-            $next_template = null;
-            $next_slug = null;
-            $this->validateDate($year, $day+1);
-            list($next_template, $next_slug) = $this->getNext($yearSlugs, $slug);
-        } catch (NotFoundHttpException $e) {}
+        list($next_template, $next_slug) = $this->getNext($yearSlugs, $slug, $year);
 
         return $this->render($yearSlugs[$slug], array(
             'day'       => $day,
@@ -76,18 +71,38 @@ class AventController extends Controller
         ));
     }
 
-    private function getPrev($slugs, $current_slug)
+    private function getNext($slugs, $current_slug, $year)
     {
-        // Get the previous article, tricky! :)
+        $day = (int) $current_slug;
+
+        try {
+            $this->validateDate($year, $day+1);
+        } catch (NotFoundHttpException $e) {
+            return array(false, false);
+        }
+
+        // Get the next article, tricky! :)
         reset($slugs);
         while (key($slugs) !== null && key($slugs) !== $current_slug) {
             next($slugs);
         }
 
-        return array(prev($slugs), key($slugs));
+        // we use `prev` for next slug because they are in reverse order in the array
+        $template = prev($slugs);
+        $slug = key($slugs);
+
+        if ($slug === $current_slug) {
+            return array(false, false);
+        }
+
+        if ($this->futureEnabled || $year < date('Y') || date('m') == 12 && $day <= date('d')) {
+            return array($template, $slug);
+        }
+
+        return array(false, false);
     }
 
-    private function getNext($slugs, $current_slug)
+    private function getPrev($slugs, $current_slug, $year)
     {
         // Get the previous article, tricky! :)
         reset($slugs);
@@ -95,7 +110,15 @@ class AventController extends Controller
             next($slugs);
         }
 
-        return array(next($slugs), key($slugs));
+        // we use `next` for previous slug because they are in reverse order in the array
+        $template = next($slugs);
+        $slug = key($slugs);
+        $day = (int) $slug;
+        if ($this->futureEnabled || $year < date('Y') || date('m') == 12 && $day <= date('d')) {
+            return array($template, $slug);
+        }
+
+        return array(false, false);
     }
 
     private function loadYearData($year)
