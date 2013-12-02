@@ -22,7 +22,9 @@ class AfsyExtractExtension extends \Twig_Extension
         $start = strpos($html, '<p>');
         $end   = strpos($html, '</p>', $start);
 
-        return substr($html, $start, $end-$start+4);
+        $content = substr($html, $start, $end-$start+4);
+
+        return preg_replace("/<img[^>]+\>/i", "", $content);
     }
 
     public function getName()
