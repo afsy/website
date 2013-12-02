@@ -87,6 +87,8 @@ class AventController extends Controller
             next($slugs);
         }
 
+        // we use `prev` for next slug because they are in reverse order in the array
+        $template = prev($slugs);
         $slug = key($slugs);
 
         if ($slug === $current_slug) {
@@ -94,8 +96,7 @@ class AventController extends Controller
         }
 
         if ($this->futureEnabled || $year < date('Y') || date('m') == 12 && $day <= date('d')) {
-            // we use `prev` for next slug because they are in reverse order in the array
-            return array(prev($slugs), $slug);
+            return array($template, $slug);
         }
 
         return array(false, false);
@@ -109,11 +110,12 @@ class AventController extends Controller
             next($slugs);
         }
 
+        // we use `next` for previous slug because they are in reverse order in the array
+        $template = next($slugs);
         $slug = key($slugs);
         $day = (int) $slug;
         if ($this->futureEnabled || $year < date('Y') || date('m') == 12 && $day <= date('d')) {
-            // we use `next` for previous slug because they are in reverse order in the array
-            return array(next($slugs), $slug);
+            return array($template, $slug);
         }
 
         return array(false, false);
