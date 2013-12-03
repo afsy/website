@@ -2,7 +2,7 @@
     <id>{{ url('avent', {year: year}) }}</id>
     <title>Calendrier de l'avent de l'Afsy {{ year }}</title>
     <link type="text/html" rel="alternate" href="{{ url('avent', {year: year}) }}"/>
-    <link type="application/rss+xml" rel="self" href="{{ url('avent_feed_atom', {year: year}) }}"/>
+    <link type="application/atom+xml" rel="self" href="{{ url('avent_feed_atom') }}"/>
     <updated>{{ 'now'|date('c') }}</updated>
 
     {% set day = 0 %}

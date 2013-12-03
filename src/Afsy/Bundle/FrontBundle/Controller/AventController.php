@@ -36,9 +36,19 @@ class AventController extends Controller
         ));
     }
 
-    public function feedAction($year)
+    public function feedAction($year = null)
     {
-        return $this->render('AfsyFrontBundle:Avent:year_'.$year.'.atom.twig', array(
+        // keep BC with previous feed
+        if (null !== $year) {
+            return $this->redirect($this->generateUrl('avent_feed_atom'));
+        }
+
+        // just display the last year in the feed
+        $years = array_keys($this->slugs);
+        krsort($years);
+        $year = current($years);
+
+        return $this->render('AfsyFrontBundle:Avent:feed.atom.twig', array(
             'year' => $year,
             'days' => $this->loadYearData($year)
         ));

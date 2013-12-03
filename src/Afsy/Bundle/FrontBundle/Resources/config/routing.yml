@@ -22,11 +22,16 @@ blog_show_tag:
     pattern: /blog/tag/{name}
     defaults: { _controller: AfsyFrontBundle:Blog:showTag }
 
+avent_feed_atom:
+    pattern: /avent/feed.atom
+    defaults: { _controller: AfsyFrontBundle:Avent:feed, _format: xml }
+
 avent:
     pattern: /avent/{year}
     defaults: { _controller: AfsyFrontBundle:Avent:index, year: null }
 
-avent_feed_atom:
+# for BC
+avent_feed_atom_year:
     pattern: /avent/{year}/feed.atom
     defaults: { _controller: AfsyFrontBundle:Avent:feed, _format: xml }
 

@@ -27,9 +27,8 @@
             <link href="{{ asset("css/avent.css") }}" rel="stylesheet"/>
         {% endblock %}
 
-        {% block atom_feed %}
-            <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
-        {% endblock %}
+        <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
+        <link rel="alternate" type="application/atom+xml" title="AFSY - calendrier de l'avent" href="{{ url('avent_feed_atom') }}"/>
     </head>
     <body>
 
