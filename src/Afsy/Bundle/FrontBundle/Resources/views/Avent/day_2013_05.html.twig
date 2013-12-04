@@ -2,57 +2,104 @@
 
 {% set year = 2013 %}
 
-{% block article_title "Jour 05 - Conteneur de services: Créer ses propres tags" %}
+{% block article_title "Jour 5 - Conteneur de services : créer ses propres tags" %}
 
 {% block article_content %}
-<h1>Conteneur de services: Créer ses propres tags</h1>
+<h1>Conteneur de services: créer ses propres tags</h1>
 
-<p>Bonjour à tous, chers lecteurs. Aujourd'hui, je vous propose de poursuivre nos tutoriaux avec une présentation pratique du fonctionnement en interne de la compilation du conteneur de services et plus particulièrement des tags.</p>
+<p>
+    Bonjour à tous, chers lecteurs. Aujourd'hui, je vous propose de poursuivre
+    nos tutoriels avec une présentation pratique du fonctionnement interne de la
+    compilation du conteneur de services et plus particulièrement des tags.
+</p>
 
 <h2>Court rappel sur les tags</h2>
 
-<p>L'objectif principal des tags est de fournir un moyen à votre bundle de fournir des services ou des features qui peuvent être très facilement étendus.</p>
+<p>
+    L'objectif principal des tags est de fournir un moyen à votre bundle de
+    fournir des services ou des fonctionnalités qui peuvent être très facilement
+    étendus. En bref, un tag c'est un point d'extension !
+</p>
 
-<p>Parmi les tags les plus connus vous avez sûrement déjà utilisé:</p>
+<p>
+    Parmi les tags les plus connus vous avez sûrement déjà utilisé :
+</p>
 
 <ul>
-<li><code>form.type</code> qui permet d'enregistrer un nouveau type de formulaire</li>
-<li><code>doctrine.event_(listener|subscriber)</code> qui enregistre un nouveau listener au cycle d'évènements de Doctrine.</li>
-<li><code>kernel.event_(listener|subscriber)</code> pour intercepter les évènements du kernel.</li>
-<li><code>twig.extension</code> pour charger une nouvelle extension dans Twig</li>
-<li>... <a href="http://symfony.com/fr/doc/master/reference/dic_tags.html">la liste plus complète est ici</a></li>
+    <li>
+        <code>form.type</code> qui permet d'enregistrer un nouveau type de
+        formulaire,
+    </li>
+    <li>
+        <code>doctrine.event_(listener|subscriber)</code> qui enregistre un
+        nouvel écouteur au cycle d'évènements de Doctrine,
+    </li>
+    <li>
+        <code>kernel.event_(listener|subscriber)</code> pour intercepter les
+        évènements du noyau,
+    </li>
+    <li>
+        <code>twig.extension</code> pour charger une nouvelle extension dans
+        Twig,
+    </li>
+    <li>
+        ... <a href="http://symfony.com/fr/doc/master/reference/dic_tags.html">la liste plus complète est ici</a>
+    </li>
 </ul>
 
-<p>Je vous propose aujourd'hui de faire un service de recherche de points d'intérêt extensible via les tags.</p>
+<p>
+    Je vous propose aujourd'hui de faire un service de recherche de points
+    d'intérêt extensible via les tags.
+</p>
 
 <h2>Un service de recherche d'endroit</h2>
 
-<p>Puisque le sujet ne porte pas sur la géolocalisation, la recherche, les webservices ou encore les licornes... je vous propose de définir une interface de recherche simple:</p>
+<p>
+    Puisque le sujet ne porte pas sur la géolocalisation, la recherche, les
+    services web ou encore les licornes... je vous propose de définir une
+    interface de recherche simple.
+</p>
 
 <pre class="php"><code>namespace MSB\LocatorBundle\Places;
 
 interface PlaceLocatorInterface
 {
     /**
-     * Searches places given a query
+     * Searches places given a query.
      *
      * @param string $query
      *
      * @return array
      */
-    function searchByKeyword($query);
+    public function searchByKeyword($query);
 }
 </code></pre>
 
-<p>C'est l'interface de recherche la plus simple du monde, celle que madame Michu sait très bien utiliser, et qui a fait gagner beaucoup d'argent à Google.</p>
+<p>
+    C'est l'interface de recherche la plus simple du monde, celle que madame
+    Michu sait très bien utiliser, et qui a fait gagner beaucoup d'argent à
+    Google.
+</p>
 
-<p>Un simple appel de la fonction <code>searchByKeyword</code> avec une chaine de caractères doit retourner un tableau de résultats.</p>
+<p>
+    Un simple appel de la méthode <code>searchByKeyword</code> avec une chaine
+    de caractères doit retourner un tableau de résultats.
+</p>
 
-<p>Je vous propose deux implémentations de cette interface afin de rendre les choses intéressantes.</p>
+<p>
+    Je vous propose deux implémentations de cette interface afin de rendre les
+    choses intéressantes.
+</p>
 
-<h3>Rechercher dans Google Place API</h3>
+<h3>Rechercher dans Google Place <abbr title="Application Programming Interface">API</abbr></h3>
 
-<p>Cette première implémentation consome l'API Place de Google. Comme vous pouvez le voir, la clef d'authentification est obtenue par le constructeur qui la transmettra lors de la construction de l'url.</p>
+<p>
+    Cette première implémentation consomme
+    l'<abbr title="Application Programming Interface" lang="en">API</abbr> Place
+    de Google. Comme vous pouvez le voir, la clef d'authentification est obtenue
+    par le constructeur qui la transmettra lors de la construction de
+    l'<abbr title="Unified Resource Locator" lang="en">url</abbr>.
+</p>
 
 <pre class="php"><code>namespace MSB\LocatorBundle\Places;
 
@@ -66,7 +113,7 @@ class GooglePlaceLocator implements PlaceLocatorInterface
     /**
      * @param string $key The google API key
      */
-    function __construct($key)
+    public function __construct($key)
     {
         $this-&gt;key = $key;
     }
@@ -94,13 +141,27 @@ class GooglePlaceLocator implements PlaceLocatorInterface
 }
 </code></pre>
 
-<p>Notez que même si Google répond quantité d'informations, je me suis contenté de récupérer le nom et l'adresse de l'endroit. J'ai également adjoint la source du résultat, à savoir <code>Google</code>. Avoir un format uniforme sera utile quand on va y ajouter des résultats fournis par un autre service.</p>
+<p>
+    Notez que même si Google répond quantité d'informations, je me suis contenté
+    de récupérer le nom et l'adresse de l'endroit. J'ai également adjoint la
+    source du résultat, à savoir <code>Google</code>. Avoir un format uniforme
+    sera utile quand on va y ajouter des résultats fournis par un autre
+    service.
+</p>
 
-<p>L'accès à l'API et à la documentation de Google sont <a href="https://developers.google.com/places/documentation">ici</a>.</p>
+<p>
+    L'accès à
+    l'<abbr title="Application Programming Interface" lang="en">API</abbr> et à
+    la documentation de Google sont
+    <a href="https://developers.google.com/places/documentation">ici</a>.
+</p>
 
-<h3>Rechercher dans Here Place API</h3>
+<h3>Rechercher dans <span lang="en">Here Place API</span></h3>
 
-<p>Ma seconde implémentation est très similaire à la première, mais pour le service de localisation de Nokia Here.</p>
+<p>
+    Ma seconde implémentation est très similaire à la première, mais pour le
+    service de localisation de Nokia Here.
+</p>
 
 <pre class="php"><code>namespace MSB\LocatorBundle\Places;
 
@@ -116,7 +177,7 @@ class HerePlaceLocator implements PlaceLocatorInterface
      * @param string $appId   The here app id
      * @param string $appCode The here app code
      */
-    function __construct($appId, $appCode)
+    public function __construct($appId, $appCode)
     {
         $this-&gt;appId = $appId;
         $this-&gt;appCode = $appCode;
@@ -145,23 +206,45 @@ class HerePlaceLocator implements PlaceLocatorInterface
 }
 </code></pre>
 
-<p>Diverses choses sont à noter:</p>
+<p>Diverses choses sont à noter :</p>
 
 <ul>
-<li>L'API de Here est beaucoup plus REST que celle de Google, mais vous verrez ça plus tard...</li>
-<li>Sinon, elle a un défaut majeur : elle a besoin d'avoir des coordonnées pour faire une recherche (paramètre <code>at</code> de l'url). Du coup, j'ai mis les coordonnées de Paris, mais ça posera d'évidentes limitations dans les résultats. Aussi, Here retourne l'adresse au format html avec des <code>&lt;br/&gt;</code> dedans que j'ai du ôter.</li>
+    <li>
+        L'<abbr title="Application Programming Interface" lang="en">API</abbr>
+        de <span lang="en">Here</span> est beaucoup plus
+        <abbr title="REpresentational State Transfer" lang="en">REST</abbr>
+        que celle de Google, mais vous verrez cela plus tard...
+    </li>
+    <li>
+        Sinon, elle a un défaut majeur : elle a besoin d'avoir des coordonnées
+        pour faire une recherche (paramètre <code>at</code> de l'url). Du coup,
+        j'ai mis les coordonnées de Paris, mais ça posera d'évidentes
+        limitations dans les résultats. Aussi, <span lang="en">Here</span>
+        retourne l'adresse au format
+        <abbr title="HyperText Markup Language">html</abbr> avec des
+        <code>&lt;br/&gt;</code> dedans que j'ai du ôter.
+    </li>
 </ul>
 
-<p>Vous pouvez obtenir un accès à l'API de HERE et à la documentation <a href="http://developer.here.com/web/guest/documentation">ici</a>.</p>
+<p>
+    Vous pouvez obtenir un accès à
+    l'<abbr title="Application Programming Interface" lang="en">API</abbr> de
+    <span lang="en">HERE</span> et à la documentation
+    <a href="http://developer.here.com/web/guest/documentation">ici</a>.
+</p>
 
 <h2>L'implémentation du service extensible</h2>
 
-<p>Maintenant, je vous propose un troisième service, qui sera celui qui permettra d'aggréger les résultats provenant d'autres implémentations.</p>
+<p>
+    Maintenant, je vous propose un troisième service, qui sera celui qui
+    permettra d'agréger les résultats provenant d'autres implémentations.
+</p>
 
 <pre class="php"><code>namespace MSB\LocatorBundle\Places;
 
 /**
- * ChainedPlaceLocator searches for places into registered implementations of PlaceLocatorInterface
+ * ChainedPlaceLocator searches for places into registered
+ * implementations of PlaceLocatorInterface.
  */
 class ChainedPlaceLocator implements PlaceLocatorInterface
 {
@@ -192,13 +275,28 @@ class ChainedPlaceLocator implements PlaceLocatorInterface
 }
 </code></pre>
 
-<p>Comme vous pouvez le voir, une fonction <code>addLocator</code> permet d'enregistrer une nouvelle implémentation de l'interface <code>PlaceLocatorInterface</code>, ainsi à l'appel de la fonction <code>searchByKeyword</code> on obtiendra l'aggrégation de tous les résultats des implémentations.</p>
+<p>
+    Comme vous pouvez le voir, une méthode <code>addLocator</code> permet
+    d'enregistrer une nouvelle implémentation de l'interface
+    <code>PlaceLocatorInterface</code>. Ainsi, à l'appel de la méthode
+    <code>searchByKeyword</code>, on obtiendra l'agrégation de tous les
+    résultats des implémentations.
+</p>
 
-<p><strong>On va donc créer un tag <code>place_locator</code> qui permettra d'identifier les services qui doivent être automatiquement enregistrés dans la fonction <code>ChainedPlaceLocator::addLocator</code>.</strong></p>
+<p>
+    <strong>
+        On va donc créer un tag <code>place_locator</code> qui permettra
+        d'identifier les services qui doivent être automatiquement enregistrés
+        dans la méthode <code>ChainedPlaceLocator::addLocator</code>.
+    </strong>
+</p>
 
 <h2>Déclaration des services et du tag</h2>
 
-<p>Pour commencer, voici la déclaration des précédents services, contenant également l'utilisation du fameux tag:</p>
+<p>
+    Pour commencer, voici la déclaration des précédents services, contenant
+    également l'utilisation du fameux tag :
+</p>
 
 <pre class="xml"><code>&lt;services&gt;
     &lt;service id="msb.places.chained_locator" class="MSB\LocatorBundle\Places\ChainedPlaceLocator"&gt;
@@ -217,15 +315,40 @@ class ChainedPlaceLocator implements PlaceLocatorInterface
 &lt;/services&gt;
 </code></pre>
 
-<p>On remarquera l'injection des identifications dans les constructeurs des services de Google et de Here, ainsi que le placement du tag <code>&lt;tag name="place_locator" /&gt;</code>.</p>
+<p>
+    On remarquera l'injection des identifications dans les constructeurs des
+    services de Google et de Here, ainsi que le placement du tag
+    <code>&lt;tag name="place_locator" /&gt;</code>.
+</p>
 
-<p>Maintenant, nous allons ajouter un <em>CompilerPass</em>.</p>
+<p>
+    Maintenant, nous allons ajouter une passe de compilation
+    <abbr title="as kown as">aka</abbr> <em>CompilerPass</em>.
+</p>
 
-<p>Les CompilerPass sont des classes qui sont appelées au moment où le conteneur de dépendance est construit. Durant cette construction, il y a plusieurs étapes pendant lesquelles les fichiers de déclaration de service sont lus, les paramètres et la configuration sont résolus, les alias sont créés et les tags sont traités...</p>
+<p>
+    Les passes de compilation sont des classes qui sont appelées au moment où le
+    conteneur de dépendance est construit. Durant cette construction, il y a
+    plusieurs étapes pendant lesquelles les fichiers de déclaration de service
+    sont lus, les paramètres et la configuration sont résolus, les alias sont
+    créés et les tags sont traités...
+</p>
 
-<p>Cette construction aboutit à la création du conteneur compilé écrit dans un fichier du cache (<code>/app/**/app***ProjectContainer.php</code>). Pour des raisons de performance évidente, cette compilation n'a lieu qu'une seule fois en environement de prod, mais elle a lieu à chaque fois pour le dev pour éviter d'enchaîner la supression manuelle du cache lors du développement.</p>
+<p>
+    Cette construction aboutit à la création du conteneur compilé écrit dans un
+    fichier du cache (<code>/app/**/app***ProjectContainer.php</code>). Pour des
+    raisons évidentes de performance, cette compilation n'a lieu qu'une seule
+    fois en environnement de production (<code>prod</code>), mais elle a lieu à
+    chaque fois pour l'environnement de développement (<code>dev</code>) pour
+    éviter d'enchaîner la suppression manuelle du cache lors du développement.
+</p>
 
-<p>Notre CompilerPass va avoir pour rôle de récupérer le service <code>msb.places.chained_locator</code> et d'enrichir sa définition pour que lorsqu'il est créé, on y appelle la fonction <code>addLocator</code> avec comme argument chacun des services ayant le tag <code>place_locator</code>.</p>
+<p>
+    Notre passe de compilation aura pour rôle de récupérer la définition du
+    service <code>msb.places.chained_locator</code> afin d'ajouter dynamiquement
+    un appel à méthode <code>addLocator</code> autant de fois qu'il y a de
+    définitions de services ayant le tag <code>place_locator</code>.
+</p>
 
 <pre class="php"><code>namespace MSB\LocatorBundle\DependencyInjection\Compiler;
 
@@ -249,11 +372,28 @@ class PlaceLocatorPass implements CompilerPassInterface
 }
 </code></pre>
 
-<p>Remarquez ici que nous ne manipulons par les services directement. C'est très important, car durant la phase de compilation, ceux ci ne sont pas encore créés. En fait nous manipulons la chaîne d'instruction qui décrit comment le service doit être créé (appeler <code>addLocator</code> avec chacun des services taggés).</p>
+<p>
+    Remarquez ici que nous ne manipulons par les services directement. C'est
+    très important, car durant la phase de compilation, ceux-ci ne sont pas
+    encore réellement créés. En fait nous manipulons la définition du service.
+    La définition contient la suite d'instructions à exécuter pour créer et
+    configurer le service proprement à l'exécution. Certaines d'entre elles
+    appellent la méthode <code>addLocator</code> avec chacun des services
+    taggés.
+</p>
 
-<p>Ainsi en manipulant la définition du service, le CompilerPass permet de repousser à plus tard la création du service (et de ceux qui lui sont associés). De plus, parce que le conteneur est en cache, le coût en performance est très réduit, voire nul.</p>
+<p>
+    Ainsi en manipulant la définition du service, la passe de compilation permet
+    de repousser à plus tard la création du service (et de ceux qui lui sont
+    associés). De plus, parce que le conteneur est en cache, le coût en
+    performance est très réduit, voire quasiment nul.
+</p>
 
-<p>La dernière étape consiste à ajouter le CompilerPass dans le framework, cela se fait en surchargeant la méthode <code>build</code> de la classe du bundle:</p>
+<p>
+    La dernière étape consiste à enregistrer la passe de compilation dans le
+    framework. Pour y parvenir, il s'agit simplement de surcharger la méthode
+    <code>build</code> de la classe du bundle.
+</p>
 
 <pre class="php"><code>namespace MSB\LocatorBundle;
 
@@ -272,9 +412,15 @@ class MSBLocatorBundle extends Bundle
 }
 </code></pre>
 
-<h2>Bonus, trouver un bar pour rencontrer l'AFSY</h2>
+<h2>
+    Bonus, trouver un bar pour rencontrer
+    l'<abbr title="Association Francophone des Utilisateurs de Symfony">AFSY</abbr>
+</h2>
 
-<p>Parcequ'un service qu'on n'utilise pas, c'est triste, je vous propose une rapide commande qui permet d'obtenir des résultats:</p>
+<p>
+    Parce qu'un service qu'on n'utilise pas, c'est triste, je vous propose une
+    rapide commande qui permet d'obtenir des résultats.
+</p>
 
 <pre class="php"><code>namespace MSB\LocatorBundle\Command;
 
@@ -304,7 +450,7 @@ class LocatePlaceCommand extends ContainerAwareCommand
 
         // show the results
         $output-&gt;writeln(sprintf('Found &lt;info&gt;%d&lt;/info&gt; result(s)', count($results)));
-        foreach($results as $result) {
+        foreach ($results as $result) {
             $output-&gt;writeln(sprintf('&lt;info&gt;%s&lt;/info&gt; by &lt;comment&gt;%s&lt;/comment&gt;', $result['name'], $result['source']));
             $output-&gt;writeln(sprintf('  %s', $result['address']));
         }
@@ -314,7 +460,12 @@ class LocatePlaceCommand extends ContainerAwareCommand
 }
 </code></pre>
 
-<p>Et voici, une sélection de bars recommandés par Google et Here où vous aurez des chances de pouvoir rencontrer les gentils membres de l'AFSY qui se tiennent au rendez-vous tous les mois:</p>
+<p>
+    Et voici, une sélection de bars recommandés par Google et
+    <span lang="en">Here</span> où vous aurez des chances de pouvoir rencontrer
+    les gentils membres de l'AFSY qui se tiennent aux rendez-vous tous les
+    mois.
+</p>
 
 <pre class="no-highlight"><code>D:\Users\Michel\Documents\Projects\symfony-standard&gt;php app/console msb:locate-place "Bar paris"
 Looking for Bar paris
@@ -336,13 +487,20 @@ Au Bon Coin by Here
   50 Rue Lemercier, 75017 Paris, France
 </code></pre>
 
-<p>Quand même, sacré Joël, on voit qu'il garde la cote !</p>
+<p>Quand même, sacré Joël, on voit qu'il garde la côte !</p>
 
-<h2>WRAP UP!</h2>
+<h2 lang="en">Wrap Up!</h2>
 
-<p>J'espère que cette découverte du conteneur de services et des tags vous a plu et qu'elle vous aidera à faire des services plus facilement extensibles.</p>
+<p>
+    J'espère que cette découverte du conteneur de services et des tags vous a
+    plu et qu'elle vous aidera à faire des services plus facilement
+    extensibles.
+</p>
 
-<p>Vous pouvez retrouver les sources du Bundle de cet article sur mon <a href="https://github.com/michelsalib/MSBLocatorBundle">github</a>.</p>
+<p>
+    Vous pouvez retrouver les sources du Bundle de cet article sur mon
+    <a href="https://github.com/michelsalib/MSBLocatorBundle">github</a>.
+</p>
 {% endblock %}
 
 {% block article_avatar %}
@@ -350,12 +508,16 @@ Au Bon Coin by Here
 {% endblock %}
 
 {% block article_bio %}
-<h2><a href="{% block author_url %}http://michelsalib.com{% endblock %}" target="_blank">{% block article_author %}Michel Salib{% endblock %}</a></h2>
-<br/>
+<h2>
+    <a href="{% block author_url %}http://michelsalib.com{% endblock %}" target="_blank">{% block article_author %}Michel Salib{% endblock %}</a>
+</h2>
 <p>
-	Michel Salib a découvert Symfony avec la version 1.4 avant de faire de Symfony2 son framework de développement principal pendant 3 ans. Passioné des nouvelles technos web il a passé deux ans dans la vie des startup parisiennes, il est aujourd'hui lead developpeur chez Thomson Reuters.
+    Michel Salib a découvert Symfony avec la version 1.4 avant de faire de
+    Symfony2 son framework de développement principal pendant 3 ans. Passionné
+    des nouvelles technologies web, il a passé deux ans dans la vie des startups
+    parisiennes, il est aujourd'hui <span lang="en">lead</span> développeur chez
+    <span lang="en">Thomson Reuters</span>.
 </p>
-<br/>
 <p>
     Sur Twitter :
     <a href="https://twitter.com/michelsalib">@michelsalib</a>
