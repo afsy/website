@@ -14,6 +14,7 @@ class AventController extends Controller
     protected $slugs = array(
         // Last articles top
         2013 => array(
+            '04-utilisez-apydatagridbundle-pour-des-listings-impeccables'  => "AfsyFrontBundle:Avent:day_2013_04.html.twig",
             '03-faites-le-plein-de-propel'  => "AfsyFrontBundle:Avent:day_2013_03.html.twig",
             '02-principes-stupid-solid-poo' => "AfsyFrontBundle:Avent:day_2013_02.html.twig",
             '01-presentation-afsy'          => "AfsyFrontBundle:Avent:day_2013_01.html.twig",
