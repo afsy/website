@@ -67,8 +67,10 @@
   margin-top: 1em;
 }
 /* line 57, ../sass/avent.scss */
-.avent-article pre {
+.avent-article pre, .avent-article code {
   font-family: "Courier New", monospace;
+}
+.avent-article pre {
   overflow: auto;
   margin-top: 1em;
 }

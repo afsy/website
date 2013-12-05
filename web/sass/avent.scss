@@ -54,8 +54,11 @@ $margin: 30px;
         margin-top: 1em;
     }
 
-    pre {
+    pre, code {
         font-family: "Courier New", monospace;
+    }
+
+    pre {
         overflow: auto;
     }
 
