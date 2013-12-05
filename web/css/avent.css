@@ -59,16 +59,20 @@
 
 /* line 48, ../sass/avent.scss */
 .avent-article h1, .avent-article h2, .avent-article h3, .avent-article h4 {
-  margin-top: 1em;
+  margin-top: 1.5em;
   margin-bottom: 0.5em;
 }
 /* line 53, ../sass/avent.scss */
 .avent-article p, .avent-article > ul {
-  margin-top: 0.5em;
+  margin-top: 1em;
 }
 /* line 57, ../sass/avent.scss */
+.avent-article pre, .avent-article code {
+  font-family: "Courier New", monospace;
+}
 .avent-article pre {
-  font-family: monospace;
+  overflow: auto;
+  margin-top: 1em;
 }
 /* line 61, ../sass/avent.scss */
 .avent-article .img-article {
