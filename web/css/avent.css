@@ -68,7 +68,8 @@
 }
 /* line 57, ../sass/avent.scss */
 .avent-article pre {
-  font-family: monospace;
+  font-family: "Courier New", monospace;
+  overflow: auto;
 }
 /* line 61, ../sass/avent.scss */
 .avent-article .img-article {

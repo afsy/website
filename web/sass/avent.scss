@@ -55,7 +55,8 @@ $margin: 30px;
     }
 
     pre {
-        font-family: monospace;
+        font-family: "Courier New", monospace;
+        overflow: auto;
     }
 
     .img-article{
