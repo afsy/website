@@ -46,12 +46,12 @@ $margin: 30px;
 
 .avent-article {
     h1, h2, h3, h4 {
-        margin-top: 1em;
+        margin-top: 1.5em;
         margin-bottom: 0.5em;
     }
 
-    p, > ul {
-        margin-top: 0.5em;
+    p, > ul, pre {
+        margin-top: 1em;
     }
 
     pre {
