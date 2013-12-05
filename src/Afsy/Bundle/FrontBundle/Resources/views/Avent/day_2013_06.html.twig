@@ -9,15 +9,15 @@
 
 <p>C'est un exercice assez difficile de faire un nouvel article au sujet de la création d'APIs REST, tant ce sujet a déjà été largement traité, que ce soit <a href="http://symfpony-project.org">dans</a> <a href="https://speakerdeck.com/gordalina/rest-apis-made-easy-with-symfony2">l'écosystème</a> <a href="http://williamdurand.fr/2012/08/02/rest-apis-with-symfony2-the-right-way/">Symfony / PHP</a>, ou <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">en dehors</a>.</p>
 
-<p>Néanmoins, il arrive encore trop souvent que, par méconnaissance ou par facilité, des développeurs créent des Web Services "pseudo-REST", collectionnant un nombre plus ou moins important de mauvaises pratiques : couplage fort à des besoins métiers, manque de formalisation ou de consistance, absence de versionning ou mauvaise utilisation des méthodes HTTP...</p>
+<p>Néanmoins, il arrive encore trop souvent que, par méconnaissance ou par facilité, des développeurs créent des Web Services « pseudo-REST », collectionnant un nombre plus ou moins important de mauvaises pratiques : couplage fort à des besoins métiers, manque de formalisation ou de consistance, absence de versionning ou mauvaise utilisation des méthodes HTTP etc.</p>
 
-<p>Cet article n'a pas pour objectif d'expliquer une nouvelle fois ce qu'est REST, mais plutôt de donner les clés des bonnes pratiques REST, et d'ammener le développeur à se poser les bonnes questions lors de la création de ses premiers services : l'avenir lui dira "merci" !</p>
+<p>Cet article n'a pas pour objectif d'expliquer une nouvelle fois ce qu'est REST, mais plutôt de donner les clés des bonnes pratiques REST, et d'amener le développeur à se poser les bonnes questions lors de la création de ses premiers services : l'avenir lui dira « merci » !</p>
 
 <p>Avant de commencer, fixons quelques définitions :</p>
 
 <ul>
-<li>une <abbr title="Application Programming Interface">API</abbr> (<abbr title="also known as">aka</abbr> "Application Programming Interface") est une interface de manipulation à destination des machines ;</li>
-<li>Lorsqu'on parle d'une "API REST HTTP", on parle d'une application Web proposant un ou plusieurs Web Services respectant le formalisme REST ;</li>
+<li>une <abbr title="Application Programming Interface">API</abbr> (<abbr title="also known as">aka</abbr> « Application Programming Interface ») est une interface de manipulation à destination des machines ;</li>
+<li>Lorsqu'on parle d'une « API REST HTTP », on parle d'une application Web proposant un ou plusieurs Web Services respectant le formalisme REST ;</li>
 <li><abbr title="Representational State Transfer">REST</abbr> est un style d'architecture proposant l'exposition de ressources (on parle aussi d'entités).</li>
 </ul>
 
@@ -33,7 +33,7 @@
 
 <h3>Verbes HTTP</h3>
 
-<p>Concrètement, une API REST HTTP expose des représentations de ressources (des articles, des personnes, des poneys, etc.), et permet de les manipuler (les lister, en créer, en modifier, en supprimer, etc.) par le biais de requêtes HTTP.</p>
+<p>Concrètement, une API REST HTTP expose des représentations de ressources (des articles, des personnes, des <a href="http://fr.wikipedia.org/wiki/Poney" onclick="cornify_add();cornify_add();cornify_add();this.onclick='';return false;">poneys</a>, etc.), et permet de les manipuler (les lister, en créer, en modifier, en supprimer, etc.) par le biais de requêtes HTTP.</p>
 
 <p>L'adéquation entre REST et HTTP suggère assez naturellement l'emploi des <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9">méthodes HTTP</a> pour la réalisation d'opérations courantes :</p>
 
@@ -44,13 +44,13 @@
 <li>supprimer une entité : <code>DELETE</code></li>
 </ul>
 
-<p>Concrètement, si votre API permet d'appeler un Web Service "http://example.tld/creer_article" par le biais de la méthode GET, il y a de bonnes chances pour que vous soyez dans le faux :-)</p>
+<p>Concrètement, si votre API permet d'appeler un Web Service <code>http://example.tld/creer_article</code> par le biais de la méthode <code>GET</code>, il y a de bonnes chances pour que vous soyez dans le faux :-)</p>
 
 <h3>Plan d'adressage</h3>
 
-<p>Un second élément marquant d'une API REST HTTP est, évidemment, l'ensemble des URLs qui sont exposées (ce que l'on nomme souvent le "plan d'adressage" de l'API).</p>
+<p>Un second élément marquant d'une API REST HTTP est, évidemment, l'ensemble des URLs qui sont exposées (ce que l'on nomme souvent le « <em>plan d'adressage</em> » de l'API).</p>
 
-<p>Même si, en soit, REST ne force pas un style d'URIs particulier (rien ne vous empêche d'utiliser des noms d'URLs absconds pour exposer vos ressources), l'usage et la pratique montrent qu'un plan d'adressage clair, lisible et consistant favorisent l'adoption d'une API, sa facilité de compréhension et d'utilisation.</p>
+<p>Même si, en soit, REST ne force pas un style d'URIs particulier (rien ne vous empêche d'utiliser des noms d'URLs abscons pour exposer vos ressources), l'usage et la pratique montrent qu'un plan d'adressage clair, lisible et consistant favorisent l'adoption d'une API, sa facilité de compréhension et d'utilisation.</p>
 
 <p>Pour exposer des ressources, vous choisirez donc d'exposer des urls courtes, nommées suivant le type de ressource exposée :</p>
 
@@ -60,11 +60,11 @@
 <li>etc.</li>
 </ul>
 
-<p>Suivant le fameux principe "<a href="http://www.w3.org/Provider/Style/URI">Cools URIs don't change</a>", choisissez évidemment des URLs agnostiques du point de vue de la technologie (ie., pas de "<code>.php</code>" dans l'url) ou de tout autre élément susceptible de changer dans le temps.</p>
+<p>Suivant le fameux principe « <a href="http://www.w3.org/Provider/Style/URI">Cools URIs don't change</a> », choisissez évidemment des URLs agnostiques du point de vue de la technologie (ie., pas de « <code>.php</code> » dans l'url) ou de tout autre élément susceptible de changer dans le temps.</p>
 
-<p>Exposer des URLs Restful est une tâche assez aisée, pour peu que l'on s'attache à adopter une démarche rigoureuse et consistante. Afin de nous aider dans notre tâche, le bundle <a href="https://github.com/FriendsOfSymfony/FOSRestBundle">FOSRestBundle</a> permet d'automatiser un grand nombre de tâches liées à la conception d'APIs REST. Un de ses atouts majeurs est qu'il permet de générer des routes automatiquement (et les urls associées) à partir de noms d'actions dans les contrôleur.</p>
+<p>Exposer des URLs <em>Restful</em> est une tâche assez aisée, pour peu que l'on s'attache à adopter une démarche rigoureuse et consistante. Afin de nous aider dans notre quête, le bundle <a href="https://github.com/FriendsOfSymfony/FOSRestBundle">FOSRestBundle</a> permet d'automatiser un grand nombre de tâches liées à la conception d'APIs REST. Un de ses atouts majeurs est qu'il permet de générer des routes automatiquement (et les urls associées) à partir de noms d'actions dans les contrôleurs.</p>
 
-<p>Pour cela, il suffit de déclarer au routing de charger des routes de type "rest" depuis le contrôleur de notre API :</p>
+<p>Pour cela, il suffit de déclarer au routeur de charger des routes de type <code>rest</code> depuis le contrôleur de notre API :</p>
 
 <pre class="yaml"><code># le routing.yml de notre bundle
 ponies:
@@ -107,7 +107,7 @@ class PoniesController
 <li><strong>comment_pony</strong> : <code>PATCH</code> <code>/ponies/{slug}/comment</code></li>
 </ul>
 
-<p>Il ne reste "plus qu'à" remplir les contrôleurs avec la logique que doit suivre l'API \o/</p>
+<p>Il ne reste « plus qu'à » remplir les contrôleurs avec la logique que doit suivre l'API \o/</p>
 
 <h2>Formaliser l'API</h2>
 
@@ -117,7 +117,7 @@ class PoniesController
 
 <ul>
 <li>un code de statut, qui indique de manière numérique le résultat de la tentative de traitement de la requête ;</li>
-<li>un ensemble d'en-têtes (des "<em>headers</em>"), qui permettent de fournir au client des informations supplémentaires ;</li>
+<li>un ensemble d'en-têtes (des « <em>headers</em> »), qui fournissent au client des informations supplémentaires ;</li>
 <li>le corps de la réponse.</li>
 </ul>
 
@@ -152,27 +152,27 @@ class PoniesController
 
 <p>La structure du corps de la réponse, et les fonctionnalités exposées par votre API, elles, sont propres à chaque situation. C'est au moment de la conception de votre API que vous devrez faire les choix suivants.</p>
 
-<h4>nommage</h4>
+<h4>Nommage</h4>
 
 <p>C'est une bonne pratique pour votre code, et c'est également une bonne pratique pour les APIs : exposez des urls, des noms de champs ou des paramètres en anglais. Cela facilitera l'adoption large de votre API, en ne faisant pas de la langue une barrière forte. Mettons les débats de côté - la <a href="http://www.francophonie.org/">langue française</a> est malheureusement dépassée dans le domaine du développement informatique, c'est juste un fait : prenez-en acte.</p>
 
 <p>Le contenu du corps de la réponse sera formatté différemment suivant le format de sérialisation adopté (cf. <em>infra</em>). Choisissez néanmoins des noms courts, expressifs, non ambigus.</p>
 
-<h4>filtres</h4>
+<h4>Filtres</h4>
 
-<p>Dans le cadre de notre API exposant des poneys, il peut être pratique de ne vouloir que certains poneys, ceux qui correspondent à certaines contraintes. Par exemple, on pourrait choisir de ne sélectionner que les poneys dont le type est "<a href="http://fr.wikipedia.org/wiki/Shetland_(cheval)">Shetland</a>", ou ceux mesurant 1m40.</p>
+<p>Dans le cadre de notre API exposant des poneys, il peut être pratique de ne vouloir que certains poneys, ceux qui correspondent à certaines contraintes. Par exemple, on pourrait choisir de ne sélectionner que les poneys dont le type est « <a href="http://fr.wikipedia.org/wiki/Shetland_(cheval)">Shetland</a> », ou ceux mesurant 1 mètre 40.</p>
 
-<p>Afin de permettre ces fonctionnalités de filtrage, il est nécessaire d'exposer clairement quels sont les filtres disponibles par le biais de l'API :</p>
+<p>Afin de permettre ces fonctionnalités de filtrage, il est nécessaire d'exposer clairement les filtres disponibles par le biais de l'API :</p>
 
 <ul>
 <li><code>/ponies?type=shetland</code></li>
 <li><code>/ponies?type=shetland,connemara</code></li>
-<li><code>/ponies?size=1.40</code></li>
-<li><code>/ponies?type=shetland,connemara&amp;size=1.40</code></li>
+<li><code>/ponies?height=140</code></li>
+<li><code>/ponies?type=shetland,connemara&amp;height=140</code></li>
 <li>etc.</li>
 </ul>
 
-<p>Symfony propose un moyen élégant et simple de répondre à cette question, en s'appuyant sur l'annotation <code>@QueryParam</code> fournie par le FOSRestBundle :</p>
+<p>Symfony propose un moyen élégant et simple de répondre à cette question, en s'appuyant sur l'annotation <code>@QueryParam</code> fournie par le <code>FOSRestBundle</code> :</p>
 
 <pre class="php"><code>/**
  * @QueryParam(name="height", requirements="\d+", description="Height of the pony in cm.")
@@ -184,24 +184,24 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
 }
 </code></pre>
 
-<p>Les filtres les plus fréquemment employés peuvent être exposés sous la forme d'alias. Par exemple, <code>/articles/published</code> est un alias plus "<em>user-friendly</em>" que <code>/articles?publication_status=published</code>.</p>
+<p>Les filtres les plus fréquemment employés peuvent être exposés sous la forme d'alias. Par exemple, <code>/articles/published</code> est un alias plus « <em>user-friendly</em> » que <code>/articles?publication_status=published</code>.</p>
 
 <p>Vous pouvez aisément créer des alias dans Symfony en utilisant le mécanisme de routage pour déclarer une route manuellement</p>
 
-<h4>tri</h4>
+<h4>Tri</h4>
 
 <p>Dans la même veine, il peut être important de permettre d'ordonner les réponses dans un certain ordre. Votre API doit donc permettre d'ordonner les résultats, par le biais de paramètres passés au service.</p>
 
-<p>Généralement le tri se fait par le biais d'un paramètre "<code>sort</code>", parfois accompagné d'un second paramètre "sort_order", ou précédé du symbole "<code>-</code>" pour indiquer que le tri doit se faire en ordre inversé :</p>
+<p>Généralement le tri se fait par le biais d'un paramètre « <code>sort</code> », parfois accompagné d'un second paramètre « sort_order », ou précédé du symbole « <code>-</code> » pour indiquer que le tri doit se faire en ordre inversé :</p>
 
 <ul>
 <li><code>/ponies?sort=type</code> : par ordre de <code>type</code> alphabétique</li>
-<li><code>/ponies?sort=-size</code> : par ordre de <code>taille</code> inversé</li>
+<li><code>/ponies?sort=-height</code> : par ordre de <code>taille</code> inversé</li>
 </ul>
 
-<h4>pagination</h4>
+<h4>Pagination</h4>
 
-<p>La mise en place d'une pagination est souvent ignorée et, lorsqu'elle est traitée, est la plupart du temps assez délicate. Pour reprendre l'exemple de l'API de poneys, une requête sur <code>/ponies</code> risque de retourner une grande liste de poneys, et donc de produire un corps de réponse très volumineux.</p>
+<p>La mise en place d'une pagination est souvent ignorée et, lorsqu'elle est traitée, est la plupart du temps assez délicate. Pour reprendre l'exemple de l'API de poneys, une requête sur <code>/ponies</code> risque de retourner une grande liste de poneys, et donc de produire un corps de réponse trop volumineux.</p>
 
 <p>Les APIs ayant des contraintes de performance au même titre que les autres applications Web, l'approche la plus traditionnelle consiste à mettre en place une pagination, qui permet de limiter le corps de la réponse à un certain nombre d'éléments.</p>
 
@@ -213,7 +213,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
 <li>à partir d'une page donnée, comment navigue-t-on vers les pages précédentes et suivantes ?</li>
 </ul>
 
-<p>Pour cette dernière question, il va être nécessaire de parler un peut de navigabilité, c'est-à-dire de la capacité de notre API à être explorée - naviguée - par des applications, des programmes.</p>
+<p>Pour cette dernière question, il va être nécessaire de parler un peu de navigabilité, c'est-à-dire de la capacité de notre API à être explorée - naviguée - par des applications, des programmes.</p>
 
 <p>La manière élégante et respectueuse d'HTTP pour fournir, à partir d'une page donnée, les liens vers les pages précédentes et suivantes, consiste à ajouter un en-tête de réponse <code>Link</code>. Par exemple, l'en-tête <code>Link</code> associée à la page 2 devrait ressembler à :</p>
 
@@ -241,17 +241,20 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
 <li><a href="http://www.json.org/"><abbr title="JavaScript Object Notation">json</abbr></a> qui, outre l'avantage de la concision, est un format aisément exploitable en javascript. Attention, certaines distributions ont, pour des problèmes de licence, récemment <a href="https://bugs.php.net/bug.php?id=63520">retiré l'extension json</a>, qui doit désormais être installée séparément (sur Debian, par exemple, un <code>$ apt-get install php5-json</code> résoudra le problème) ;</li>
 <li><p><a href="http://msgpack.org/">MessagePack</a>, un format de sérialization binaire qui peut permettre de gagner encore quelques bits supplémentaires. MessagePack peut être disponible très aisément en PHP, en installant le package PECL associé :</p>
 
-<pre class="no-highlight"><code>$ pecl install msgpack
-</code></pre></li>
+<p>$ pecl install msgpack</p></li>
 </ul>
 
-<p>Le choix du format de la réponse ne doit pas se faire sur une extension dans l'URL, mais par le biais de l'en-tête de requête <code>Accept</code>, qui permet au client d'indiquer quels sont les types de contenus acceptables pour la réponse.</p>
+<p>Le choix du format de la réponse ne doit pas se faire sur une extension dans l'URL, mais par le biais de l'en-tête de requête <code>Accept</code>, qui permet au client d'indiquer quels sont les types de contenus acceptables en guise de réponse.</p>
 
 <p>Si le client indique qu'il souhaite une réponse au format <code>application/json</code>, le serveur pourra librement décider d'envoyer une réponse en <code>application/json</code>, ou répondre par un code de statut HTTP <code>406</code> (<em>Not Acceptable</em>).</p>
 
-<p>Comment tout cela est-il traité avec Symfony ? Encore une fois, le bundle FOSRestBundle aide énormément.</p>
+<p>Comment tout cela est-il traité avec Symfony ? Encore une fois, le bundle <code>FOSRestBundle</code> aide énormément.</p>
 
 <h4>Suppression des espaces, performance FTW?</h4>
+
+<p>Une tentation qui revient fréquemment consiste à vouloir optimiser la taille de la réponse en supprimant les espaces non-nécessaires. Par exemple, une réponse sérialisée en XML sera moins volumineuse (en octets) si on retire tous les sauts de lignes et les caractères d'indentation.</p>
+
+<p>Cette idée est une fausse bonne idée : cela rendra votre API peut aisée à explorer et examiner pour les développeurs (même si, certes, il existe des outils pour mettre en forme un flux XML ou json), et le gain sera très faible, de l'ordre de quelques pourcents seulement. Il vaut mieux placer vos efforts dans la bonne compréhension des modules de compression de la réponse qui sont disponibles pour <a href="http://nginx.org/en/docs/http/ngx_http_gzip_module.html">nginx</a> ou <a href="http://httpd.apache.org/docs/current/mod/mod_deflate.html">Apache</a> (et la charge serveur associée sera ainsi bien mieux utilisée) !</p>
 
 <h3>Navigabilité : HATEOAS or not?</h3>
 
@@ -277,10 +280,10 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
             }]
         },
         "bithdate": "2010-08-23",
-        "genre": "male",
+        "gender": "male",
         "contests": [{
             "id": 1199,
-            "name": "IPC 2013 - Internation Pony Contest 2013",
+            "name": "IPC 2013 - International Pony Contest 2013",
             "location": "Munich, Germany",
             "startDate": 2013-10-27,
             "endDate": 2013-10-30,
@@ -291,7 +294,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
 
 <p>Corolaire de son avantage, cette solution a évidemment l'inconvénient de produire des réponses verbeuses, et forcément centrées sur certains cas d'usage. Le risque, avec cette approche, est de concevoir des APIs aux réponses plus complexes que nécessaire, et aux performances dégradées par rapport aux besoins réels.</p>
 
-<p>Une deuxième approche peut choisir de revenir aux sources de REST en se concentrant, pour chaque URL, sur la représentation de la ressource elle-même, sans se soucier des éléments liés. Dans ce cas, une réponse pourrait être :</p>
+<p>Une deuxième approche consiste à choisir de revenir aux sources de REST en se concentrant, pour chaque URL, sur la représentation de la ressource elle-même, sans se soucier des éléments liés. Dans ce cas, une réponse pourrait être :</p>
 
 <pre class="json"><code>{
     "poney": {
@@ -299,16 +302,20 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
         "name": "Michel",
         "typeId": 1,
         "bithdate": "2010-08-23",
-        "genre": "male",
+        "gender": "male",
         "contestIds": [ 1199 ]
     }
 }
 </code></pre>
 
-<p>Cette seconde approche est déjà plus intéressante, dans la mesure où elle permet de récupérer des données de manière atomique, sans courir le risque, à chaque appel, de récupérer un flux énorme de données.<br />
-Cette approche souffre néanmoins de deux limitations principales :<br />
- * comment un client peut-il savoir quelle est l'URL à laquelle il peut trouver la ressource "<code>type</code>" pour le poney "<code>Michel</code>" ? Idem pour le contest dont on nous fournit l'identifiant 1199 !<br />
- * pour afficher la fiche d'identité complète d'un poney, un client devra-t-il donc réaliser <em>n</em> requêtes, en fonction de l'activité de ce poney ?</p>
+<p>Cette seconde approche est déjà plus intéressante, dans la mesure où elle permet de récupérer des données de manière atomique, sans courir le risque, à chaque appel, de récupérer un flux énorme de données.</p>
+
+<p>Cette approche souffre néanmoins de deux limitations principales :</p>
+
+<ul>
+<li>comment un client peut-il savoir quelle est l'URL à laquelle il peut trouver la ressource "<code>type</code>" pour le poney "<code>Michel</code>" ? Idem pour le contest dont on nous fournit l'identifiant 1199 !</li>
+<li>pour afficher la fiche d'identité complète d'un poney, un client devra-t-il donc réaliser <em>n</em> requêtes, en fonction de l'activité de ce poney ?</li>
+</ul>
 
 <p>La première question peut être résolue par une approche <abbr title="Hypermedia as the Engine of Application State">HATEOAS</abbr>, qui permet d'exposer les actions ou transitions possibles à partir de la ressource actuellement exposée, par le biais de lien hypermédias.</p>
 
@@ -320,7 +327,7 @@ Cette approche souffre néanmoins de deux limitations principales :<br />
         "name": "Michel",
         "typeId": 1,
         "bithdate": "2010-08-23",
-        "genre": "male",
+        "gender": "male",
         "contestIds": [ 1199 ],
         "_links": {
             "self": { "href": "/ponies/118" },
@@ -336,14 +343,14 @@ Cette approche souffre néanmoins de deux limitations principales :<br />
 
 <p>Si on utilise bien cette approche sur tous les services exposés par notre API, un client qui souhaite en exploiter les données pourra le faire sans avoir une connaissance parfaite du plan d'adressage de notre API. Il n'aura pas, par exemple, à implémenter la construction de l'URL qui permet d'accéder aux commentaires associés au poney "<code>Michel</code>" : ce sont les liens qui lui fourniront cette indication.</p>
 
-<p>L'écosystème Symfony2  montre encore une fois, sur ce point, son dynamisme. Deux bundles permettent de traiter le problème :</p>
+<p>L'écosystème Symfony2 montre encore une fois, sur ce point, son dynamisme. Deux bundles permettent de traiter le problème :</p>
 
 <ul>
 <li><a href="https://github.com/TheFootballSocialClub/FSCHateoasBundle">FSCHateoasBundle</a></li>
 <li><a href="https://github.com/willdurand/BazingaHateoasBundle">BazingaHateoasBundle</a></li>
 </ul>
 
-<p>Dans les deux cas, ces bundles procèdent par une association d'annotations aux entités, permettant de définir quels sont les liens à retourner dans une sérialisation de l'entité. Par exemple, avec BazingaHateoasBundle :</p>
+<p>Dans les deux cas, ces bundles procèdent par une association d'annotations aux entités, permettant de définir quels sont les liens à retourner dans une sérialisation de l'entité. Par exemple, avec <code>BazingaHateoasBundle</code> :</p>
 
 <pre class="php"><code>&lt;?php
 namespace Pony\ApiBundle\Entity;
@@ -416,19 +423,19 @@ class Pony
 
 <p>Si c'est possible, vous pouvez aussi choisir de rediriger les requêtes avec un code de statut <code>301</code> vers une version plus récente du même service, ou simplement répondre par un code de statut d'erreur <code>410</code>.</p>
 
-<h2>Héberger, monitorer, encadrer et documenter</h2>
+<h2>Héberger, surveiller, encadrer et documenter</h2>
 
-<h3>Give me cache, bitch</h3>
+<h3>Give me cache, bitch!</h3>
 
-<p>Une bonne API REST respecte un principe d'idempotence : deux requêtes successives produisent la même réponse. Sauf changement dans l'intervalle, deux appels à l'API avec un même header <code>Accept</code> pour obtenir la fiche du poney <code>Michel</code> devront donc produire le même résultat.</p>
+<p>Une bonne API REST respecte un principe d'idempotence : deux requêtes successives produisent la même réponse. Sauf changement dans l'intervalle, deux appels à l'API avec une même entête <code>Accept</code> pour obtenir la fiche du poney <code>Michel</code> devront donc produire le même résultat.</p>
 
-<p>Cela signifie notamment qu'une API REST doit être <em>stateless</em>, c'est-à-dire sans état. Si vous devez gérer des droits d'accès, votre API ne doit donc pas réagir aux sessions, mais vous devez à la place fournir un token à chaque appel à l'api. Encore une fois, deux écoles s'affrontent : passer le token dans l'URL ou par le biais d'un header. Et comme toujours, utiliser une en-tête est plus <em>smart</em>, mais peut être un problème avec certains clients HTTP peu avancés.</p>
+<p>Cela signifie notamment qu'une API REST doit être « <em>stateless</em> », c'est-à-dire sans état. Si vous devez gérer des droits d'accès, votre API ne doit donc pas réagir aux sessions, mais vous devez à la place fournir un jeton à chaque appel de l'api. Encore une fois, deux écoles s'affrontent : passer le jeton dans l'URL ou par le biais d'une entête. Et comme toujours, utiliser une en-tête est plus <em>smart</em>, mais peut être un problème avec certains clients HTTP peu avancés.</p>
 
-<p>Un gros avantage de ce caractère stateless, c'est qu'il pemet aisément, du coup, d'associer du cache HTTP à votre API. Suivant les contraintes métier, vous pourrez choisir d'en restreindre la durée de vie, mais c'est une bonne idée, pour limiter la charge, de toujours mettre une durée de cache minimal sur vos APIs. En cas de fort trafic, un cache de 10 secondes peut réellement faire baisser la charge du serveur d'API.</p>
+<p>Un gros avantage de ce caractère « <em>stateless</em> », c'est qu'il permet aisément, du coup, d'associer du cache HTTP à votre API. Suivant les contraintes métier, vous pourrez choisir d'en restreindre la durée de vie, mais c'est une bonne idée, pour limiter la charge, de toujours mettre une durée de cache minimal sur vos APIs. En cas de fort trafic, un cache de 10 secondes peut réellement faire baisser la charge du serveur d'API.</p>
 
 <h3>Analyser et grapher les performances</h3>
 
-<p>Une API REST HTTP est faite pour être consommée par des clients d'API. Cela signifie que des systèmes tiers (les "clients") sont dépendants du temps de réponse de l'API. Si votre API répond en 10s, les clients qui l'exploitent souffriront de la latence ainsi introduite, et il y a fort à parier qu'au final votre API sera jugée peu satisfaisante.</p>
+<p>Une API REST HTTP est faite pour être consommée par des clients d'API. Cela signifie que des systèmes tiers (les « clients ») sont dépendants du temps de réponse de l'API. Si votre API répond en 10s, les clients qui l'exploitent souffriront de la latence ainsi introduite, et il y a fort à parier qu'au final votre API sera jugée peu satisfaisante.</p>
 
 <p>Il n'y a pas de métrique absolue, mais une API devrait répondre le plus rapidement possible, quelle que soit la requête. Un ordre de grandeur de 20 à 50 ms parait raisonnable.</p>
 
@@ -436,8 +443,9 @@ class Pony
 
 <h3>Limiter le rythme</h3>
 
-<p>Afin de protéger votre API contre les abus - volontaires type <a href="http://fr.wikipedia.org/wiki/Attaque_par_d%C3%A9ni_de_service"><abbr title="Deny of Service">DoS</abbr></a> ou involontaires (un client buggé) - une approche raisonnable peut consister à limiter le nombre de requêtes autorisées pour un client dans une durée donnée. Par exemple, vous pouvez vouloir limiter un client à 300 requêtes par heure.<br />
-Pour cela, plusieurs en-têtes HTTP peuvent aider :</p>
+<p>Afin de protéger votre API contre les abus - volontaires type <a href="http://fr.wikipedia.org/wiki/Attaque_par_d%C3%A9ni_de_service"><abbr title="Deny of Service">DoS</abbr></a> ou involontaires (un client buggé) - une approche raisonnable peut consister à limiter le nombre de requêtes autorisées pour un client dans une durée donnée. Par exemple, vous pouvez vouloir limiter un client à 300 requêtes par heure.</p>
+
+<p>Pour cela, plusieurs en-têtes HTTP peuvent aider :</p>
 
 <ul>
 <li><code>X-Rate-Limit-Limit</code> permet d'indiquer le nombre d’appels maximal par tranche de temps (par exemple, une heure) ;</li>
@@ -447,9 +455,9 @@ Pour cela, plusieurs en-têtes HTTP peuvent aider :</p>
 
 <p>Par exemple :</p>
 
-<pre class="no-highlight"><code>    X-Rate-Limit-Limit: 7500
-    X-Rate-Limit-Remaining: 7499
-    X-Rate-Limit-Reset: 1386256560
+<pre class="http"><code>X-Rate-Limit-Limit: 7500
+X-Rate-Limit-Remaining: 7499
+X-Rate-Limit-Reset: 1386256560
 </code></pre>
 
 <p>Il est possible de mettre en place cette protection au niveau de votre application - mais cela sera consommateur de ressources - ou directement au niveau du serveur. Par exemple, nginx propose le module <a href="http://nginx.org/en/docs/http/ngx_http_limit_req_module.html">ngx_http_limit_req_module</a>.</p>
@@ -465,11 +473,8 @@ Pour cela, plusieurs en-têtes HTTP peuvent aider :</p>
 <pre class="php"><code>/**
  * @QueryParam(name="height", requirements="\d+", description="Height of the pony in centimeters.")
  * @QueryParam(name="type", description="Type of the pony.")
-  *
- * @ApiDoc(
- *  resource=true,
- *  description="Get all the ponies"
- * )
+ *
+ * @ApiDoc(resource=true, description="Get all the ponies")
  */
 public function getPoniesAction(ParamFetcher $paramFetcher)
 {
@@ -483,7 +488,11 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
 
 <p><img src="{{ asset('bundles/afsyfront/images/avent/06-NelmioApiDocBundle-1.png') }}" alt="" /></p>
 
-<p>N'attendez pas la fin de votre projet pour documenter : vous pouvez le faire dés le début, et ainsi avancer en parrallèle des clients HTTP éventuels, quitte à bouchonner à l'aide d'outils tiers comme <a href="http://apiary.io/how-it-works">Apiary</a>.</p>
+<p>N'attendez pas la fin de votre projet pour documenter : vous pouvez le faire dés le début, et ainsi avancer en parallèle des clients HTTP éventuels, quitte à bouchonner à l'aide d'outils tiers comme <a href="http://apiary.io/how-it-works">Apiary</a>.</p>
+
+<p>Bonne <em>APIculture</em> !</p>
+
+<script type="text/javascript" src="http://www.cornify.com/js/cornify.js"></script>
 {% endblock %}
 
 {% block article_avatar %}
