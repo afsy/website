@@ -364,7 +364,7 @@ class PlaceLocatorPass implements CompilerPassInterface
         $definition = $container-&gt;findDefinition('msb.places.chained_locator');
 
         // for every service tagged place_locator...
-        foreach ($container-&gt;findTaggedServiceIds('place_locator') as $id =&gt; $attributes) {
+        foreach ($container-&gt;findTaggedServiceIds('place_locator') as $id =&gt; $tags) {
             // ... add it as a call to addLocator of the msb.places.chained_locator service definition
             $definition-&gt;addMethodCall('addLocator', [new Reference($id)]);
         }
