@@ -14,6 +14,7 @@ class AventController extends Controller
     protected $slugs = array(
         // Last articles top
         2013 => array(
+            '08-utilisation-avancee-du-composant-sonfig-de-symfony2'      => 'AfsyFrontBundle:Avent:day_2013_08.html.twig',
             '07-symfony-framework-MVC-javascript'                         => "AfsyFrontBundle:Avent:day_2013_07.html.twig",
             '06-best-practices-pour-vos-apis-rest-http-avec-symfony2'     => "AfsyFrontBundle:Avent:day_2013_06.html.twig",
             '05-conteneur-de-services-creer-ses-propres-tags'             => 'AfsyFrontBundle:Avent:day_2013_05.html.twig',
