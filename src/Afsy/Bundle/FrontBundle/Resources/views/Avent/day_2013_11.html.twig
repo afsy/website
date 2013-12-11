@@ -1,0 +1,318 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 11 - Les CMS autour de Symfony2" %}
+
+{% block article_content %}
+    <h1>Les CMS autour de Symfony2</h1>
+
+    <p>J'ai besoin d'utiliser un CMS dans mon application, mais lequel choisir ? Travaillant avec Symfony2, lequel pourra le mieux s'intégrer avec ce Framework ?</p>
+
+    <p>Pendant longtemps, je me suis posé ces questions sur différents projets sur lesquels j'ai travaillé. Au delà de l'aspect fonctionnel, je me suis souvent confronté à la problématique d'intégration de ces CMS avec mon framework préféré : <a href="http://symfony.com/">Symfony2</a>.</p>
+
+    <p>Symfony2 est devenu ces dernières années un Framework incontournable dans le monde du développement web. Se distinguant sur le marché par son fort écosystème, de nombreuses entreprises ont migré leurs plateformes web sur ce framework (ou en utilise seulement certains composants) : Overblog, Dailymotion, Gdf Suez, M6, Afnic, L'express...</p>
+
+    <p>Face à cet engouement, les éditeurs de CMS ne sont pas restés indifférents à ces choix technologiques et ont décidé eux aussi de suivre le mouvement.</p>
+
+    <p><strong>Je vous propose donc dans cet article de décortiquer 2 CMS, qui sont bien connus dans le monde PHP, et qui ont décidé d'opérer récemment ce rapprochement avec Symfony2 : <a href="https://drupal.org/">Drupal</a> et <a href="http://ez.no/fr/">eZ Publish</a>.</strong></p>
+
+    <h2>1. Présentation fonctionnelle</h2>
+
+    <p class="clearfix">
+        <img src="{{ asset('bundles/afsyfront/images/avent/11-logo-drupal.png') }}" alt="Drupal 8" title="Logo Drupal" class="img-article" />
+        <strong>Drupal 8</strong><br />
+        Crée en 1999 par <a href="http://buytaert.net/">Dries Buytaert</a>, Drupal est aujourd'hui un CMS très répandu dans le monde du web... C'est en mars 2012 que la communauté Drupal a décidé d'utiliser Symfony dans la nouvelle version de son CMS. Encore en cours de développement, la distribution de Drupal dont je vais vous parler dans cet article est encore en version Alpha.
+    </p>
+
+    <p class="clearfix">
+        <img src="{{ asset('bundles/afsyfront/images/avent/11-logo-ezpublish.png') }}" alt="eZ Publish 5" title="Logo eZ Publish" class="img-article" />
+        <strong>eZ Plublish 5</strong><br />
+        Crée en 1999 par 2 frères, <a href="http://ez.no/About-eZ/eZ-Management">Aleksander Farstad et Bård Farstad</a>, la société norvégienne eZ Systems est aujourd’hui présente mondialement. Début 2013, les équipes de eZ Systems ont décidé de migrer leur CMS sous Symfony2. A ce jour, la version 5.x de eZ Publish est stable et disponible.
+    </p>
+
+    <h3>1.1 Installation / Configuration</h3>
+
+    <table class="stripped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>eZ Publish</th>
+                <th>Drupal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="even">
+                <td>Installation</td>
+                <td>Wizard installation : Langue, BDD, Mails, Paquetage...</td>
+                <td>Wizard installation : Langue, BDD, traductions...</td>
+            </tr>
+            <tr>
+                <td>Base de données</td>
+                <td>MySQL ou PostgreSQL</td>
+                <td>MySQL, MariaDB, Percona Server ou équivalent, PostgreSQL, SQLite</td>
+            </tr>
+            <tr class="even">
+                <td>Configuration</td>
+                <td>Fichiers de configuration YAML : parameters.yml, config.yml...</td>
+                <td>Fichiers de configuration YAML</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>1.2 Fonctionnalités</h3>
+
+    <table class="stripped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>eZ Publish</th>
+                <th>Drupal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="even">
+                <td>Gestion des pages/templates</td>
+                <td>OUI</td>
+                <td>OUI</td>
+            </tr>
+            <tr>
+                <td>Gestion de blocs</td>
+                <td>OUI</td>
+                <td>OUI (modules Block et Custom Block)</td>
+            </tr>
+            <tr class="even">
+                <td>Mediathèque</td>
+                <td>OUI</td>
+                <td>OUI avec gestion des breakpoints (images responsive)</td>
+            </tr>
+            <tr>
+                <td>Workflow de publication</td>
+                <td>OUI</td>
+                <td>OUI (module Revisioning)</td>
+            </tr>
+            <tr class="even">
+                <td>Site multilingue</td>
+                <td>OUI</td>
+                <td>OUI</td>
+            </tr>
+            <tr>
+                <td>E-commerce</td>
+                <td>OUI</td>
+                <td>OUI (module Commerce en cours de développement)</td>
+            </tr>
+            <tr class="even">
+                <td>Flux RSS</td>
+                <td>OUI</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Moteur de recherche</td>
+                <td>OUI</td>
+                <td>OUI (module Search)</td>
+            </tr>
+            <tr class="even">
+                <td>Gestion de droits utilisateurs</td>
+                <td>OUI</td>
+                <td>OUI (module User)</td>
+            </tr>
+            <tr>
+                <td>Scripts CronJobs</td>
+                <td>OUI</td>
+                <td>OUI (module Actions)</td>
+            </tr>
+            <tr class="even">
+                <td>Mobilité et responsive</td>
+                <td>OUI</td>
+                <td>OUI (module Breakpoint)</td>
+            </tr>
+            <tr>
+                <td>Support HTML5</td>
+                <td>OUI</td>
+                <td>OUI</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>Globalement, ces 2 CMS offrent des fonctionnalités très similaires. eZ Publish embarque nativement de nombreux modules ce qui en fait un produit très complet dès son installation. Drupal propose nativement des fonctionnalités beaucoup plus simples, l’utilisation de modules complémentaires sera parfois nécessaire selon les besoins de votre application.</p>
+
+    <h2>2. Utilisation des composants Symfony2</h2>
+
+    <p><strong>Pendant des années, Drupal et eZ Systems ont développés pour leurs CMS leurs propres composants : routing, templating, cache... entrainant ainsi de nombreuses contraintes :</strong></p>
+
+    <ul>
+        <li>Lourde maintenance de l’ensemble du code</li>
+        <li>Peu de standardisation</li>
+        <li>Peu de réutilisabilité de l’existant rendant l’apprentissage du CMS fastidieux par les développeurs</li>
+        <li>Intégration difficile dans des applications nécessitant une certaine logique métier (site d’annonces en ligne, réseau social, site e-commerce...)</li>
+        <li>...</li>
+    </ul>
+
+    <p>L’émergence des frameworks PHP sur le marché a fait prendre conscience à ces développeurs/éditeurs qu’il serait judicieux de ne plus réinventer la roue et de se baser sur des composants existants. Ceux-ci se sont alors tournés vers la communauté Symfony qui propose une grande variété de composants : HttpKernel, Cache, Class Loader, Routing, Injection de dépendance...</p>
+
+    <p><strong>Ce rapprochement a généré de nombreux avantages :</strong></p>
+
+    <ul>
+        <li>Il permet aux contributeurs de ces 2 CMS de se concentrer sur leur cœur de métier, la gestion de contenu, et de proposer ainsi une meilleure expérience utilisateur dans ce domaine</li>
+        <li>Les composants développés par la communauté Symfony respectent des standards stricts ainsi que des bonnes pratiques définis par la communauté PHP : PSR-0, Namespaces, Composer, Programmation Orientée Objet, PHPUnit...</li>
+        <li>Une meilleure interopérabilité entre le système de gestion de contenu (CMS) et les briques métiers de vos applications (gestion de news, boutique en ligne, gestion d’annonces...)</li>
+        <li>Utilisation de la couche Http de Symfony pour une meilleure gestion du cache</li>
+        <li>Homogénisation du système de templating (Twig)</li>
+        <li>Disponibilité d'API REST (flux de données multi-canal)</li>
+        <li>Tests unitaires et fonctionnels améliorés</li>
+        <li>Montée en compétence facilitée pour les développeurs Symfony2</li>
+    </ul>
+
+    <p>Nous noterons une différence notable entre ces 2 CMS qui pourra vous orienter dans le choix d’utilisation de telle ou telle solution : eZ Publish est basé sur la version full stack de Symfony alors que Drupal utilise seulement certains composants.</p>
+
+    <h3>2.1 Composants utilisés par Drupal</h3>
+
+    <table class="stripped">
+        <tbody>
+            <tr class="even">
+                <td>ClassLoader</td>
+                <td>HttpFoundation</td>
+                <td>Serializer</td>
+            </tr>
+            <tr>
+                <td>DependencyInjection</td>
+                <td>HttpKernel</td>
+                <td>Validator</td>
+            </tr>
+            <tr class="even">
+                <td>EventDispatcher</td>
+                <td>Routing</td>
+                <td>Yaml</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>2.2 Composants utilisés par eZ Publish (full-stack)</h3>
+
+    <table class="stripped">
+        <tbody>
+            <tr class="even">
+                <td>BrowserKit</td>
+                <td>ClassLoader</td>
+                <td>Config</td>
+            </tr>
+            <tr>
+                <td>Console</td>
+                <td>CssSelector</td>
+                <td>Finder</td>
+            </tr>
+            <tr class="even">
+                <td>Form</td>
+                <td>Process</td>
+                <td>Security</td>
+            </tr>
+            <tr>
+                <td>Translation</td>
+                <td>Validator</td>
+                <td>Yaml</td>
+            </tr>
+            <tr class="even">
+                <td>Filesystem</td>
+                <td>DependencyInjection</td>
+                <td>EventDispatcher</td>
+            </tr>
+            <tr>
+                <td>HttpKernel</td>
+                <td>Debug</td>
+                <td>DomCrawler</td>
+            </tr>
+            <tr class="even">
+                <td>HttpFoundation</td>
+                <td>Locale</td>
+                <td>Icu</td>
+            </tr>
+            <tr>
+                <td>OptionsResolver</td>
+                <td>PropertyAccess</td>
+                <td>Routing</td>
+            </tr>
+            <tr class="even">
+                <td>Serializer</td>
+                <td>Stopwatch</td>
+                <td>Templating</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Intégration dans un projet Symfony2</h2>
+
+    <p>Le composant HttpKernel permet aux CMS d'être interopérables avec Symfony2. En d’autres termes, l’intégration de Drupal ou eZ Publish dans un projet Symfony ou vice versa est donc facilitée.</p>
+
+    <p>Dans la suite de cette partie, je vais essayer de vous donner des pistes à suivre permettant d’intégrer un CMS dans votre application Symfony2 :</p>
+
+    <h3>3.1 eZ Publish</h3>
+
+    <p>L'utilisation du full-stack de Symfony2 par eZ Publish permet de faciliter grandement son intégration dans un projet Symfony2 existant.</p>
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/11-archi-ezpublish.png') }}" alt="Architecture eZP ublish" title="Architecture eZ Publish" style="margin: auto" /></p>
+
+    <p><strong>Concrètement si vous partez d'un projet Symfony2 existant, les adaptations restent globalement mineures :</strong></p>
+
+    <ul>
+        <li>Fusionner votre dossier <code>app/</code> avec son équivalent dans eZPublish <code>ezpublish/</code> (<code>app/AppKernel.php</code> = <code>app/EzPublishKernel</code> et <code>app/AppCache.php</code> = `app/EzPublishCache)... Je ne donnerai pas ici la liste exhaustive des changements à opérer.</li>
+        <li>Mise à jour de votre composer.json</li>
+        <li>Récupération des dossiers/fichiers <code>web/</code> propres à eZ Publish</li>
+    </ul>
+
+    <p>Si vous savez dès le début de votre projet que vous devrez utiliser eZ Publish, je vous conseille de partir de la version de base de eZ Publish (<a href="https://github.com/ezsystems/ezpublish-community">https://github.com/ezsystems/ezpublish-community</a>) et non de la version <a href="https://github.com/symfony/symfony-standard">symfony-standard</a>.</p>
+
+    <h3>3.2 Drupal</h3>
+
+    <p><strong>Pour Drupal, je ne vais pas vous détailler ici la méthode permettant d'intégrer ce CMS dans un projet Symfony2, je vous renvoie tout simplement vers 2 ressources très intéressantes :</strong></p>
+
+    <ul>
+        <li>Les slides de <a href="http://fabricebernhard.com/">Fabrice Bernhard</a> expliquant l'intégration de Drupal 8 dans Symfony2 : <a href="http://fr.slideshare.net/fabrice.bernhard/integrating-drupal-8-into-symfony-2">http://fr.slideshare.net/fabrice.bernhard/integrating-drupal-8-into-symfony-2</a></li>
+        <li>Le bundle créé par Theodo <code>TheodoDrupalBundle</code> : <a href="https://github.com/theodo/TheodoDrupal8Bundle">https://github.com/theodo/TheodoDrupal8Bundle</a></li>
+    </ul>
+
+    <p>A ce jour, la distribution de Drupal est en version Alpha 6, ce qui signifie que ce bundle prometteur évoluera au fur et à mesure. A surveiller ces prochains mois ... ;)</p>
+
+    <h2>4. Conclusion</h2>
+
+    <p>J’espère que cet article vous aura permis de mieux connaître Drupal/eZ Publish et ainsi faciliter votre choix d’utiliser un CMS dans vos applications Symfony2. De mes recherches sur ces derniers jours concernant ces 2 CMS, je ne peux en tirer de réelles conclusions sur lequel est le meilleur et s'intègre le mieux avec Symfony2.</p>
+
+    <p><strong>Ces 2 CMS apportent une approche différente :</strong></p>
+
+    <ul>
+        <li>eZ Publish se base sur Symfony2 Full stack ce qui facilite nativement son intégration avec un projet Symfony2 mais est, à mon sens, un peu trop lourd (128 tables dans la base de données !!!)</li>
+        <li>Drupal est relativement léger de base et ses fonctionnalités peuvent être aisément étendues par l'installation de modules complémentaires. Nativement, son intégration dans Symfony2 pourrait être réellement fastidieuse mais le bundle <code>TheodoDrupalBundle</code> permet de pallier cette problématique.</li>
+    </ul>
+
+    <p>Je ne vous ai parlé que de Drupal et de eZ Publish, mais d'autres CMS/CMF se basent aussi sur Symfony2 : <a href="http://cmf.symfony.com/">Symfony CMF</a>, <a href="http://initcms.com/">Init Cms</a>, <a href="http://www.sulu.io/">Sulu CMF</a>, <a href="http://bergie.iki.fi/blog/midgard_in_the_symfony2_world/">Midgard</a>... Je vous invite à les découvrir !</p>
+
+    <p><strong>Quelques ressources complémentaires :</strong></p>
+
+    <ul>
+        <li><a href="http://symfony.com/blog/symfony2-meets-drupal-8">http://symfony.com/blog/symfony2-meets-drupal-8</a></li>
+        <li><a href="http://symfony.com/blog/symfony2-meets-ez-publish-5">http://symfony.com/blog/symfony2-meets-ez-publish-5</a></li>
+        <li><a href="http://fr.slideshare.net/jeanvoye/symfony-and-ez-publish-boarding-now">http://fr.slideshare.net/jeanvoye/symfony-and-ez-publish-boarding-now</a></li>
+        <li><a href="http://yulz.github.io/ezpublish5-and-symfony2/#/title">http://yulz.github.io/ezpublish5-and-symfony2/#/title</a></li>
+    </ul>
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/johan-lopes.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url %}http://www.johanlopes.fr{% endblock %}" target="_blank">{% block article_author %}Johan LOPES{% endblock %}</a>
+    </h2>
+    <p>
+        Johan a rejoint depuis 2009 la société <a href="http://www.elao.com" target="_blank">ELAO</a> où il occupe le poste de Chef de projet.
+    </p>
+    <p>
+        Il se passionne avec son équipe pour les méthodologies Agile et participe à de nombreux projets Symfony pour de grands comptes : GDF Suez, Arianespace, Afnic, Adele.org ...<br />
+        Attiré par l’entreprenariat et l’innovation, il a récemment lancé un projet permettant de proposer une plateforme d’échange de services entre particuliers : <a href="http://www.servistreet.com" target="_blank">ServiStreet.com</a>
+    </p>
+    <p>
+        Portfolio : <a href="http://www.johanlopes.fr" target="_blank">www.johanlopes.fr</a> |
+        Twitter : <a href="https://twitter.com/johan_lopes" target="_blank">@johan_lopes</a> |
+        GitHub : <a href="https://github.com/JohanLopes/" target="_blank">JohanLopes</a>
+    </p>
+{% endblock %}
