@@ -14,6 +14,7 @@ class AventController extends Controller
     protected $slugs = array(
         // Last articles top
         2013 => array(
+            '12-et-si-on-mettait-un-peu-de-symfony-dans-javascript'       => 'AfsyFrontBundle:Avent:day_2013_12.html.twig',
             '11-les-cms-autour-de-symfony2'                               => 'AfsyFrontBundle:Avent:day_2013_11.html.twig',
             '10-les-meta-donnees-doctrine'                                => 'AfsyFrontBundle:Avent:day_2013_10.html.twig',
             '09-symfony-1-5-notre-fork-de-symfony1'                       => 'AfsyFrontBundle:Avent:day_2013_09.html.twig',
