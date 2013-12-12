@@ -62,13 +62,16 @@
 
 <p>Ensuite on crée ses templates comme d'habitude sauf qu'on ajoute le tag <code>twig_js</code> en début de fichier qui va permettre de définir un nom de template, exemple :</p>
 
+{% raw %}
 <pre class="twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
 &lt;h1&gt;Los Pollos Hermanos meth lab&lt;/h1&gt;
 &lt;p&gt;Surface: {{ lab.surface }}&lt;/p&gt;
 </code></pre>
+{% endraw %}
 
 <p>Puis on ajoute le fichier <code>twig.js</code> et nos templates dans les assets (easy) :</p>
 
+{% raw %}
 <pre class="twig"><code>{% javascripts %}
     '../vendor/jms/twig-js/twig.js'
     '../app/Resources/templates/LosPollosHermanos/Office.twig'
@@ -78,6 +81,7 @@
     &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
 {% endjavascripts %}
 </code></pre>
+{% endraw %}
 
 <p>Enfin, on fait le rendu de notre template :</p>
 
@@ -92,6 +96,7 @@
 
 <p>Example avec <code>locale [en, fr]</code> pour regrouper en un fichier JavaScript l'ensemble de mes fichiers de locale de mes libraries :</p>
 
+{% raw %}
 <pre class="twig"><code>{% javascripts %}
     '../app/Resources/components/lib-foo/{locale}.js'
     '../app/Resources/components/lib-bar/{locale}.js'
@@ -100,7 +105,7 @@
     &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
 {% endjavascripts %}
 </code></pre>
-
+{% endraw %}
 <p>Ainsi on obtient <code>js/lang.fr.js</code> (lib-foo/fr.js + lib-bar/fr.js) et <code>js/lang.en.js</code> (lib-foo/en.js + lib-bar/en.js). Les utilisateurs n'auront que le JavaScript correspondant à leur locale.</p>
 
 <p>Mais il y a mieux, c'est de générer des templates avec Twig JS traduits en fonction de la <code>locale</code> !</p>
@@ -111,13 +116,16 @@
 
 <p>On met à jour le template en utilisant <code>trans()</code> pour traduire nos clés :</p>
 
+{% raw %}
 <pre class="twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
 &lt;h1&gt;{{ "los_pollos.meth_lab"|trans }}&lt;/h1&gt;
 &lt;p&gt;{{ "los_pollos.surface"|trans }}: {{ lab.surface }}&lt;/p&gt;
 </code></pre>
+{% endraw %}
 
 <p>On met à jour nos assets dans le layout principal :</p>
 
+{% raw %}
 <pre class="twig"><code>{% javascripts
     '../app/Resources/template/LosPollosHermanos/Office.twig'
     '../app/Resources/template/LosPollosHermanos/Lab.twig'
@@ -126,6 +134,7 @@
     &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
 {% endjavascripts %}
 </code></pre>
+{% endraw %}
 
 <p>Ainsi on obtient <code>js/templates.fr.js</code> et <code>js/templates.en.js</code> dont le contenu est différent selon la <code>locale</code>. Les utilisateurs n'auront que les templates compilés correspondant à leur locale.</p>
 
@@ -137,6 +146,7 @@
 
 <p>Là, c'est le moment (notez le jeu de mot...) d'utiliser ce qu'on a vu précédement pour l'ajouter dans les assets :</p>
 
+{% raw %}
 <pre class="twig"><code>{% javascripts
     '../app/Resources/components/moment/min/moment.min.js'
     '../app/Resources/components/moment/min/lang/{locale}.js'
@@ -145,6 +155,7 @@
     &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
 {% endjavascripts %}
 </code></pre>
+{% endraw %}
 
 <p>Maintenant il faut créer un filtre dans Twig JS pour qu'on puisse l'utiliser dans les templates :</p>
 
@@ -155,8 +166,10 @@
 
 <p>Facile non ? L'utilisation l'est encore plus :</p>
 
+{% raw %}
 <pre class="no-highlight"><code>{{ meth.delivery.scheduledDate|date('LL') }}
 </code></pre>
+{% endraw %}
 
 <h2>i18n : translations Symfony en JS</h2>
 
