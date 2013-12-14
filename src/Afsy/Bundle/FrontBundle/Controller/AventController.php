@@ -14,6 +14,7 @@ class AventController extends Controller
     protected $slugs = array(
         // Last articles top
         2013 => array(
+            '15-etendre-behat-pour-y-mettre-son-metier'                   => 'AfsyFrontBundle:Avent:day_2013_15.html.twig',
             '13-jouons-a-cache-cache-avec-http'                           => 'AfsyFrontBundle:Avent:day_2013_13.html.twig',
             '12-et-si-on-mettait-un-peu-de-symfony-dans-javascript'       => 'AfsyFrontBundle:Avent:day_2013_12.html.twig',
             '11-les-cms-autour-de-symfony2'                               => 'AfsyFrontBundle:Avent:day_2013_11.html.twig',
