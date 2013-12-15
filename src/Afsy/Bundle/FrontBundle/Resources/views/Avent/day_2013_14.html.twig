@@ -27,9 +27,9 @@
 <li>Les éventuelles erreurs de mapping Doctrine.</li>
 </ul>
 
-<p><img src="../img/14-debug-toolbar.png" alt="Debug toolbar" /></p>
+<p><img src="{{ asset('bundles/afsyfront/images/avent/14-debug-toolbar.png') }}" alt="Debug toolbar" /></p>
 
-<p><img src="../img/14-profiler.png" alt="Profiler" /></p>
+<p><img src="{{ asset('bundles/afsyfront/images/avent/14-profiler.png') }}" alt="Profiler" /></p>
 
 <h3>2. Les outils externes</h3>
 
@@ -127,9 +127,7 @@ Doctrine:
 
 <p>Dans certains cas, il peut être nécessaire de spécifier l'option <code>fetch="EAGER"</code> dans la configuration d'une relation Doctrine afin de diminuer le nombre de requêtes :</p>
 
-<pre class="php"><code>&lt;?php
-
-class User {
+<pre class="php"><code>class User {
     ...
     /**
      * @ManyToOne(targetEntity="Group", cascade={"all"}, fetch="EAGER")
@@ -149,7 +147,7 @@ class User {
 
 <p>Il est possible de récupérer plusieurs entités différentes en une seule requête Doctrine. Cela peut d'ailleurs présenter un gain de temps très conséquent. Pour ce faire, il suffit d'utiliser la méthode <code>addSelect</code> de l'objet <code>QueryBuilder</code> :</p>
 
-<pre><code class="language-php"><br />class UserRepository
+<pre><code class="language-php">class UserRepository
 {
     ...
     public function findUsersWithGroups()
@@ -209,7 +207,9 @@ return $fetchedIds;
     <a href="{% block author_url %}http://matts2cant.com/{% endblock %}" target="_blank">{% block article_author %}Matthieu de Canteloube{% endblock %}</a>
 </h2>
 <p>
-    Matthieu est ingénieur ESIEE et co-fondateur de Vimies.
+    Matthieu de Canteloube est architecte chez <a target="_blank" href="http://www.theodo.fr">Theodo</a>
+    et développeur Symfony2 certifié. Il est également co-fondateur de Vimies, un réseau
+    social mobile de partage de vidéos.
 </p>
 <p>
     Vous pouvez le retrouver sur twitter:
