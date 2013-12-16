@@ -231,7 +231,7 @@ var getRoute = function(routeName){
 <p>Il existe de nombreuses solutions pour rendre son application indexable comme par exemple Prerender.io (présenté par Rémi <a href="http://afsy.fr/avent/2013/07-symfony-framework-MVC-javascript">précédemment</a> ).<br />
 On peut envisager une solution plus simple (mais plus compliquée à maintenir). Il s'agit de déléguer le rendu de la partie indexable à Symfony.</p>
 
-<h3>Etape 1 : Le hasbang</h3>
+<h3>Etape 1 : Le hashbang</h3>
 
 <p>Le hashbang <code>#!</code>, utilisé dans les URLs, permet d'indiquer aux bots qu'il s'agit d'une application "Ajax" <a href="https://developers.google.com/webmasters/ajax-crawling/docs/specification">Google Ajax Crawling Scheme</a>.<br />
 Automatiquemnt à la vue de l'URL http://example.com/#!/ma-page, le bot va crawler http://example.com/?<em>escaped_fragment</em>=/ma-page</p>
