@@ -90,7 +90,7 @@ Alors je vois "Association Francophone des utilisateurs de Symfony"
 
 <p>Finalement, pour réunir ensemble ces contextes dans un seul contexte :</p>
 
-<pre><code class="language-php"><br /># fichier: features/bootstrap/FeatureContext.php
+<pre><code class="language-php"># fichier: features/bootstrap/FeatureContext.php
 
 use Alex\MailCatcher\Behat\MailCatcherContext;
 use Behat\Behat\Context\BehatContext;
@@ -167,7 +167,7 @@ interface InitializerInterface
 
 <p>Il ne reste plus qu'à faire en sorte que cette méthode soit appelée avec la bonne valeur. Pour cela, on crée l'<em>Initializer</em> associé :</p>
 
-<pre class="no-highlight"><code>namespace Acme\Behat\AcmeExtension\Context;
+<pre class="php"><code>namespace Acme\Behat\AcmeExtension\Context;
 
 use Behat\Behat\Context\Initializer\InitializerInterface;
 use Behat\Behat\Context\ContextInterface;
@@ -226,8 +226,8 @@ class Extension extends BaseExtension
 
 <p>Dans un dossier <code>config</code>, situé avec le fichier <code>Extension.php</code>, on crée un fichier <code>services.xml</code> définissant un service :</p>
 
-<pre><code class="language-xml"><!-- src/Acme/Behat/AcmeExtension/config/services.xml -->
-<?xml version="1.0" ?>
+<pre><code class="language-xml">&lt;!-- src/Acme/Behat/AcmeExtension/config/services.xml --&gt;
+&lt;?xml version="1.0" ?&gt;
 &lt;container xmlns="http://symfony.com/schema/dic/services"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"&gt;
@@ -346,8 +346,8 @@ class FeatureContext extends BehatContext implements KernelAwareInterface
 
 <p>Maintenant, on crée le fichier de service pour déclarer le <em>KernelProxy</em> comme service :</p>
 
-<pre><code class="language-xml"><!-- src/Acme/Behat/KernelExtension/config/services.xml -->
-<?xml version="1.0" ?>
+<pre><code class="language-xml">&lt;!-- src/Acme/Behat/KernelExtension/config/services.xml --&gt;
+&lt;?xml version="1.0" ?&gt;
 &lt;container xmlns="http://symfony.com/schema/dic/services"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"&gt;
