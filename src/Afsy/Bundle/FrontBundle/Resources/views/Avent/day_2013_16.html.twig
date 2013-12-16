@@ -2,7 +2,7 @@
 
 {% set year = 2013 %}
 
-{% block article_title "Jour 17 - Tips & Tricks : Symfony & AngularJS" %}
+{% block article_title "Jour 16 - Tips & Tricks : Symfony & AngularJS" %}
 
 {% block article_content %}
 
@@ -122,8 +122,8 @@ Requêter une ressource au format JSONP revient à demander au navigateur de ré
 ServerName mon-appli-angular.com
 DocumentRoot /var/www/mon-appli-angular/
 Alias /api /var/www/mon-appli-symfony/
-&lt;Directory xxxx&gt;
-&lt;/Directory&gt;
+    &lt;Directory xxxx&gt;
+    &lt;/Directory&gt;
 &lt;/VirtualHost&gt;
 </code></pre>
 
@@ -145,12 +145,12 @@ Attention tout de même, le mécanisme CORS n'est pas supporté par tous les nav
 
 public function registerBundles()
 {
-$bundles = array(
+    $bundles = array(
+        ...
+        new Nelmio\CorsBundle\NelmioCorsBundle(),
+        ...
+    );
     ...
-    new Nelmio\CorsBundle\NelmioCorsBundle(),
-    ...
-);
-...
 }
 </code></pre>
 
@@ -259,26 +259,28 @@ fos_rest:
 view:
     templating_formats:
         html: true
-```
+        </code>
+</pre>
+
 
 Puis dans le controller, on pourra spécifier le template Twig que nous souhaitons utiliser.
 
-```php
-
+<pre class="php">
+    <code>
 use FOS\RestBundle\Controller\FOSRestController;
 
 class UsersController extends FOSRestController
 {
-public function getUsersAction()
-{
-    $data = // get data, in this case list of users.
-    $view = $this-&gt;view($data, 200)
-        -&gt;setTemplate("MyBundle:Users:getUsers.html.twig")
-        -&gt;setTemplateVar('users')
-    ;
+    public function getUsersAction()
+    {
+        $data = // get data, in this case list of users.
+        $view = $this-&gt;view($data, 200)
+            -&gt;setTemplate("MyBundle:Users:getUsers.html.twig")
+            -&gt;setTemplateVar('users')
+        ;
 
-    return $this-&gt;handleView($view);
-}
+        return $this-&gt;handleView($view);
+    }
 }
 </code></pre>
 
@@ -288,7 +290,8 @@ public function getUsersAction()
 
 <p>Ajoutez ces lignes dans votre .htaccess :</p>
 
-<pre class="no-highlight"><code>  RewriteCond %{QUERY_STRING} ^_escaped_fragment_=%2F(.*)$
+<pre class="no-highlight"><code>
+RewriteCond %{QUERY_STRING} ^_escaped_fragment_=%2F(.*)$
 RewriteRule ^$ api/%1.html [QSA,L]
 </code></pre>
 
@@ -309,10 +312,11 @@ Reportez vous à l'article du <a href="http://afsy.fr/avent/2013/12-et-si-on-met
 <pre class="no-highlight"><code>{{'category.list' | trans}}
 </code></pre>
 
-<pre class="js"><code>app.filter('trans', function () {
-return function (input) {
-return Translator.get(input);
-};
+<pre class="js"><code>
+app.filter('trans', function () {
+    return function (input) {
+        return Translator.get(input);
+    };
 });
 
 </code></pre>
@@ -329,7 +333,7 @@ return Translator.get(input);
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('bundles/afsyfront/images/avent/thibault-maxime.png') }} alt="Avatar Joël" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/thibault-maxime.png') }} alt="Avatar Thibault et Maxime" />
 {% endblock %}
 
 {% block article_bio %}
