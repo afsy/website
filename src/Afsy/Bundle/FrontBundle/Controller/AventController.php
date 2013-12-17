@@ -14,6 +14,7 @@ class AventController extends Controller
     protected $slugs = array(
         // Last articles top
         2013 => array(
+            '17-commencer-a-adopter-Devops-sur-ses-projets-Symfony'       => 'AfsyFrontBundle:Avent:day_2013_17.html.twig',
             '16-symfony-et-angularjs-tips'                                => 'AfsyFrontBundle:Avent:day_2013_16.html.twig',
             '15-etendre-behat-pour-y-mettre-son-metier'                   => 'AfsyFrontBundle:Avent:day_2013_15.html.twig',
             '14-votre-application-est-lente-pensez-a-optimiser-doctrine'  => 'AfsyFrontBundle:Avent:day_2013_14.html.twig',

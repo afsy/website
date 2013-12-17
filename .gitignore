@@ -15,3 +15,6 @@ app/config/parameters.yml
 web/css/compiled
 web/js/compiled
 composer.phar
+
+# other
+*.pyc
