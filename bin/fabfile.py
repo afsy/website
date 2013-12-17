@@ -9,6 +9,8 @@ from time import strftime
 from fabric.api import *
 from fabric.contrib.files import exists
 
+
+
 adventcalendarpath = os.path.abspath(os.path.dirname(__file__) + '/../../afsy-calendrier-avent')
 afsyfrpath = os.path.abspath(os.path.dirname(__file__) + '/../')
 
@@ -75,25 +77,29 @@ def adventcopy(daynum):
 
 
 
-
-
-path = {
-    'prod': '/theodo/v3.theodo.fr',
-    'preprod': '/theodo/preprod.theodo.fr'
+env.roledefs = {
+    'prod': ['operator@vps-48018.synalabs.net'],
+    'preprod': ['operator@vps-48018.synalabs.net:22']
 }
 
-def theodo(command):
-    return sudo(command, user='theodo')
+env.use_ssh_config = True
+
+path = {
+    'prod': '/var/www/prod.afsy.fr/htdocs/',
+    'preprod': '/var/www/preprod.afsy.fr/htdocs/'
+}
+
+
+def wwwdata(command):
+    return sudo(command, user='www-data')
 
 @roles('preprod')
 def checkout_project(tag):
     with cd(path[_getrole()]):
-        if not exists(path[_getrole()] + '/.git', use_sudo=True):
-            theodo('git clone --recursive git@github.com:theodo/theodo-fr.git .')
-
-        theodo('git fetch')
-        theodo('git fetch origin --tags')
-        theodo('git checkout ' + tag)
+        wwwdata('git fetch')
+        wwwdata('git fetch origin --tags')
+        wwwdata('git checkout ' + tag)
+        wwwdata('app/console cache:warmup')
 
 @roles('preprod')
 def deploy():
@@ -101,6 +107,7 @@ def deploy():
     local('git tag -a %s -m "%s"' % (tag, _getrole()))
     local('git push --tags')
     checkout_project(tag)
+
 
 def _getrole():
     for role in env.roledefs:
