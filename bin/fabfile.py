@@ -43,10 +43,10 @@ article_bio = """
 <p>
    <a href="http://twitter.com/theodo">Fabrice</a> est co-fondateur et directeur technique de
    <a href="http://www.theodo.fr">Theodo</a>, une équipe de développement agile spécialisée sur Symfony2 et Node.js.
-   Il est aussi en parallèle le directeur technique d'<a href="http://www.allomatch.com">Allomatch</a>,
+   Il est aussi directeur technique d'<a href="http://www.allomatch.com">Allomatch</a>,
    le moteur de recherche des matchs diffusés dans les bars.
    Cette double-casquette a permis d'acquérir une expérience unique dans la maintenance et l'évolution d'applications
-   PHP à grande échelle, qui a été clef dans la découverte du mouvement Devops dès 2010.
+   PHP à grande échelle, qui a été clef dans son implication dans le mouvement Devops dès 2010.
 </p>
 
 {% endblock %}
@@ -105,6 +105,7 @@ def checkout_project(tag):
 def deploy():
     tag = "%s/%s" % (_getrole(), strftime("%Y/%m-%d-%H-%M-%S"))
     local('git tag -a %s -m "%s"' % (tag, _getrole()))
+    local('git push')
     local('git push --tags')
     checkout_project(tag)
 
