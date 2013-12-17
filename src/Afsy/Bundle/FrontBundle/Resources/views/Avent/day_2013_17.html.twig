@@ -2,13 +2,13 @@
 
 {% set year = 2013 %}
 
-{% block article_title "Jour 17 - Commencer à adopter Devops sur ses projets Symfony" %}
+{% block article_title "Jour 17 - Commencer à adopter la culture Devops sur ses projets Symfony" %}
 
 {% block article_content %}
 
 {% verbatim %}
 
-            <h1>Commencer à adopter Devops sur ses projets Symfony</h1>
+<h1>Commencer à adopter Devops sur ses projets Symfony</h1>
 
 <p>Devops est le mouvement qui vise à réunir les équipes IT, en particulier les équipes de développement et des opérations, autour d'un objectif commun : améliorer la performance de l'organisation IT au service du métier. Cet article a pour but de démontrer la puissance de ce mouvement et les premières étapes pour adopter la culture Devops sur vos projets Symfony.</p>
 
@@ -17,14 +17,14 @@
 <h3>La vélocité est une nécessité dans le monde du web</h3>
 
 <p>La vitesse est la clef du succès dans l'économie digitale. Ce constat est particulièrement visible dans le monde des Start-ups, où les premiers arrivés sur un marché sont les seuls qui survivent. Mais c'est aussi valable dans les organisations plus traditionnelles où les clients attendent toujours plus de réactivité, portée par les nouvelles technologies. Comme le démontre le livre de Jason Jennings et Laurence Haughton, ce ne sont plus les gros qui mangent les petits mais les rapides qui mangent les lents.<br />
-<img src="http://ecx.images-amazon.com/images/I/41OHX-eqG8L.jpg" alt="It is the fast that eat the slow" /></p>
+<a href="http://www.amazon.com/gp/aw/d/0066620546"><img src="http://ecx.images-amazon.com/images/I/41OHX-eqG8L.jpg" alt="It is the fast that eat the slow" /></a></p>
 
 <h3>Le goulot d'étranglement est souvent technique</h3>
 
-<p>Souvent le département technique est le goulot d'étranglement qui ralentit l'entreprise : la complexité des projets IT et les risques associés font qu'entre l'idée et son déploiement effectif il peut se passer plusieurs mois. Les méthodes agiles sont une réponse à ce problème. Pour aller plus vite, ces méthodes cherchent à révolutionner l'organisation à l'aide de pricnipes simples :</p>
+<p>Souvent le département technique est le goulot d'étranglement qui ralentit l'entreprise : la complexité des projets IT et les risques associés font qu'entre l'idée et son déploiement effectif il peut se passer plusieurs mois. Les méthodes agiles sont une réponse à ce problème. Pour aller plus vite, ces méthodes cherchent à révolutionner l'organisation à l'aide de principes simples :</p>
 
 <ul>
-<li>découper les projets en briques minimales utiisables (les user stories),</li>
+<li>découper les projets en briques minimales utilisables (les user stories),</li>
 <li>prioriser chacune de ses briques,</li>
 <li>intégrer le porteur du projet dans l'équipe technique pour valider au fur et à mesure,</li>
 <li>faire des points réguliers à date fixe (les sprints)</li>
@@ -32,7 +32,7 @@
 
 <h3>Être agile en développement ne suffit pas</h3>
 
-<p>Mais dans une méthode agile comme Scrum on peut rapidement se retrouver dans une illusion de vitesse : il ne suffit pas d'itérer vite si ces itérations ne sont pas mises aussi rapidement en production. Et c'est effectivement ce qui se passe dans beaucoup d'organisations, où des équipes de développement qui ont adopté l'agilité se retrouvent à développer très rapidement des évolutions... qui s'empilent devant le département des opérations, ceux qui ont en charge de les mettre en production. En effet les enjeux sur un projet informatique sont nombreux, et les développeurs oublient souvent ceux qui concernent la production :</p>
+<p>Mais dans une méthode agile comme Scrum, on peut rapidement se retrouver dans une illusion de vitesse : il ne suffit pas d'itérer vite si ces itérations ne sont pas mises aussi rapidement en production. Et c'est effectivement ce qui se passe dans beaucoup d'organisations, où des équipes de développement qui ont adopté l'agilité se retrouvent à développer très rapidement des évolutions... qui s'empilent devant le département des opérations, ceux qui ont en charge de les mettre en production. En effet, les enjeux sur un projet informatique sont nombreux, et les développeurs oublient souvent ceux qui concernent la production :</p>
 
 <ul>
 <li>la disponibilité : backups, monitoring, documentation...</li>
@@ -49,7 +49,7 @@
 
 <h3>Devops apporte l'agilité jusqu'à la production</h3>
 
-<p>Le mot Devops est apparu en 2009 sur le blog de Patrick Debois et fédère depuis tous ceux qui s'intéressent à l'agilité au sens large, du développement aux opérations. L'idée principale est que toute l'organisation IT travaille en équipe, en particulier les développeurs avec les opérations, avec un but commun : la performance de l'organisation technique au service du métier. Le mouvement Devops se penche sur trois domaines :</p>
+<p>Le mot Devops est apparu en 2009 sur le blog de <a href="http://www.jedi.be/blog/">Patrick Debois</a> et fédère depuis tous ceux qui s'intéressent à l'agilité au sens large, du développement aux opérations. L'idée principale est que toute l'organisation IT travaille en équipe, en particulier les développeurs avec les opérations, avec un but commun : la performance de l'organisation technique au service du métier. Le mouvement Devops se penche sur trois domaines :</p>
 
 <ul>
 <li>les outils, le "comment"</li>
@@ -57,24 +57,24 @@
 <li>les hommes, le "pourquoi"</li>
 </ul>
 
-<p>Devops se retrouve souvent associé à des outils de déploiement continu et de provisioning. Il est impossible pourtant d'être Devops si on ignore la partie humaine qui est au coeur du problème. Les objectifs locaux sont opposés : les équipes de développement doivent apporter rapidement des évolutions alors que les équipes d'opérations doivent garantir la stabilité des systèmes en production. C'est à ce problème que l'on s'attaque, et les outils ne sont qu'une arme parmi d'autres pour réussir à faire travailler ensemble ces équipes naturellement en conflit.</p>
+<p>Devops se retrouve souvent associé à des outils de déploiement continu et de l'approvisionnement (le "provisioning"). Il est impossible pourtant d'être Devops si on ignore la partie humaine qui est au coeur du problème. Les objectifs locaux sont opposés : les équipes de développement doivent apporter rapidement des évolutions alors que les équipes d'opérations doivent garantir la stabilité des systèmes en production. C'est à ce problème que l'on s'attaque, et les outils ne sont qu'une arme parmi d'autres pour réussir à faire travailler ensemble ces équipes naturellement en conflit.</p>
 
 <h3>Des résultats démontrés</h3>
 
 <p>Il est facile aujourd'hui d'avoir des informations sur l'impact qu'a la culture Devops dans les organisations qui l'ont adoptée. On trouve de nombreux témoignages des leaders Devops (Etsy, Flickr, Amazon, Netflix, etc.) sur leurs blogs techniques ou à des conférences comme Velocity. Il existe aussi des études, dont une réalisée en 2013 par PuppetLabs et IT Revolution Press auprès de 4000 ingénieurs devs et ops. Les chiffres sont bluffants ! Les organisations qui disent avoir adopté Devops depuis plus d'un an :</p>
 
 <ul>
-<li><p>ont des temps de déploiement 8000 fois plus courts<br />
-<img src="/bundles/afsyfront/images/avent/17-duree.jpg" alt="Temps de déploiement" /></p></li>
-<li><p>déploient 30 fois plus souvent<br />
-<img src="/bundles/afsyfront/images/avent/17-frequence.jpg" alt="Fréquence de déploiement" /></p></li>
-<li><p>ont 50% de déploiements ratés en moins<br />
-<img src="/bundles/afsyfront/images/avent/17-ratages.jpg" alt="Taux d'erreur" /></p></li>
-<li><p>réagissent 12x plus rapidement en cas de problèmes de déploiement<br />
-<img src="/bundles/afsyfront/images/avent/17-resolution.jpg" alt="Temps de résolution" /></p></li>
+<li>ont des temps de déploiement 8000 fois plus courts<br />
+<img src="/bundles/afsyfront/images/avent/17-duree.jpg" alt="Temps de déploiement" /></li>
+<li>déploient 30 fois plus souvent<br />
+<img src="/bundles/afsyfront/images/avent/17-frequence.jpg" alt="Fréquence de déploiement" /></li>
+<li>ont 50% de déploiements ratés en moins<br />
+<img src="/bundles/afsyfront/images/avent/17-ratages.jpg" alt="Taux d'erreur" /></li>
+<li>réagissent 12x plus rapidement en cas de problèmes de déploiement<br />
+<img src="/bundles/afsyfront/images/avent/17-resolution.jpg" alt="Temps de résolution" /></li>
 </ul>
 
-<p>(Tous les résultats sont dans l'étude PuppetLabs : <a href="http://info.puppetlabs.com/2013-state-of-devops-report.html">http://info.puppetlabs.com/2013-state-of-devops-report.html</a>)</p>
+<p>(Tous les résultats sont dans <a href="http://info.puppetlabs.com/2013-state-of-devops-report.html">l'étude de PuppetLabs</a>)</p>
 
 <p>La question n'est donc pas s'il faut adopter Devops mais comment l'adopter.</p>
 
@@ -101,13 +101,13 @@ L’équipe de développement, plus junior en âge et moins aguerrie sur l’ens
 
 <h3>Étape 1 : un bac à sable pour donner aux développeurs l'expérience de la production</h3>
 
-<p>Il est étonnant de constater que la principale différence entre un développeur à l'aise sur la partie opération et un développeur qui en a peur est simplement... l'expérience d'hébergement sur un serveur souvent à titre personnel. Cela peut paraitre évident qu'il faut un terrain de jeu pour apprendre, pourtant beaucoup de développeurs ne possèdent pas de serveur dédié et je n'ai pas rencontré d'organisations qui en fournissait un à titre de bac à sable d'entrainement.</p>
+<p>Il est étonnant de constater que la principale différence entre un développeur à l'aise sur la partie opération et un développeur qui en a peur est simplement... l'expérience d'hébergement sur un serveur souvent à titre personnel. Cela peut paraitre évident qu'il faille un terrain de jeu pour apprendre, pourtant beaucoup de développeurs ne possèdent pas de serveur dédié et je n'ai pas rencontré d'organisations qui en fournissait un à titre de bac à sable d'entrainement.</p>
 
 <p>Hors c'est une étape incontournable ! Et il n'est pas très couteux aujourd'hui de s'y mettre. En particulier Amazon propose un <a href="http://aws.amazon.com/free/">serveur EC2 gratuit pendant un an</a> et Online.net un <a href="http://www.online.net/fr/serveur-dedie/dedibox-scg2">serveur dédié à 10€HT par mois</a> donc n'hésitez pas ! Bien sûr on parle ici de serveurs Linux...</p>
 
 <h3>Étape 2 : le déploiement automatisé pour ne pas y passer plus d'une minute</h3>
 
-<p>Une fois qu'on a passé l'étape indispensable d'avoir fait ses armes soit-même sur un serveur Linux, il faut commencer à adopter des bonnes pratiques qui accélèrent le flux des besoin métiers de l'expression à la production.</p>
+<p>Une fois qu'on a passé l'étape indispensable d'avoir fait ses armes soit-même sur un serveur Linux, il faut commencer à adopter des bonnes pratiques qui accélèrent le flux des besoins métiers de l'expression à la production.</p>
 
 <p>Les fréquences de déploiement revendiquées par les leaders du mouvement Devops sont beaucoup trop élevées pour permettre plus que quelques minutes d’intervention humaine. Si Netflix ou <a href="https://speakerdeck.com/astanway/bring-the-noise-continuously-deploying-under-a-hailstorm-of-metrics?slide=13">Etsy déploient plus de 30 fois par jour</a>, ou qu’<a href="http://assets.en.oreilly.com/1/event/60/Velocity%20Culture%20Presentation.pdf">Amazon déploie en moyenne toutes les 11 secondes sur des dizaines de milliers de serveur</a>, c’est parce que chaque déploiement est entièrement automatisé.</p>
 
@@ -172,7 +172,7 @@ def _getrole():
 
 <h3>Étape 3 : le monitoring pour détecter instantanément les erreurs en production</h3>
 
-<p>Une fois le déploiement automatisé, il faut réussir à vaincre la peur de déployer très souvent. C'est le rôle du monitoring qui, s'il est bien pensé, vous alertera à la moindre erreur et vous permettra de réagir vite. En effet le principe "Better ask for forgiveness than permission" accélère beaucoup une organisation... mais n'est durable qu'à condition :</p>
+<p>Une fois le déploiement automatisé, il faut réussir à vaincre la peur de déployer très souvent. C'est le rôle du monitoring qui, s'il est bien pensé, vous alertera à la moindre erreur et vous permettra de réagir vite. En effet, le principe "Better ask for forgiveness than permission" accélère beaucoup une organisation... mais n'est durable qu'à condition :</p>
 
 <ul>
 <li>de détecter et réparer son erreur rapidement</li>
@@ -181,17 +181,17 @@ def _getrole():
 
 <p>Ce n'est pas un hasard si StatsD, un outil de monitoring très populaire a été créé par Etsy, l'un des leaders du mouvement Devops. Une <a href="http://www.elao.com/blog/symfony-2/monitor-your-symfony2-application-via-stats-d-and-graphite-22.html">implémentation de Statsd sur un projet Symfony</a> est décrite par Tristan Bessoussa.</p>
 
-<p>Mais il existe encore plus simple aujourd'hui avec des solutions SaaS comme NewRelic et AppsDynamics. <a href="http://blog.newrelic.com/2013/11/18/new-relic-php-agent-now-supports-symfony-2/">NewRelic intègre depuis très récemment un support natif Symfony</a> encore assez basique mais prometteur.</p>
+<p>Mais il existe encore plus simple aujourd'hui avec des solutions SaaS comme NewRelic et AppsDynamics. <a href="http://blog.newrelic.com/2013/11/18/new-relic-php-agent-now-supports-symfony-2/">NewRelic intègre depuis très récemment un support natif Symfony2</a> encore assez basique mais prometteur.</p>
 
-<p>Ces applications permettent non seulement d'avoir instantanément des informations critiques de votre application sans effort, mais elles peuvent aussi alerter en cas d'augmentation du nombre d'erreur. Indispensable pour vérifier que le dernier déploiement n'a pas eu d'impact négatif !</p>
+<p>Ces applications permettent, non seulement d'avoir instantanément des informations critiques de votre application sans effort, mais elles peuvent aussi alerter en cas d'augmentation du nombre d'erreurs. Indispensable pour vérifier que le dernier déploiement n'a pas eu d'impact négatif !</p>
 
 <p><img src="http://newrelic.com/assets/pages/application_monitoring/screens/screen_dashboards-2bd9185b4ba495e9f104b529470ba44f.jpg" alt="Dashboard NewRelic" /></p>
 
 <h3>Étape 4 : l'intégration continue pour détecter les erreurs avant la production</h3>
 
-<p>Bien sûr il est possible de détecter une grande partie des erreurs avant la mise en production. C'est le role de l'intégration continue qui lance l'ensemble des tests unitaires à chaque commit.</p>
+<p>Bien sûr il est possible de détecter une grande partie des erreurs avant la mise en production. C'est le role de l'intégration continue qui lance l'ensemble des tests unitaires et fonctionnels à chaque commit.</p>
 
-<p>Le pré-requis comme annoncé précédemment est l'écriture de tests unitaires et fonctionnels. À titre d'exemple <a href="http://codeascraft.com/2011/04/20/divide-and-concur/">Etsy avait en 2011 plus de 7000 tests</a>. Un bon départ pour comencer est <a href="http://symfony.com/doc/current/book/testing.html">le chapitre sur les tests de la documentation Symfony</a>. Pour aller plus loin deux sujets souvent épineux quand on commence à faire beaucoup de tests unitaires et fonctionnels :</p>
+<p>Le pré-requis, comme annoncé précédemment, est l'écriture de tests unitaires et fonctionnels. À titre d'exemple <a href="http://codeascraft.com/2011/04/20/divide-and-concur/">Etsy avait en 2011 plus de 7000 tests</a>. Un bon départ pour commencer est <a href="http://symfony.com/doc/current/book/testing.html">le chapitre sur les tests de la documentation Symfony</a>. Pour aller plus loin, deux sujets souvent épineux quand on commence à faire beaucoup de tests unitaires et fonctionnels :</p>
 
 <ul>
 <li><a href="http://www.theodo.fr/blog/2013/08/managing-fixtures/">la gestion des données de tests appelées "fixtures"</a> dont l'absence est souvent le frein à la rédaction de tests utiles</li>
@@ -203,11 +203,11 @@ def _getrole():
 </ul></li>
 </ul>
 
-<p>Pour mettre en place un système d'intégration continue et automatiser le lancement des tests, Jenkins est l'outil standard. Il permet d'avoir un tableau de bord très complet sur les métriques du projet :</p>
+<p>Pour mettre en place un système d'intégration continue et automatiser le lancement des tests, <a href="http://jenkins-ci.org/">Jenkins</a> est l'outil standard. Il permet d'avoir un tableau de bord très complet sur les métriques du projet :</p>
 
 <p><img src="http://blog.lazycloud.net/wp-content/uploads/2013/03/jenkinsglobal-1024x881.png" alt="Tableau de bord Jenkins" /></p>
 
-<p>Un article de blog assez complet détaille la <a href="http://blog.lazycloud.net/utiliser-jenkins-pour-un-projet-symfony2/">configuration de Jenkins pour un projet Symfony</a></p>
+<p>Un article de blog assez complet détaille la <a href="http://blog.lazycloud.net/utiliser-jenkins-pour-un-projet-symfony2/">configuration de Jenkins pour un projet Symfony</a>.</p>
 
 <p>Des solutions alternatives existent en SaaS qui permettent d'éviter toutes les étapes d'installation. L'un des premiers est <a href="http://about.travis-ci.org/docs/user/languages/php/">Travis-CI, qui s'est rapidement rapproché de la communauté Symfony</a>. Travis peut s'intégrer avec <a href="https://coveralls.io/docs/supported_continuous_integration">CoverAlls</a> pour offrir en plus la couverture de code.</p>
 
@@ -219,9 +219,9 @@ def _getrole():
 
 <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Vagrant.png/197px-Vagrant.png" alt="Logo Vagrant" /></p>
 
-<p>Pour cela la solution standard est Vagrant. C'est un outil qui permet de gérer très facilement la configuration d'une machine virtuelle propre à son projet. Paul Seiffert maintient une <a href="https://github.com/seiffert/default-vagrant">configuration Vagrant qu'il utilise sur ses projets PHP</a> qui est un bon départ pour démarrer son utilisation de Vagrant.</p>
+<p>Pour cela la solution standard est <a href="http://www.vagrantup.com/">Vagrant</a>. C'est un outil qui permet de gérer très facilement la configuration d'une machine virtuelle propre à son projet. Paul Seiffert maintient une <a href="https://github.com/seiffert/default-vagrant">configuration Vagrant qu'il utilise sur ses projets PHP</a> qui est un bon départ pour démarrer son utilisation de Vagrant.</p>
 
-<p>Un point important pour ne pas être déçu par les performances de Vagrant est d'<a href="http://www.whitewashing.de/2013/08/19/speedup_symfony2_on_vagrant_boxes.html">optimiser son projet Symfony2 pour Vagrant</a>. Les quelques astuces décrites par Benjamin Eberlei sur son blog permettent de gagner un facteur 5 sur des requêtes Symfony2 en environnement de développement. Indispensables !</p>
+<p>Un point important, pour ne pas être déçu par les performances de Vagrant, est d'<a href="http://www.whitewashing.de/2013/08/19/speedup_symfony2_on_vagrant_boxes.html">optimiser son projet Symfony2 pour Vagrant</a>. Les quelques astuces décrites par Benjamin Eberlei sur son blog permettent de gagner un facteur 5 sur des requêtes Symfony2 en environnement de développement. Indispensables !</p>
 
 <h2>Devops au-delà de Symfony</h2>
 
@@ -232,7 +232,7 @@ def _getrole():
 <ul>
 <li>Automatiser la configuration de l'infrastructure (Provisioning)</li>
 <li>Permettre le self-service dans l'infrastructure (IaaS)</li>
-<li>Faciliter sur les backups</li>
+<li>Faciliter les backups</li>
 <li>Permettre le self-service sur les tests de montée en charge</li>
 <li>Introduire le pair-devopsing entre devs et ops</li>
 <li>S'inspirer des méthodes lean et généraliser le management visuel</li>
@@ -243,7 +243,7 @@ def _getrole():
 
 <ul>
 <li>avec des mesures quantitatives partout où c'est possible et même là où ça ne le semble pas à première vue</li>
-<li>en attaquant les problème prioritaire, identifié grâce à l'analyse des mesures obtenues</li>
+<li>en attaquant les problèmes prioritaires, identifiés grâce à l'analyse des mesures obtenues</li>
 <li>en testant des hypothèses de résolution</li>
 <li>et en itérant ainsi en continu</li>
 </ul>
@@ -253,8 +253,8 @@ def _getrole():
 <p>Ensuite le plus efficace pour explorer ce sujet encore très jeune est d'échanger avec les passionnés de Devops.<br />
 <img src="http://devopsdays.org/events/2013-paris/paris-love-devops.png" alt="DevopsDays Paris" /></p>
 
-<p>Vous nous retrouverez dans des meetups comme le <a href="http://parisdevops.fr/">meetup Paris Devops</a>, lors des conférences <a href="http://devopsdays.org/">DevopsDays</a> organisés partout dans le monde ou aux <a href="http://velocityconf.com/">Velocity Conference</a>. J'espère vous y rencontrer nombreux !</p>
-        
+<p>Vous nous retrouverez dans des meetups comme le <a href="http://parisdevops.fr/">meetup Paris Devops</a>, lors des conférences <a href="http://devopsdays.org/">DevopsDays</a> organisées partout dans le monde ou à la <a href="http://velocityconf.com/">Velocity Conference</a>. J'espère vous y rencontrer nombreux !</p>
+
 {% endverbatim %}
 
 {% endblock %}
@@ -271,7 +271,7 @@ def _getrole():
    Il est aussi directeur technique d'<a href="http://www.allomatch.com">Allomatch</a>,
    le moteur de recherche des matchs diffusés dans les bars.
    Cette double-casquette a permis d'acquérir une expérience unique dans la maintenance et l'évolution d'applications
-   PHP à grande échelle, qui a été clef dans son implication dans le mouvement Devops dès 2010.
+   PHP à grande échelle, qui a été la clef dans son implication dans le mouvement Devops dès 2010.
 </p>
 
 {% endblock %}
