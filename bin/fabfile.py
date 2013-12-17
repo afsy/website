@@ -34,7 +34,7 @@ article_footer = """
 
 article_bio = """
 {% block article_avatar %}
-    <img src="{{ asset('bundles/afsyfront/images/avent/17-fabrice.png') }} alt="Avatar Fabrice" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/17-fabrice.png') }}" alt="Avatar Fabrice" />
 {% endblock %}
 {% block article_bio %}
 <h2>
