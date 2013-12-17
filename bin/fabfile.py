@@ -99,7 +99,7 @@ def checkout_project(tag):
         wwwdata('git fetch')
         wwwdata('git fetch origin --tags')
         wwwdata('git checkout ' + tag)
-        wwwdata('app/console cache:warmup --env=prod')
+        wwwdata('app/console cache:clear --env=prod')
 
 @roles('preprod')
 def deploy():
