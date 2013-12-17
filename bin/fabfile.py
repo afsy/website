@@ -59,12 +59,8 @@ def adventcopy(daynum):
         htmlfilename = glob.glob(adventcalendarpath + '/build/' + daynum + '*')[0]
         with open (htmlfilename, "r") as htmlfile:
             htmldata = htmlfile.read()
+        htmldata = re.search('<article>(.+?)</article>', htmldata, re.DOTALL).group(1)
 
-        m = re.search('<article>(.+?)</article>', htmldata, re.DOTALL)
-        if m:
-            htmldata = m.group(1)
-
-        local('rsync -rav img/' + daynum + '-* ' + afsyfrpath + '/src/Afsy/Bundle/FrontBundle/Resources/public/images/avent/ ')
         local('rsync -rav img/' + daynum + '-* ' + afsyfrpath + '/src/Afsy/Bundle/FrontBundle/Resources/public/images/avent/ ')
 
     with lcd(afsyfrpath):
