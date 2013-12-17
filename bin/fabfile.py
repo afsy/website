@@ -65,8 +65,6 @@ def adventcopy(daynum):
         local('rsync -rav img/' + daynum + '-* ' + afsyfrpath + '/src/Afsy/Bundle/FrontBundle/Resources/public/images/avent/ ')
         local('rsync -rav img/' + daynum + '-* ' + afsyfrpath + '/src/Afsy/Bundle/FrontBundle/Resources/public/images/avent/ ')
 
-
-
     with lcd(afsyfrpath):
         with open('src/Afsy/Bundle/FrontBundle/Resources/views/Avent/day_2013_' + daynum + '.html.twig', 'w') as template:
             template.write(article_header)
