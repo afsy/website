@@ -27,7 +27,7 @@ Sur OSX ça se passe ici : /Library/Ruby/Gems</p>
 
 <p>Les Tasks sont les bases de Capistrano, elles peuvent être lancées directement par la ligne de commande ou bien être appelées dans une autre tâche.</p>
 
-<pre><code class="language-ruby"><br />desc "Lorem ipsum dolor sit amet, consectetur adipisicing elit."
+<pre><code class="language-ruby">desc "Lorem ipsum dolor sit amet, consectetur adipisicing elit."
 task :backup do
     puts "In Example Backup Web-Server"
     ...
@@ -89,13 +89,13 @@ Le principe est très simple : chaque environnement a son propre fichier où l'o
 $ cap prod deploy
 </code></pre>
 
-<p>Plus d'infos sur le site de <a href="http://capifony.org/cookbook/using-the-multistage-extension.html">capifony</a></p>
+<p>Plus d'infos sur le site de <a href="http://capifony.org/cookbook/using-the-multistage-extension.html">capifony</a>.</p>
 
 <h2>Etendre Capifony</h2>
 
 <h3>Où est ce que je mets mon code ?</h3>
 
-<p>Partout et c'est un peu le souci! Vous pouvez le poser dans le fichier Capfile, le app/config/deploy.rb ou bien dans les fichiers spécifiques par environnement.</p>
+<p>Partout et c'est un peu le souci! Vous pouvez le poser dans le fichier Capfile, le <code>app/config/deploy.rb</code> ou bien dans les fichiers spécifiques par environnement.</p>
 
 <p>Ensuite si vous souhaitez partager du code entre les projets et les postes de dev, il va falloir passer par une extension et il y en a beaucoup. Essayez la commande suivante :</p>
 
@@ -177,7 +177,7 @@ set :gateway,     "deploy@lb.elao.com"
 <p>Dans ce cas 2 solutions s'offrent à vous :</p>
 
 <ul>
-<li>Faire un mirroir pour composer avec <a href="https://github.com/composer/satis">Satis</a>, mais cela devient complexe à maintenir particulièrement pour des projets avec beaucoup de dependances.</li>
+<li>Faire un mirroir pour Composer avec <a href="https://github.com/composer/satis">Satis</a>, mais cela devient complexe à maintenir particulièrement pour des projets avec beaucoup de dependances.</li>
 <li>Packager (fichier zip) les vendors dans le depot GIT de votre projet mais pas super glop pour la taille de votre repo.</li>
 </ul>
 
@@ -194,7 +194,7 @@ role(:db) { ["db2.elao.local", {:user =&gt; 'deploy2'}]
 
 <h3>Récupérer les hosts d'un rôle</h3>
 
-<p>Dans une configuration de multi hosts par rôle, nous avons des besoins d'exécuter des tâches sur chacun d'entre eux. Le code ci-dessous nous permet de générer le cache de nos applications Symfony 1.X sur tous les frontaux web.</p>
+<p>Dans une configuration de multi hosts par rôle, nous avons des besoins d'exécuter des tâches sur chacun d'entre eux. Le code ci-dessous nous permet de générer le cache de nos applications symfony 1.x sur tous les frontaux web.</p>
 
 <pre class="ruby"><code>servers = find_servers(:roles =&gt; :app)
 servers.each_with_index do |server, idx|
@@ -254,13 +254,13 @@ end
 
 <p>L'annonce détaillé de Capistrano 3 est disponible <a href="http://www.capistranorb.com/2013/06/01/release-announcement.html">ici</a>.</p>
 
-<p>Donc beaucoup de changement qui ont un impact fort sur Capifony, ce qui a déclenché cette belle <a href="https://github.com/everzet/capifony/pull/437">PR</a> sur le rewrite de Capifony pour sa version 3. C'est <a href="https://github.com/peterjmit">Peter Mitchell</a>, le nouveau lead developer du projet qui port le sujet.</p>
+<p>Donc beaucoup de changement qui ont un impact fort sur Capifony, ce qui a déclenché cette belle <a href="https://github.com/everzet/capifony/pull/437">PR</a> sur le rewrite de Capifony pour sa version 3. C'est <a href="https://github.com/peterjmit">Peter Mitchell</a>, le nouveau lead developer du projet qui porte le sujet.</p>
 
 <p>A suivre donc...</p>
 
 <h2>Conclusion</h2>
 
-<p>J'espère que cet article va donner aux utilisateurs actuels de Capifony d'aller un peu plus loin sur le sujet et  permettre à ceux qui ne le connaissent pas de laisser lui donner sa chance.<br />
+<p>J'espère que cet article va donner, aux utilisateurs actuels de Capifony, l'envie d'aller un peu plus loin sur le sujet et  permettre à ceux qui ne le connaissent pas de laisser lui donner sa chance.<br />
 N'hésitez à partager vos recipes Capistrano et autres retours d'expérience sur le sujet, je suis le premier preneur.</p>
 {% endblock %}
 
