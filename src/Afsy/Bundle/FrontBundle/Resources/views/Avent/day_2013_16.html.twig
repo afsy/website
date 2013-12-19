@@ -23,10 +23,10 @@ Aujourd'hui, nous vous proposons de reprendre cette architecture mais "depuis le
 
 <ul>
 <li>Développer une application indépendante et autonome ("Full AngularJS"). Toute les logiques métiers seront réalisées en Javascript ou via des appels à l'API REST.</li>
-<li><p>De manière localisée dans votre page pour un widget par exemple. Vous aurez donc votre application Symfony et vos templates (Twig?) bootstrapant AngularJS.</p>
-
-<p>Par soucis pratique c'est cette dernière solution que nous avons utilisée dans notre application de démo, dispo sur <a href="https://github.com/LaNetscouade/afsy-avent-2013">GitHub</a>.</p></li>
+<li>De manière localisée dans votre page pour un widget par exemple. Vous aurez donc votre application Symfony et vos templates (Twig?) bootstrapant AngularJS.</li>
 </ul>
+<p>Par soucis pratique c'est cette dernière solution que nous avons utilisée dans notre application de démo, dispo sur <a href="https://github.com/LaNetscouade/afsy-avent-2013">GitHub</a>.</p>
+
 
 <h3>API Rest et AngularJs : Mise en place</h3>
 
@@ -86,10 +86,11 @@ Il est donc important d'isoler votre code Angular dans les templates Twig en uti
 Parmi ces outils, on citera :</p>
 
 <ul>
-<li><p><a href="https://github.com/bower/bower">Bower</a><br />
-Un outil pour gérer les dépendances et l'installation de composants "Frontend" (une sorte de composer pour le front). Il est possible d'intégrer facilement le gestionnaire Bower dans une application Symfony2 en utilisant, par exemple le bundle <a href="https://github.com/Spea/SpBowerBundle">SpBowerBundle</a>.</p></li>
-<li><p><a href="http://gruntjs.com/">Grunt</a><br />
+<li><a href="https://github.com/bower/bower">Bower</a><br />
+Un outil pour gérer les dépendances et l'installation de composants "Frontend" (une sorte de composer pour le front). Il est possible d'intégrer facilement le gestionnaire Bower dans une application Symfony2 en utilisant, par exemple le bundle <a href="https://github.com/Spea/SpBowerBundle">SpBowerBundle</a>.</li>
+<li><a href="http://gruntjs.com/">Grunt</a><br />
     Une boite à outil pour gérer toutes les tâches utiles pour le dev, telles que compiler des fichiers SASS ou minifier les fichiers Javascripts (il y en a beaucoup d'autres !). Sur certains aspects, ça peut ressembler à un Makefile orienté Javascript. Bien que nous ne l'avons pas testé, l'usage de Grunt dans Symfony est envisageable (Adieu Assetic ?!). Cet [article](http://wozbe.com/fr/blog/2013-08-07-integration-grunt-et-bower-au-sein-application-symfony) est un bon point de départ.
+    </li>
     </ul>
 
 <p>Vous pouvez voir un exemple d'intégration de Bower dans notre <a href="https://github.com/LaNetscouade/afsy-avent-2013/blob/master/src/LaNetscouade/AngularDemoBundle/Resources/config/bower/bower.json">démo</a></p>

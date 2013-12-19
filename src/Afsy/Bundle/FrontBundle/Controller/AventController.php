@@ -15,6 +15,8 @@ class AventController extends Controller
         // Last articles top
         2013 => array(
             '20-elasticsearch-dans-votre-Symfony2'                        => 'AfsyFrontBundle:Avent:day_2013_20.html.twig',
+            '19-bien-penser-ses-commandes-Symfony'                        => 'AfsyFrontBundle:Avent:day_2013_19.html.twig',
+            '18-capifony-et-capistrano'                                   => 'AfsyFrontBundle:Avent:day_2013_18.html.twig',
             '17-commencer-a-adopter-Devops-sur-ses-projets-Symfony'       => 'AfsyFrontBundle:Avent:day_2013_17.html.twig',
             '16-symfony-et-angularjs-tips'                                => 'AfsyFrontBundle:Avent:day_2013_16.html.twig',
             '15-etendre-behat-pour-y-mettre-son-metier'                   => 'AfsyFrontBundle:Avent:day_2013_15.html.twig',
