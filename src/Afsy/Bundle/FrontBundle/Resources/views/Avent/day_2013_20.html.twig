@@ -48,7 +48,8 @@
 
 <h2>Mettre en place le Bundle</h2>
 
-<p>Prenons l'exemple du site web de l'Afsy, qui est une application Symfony2 <a href="https://github.com/afsy/website">tout à fait classique</a>.Il est composé d'entités <strong>Article</strong> et <strong>Author</strong> que nous souhaitons indexer.</p>
+<p>Prenons l'exemple du site web de l'Afsy, qui est une application Symfony2 <a href="https://github.com/afsy/website">tout à fait classique</a>.
+ Il est composé d'entités <strong>Article</strong> et <strong>Author</strong> que nous souhaitons indexer.</p>
 
 <p>La première chose à faire est d'installer nos nouvelles dépendances, <strong>FOSElasticaBundle</strong> et <strong>JMSSerializerBundle</strong> :</p>
 
@@ -121,7 +122,7 @@ Refreshing afsy
 <li>et enfin, envoyer en <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-bulk.html">bulk</a> les documents dans le moteur d'indexation.</li>
 </ul>
 
-<p>Vous pouvez constater le bon fonctionnement de la commande en consultant le contenu de votre serveur ESvia <a href="http://mobz.github.io/elasticsearch-head/">le plugin Head</a>.</p>
+<p>Vous pouvez constater le bon fonctionnement de la commande en consultant le contenu de votre serveur ES via <a href="http://mobz.github.io/elasticsearch-head/">le plugin Head</a>.</p>
 
 <img src="{{ asset('bundles/afsyfront/images/avent/20-head.png') }}" alt="Head Plugin" style="display:block;margin:10px auto;" />
 
@@ -323,7 +324,7 @@ class ArticleRepository extends Repository
 
 <h2>Mettre en place une facette</h2>
 
-<p>Une des forces d'Elasticsearch est la possibilité de faire de l'aggregation sur les résultats et d'en sortir des statistiques.Il nous serait par exemple possible de récupérer la répartition des articles par année avec une <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-facets-date-histogram-facet.html">facette Date Histogram</a>. Voici comment l'implémenter avec Elastica :</p>
+<p>Une des forces d'Elasticsearch est la possibilité de faire de l'aggregation sur les résultats et d'en sortir des statistiques. Il nous serait par exemple possible de récupérer la répartition des articles par année avec une <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-facets-date-histogram-facet.html">facette Date Histogram</a>. Voici comment l'implémenter avec Elastica :</p>
 
 <pre class="php"><code>$query = \Elastica\Query::create(); // Nous recherchons tout (MatchAll)
 
