@@ -16,5 +16,8 @@ web/css/compiled
 web/js/compiled
 composer.phar
 
+# deployment
+bin/fabfile.py
+
 # other
 *.pyc

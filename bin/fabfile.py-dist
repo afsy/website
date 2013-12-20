@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import glob
+import re
+
+from time import strftime
+from fabric.api import *
+from fabric.contrib.files import exists
+
+
+env.roledefs = {
+    'prod': ['@prod_ssh_server@'],
+    'preprod': ['@preprod_ssh_server@']
+}
+
+path = {
+    'prod': '@prod_path@',
+    'preprod': '@preprod_path@'
+}
+
+env.use_ssh_config = True
+
+def wwwdata(command):
+    return sudo(command, user='www-data')
+
+@roles('preprod')
+def checkout_project(tag):
+    with cd(path[_getrole()]):
+        wwwdata('git fetch')
+        wwwdata('git fetch origin --tags')
+        wwwdata('git checkout ' + tag)
+        wwwdata('app/console cache:clear --env=prod')
+
+@roles('preprod')
+def deploy():
+    run('pwd') # go through the first connection
+    tag = "%s/%s" % (_getrole(), strftime("%Y/%m-%d-%H-%M-%S"))
+    local('git tag -a %s -m "%s"' % (tag, _getrole()))
+    local('git push')
+    local('git push --tags')
+    checkout_project(tag)
+
+
+def _getrole():
+    for role in env.roledefs:
+        if env.host_string in env.roledefs[role]:
+            return role
+
+    raise Exception('Role not found')
