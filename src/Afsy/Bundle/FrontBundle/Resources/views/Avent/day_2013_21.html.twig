@@ -23,11 +23,11 @@
 
 <p>Ca vous semble confus ? Voici deux images pour y voir plus clair :</p>
 
-<p><img src="../img/21-1-direct-messaging.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-1-direct-messaging.png" alt="image" /></p>
 
 <p>On a un système simple avec un appelant et un appelé, mais pas plus d'interactions.</p>
 
-<p><img src="../img/21-2-broker-messaging.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-2-broker-messaging.png" alt="image" /></p>
 
 <p>On a un système plus complexe où, grâce au service de messagerie, un appelant B peut communiquer directement avec 3 appelés X, Y et Z. (source des images : <a href="http://www.inspirel.com/yami4/book/4-1.html">Inspirel</a>).</p>
 
@@ -504,23 +504,23 @@ C'est ce que nous allons faire maintenant en créant la file d'attente liée à 
 <p>On va se rendre dans cette interface web, et cliquer sur l'onglet <a href="http://localhost:15672/#/queues">Queues</a>.<br />
 Puis, tout simplement ajouter une file d'attente comme suit :</p>
 
-<p><img src="../img/21-3-add-downloadimage-queue.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-3-add-downloadimage-queue.png" alt="image" /></p>
 
 <p>Une fois ajoutée, elle apparaît directement dans la liste des files d'attente :</p>
 
-<p><img src="../img/21-4-queues-list.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-4-queues-list.png" alt="image" /></p>
 
 <p>En parallèle, RabbitMQ crée automatiquement une boite d'échanges (visible dans l'onglet <a href="http://localhost:15672/#/exchanges">Exchanges</a>) avec le nom de la file d'attente :</p>
 
-<p><img src="../img/21-5-exchanges-list.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-5-exchanges-list.png" alt="image" /></p>
 
 <p>Il ne reste plus qu'à lier la file d'attente à la boite d'échanges :</p>
 
-<p><img src="../img/21-6-add-binding.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-6-add-binding.png" alt="image" /></p>
 
 <p>Ce qui donne :</p>
 
-<p><img src="../img/21-7-binded-queue.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-7-binded-queue.png" alt="image" /></p>
 
 <p>Et voilà !</p>
 
@@ -533,7 +533,7 @@ Normalement (si vous êtes connectés à internet ^^), la page se télécharge b
 
 <p>Une fois la page téléchargée, on peut voir que de nouveaux messages sont arrivés dans la file d'attente <code>afsy_download_image</code> :</p>
 
-<p><img src="../img/21-8-new-messages.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-8-new-messages.png" alt="image" /></p>
 
 <p>Il faut maintenant les traiter. Pour ça, on va utiliser la ligne de commande et lancer la commande suivante :</p>
 
@@ -550,7 +550,7 @@ $ php app/console rabbitmq:consumer -w -m 1 afsy_download_image
 
 <p>Normalement vous devriez avoir ce type de message :</p>
 
-<p><img src="../img/21-9-download-image.png" alt="image" /></p>
+<p><img src="/bundles/afsyfront/images/avent/21-9-download-image.png" alt="image" /></p>
 
 <p>Ca y est ! On a bien téléchargé notre première image. On peut maintenant lancer le traitement de toutes les autres :</p>
 
