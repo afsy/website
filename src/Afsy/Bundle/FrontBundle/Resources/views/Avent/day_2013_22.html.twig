@@ -66,13 +66,13 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
     {{ form_start(form) }}
 &lt;div class="row"&gt;
     {{ form_label(form.fanboy) }}
-        &lt;select data-bind="options: DeviceList, optionsText: 'name', value: brand"&gt;
+        &lt;select data-bind="options: BrandList, optionsText: 'name', value: brand"&gt;
         &lt;/select&gt;
 &lt;/div&gt;
 &lt;div class="row"&gt;
     {{ form_label(form.tablet) }}
     &lt;div data-bind="with: brand"&gt;
-        &lt;select data-bind="options: devices, optionsText: 'name', optionsValue: "value"&gt;
+        &lt;select data-bind="options: devices, optionsText: 'name', optionsValue: "id"&gt;
         &lt;/select&gt;
     &lt;/div&gt;
 &lt;/div&gt;
@@ -82,7 +82,7 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
 
 <p>Partie VueModèle</p>
 
-<pre class="js"><code>var DeviceList = [
+<pre class="js"><code>var BrandList = [
     { "name":    "Apple","devices":   [
             { "value": 1, "name": 'iPhone 4'},
             { "value": 2, "name" : 'iPhone 5'},
@@ -165,7 +165,7 @@ ko.applyBindings(new Device());
 
 ....
 
-{{ form_widget(form.tablet, {'data_bind': 'options: devices, optionsText: "name", optionsValue: "value"' }) }}
+{{ form_widget(form.tablet, {'data_bind': 'options: devices, optionsText: "name", optionsValue: "id"' }) }}
 
 ...
 </code></pre>
@@ -182,18 +182,18 @@ ko.applyBindings(new Device());
     public function choseTablet2Action()
     {
         $form = $this-&gt;createForm(new DeviceType());
-        $devices = array(
+        $$brands = array(
             array(
                 "name"      =&gt; "Apple",
                 "devices"   =&gt; array(
-                    array("value" =&gt; 1, "name"  =&gt; "iPhone 4"),
+                    array("id" =&gt; 1, "name"  =&gt; "iPhone 4"),
                     ...
                 )
             ),
             array(
                 "name"      =&gt; "Google",
                 "devices"   =&gt; array(
-                    array("value" =&gt; 1, "name"  =&gt; "Nexus 4"),
+                    array("id" =&gt; 1, "name"  =&gt; "Nexus 4"),
                     ...
                 )
             ),
@@ -201,18 +201,72 @@ ko.applyBindings(new Device());
 
         return array(
             'form'      =&gt; $form-&gt;createView(),
-            'devices'   =&gt; json_encode($devices),
+            'devices'   =&gt; json_encode($brands),
         );
     }
 </code></pre>
 
-<p>On récupère alors les données dans notre code js, et le tour est joué. Evidemment le gain ici est très limité, on avait des données en dur en javascript et l'on passe à des données en dur en php. Cela prend par contre tout son sens lorsque les données deviennent dynamiques, typiquement lorsqu'on récupère des entités du modèle Symfony2.</p>
+<p>On récupère alors les données dans notre code js, et le tour est joué. Evidemment l'intérêt ici est très limité, on avait des données en dur en javascript et l'on passe à des données en dur en php. Cela prend par contre tout son sens lorsque les données deviennent dynamiques, typiquement lorsqu'on récupère des entités du modèle Symfony2.<br />
+Par exemple, créons des entités Brand et Device et utilisons des formulaires de type "entity".</p>
+
+<pre class="php"><code>//DeviceType.php
+$builder-&gt;add('device', 'entity', array(
+            'label'     =&gt; 'Quel appareil souhaites-tu te faire offrir par le Père Noël ?',
+            "class"     =&gt; 'AcmeDemoBundle:Device',
+            "property"  =&gt; 'name',
+        ));
+        $builder-&gt;add('fanboy', 'entity', array(
+            'label'     =&gt; 'Quelle est ta marque préférée ?',
+            'class'     =&gt; 'AcmeDemoBundle:Brand',
+            "property"  =&gt; 'name',
+        ));
+</code></pre>
+
+<p>Pas besoin de changer quoi que ce soit pour l'instant dans la template puisque le type "entity" hérite de "type". Par contre, les données envoyées en json sont maintenant celles du modèle.<br />
+Pour transmettre la même structure, il nous suffit d'implémenter \JSONSerializable :</p>
+
+<pre class="php"><code>//Brand.php
+...
+class Brand implements \JsonSerializable
+{
+...
+public function jsonSerialize()
+    {
+        return [
+            'id'        =&gt; $this-&gt;id,
+            'name'      =&gt; $this-&gt;name,
+            'devices'   =&gt; $this-&gt;devices-&gt;toArray(),
+        ];
+    }
+//Device.php
+...
+class Device implements \JsonSerializable
+{
+...
+public function jsonSerialize()
+    {
+        return [
+            'id'        =&gt; $this-&gt;id,
+            'name'      =&gt; $this-&gt;name,
+        ];
+    }
+...
+</code></pre>
+
+<p>et de même dans la classe Device. Il ne reste plus qu'à remplacer le tableau en dur $brands du controlleur par la liste des objets Brands trouvés en table :</p>
+
+<pre class="php"><code>//ChristmasController
+$brands = $this-&gt;getDoctrine()-&gt;getRepository('AcmeDemoBundle:Brand')-&gt;findAll();
+</code></pre>
 
 <h3>Et ensuite ?</h3>
 
-<p>Quelques éléments pour aller plus loin :<br />
-* jusqu'ici, toute la configuration du data-binding est faite directement dans la template. Cela fonctionne, mais il serait plus simple d'avoir à simplement déclarer si l'on veut activer ou non le data-binding sur notre formulaire. Il suffit pour cela d'étendre le type de base (choice en l'occurrence), et tout peut être défini au niveau du formulaire.<br />
-* En général, comme indiqué juste avant, on n'aura pas à manipuler des tableaux écrits à la main mais des entités. Dans les cas simples, il suffit d'implémenter JsonSerializable dans vos entités, autrement, penser à utiliser le JMSSerializerBundle ; les groupes peuvent notamment s'avérer utiles pour serialiser ces données dans plusieurs contextes.</p>
+<p>Quelques éléments pour aller plus loin :</p>
+
+<ul>
+<li>Jusqu'ici, toute la configuration du data-binding est faite directement dans la template. Cela fonctionne, mais il serait plus simple d'avoir à simplement déclarer si l'on veut activer ou non le data-binding sur notre formulaire. Il suffit pour cela d'étendre le type de base (choice en l'occurrence), et tout peut être défini au niveau du formulaire.</li>
+<li>J'ai présenté la version basique de la sérialisation ici, en pratique, penser au JMSSerializerBundle ! Notamment les groupes qui permettent de contrôler ce que l'on veut sérialiser en fonction du contexte, pratique si vous avez besoin de faire du data-binding de la même entité dans plusieurs contexte différents, ou tout simplement pour ne pas contraindre la structure si vous avez besoin d'une version sérialisée de l'entité à un autre endroit.</li>
+</ul>
 
 <h2>En conclusion</h2>
 
@@ -220,6 +274,7 @@ ko.applyBindings(new Device());
 
 <ul>
 <li>Une présentation très instructive sur la comparaison entre emberjs, angularjs et knockoutjs : <a href="http://2013.jsconf.eu/speakers/marius-gundersen-a-comparison-of-the-twoway-binding-in-angularjs-emberjs-and-knockoutjs.html">http://2013.jsconf.eu/speakers/marius-gundersen-a-comparison-of-the-twoway-binding-in-angularjs-emberjs-and-knockoutjs.html</a>. En teaser une différence notable : contrairement aux deux autres, angular n'utilise pas vraiment le pattern Observateur, mais fait du dirty-checking, i.e. à chaque modification il doit vérifier si chacune des variables a été modifiée. D'où quelques lenteurs quand on modifie une seule des variables s'il y en a beaucoup d'autres ! Knockout et Ember ont eux aussi des faiblesses dans d'autres contexte, car la mise à jour des observables est plus lourde.</li>
+<li>Une série d'articles utiles sur knockout : <a href="http://www.jsmage.com/2013_09_01_archive.html">http://www.jsmage.com/2013_09_01_archive.html</a></li>
 <li>J'ai présenté ici des premiers exemples assez simples et isolés, dans une application réelle évidemment vous risquez d'avoir ce besoin sur un certain nombre de pages, et dans des contextes différents, attention donc à garder votre modèle knockout ou autre lisible et bien découpé, comme vous le faites déjà dans votre appli Symfony2 ;) </li>
 <li>Nous n'avons vu ici qu'une petite partie de ce que l'on peut faire en termes de data-binding, n'hésitez pas à jouer avec votre framework JS favori !</li>
 </ul>
