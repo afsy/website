@@ -10,20 +10,20 @@
 
 <p>Aujourd'hui nous allons nous intéresser aux formulaires Symfony2, côté frontend et rendu, et montrer comment ils peuvent s'intégrer à des librairies javascript pour améliorer l'expérience utilisateur en évitant le spaghetti.Js.</p>
 
-<p>Prenons un exemple : Kevin arrive sur <a href="#">perenoelcorp.com</a> pour y commander la dernière tablette de sa marque préférée* :</p>
+<p>Prenons un exemple : Kevin arrive sur perenoelcorp.com pour y commander la dernière tablette de sa marque préférée* :</p>
 
 <p><img src="/bundles/afsyfront/images/avent/22-1-device-choice.png" alt="Choix appareil" /></p>
 
 <p>Evidemment, en ajoutant plus de modèles, le menu déroulant devient rapidement moins pratique ! Ne pourrait-on pas demander à Kévin de choisir la marque puis le modèle ?</p>
 
 <ul>
-<li><p>V1 : on fait ça tranquille en deux temps :</p>
+<li>V1 : on fait ça tranquille en deux temps :
 
-<p><img src="/bundles/afsyfront/images/avent/22-2-static-version.png" alt="Choix marque statique" /></p></li>
-<li><p>V2 : un petit script JS avec appel AJAX pour récupérer le menu déroulant des appareils à chaque changement du menu déroulant des marques.</p>
+<img src="/bundles/afsyfront/images/avent/22-2-static-version.png" alt="Choix marque statique" /></li>
+<li>V2 : un petit script JS avec appel AJAX pour récupérer le menu déroulant des appareils à chaque changement du menu déroulant des marques.
 
-<p><img src="/bundles/afsyfront/images/avent/22-3-ajax-version.png" alt="Choix marque ajax" /></p></li>
-<li><p>V2 bis : le même mais sans appel AJAX : on précharge les différentes possibilités en amont, puis on met à jour le second formulaire en fonction.</p></li>
+<img src="/bundles/afsyfront/images/avent/22-3-ajax-version.png" alt="Choix marque ajax" /></li>
+<li>V2 bis : le même mais sans appel AJAX : on précharge les différentes possibilités en amont, puis on met à jour le second formulaire en fonction.</li>
 </ul>
 
 <p>Le data-binding et les outils existants vont nous permettre de mettre en pratique cette dernière idée de manière très simple.</p>
@@ -110,10 +110,12 @@ ko.applyBindings(new Device());
 <img src="/bundles/afsyfront/images/avent/22-4-apple-devices.png" alt="Apple sélectionné" /><br />
 <img src="/bundles/afsyfront/images/avent/22-5-google-devices.png" alt="Google sélectionné" /></p>
 
-<p>Nous avons donc :<br />
- * spécifié dans le second menu déroulant comment se fait le data-binding<br />
- * déclaré les éléments du modèle<br />
- * déclaré la marque comme Observable</p>
+<p>Nous avons donc :
+ <ul>
+  <li>Spécifié dans le second menu déroulant comment se fait le data-binding.</li>
+  <li>Déclaré les éléments du modèle./</li>
+  <li>Déclaré la marque comme Observable.</li>
+ </ul>
 
 <p>Cependant, pour la première étape, nous avons écrit le formulaire à la main. On ne profite du coup plus du formulaire Symfony2 que l'on avait pu définir avant d'ajouter le data-binding !</p>
 
