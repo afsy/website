@@ -10,7 +10,7 @@
 
 <p>Aujourd'hui nous allons nous intéresser aux formulaires Symfony2, côté frontend et rendu, et montrer comment ils peuvent s'intégrer à des librairies javascript pour améliorer l'expérience utilisateur en évitant le spaghetti.Js.</p>
 
-<p>Prenons un exemple : Kevin arrive sur perenoel.com pour y commander la dernière tablette de sa marque préférée* :</p>
+<p>Prenons un exemple : Kevin arrive sur <a href="#">perenoelcorp.com</a> pour y commander la dernière tablette de sa marque préférée* :</p>
 
 <p><img src="/bundles/afsyfront/images/avent/22-1-device-choice.png" alt="Choix appareil" /></p>
 
@@ -35,7 +35,7 @@
 <p>Le data-binding va consister à associer des éléments de la vue -ici nos deux menus déroulants- à un modèle, de sorte que toute modification de l'un soit répercutée automatiquement sur l'autre.<br />
 Il s'agit donc de data-binding à double sens ("two way bindings"), par opposition au schema classique dans lequel les modifications du modèles seraient répercutées sur la vue, mais pas le contraire. Les frameworks gérant le data-binding à double sens implémenteront en général le design pattern "Observateur", les changements de certains éléments du DOM étant scrutés par l'application. (Mais comme nous le verrons en conclusion, ce n'est pas 100% le cas pour certains).</p>
 
-<p>Diverses librairies javascript spécifiques et la plupart des frameworks JS permettent de faire du data-binding : <a href="http://docs.angularjs.org/guide/databinding">angularjs</a>, <a href="http://knockoutjs.com/documentation/introduction.html">knockoutjs</a>, <a href="http://emberjs.com/guides/object-model/bindings/">emberjs</a>, <a href="http://backbonejs.org/">backbonejs</a> avec éventuellement en complément <a href="http://epoxyjs.org/">epoxyjs</a>, <a href="http://www.rivetsjs.com/">rivetjs</a>, et d'autre !</p>
+<p>Diverses librairies javascript spécifiques et la plupart des frameworks JS permettent de faire du data-binding : <a href="http://docs.angularjs.org/guide/databinding">angularjs</a>, <a href="http://knockoutjs.com/documentation/introduction.html">knockoutjs</a>, <a href="http://emberjs.com/guides/object-model/bindings/">emberjs</a>, <a href="http://backbonejs.org/">backbonejs</a> avec éventuellement en complément <a href="http://epoxyjs.org/">epoxyjs</a>, <a href="http://www.rivetsjs.com/">rivetjs</a>, et pas mal d'autres !</p>
 
 <p>Je ne les ai pas tous testés intensivement et le but de cet article n'est pas de faire une fastidieuse démo de chacun de ces outils. Nous allons nous intéresser à la manière dont on peut personnaliser ses formulaires Symfony2 pour les faire interagir très simplement avec l'une ou l'autre de ces librairies.</p>
 
@@ -45,7 +45,7 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
 
 <ul>
 <li>Evidemment, commencer ici : <a href="http://symfony.com/doc/current/cookbook/form/form_customization.html#cookbook-form-theming-methods">http://symfony.com/doc/current/cookbook/form/form_customization.html#cookbook-form-theming-methods</a></li>
-<li>Pour personnaliser les variables du formulaire dans la vue :  * <a href="http://symfony.com/doc/current/reference/forms/twig_reference.html#more-about-form-variables">http://symfony.com/doc/current/reference/forms/twig_reference.html#more-about-form-variables</a></li>
+<li>Pour personnaliser les variables du formulaire dans la vue : <a href="http://symfony.com/doc/current/reference/forms/twig_reference.html#more-about-form-variables">http://symfony.com/doc/current/reference/forms/twig_reference.html#more-about-form-variables</a></li>
 <li>Sur les formulaires eux-mêmes : <a href="http://symfony.com/doc/current/cookbook/form/create_custom_field_type.html">http://symfony.com/doc/current/cookbook/form/create_custom_field_type.html</a></li>
 </ul>
 
@@ -72,7 +72,7 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
 &lt;div class="row"&gt;
     {{ form_label(form.tablet) }}
     &lt;div data-bind="with: brand"&gt;
-        &lt;select data-bind="options: devices, optionsText: 'name', optionsValue: "value""&gt;
+        &lt;select data-bind="options: devices, optionsText: 'name', optionsValue: "value"&gt;
         &lt;/select&gt;
     &lt;/div&gt;
 &lt;/div&gt;
@@ -101,7 +101,6 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
 
 var Device = function() {
     this.brand = ko.observable();
-    this.device = ko.observable();
 }
 
 ko.applyBindings(new Device());
@@ -111,7 +110,12 @@ ko.applyBindings(new Device());
 <img src="/bundles/afsyfront/images/avent/22-4-apple-devices.png" alt="Apple sélectionné" /><br />
 <img src="/bundles/afsyfront/images/avent/22-5-google-devices.png" alt="Google sélectionné" /></p>
 
-<p>Cependant, nous avons ici à peu près tout fait côté javascript. On ne profite du coup plus du formulaire Symfony2 que l'on avait pu définir avant d'ajouter le data-binding !</p>
+<p>Nous avons donc :<br />
+ * spécifié dans le second menu déroulant comment se fait le data-binding<br />
+ * déclaré les éléments du modèle<br />
+ * déclaré la marque comme Observable</p>
+
+<p>Cependant, pour la première étape, nous avons écrit le formulaire à la main. On ne profite du coup plus du formulaire Symfony2 que l'on avait pu définir avant d'ajouter le data-binding !</p>
 
 <p>C'est ici que nous allons devoir créer une template de formulaire personnalisée.</p>
 
@@ -166,7 +170,7 @@ ko.applyBindings(new Device());
 ...
 </code></pre>
 
-<p>Nous avons légèrement avancé : on profite du système de templating des formulaires Symfony, par exemple l'id est de nouveau générée automatiquement, on récupère les options du formulaire type "required", etc. Par contre, les données affichées dans le formulaire sont toujours écrites en dur dans le fichier JS...</p>
+<p>Nous avons légèrement avancé : on profite du système de templating des formulaires Symfony, par exemple l'id est de nouveau générée automatiquement, on récupère les options du formulaire type "required", etc. De plus, cela permet d'utiliser le même formulaire dans plusieurs contextes, selon que l'on veut ou non utiliser le data-binding. Par contre, les données affichées dans le formulaire sont toujours écrites en dur dans le fichier JS...</p>
 
 <p>Nous allons donc les passer depuis Symfony :</p>
 
@@ -202,14 +206,13 @@ ko.applyBindings(new Device());
     }
 </code></pre>
 
-<p>On récupère alors les données dans notre code js, et le tour est joué. Evidemment l'intérêt ici est très limité, on avait des données en dur en javascript et l'on passe à des données en dur en php. Cela prend par contre tout son sens lorsque les données deviennent dynamiques, typiquement lorsqu'on récupère des entités du modèle Symfony2.</p>
+<p>On récupère alors les données dans notre code js, et le tour est joué. Evidemment le gain ici est très limité, on avait des données en dur en javascript et l'on passe à des données en dur en php. Cela prend par contre tout son sens lorsque les données deviennent dynamiques, typiquement lorsqu'on récupère des entités du modèle Symfony2.</p>
 
 <h3>Et ensuite ?</h3>
 
 <p>Quelques éléments pour aller plus loin :<br />
 * jusqu'ici, toute la configuration du data-binding est faite directement dans la template. Cela fonctionne, mais il serait plus simple d'avoir à simplement déclarer si l'on veut activer ou non le data-binding sur notre formulaire. Il suffit pour cela d'étendre le type de base (choice en l'occurrence), et tout peut être défini au niveau du formulaire.<br />
-* En général, on n'aura pas à manipuler des tableaux écrits à la main mais des entités. Dans les cas simples, il suffit d'implémenter<br />
-JsonSerializable dans vos entités, autrement, penser à utiliser le JMSSerializerBundle !</p>
+* En général, comme indiqué juste avant, on n'aura pas à manipuler des tableaux écrits à la main mais des entités. Dans les cas simples, il suffit d'implémenter JsonSerializable dans vos entités, autrement, penser à utiliser le JMSSerializerBundle ; les groupes peuvent notamment s'avérer utiles pour serialiser ces données dans plusieurs contextes.</p>
 
 <h2>En conclusion</h2>
 
@@ -221,7 +224,7 @@ JsonSerializable dans vos entités, autrement, penser à utiliser le JMSSerializ
 <li>Nous n'avons vu ici qu'une petite partie de ce que l'on peut faire en termes de data-binding, n'hésitez pas à jouer avec votre framework JS favori !</li>
 </ul>
 
-<p><sub>*note : les objets évoqués ne sont là qu'à titre d'exemple, l'auteur n'a aucun lien avec l'une ou l'autre des marques présentées ou aucune autre et ne vous dira même pas quel est le modèle de son propre téléphone.</sub></p>
+<p><sub>*note : les objets évoqués ne sont là qu'à titre d'exemple, l'auteur n'a aucun lien avec l'une ou l'autre des marques présentées ou aucune autre et gardera pour lui le modèle et la marque de son propre téléphone.</sub></p>
 {% endverbatim %}
 {%endblock article_content %}
 {% block article_avatar %}
