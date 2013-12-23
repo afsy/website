@@ -55,7 +55,7 @@ Imaginons développer une application qui a en charge un établissement de jeu d
 
 <h2 id="demonstration">Démonstration</h2>
 
-<p>Créons notre premier controleur dans notre bundle pour créer nos parties de cartes :</p>
+<p>Créons notre premier contrôleur dans notre bundle pour créer nos parties de cartes :</p>
 
 <pre><code class="language-php">&lt;?php
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -100,7 +100,7 @@ class GameController extends Controller
 <p>Oui ca serait plus sympa <strong>techniquement</strong>. Mais en soit en quoi ça va nous aider dans nos problématiques métier ?</p>
 
 <blockquote>
-  <p>"Il faut jamais faire de persist/flush dans notre controlleur ! Créons un service qui s'en occupe."</p>
+  <p>"Il faut jamais faire de persist/flush dans notre contrôleur ! Créons un service qui s'en occupe."</p>
 </blockquote>
 
 <p>Ok c'est un début.</p>
@@ -140,7 +140,7 @@ class GameManager
 }
 </code></pre>
 
-<p>Et modifions notre controlleur en conséquence :</p>
+<p>Et modifions notre contrôleur en conséquence :</p>
 
 <pre class="php"><code>&lt;?php
 /***/
@@ -234,14 +234,14 @@ Utilisons les groupes de validation ?</p>
 <p>Mais maintenant, on aimerait que quand il y a au moins 10 participants, un éclairage particulier soit mis en place sur la table. Ok c'est un simple <code>if</code> en fait. Mais à quel endroit ajouter cette vérification et déclencher l'allumage ?</p>
 
 <ul>
-<li>Dans notre controlleur ?</li>
+<li>Dans notre contrôleur ?</li>
 <li>Dans notre manager ?</li>
 <li>Dans notre validateur ?</li>
 </ul>
 
 <p><strong>STOOOOP !</strong></p>
 
-<p>Et si on commençait à réfléchir plus loin que 2 coups ? Descendre votre code dans une classe appelée depuis votre controlleur (notre GameManager ici) n'est pas un pattern en fait.</p>
+<p>Et si on commençait à réfléchir plus loin que 2 coups ? Descendre votre code dans une classe appelée depuis votre contrôleur (notre GameManager ici) n'est pas un pattern en fait.</p>
 
 <p>Et si l'on partait du postulat que oui forcément <strong>les règles métiers vont très vite évoluer</strong> comme dans toute application et qu'on s'armait en conséquence pour pouvoir capitaliser sur notre métier, le rendre le plus <strong>explicite et évolutif</strong> possible ?<br />
 Et surtout le <strong>rendre indépendant</strong> de tout framework ?</p>
@@ -264,11 +264,11 @@ Et surtout le <strong>rendre indépendant</strong> de tout framework ?</p>
 
 <p>Rassurez-vous le développement objet a 30 ans, <strong>ces problématiques ont déjà été rencontrées par d'autres</strong>. La solution est en fait d'appliquer, comme vous le faites pour vos problématiques techniques, des patterns pour votre partie métier. Ces différents concepts sont réunis sous le DDD : Domain Driven Design.</p>
 
-<p>L'objectif est de remettre <strong>le métier au coeur de vos préoccupations</strong>, l'implémentation technique n'étant alors que secondaire. L'approche est intéressante car en structurant notre partie métier, on en vient souvent à simplifier notre partie technique qui en devient, bien souvent, plus claire et limpide.</p>
+<p>L'objectif est de remettre <strong>le métier au coeur de vos préoccupations</strong>, l'implémentation technique n'étant alors que secondaire. L'approche est intéressante car en structurant notre partie métier, on en vient souvent à simplifier notre partie technique qui en devient limpide.</p>
 
-<p>Dans notre exemple notre domaine est donc les jeux de cartes. On ne veut pas que l'implémentation que se soit du stockage, du routing ou de la vue ne viennent changer la façon dont on va concevoir toute la logique business.</p>
+<p>Dans notre exemple notre domaine est donc les jeux de cartes. On ne veut pas que l'implémentation que ce soit du stockage, du routing ou de la vue ne viennent changer la façon dont on va concevoir toute la logique business.</p>
 
-<p>Regardons quelques exemples en détails qui pourraient nous aider à organiser et structurer notre partie métier.</p>
+<p>Regardons quelques exemples en détail qui pourraient nous aider à organiser et structurer notre partie métier.</p>
 
 <p>Attention, je ne vais pas rentrer dans le détail de chaque pattern présenté. L'idée est plus de <strong>sensibiliser et montrer rapidement leur intérêt</strong> pour vos applications. Par contre, vous trouverez à la fin la bibliographie sur laquelle je me suis appuyé pour mettre tout ça en place ainsi que l'application fil rouge réalisée pour les besoins de l'article.</p>
 
@@ -306,7 +306,7 @@ class PokerNbPlayersSpecification
     /***/
 </code></pre>
 
-<p>Évidemment, on peut maintenant facilement combiner toutes sortes de specifications (AND, OR, XOR,...) et surtout utiliser une librairie plutôt que de refaire toujours les mêmes choses tel que <a href="https://github.com/bobthecow/Ruler">Ruler</a>.</p>
+<p>Évidemment, on peut maintenant facilement combiner toutes sortes de spécifications (AND, OR, XOR,...) et surtout utiliser une librairie plutôt que de refaire toujours les mêmes choses tel que <a href="https://github.com/bobthecow/Ruler">Ruler</a> ou <a href="https://github.com/hoaproject/Ruler">Hoa\Ruler</a>.</p>
 
 <p>Mais le concept est là ! Comme Hugo l'expliquait dans <a href="http://afsy.fr/avent/2013/02-principes-stupid-solid-poo">son article sur STUPID/SOLID</a>, le nommage est difficile mais indispensable. Et selon le DDD, <strong>plus vous l'orientez métier, et plus il vous sera utile</strong>.</p>
 
@@ -324,9 +324,9 @@ class PokerNbPlayersSpecification
   <p>En quoi ça nous aide avec nos problématiques métiers ?</p>
 </blockquote>
 
-<p>Si on reprend notre controlleur initial, si on enlève le nom de notre action. Comment sait-on de quoi on parle ?</p>
+<p>Si on reprend notre contrôleur initial, si on enlève le nom de notre action. Comment sait-on de quoi on parle ?</p>
 
-<p>La partie <code>Command</code> prend ainsi tout son intérêt. Depuis vos controlleurs vous allez donner des ordres à votre application de la manière la plus précise possible : "Je veux créer une nouvelle partie de Poker avec 4 joueurs".</p>
+<p>La partie <code>Command</code> prend ainsi tout son intérêt. Depuis vos contrôleurs vous allez donner des ordres à votre application de la manière la plus précise possible : "Je veux créer une nouvelle partie de Poker avec 4 joueurs".</p>
 
 <pre><code class="language-php">&lt;?php
 // Je veux créer une nouvelle partie
@@ -359,7 +359,7 @@ class StartGameCommandHandler
 <p>Rien de plus encore une fois. On notera l'introduction de la nouvelle méthode <code>start</code> sur notre modèle qu'on verra plus bas.<br />
 On a maintenant un service capable d'<strong>encapsuler le traitement métier</strong> lié à la création d'une partie. Si à la création d'une partie, vous avez besoin de créer une autre entité ou autre <strong>nécessaire</strong> à la création, c'est par ici !</p>
 
-<p>Par convention dans ce pattern, on utilise un Bus pour enregistrer tous nos handlers de commandes et ainsi n'avoir qu'un seul service à utiliser. Je vous en passe l'implémentation qui ne nous intéresse pas. Voici par contre notre controlleur maintenant :</p>
+<p>Par convention dans ce pattern, on utilise un Bus pour enregistrer tous nos handlers de commandes et ainsi n'avoir qu'un seul service à utiliser. Je vous en passe l'implémentation qui ne nous intéresse pas. Voici par contre notre contrôleur maintenant :</p>
 
 <pre><code class="language-php">&lt;?php
 class GameController extends Controller
@@ -394,7 +394,7 @@ class GameController extends Controller
 <ul>
 <li>On ne travaille plus directement avec nos entités via notre formulaire. Plus besoin de setter/getter.<br />
 Et c'est souvent plus simple car on n'a pas besoin de faire des pirouettes dans notre formulaire. Notre command est notre objet <strong>dédié à notre action et pas à notre état</strong> !</li>
-<li>On voit maintenant qu'on parle d'une création de partie sans avoir le nom du controlleur et l'action. Sous entendu que ce code à un autre endroit a tout autant de sens.</li>
+<li>On voit maintenant qu'on parle d'une création de partie sans avoir le nom du contrôleur et l'action. Sous entendu que ce code à un autre endroit a tout autant de sens.</li>
 </ul>
 
 <p>Revenons maintenant à notre model et sa nouvelle méthode:</p>
@@ -467,14 +467,14 @@ class DomainEventProvider
 
 <h2 id="exemple">L'application fil rouge</h2>
 
-<p>Pour illustrer la totalité des concepts introduits voici une petite sandbox Symfony que j'ai développée :<br />
+<p>Pour illustrer la totalité des concepts introduits voici une petite sandbox Symfony que j'ai développé :<br />
 <a href="https://github.com/tyx/cqrs-php-sandbox">https://github.com/tyx/cqrs-php-sandbox</a></p>
 
 <p>Elle utilise la seule implémentation sérieuse de CQRS/EventSourcing en PHP de Benjamin Eberlei :<br />
 <a href="https://github.com/beberlei/litecqrs-php">https://github.com/beberlei/litecqrs-php</a></p>
 
-<p>Pour l'instant seul le jeu blackjack est développé. On pourrait certainement discuté sur plusieurs détails d'implémentation. Mais l'objectif n'est pas de donner une réponse universelle, je suis bien loin de détenir la véritié ;)<br />
-Mais de montrer qu'aujourd'ui le DDD n'est plus un simple fantasme, il peut être utilisé au coeur de nos applications Symfony.</p>
+<p>Pour l'instant seul le jeu blackjack est développé. On pourrait certainement discuter sur plusieurs détails d'implémentation. Mais l'objectif n'est pas de donner une réponse universelle, je suis bien loin de détenir la véritié ;)<br />
+Mais de montrer qu'aujourd'hui le DDD n'est plus un simple fantasme, il peut être utilisé au coeur de nos applications Symfony.</p>
 
 <h2 id="bibliographie">Bibliographie</h2>
 
