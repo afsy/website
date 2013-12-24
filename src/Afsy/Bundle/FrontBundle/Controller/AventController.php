@@ -14,6 +14,7 @@ class AventController extends Controller
     protected $slugs = array(
         // Last articles top
         2013 => array(
+            '24-avancee-symfony-2-5'                                      => 'AfsyFrontBundle:Avent:day_2013_24.html.twig',
             '23-sensibilisation-ddd'                                      => 'AfsyFrontBundle:Avent:day_2013_23.html.twig',
             '22-formulaires-Symfony2-et-data-binding'                     => 'AfsyFrontBundle:Avent:day_2013_22.html.twig',
             '21-rabbitmq-et-Symfony2-traitements-asynchrones'             => 'AfsyFrontBundle:Avent:day_2013_21.html.twig',
