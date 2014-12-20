@@ -388,18 +388,18 @@ $years  = $facets['years']['entries'];
 <pre class="yml"><code>indexes:
     afsy:
         client: default
-            settings:
-                index:
-                    analysis:
-                        analyzer:
-                            custom_french_analyzer:
-                                type: custom
-                                tokenizer: letter
-                                filter: ["asciifolding", "lowercase", "french_stem", "stop_fr"]
-                        filter:
-                            stop_fr:
-                                type: "stop"
-                                stopwords: ["l", "m", "t", "qu", "n", "s", "j", "d"]
+        settings:
+            index:
+                analysis:
+                    analyzer:
+                        custom_french_analyzer:
+                            type: custom
+                            tokenizer: letter
+                            filter: ["asciifolding", "lowercase", "french_stem", "stop_fr"]
+                    filter:
+                        stop_fr:
+                            type: "stop"
+                            stopwords: ["l", "m", "t", "qu", "n", "s", "j", "d"]
 </code></pre>
 
 <p>Nous faisons plusieurs choses avec cette configuration<sup id="fnref:3"><a href="#fn:3" rel="footnote">3</a></sup> :</p>
