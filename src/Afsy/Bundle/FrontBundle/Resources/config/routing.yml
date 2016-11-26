@@ -1,35 +1,35 @@
 homepage:
-    pattern:  /
+    path:  /
     defaults: { _controller: AfsyFrontBundle:Blog:index }
 
 feed_atom:
-    pattern: /feed.atom
+    path: /feed.atom
     defaults: { _controller: AfsyFrontBundle:Blog:feed }
 
 blog_home:
-    pattern: /blog
+    path: /blog
     defaults: { _controller: AfsyFrontBundle:Blog:index }
 
 blog_show:
-    pattern: /blog/{slug}
+    path: /blog/{slug}
     defaults: { _controller: AfsyFrontBundle:Blog:show }
 
 blog_preview:
-    pattern: /blog/preview/{slug}
+    path: /blog/preview/{slug}
     defaults: { _controller: AfsyFrontBundle:Blog:show, preview: true }
 
 blog_show_tag:
-    pattern: /blog/tag/{name}
+    path: /blog/tag/{name}
     defaults: { _controller: AfsyFrontBundle:Blog:showTag }
 
 avent:
-    pattern: /avent/{year}
+    path: /avent/{year}
     defaults: { _controller: AfsyFrontBundle:Avent:index, year: null }
 
 avent_feed_atom:
-    pattern: /avent/{year}/feed.atom
+    path: /avent/{year}/feed.atom
     defaults: { _controller: AfsyFrontBundle:Avent:feed, _format: xml }
 
 avent_day:
-    pattern: /avent/{year}/{slug}
+    path: /avent/{year}/{slug}
     defaults: { _controller: AfsyFrontBundle:Avent:day }

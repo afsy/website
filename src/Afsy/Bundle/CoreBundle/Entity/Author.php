@@ -2,7 +2,6 @@
 
 namespace Afsy\Bundle\CoreBundle\Entity;
 
-use JMS\SecurityExtraBundle\Security\Util\String;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use \Doctrine\Common\Collections\ArrayCollection;

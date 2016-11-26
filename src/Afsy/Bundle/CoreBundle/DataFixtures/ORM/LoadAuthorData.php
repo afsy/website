@@ -19,7 +19,15 @@ class LoadAuthorData extends AbstractFixture implements OrderedFixtureInterface
         $user->setEmail('xavier@lacot.org');
         $user->setCity('Paris');
         $user->setIsEnabled(true);
+
+        $maxime = new Author();
+        $maxime->setName('Maxime Veber');
+        $maxime->setEmail('nek.dev@gmail.com');
+        $maxime->setCity('Paris');
+        $maxime->setIsEnabled(true);
+
         $manager->persist($user);
+        $manager->persist($maxime);
         $this->addReference('xavierlacot', $user);
         $manager->flush();
     }

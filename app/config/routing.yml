@@ -12,24 +12,24 @@ hwi_oauth_security:
 
 # Sensio connect OAauth
 sensio_connect_login:
-    pattern: /login/check-connect
+    path: /login/check-connect
 
 logout:
-    pattern:   /logout
+    path:   /logout
 
 # Site / Admin
 afsy_front_bundle:
     resource: "@AfsyFrontBundle/Resources/config/routing.yml"
 
 admin_redirect:
-    pattern: /admin
+    path: /admin
     defaults:
         _controller: FrameworkBundle:Redirect:urlRedirect
         path: /admin/dashboard
         permanent: false
 
-admin:
-    resource: '@SonataAdminBundle/Resources/config/routing/sonata_admin.xml'
+admin_area:
+    resource: "@SonataAdminBundle/Resources/config/routing/sonata_admin.xml"
     prefix: /admin
 
 _sonata_admin:

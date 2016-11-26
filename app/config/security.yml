@@ -1,6 +1,6 @@
-jms_security_extra:
-    secure_all_services: false
-    expressions: true
+#jms_security_extra:
+#    secure_all_services: false
+#    expressions: true
 
 security:
     encoders:
@@ -18,11 +18,12 @@ security:
         secured_area:
             pattern:        ^/
             logout:         ~
-            anonymous:      true
+            anonymous:      ~
             oauth:
                 resource_owners:
                     sensio_connect: sensio_connect_login
                 login_path:     hwi_oauth_connect
+                use_forward:    false
                 failure_path:   hwi_oauth_connect
 
                 oauth_user_provider:

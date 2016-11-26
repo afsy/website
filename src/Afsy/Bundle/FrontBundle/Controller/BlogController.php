@@ -26,7 +26,7 @@ class BlogController extends Controller
         $query = $this->getDoctrine()->getRepository('AfsyCoreBundle:Article')->getQuery();
         $pagination = $this->get('knp_paginator')->paginate(
             $query,
-            $this->get('request')->query->get('page', 1)
+            $this->get('request_stack')->getCurrentRequest()->query->get('page', 1)
         );
         $tagManager = $this->get('fpn_tag.tag_manager');
 
@@ -60,7 +60,7 @@ class BlogController extends Controller
         $query = $this->getDoctrine()->getRepository('AfsyCoreBundle:Article')->getQueryForTag($tag);
         $pagination = $this->get('knp_paginator')->paginate(
             $query,
-            $this->get('request')->query->get('page', 1)
+            $this->get('request_stack')->getCurrentRequest()->query->get('page', 1)
         );
         $tagManager = $this->get('fpn_tag.tag_manager');
 
