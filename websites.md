@@ -36,4 +36,10 @@ Actualités / Vidéo / Media / Journalisme
 
 Symfony2
 
+Dailymotion
+-----------
+
+Vidéo
+
+Symfony2
 
