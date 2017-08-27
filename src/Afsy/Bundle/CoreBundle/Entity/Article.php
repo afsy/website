@@ -41,7 +41,6 @@ class Article implements Taggable
     /**
      * @var string
      * @ORM\Column(type="text")
-     * @Assert\NotBlank()
      */
     protected $body;
 
@@ -62,6 +61,7 @@ class Article implements Taggable
     /**
      * @var \DateTime
      * @ORM\Column(type="datetime", name="published_at")
+     * @Assert\DateTime()
      */
     protected $publishedAt;
 
@@ -74,6 +74,8 @@ class Article implements Taggable
     /**
      * @var \DateTime
      * @ORM\Column(type="datetime", name="event_date", nullable=true)
+     * @Assert\DateTime()
+     * @Assert\GreaterThan("today")
      */
     protected $eventDate;
 
@@ -124,7 +126,8 @@ class Article implements Taggable
     {
         $this->authors      = new ArrayCollection();
         $this->tags         = new ArrayCollection();
-        $this->publishedAt = new \DateTime();
+        $this->publishedAt  = new \DateTime();
+        $this->map          = '<img src="http://maps.googleapis.com/maps/api/staticmap?zoom=15&size=470x260&maptype=roadmap&markers=color:green|48.8588589,2.3470599&sensor=false" alt="" />';
     }
 
     public function __toString()
@@ -269,7 +272,7 @@ class Article implements Taggable
     /**
      * Set body
      *
-     * @param  text    $body
+     * @param  string    $body
      * @return Article
      */
     public function setBody($body)
@@ -282,7 +285,7 @@ class Article implements Taggable
     /**
      * Get body
      *
-     * @return text
+     * @return string
      */
     public function getBody()
     {
@@ -292,7 +295,7 @@ class Article implements Taggable
     /**
      * Set city
      *
-     * @param  text    $city
+     * @param  string    $city
      * @return Article
      */
     public function setCity($city)
@@ -305,7 +308,7 @@ class Article implements Taggable
     /**
      * Get city
      *
-     * @return text
+     * @return string
      */
     public function getCity()
     {
@@ -338,7 +341,7 @@ class Article implements Taggable
     /**
      * Set markdownBody
      *
-     * @param  text    $markdownBody
+     * @param  string    $markdownBody
      * @return Article
      */
     public function setMarkdownBody($markdownBody)
@@ -351,7 +354,7 @@ class Article implements Taggable
     /**
      * Get markdownBody
      *
-     * @return text
+     * @return string
      */
     public function getMarkdownBody()
     {
@@ -366,10 +369,10 @@ class Article implements Taggable
     /**
      * Set publishedAt
      *
-     * @param  datetime $publishedAt
+     * @param  \DateTime $publishedAt
      * @return Article
      */
-    public function setPublishedAt($publishedAt)
+    public function setPublishedAt(\DateTime $publishedAt)
     {
         $this->publishedAt = $publishedAt;
 
@@ -379,7 +382,7 @@ class Article implements Taggable
     /**
      * Get publishedAt
      *
-     * @return datetime
+     * @return \DateTime
      */
     public function getPublishedAt()
     {

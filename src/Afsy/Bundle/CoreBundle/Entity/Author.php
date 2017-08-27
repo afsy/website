@@ -49,7 +49,7 @@ class Author implements UserInterface
      * Author is enable to log into admin
      *
      * @ORM\Column(type="boolean", name="is_enabled")
-     * @Assert\NotBlank()
+     * @Assert\NotNull()
      */
     protected $isEnabled = false;
 

@@ -14,8 +14,9 @@ class ArticleAdmin extends Admin
     protected $tagsData;
 
     protected $datagridValues = array(
-        '_sort_order' => 'desc', // sort direction
-        '_sort_by' => 'published_at' // field name
+        '_sort_by' => 'publishedAt', // field name
+        '_sort_order' => 'DESC',
+        '_page' => 1
     );
 
     protected function configureFormFields(FormMapper $formMapper)
@@ -23,12 +24,11 @@ class ArticleAdmin extends Admin
         $formMapper
             ->with('General')
                 ->add('title')
-                ->add('body', null, array('required' => false, 'attr' => array('class' => 'hidden html-body')))
-                ->add('markdown_body', 'text', array('required' => false, 'attr' => array('class' => 'hidden markdown-body')))
+                ->add('markdownBody', 'textarea', array('required' => true, 'attr' => array('rows' => '12')))
             ->end()
             ->with('Options')
-                ->add('language', 'choice', array('choices' => array('fr' => 'French', 'en' => 'English')))
-                ->add('publishedAt')
+                ->add('language', 'choice', array('choices' => array('French' => 'fr', 'English' => 'en')))
+                ->add('publishedAt', 'datetime')
                 ->add('isPublished', null, array('required' => false))
                 ->add('authors')
                 ->add('tags_list', 'text', array('required' => true, 'attr' => array('class' => 'jquery-tag-it')))
@@ -36,7 +36,7 @@ class ArticleAdmin extends Admin
             ->with('Location')
                 ->add('city')
                 ->add('eventUrl')
-                ->add('eventDate')
+                ->add('eventDate', 'datetime')
                 ->add('address')
                 ->add('map')
             ->end()
@@ -135,17 +135,5 @@ class ArticleAdmin extends Admin
         $this->getTagManager()->loadTagging($object);
 
         return $object;
-    }
-
-    public function getTemplate($name)
-    {
-        switch ($name) {
-            case 'edit':
-                return 'AfsyAdminBundle:Article:edit.html.twig';
-                break;
-            default:
-                return parent::getTemplate($name);
-                break;
-        }
     }
 }

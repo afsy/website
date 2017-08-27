@@ -35,5 +35,11 @@
                 <argument>AfsyAdminBundle</argument>
             </call>
         </service>
+
+        <service id="afsy.listeners.markdown_parser" class="Afsy\Bundle\AdminBundle\Listeners\MarkdownParserListener">
+            <argument type="service" id="markdown.parser" />
+            <tag name="doctrine.event_listener" event="prePersist" />
+            <tag name="doctrine.event_listener" event="preUpdate" />
+        </service>
     </services>
 </container>
