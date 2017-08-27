@@ -21,3 +21,4 @@ bin/fabfile.py
 
 # other
 *.pyc
+var/

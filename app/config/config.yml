@@ -87,6 +87,8 @@ stof_doctrine_extensions:
 hwi_oauth:
     # name of the firewall in which this bundle is active, this setting MUST be set
     firewall_names: [secured_area]
+    #http_client:
+    #    verify_peer:   false
     resource_owners:
         sensio_connect:
             type:                sensio_connect

@@ -5,18 +5,20 @@
         "psr-4": { "": "src/" },
         "classmap": [ "app/AppKernel.php", "app/AppCache.php" ]
     },
+    "comment": "right version of hwi oauth bundle should be 0.6, not released ATM",
     "require": {
         "php": ">=5.3.3",
-        "symfony/symfony": "3.1.*",
+        "symfony/symfony": "3.3.*",
         "doctrine/orm": "^2.5",
         "doctrine/doctrine-bundle": "^1.6",
         "doctrine/doctrine-cache-bundle": "^1.2",
+        "twig/twig": "^1.0||^2.0",
         "twig/extensions": "1.0.*@dev",
         "symfony/assetic-bundle": "^2.8",
-        "symfony/swiftmailer-bundle": "^2.3",
-        "symfony/monolog-bundle": "^2.8",
+        "symfony/swiftmailer-bundle": "^2.3.10",
+        "symfony/monolog-bundle": "^3.1.0",
         "symfony/polyfill-apcu": "^1.0",
-        "sensio/distribution-bundle": "^5.0",
+        "sensio/distribution-bundle": "^5.0.19",
         "sensio/framework-extra-bundle": "^3.0.2",
         "stof/doctrine-extensions-bundle": "dev-master",
         "fpn/tag-bundle": "dev-master",
@@ -26,11 +28,12 @@
         "doctrine/doctrine-fixtures-bundle": "^2.3",
 
         "knplabs/knp-paginator-bundle": "^2.5.3",
-        "hwi/oauth-bundle": "^0.5.1",
+        "hwi/oauth-bundle": "dev-master",
         "knplabs/knp-menu-bundle": "^2.1",
 
         "incenteev/composer-parameter-handler": "^2.0",
-        "sonata-project/admin-bundle": "^3.10"
+        "sonata-project/admin-bundle": "^3.10",
+        "sonata-project/doctrine-orm-admin-bundle": "^3.1"
     },
     "scripts": {
         "symfony-scripts": [
