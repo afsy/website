@@ -7,9 +7,6 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Knp\Bundle\MarkdownBundle\MarkdownParserInterface;
 
-/**
- * Class MarkdownParserListener
- */
 class MarkdownParserListener
 {
     /**

@@ -18,7 +18,7 @@ framework:
         version: 3
     default_locale:  "%locale%"
     trusted_proxies: ~
-    trusted_hosts: ['.*\.?afsy.fr$', 'localhost']
+    trusted_hosts: ['^(www\.)?afsy.fr$']
     session:
         # http://symfony.com/doc/current/reference/configuration/framework.html#handler-id
         handler_id:  session.handler.native_file
@@ -116,13 +116,4 @@ sonata_block:
         sonata.block.service.text:
         sonata.block.service.action:
         sonata.block.service.rss:
-#
-#sonata_admin:
-#    title:      Afsy admin
-#    title_logo: /bundles/afsyadmin/images/logo.png
-#    templates:
-#        layout:  AfsyAdminBundle::layout.html.twig
-#    dashboard:
-#        blocks:
-#            # display a dashboard block
-#            - { position: left, type: sonata.admin.block.admin_list }
+
