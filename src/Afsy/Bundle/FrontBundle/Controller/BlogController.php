@@ -6,6 +6,7 @@ use Afsy\Bundle\CoreBundle\Entity\Article;
 use Afsy\Bundle\CoreBundle\Entity\Tag;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -21,12 +22,12 @@ class BlogController extends Controller
      *
      * @Template()
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
         $query = $this->getDoctrine()->getRepository('AfsyCoreBundle:Article')->getQuery();
         $pagination = $this->get('knp_paginator')->paginate(
             $query,
-            $this->get('request_stack')->getCurrentRequest()->query->get('page', 1)
+            $request->query->get('page', 1)
         );
         $tagManager = $this->get('fpn_tag.tag_manager');
 
@@ -55,12 +56,12 @@ class BlogController extends Controller
     /**
      * @Template("AfsyFrontBundle:Blog:index.html.twig")
      */
-    public function showTagAction(Tag $tag)
+    public function showTagAction(Request $request, Tag $tag)
     {
         $query = $this->getDoctrine()->getRepository('AfsyCoreBundle:Article')->getQueryForTag($tag);
         $pagination = $this->get('knp_paginator')->paginate(
             $query,
-            $this->get('request_stack')->getCurrentRequest()->query->get('page', 1)
+            $request->query->get('page', 1)
         );
         $tagManager = $this->get('fpn_tag.tag_manager');
 
