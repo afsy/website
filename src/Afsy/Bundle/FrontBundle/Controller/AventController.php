@@ -39,8 +39,8 @@ class AventController extends Controller
             '02-principes-stupid-solid-poo'                               => 'AfsyFrontBundle:Avent:day_2013_02.html.twig',
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
-        2017 => [
-        ]
+        2017 => array(
+        )
     );
 
     public function indexAction($year)
