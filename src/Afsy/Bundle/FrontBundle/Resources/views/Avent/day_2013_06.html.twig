@@ -143,7 +143,7 @@
     <code>rest</code> depuis le contrôleur de notre API :
 </p>
 
-<pre class="yaml"><code># le routing.yml de notre bundle
+<pre class="language-yaml"><code># le routing.yml de notre bundle
 ponies:
     type:     rest
     resource: Pony\ApiBundle\Controller\PoniesController
@@ -154,7 +154,7 @@ ponies:
     actions...
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 namespace Pony\ApiBundle\Controller;
 
@@ -292,7 +292,7 @@ class PoniesController
     aisément définir les codes de statut à associer à une réponse HTTP :
 </p>
 
-<pre class="php"><code>$response-&gt;setStatusCode(Response::HTTP_OK);
+<pre class="language-php"><code>$response-&gt;setStatusCode(Response::HTTP_OK);
 </code></pre>
 
 <p>
@@ -362,7 +362,7 @@ class PoniesController
     <code>FOSRestBundle</code> :
 </p>
 
-<pre class="php"><code>/**
+<pre class="language-php"><code>/**
  * @QueryParam(name="height", requirements="\d+", description="Height of the pony in cm.")
  * @QueryParam(name="type", description="Type of the pony.")
  */
@@ -463,7 +463,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
     <code>Link</code> associée à la page 2 devrait ressembler à :
 </p>
 
-<pre class="no-highlight"><code>Link: &lt;https://api.domain.com/ponies?page=1&amp;per_page=100&gt;; rel="first",
+<pre class="language-http"><code>Link: &lt;https://api.domain.com/ponies?page=1&amp;per_page=100&gt;; rel="first",
       &lt;https://api.domain.com/ponies?page=1&amp;per_page=100&gt;; rel="prev",
       &lt;https://api.domain.com/ponies?page=3&amp;per_page=100&gt;; rel="next",
       &lt;https://api.domain.com/ponies?page=118&amp;per_page=100&gt;; rel="last"
@@ -474,7 +474,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
     pour traiter correctement cette problématique :
 </p>
 
-<pre class="php"><code>$response-&gt;headers-&gt;set('Link', $links);
+<pre class="language-php"><code>$response-&gt;headers-&gt;set('Link', $links);
 </code></pre>
 
 <h3>Sérialisation</h3>
@@ -576,7 +576,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
     nécessaires à l'affichage dans un seul service, eg. :
 </p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "poney": {
         "id": 118,
         "name": "Michel",
@@ -619,7 +619,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
     pourrait être :
 </p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "poney": {
         "id": 118,
         "name": "Michel",
@@ -662,7 +662,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
 
 <p>La réponse pourrait par exemple devenir :</p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "poney": {
         "id": 118,
         "name": "Michel",
@@ -721,7 +721,7 @@ public function getPoniesAction(ParamFetcher $paramFetcher)
     <code>BazingaHateoasBundle</code> :
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 namespace Pony\ApiBundle\Entity;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -749,7 +749,7 @@ class Pony
     ajoutés :
 </p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "id": 1,
     "name": "John Silver",
     "type": "Connemara",
@@ -940,7 +940,7 @@ class Pony
 
 <p>Par exemple :</p>
 
-<pre class="http"><code>X-Rate-Limit-Limit: 7500
+<pre class="language-http"><code>X-Rate-Limit-Limit: 7500
 X-Rate-Limit-Remaining: 7499
 X-Rate-Limit-Reset: 1386256560
 </code></pre>
@@ -979,7 +979,7 @@ X-Rate-Limit-Reset: 1386256560
     <code>@QueryParam</code> :
 </p>
 
-<pre class="php"><code>/**
+<pre class="language-php"><code>/**
  * @QueryParam(name="height", requirements="\d+", description="Height of the pony in centimeters.")
  * @QueryParam(name="type", description="Type of the pony.")
  *

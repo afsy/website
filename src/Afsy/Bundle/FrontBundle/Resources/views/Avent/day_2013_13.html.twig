@@ -93,7 +93,7 @@ Son implémentation est <a href="http://symfonic.fr/fr/2012/08/gestion-cache-htt
 <li>En revanche si cette modification provient de sources automatiques, il faut mettre en place son propre monitoring. Par exemple, on peut très bien utiliser <a href="https://github.com/etsy/statsd/">Statsd</a> avec la bibliothèque <a href="https://github.com/domnikl/statsd-php">statsd-php</a> et mettre ce bout de code :</li>
 </ul>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 if ($dataHasChanged) {
     $statsd-&gt;timing("mydata.".$dataKey.".versatility", $timeBetweenUpdate);
 }

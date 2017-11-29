@@ -29,7 +29,7 @@
 
 <h3>Mesurer les progrès</h3>
 
-<pre class="php"><code>$progress-&gt;setEmptyBarCharacter('.');
+<pre class="language-php"><code>$progress-&gt;setEmptyBarCharacter('.');
 $progress-&gt;setBarCharacter("\xf0\x9f\x8e\x84");
 $progress-&gt;setProgressCharacter("\xf0\x9f\x8e\x85");
 $progress-&gt;setFormat('&lt;info&gt;%current%&lt;/info&gt; &lt;info&gt;[&lt;/info&gt;%bar%&lt;info&gt;]&lt;/info&gt; &lt;comment&gt;Elapsed: %elapsed%&lt;/comment&gt;');
@@ -39,7 +39,7 @@ $progress-&gt;setFormat('&lt;info&gt;%current%&lt;/info&gt; &lt;info&gt;[&lt;/in
 
 <h3>C'est le moment de passer à table !</h3>
 
-<pre class="php"><code>$table = $this-&gt;getHelperSet()-&gt;get('table');
+<pre class="language-php"><code>$table = $this-&gt;getHelperSet()-&gt;get('table');
 $christmasTreeEmoji = "\xf0\x9f\x8e\x84";
 $santaEmoji = "\xf0\x9f\x8e\x85";
 
@@ -87,7 +87,7 @@ $table-&gt;render($output);
 
 <p>Par exemple le code suivant:</p>
 
-<pre class="php"><code>$logger = $this-&gt;getContainer()-&gt;get('logger');
+<pre class="language-php"><code>$logger = $this-&gt;getContainer()-&gt;get('logger');
 
 $presents = array('presents' =&gt; array('cigar', 'lin', 'Twist Lessons', 'Neverland'));
 
@@ -115,7 +115,7 @@ $logger-&gt;emerg('This is an emergency message', $presents);
 
 <p>Vous disposez désormais de 4 méthodes explicites. Un exemple vaut mieux que de longs discours:</p>
 
-<pre class="php"><code>if ($output-&gt;isVerbose()) {
+<pre class="language-php"><code>if ($output-&gt;isVerbose()) {
     // ...
 }
 

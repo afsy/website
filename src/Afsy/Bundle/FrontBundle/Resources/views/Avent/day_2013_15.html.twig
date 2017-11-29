@@ -23,7 +23,7 @@ Alors je vois "Votre message a été envoyé"
 
 <p>On implémente ensuite ces phrases avec des méthodes PHP, pour exécuter le test :</p>
 
-<pre class="php"><code>/**
+<pre class="language-php"><code>/**
  * @When /^je clique sur "(.*)"$/
  */
 public function iClickOn($text)
@@ -112,7 +112,7 @@ class FeatureContext extends BehatContext
 
 <p>Chaque contexte est ici nommé, pour être retrouvé ultérieurement. Par exemple, si vous êtes dans le contexte <code>ApiContext</code> et que vous souhaitez accéder à <code>WebDriverContext</code>, vous pouvez faire :</p>
 
-<pre class="php"><code>class ApiContext extends BehatContext
+<pre class="language-php"><code>class ApiContext extends BehatContext
 {
     private function doSomething()
     {
@@ -134,7 +134,7 @@ class FeatureContext extends BehatContext
 
 <p>Behat dispose en interne d'un conteneur de services. Malheureusement, les contextes de notre application ne sont pas des services du conteneur. La méthode utilisée pour injecter les dépendances dans nos contextes est celle des <em>Initializers</em> : ce sont des services qui vont pouvoir itérer sur tous les contexte. L'interface d'un <em>Initializer</em> est la suivante :</p>
 
-<pre class="php"><code>namespace Behat\Behat\Context\Initializer;
+<pre class="language-php"><code>namespace Behat\Behat\Context\Initializer;
 
 interface InitializerInterface
 {
@@ -154,7 +154,7 @@ interface InitializerInterface
 
 <p>Pour pouvoir injecter nos dépendances dans nos contextes, nous allons tout d'abord modifier notre classe de contexte pour pouvoir y injecter notre valeur :</p>
 
-<pre class="php"><code>class FeatureContext extends BehatContext
+<pre class="language-php"><code>class FeatureContext extends BehatContext
 {
     private $fixturesPath;
 
@@ -167,7 +167,7 @@ interface InitializerInterface
 
 <p>Il ne reste plus qu'à faire en sorte que cette méthode soit appelée avec la bonne valeur. Pour cela, on crée l'<em>Initializer</em> associé :</p>
 
-<pre class="php"><code>namespace Acme\Behat\AcmeExtension\Context;
+<pre class="language-php"><code>namespace Acme\Behat\AcmeExtension\Context;
 
 use Behat\Behat\Context\Initializer\InitializerInterface;
 use Behat\Behat\Context\ContextInterface;
@@ -199,7 +199,7 @@ class FixturesInitializer implements InitializerInterface
 
 <p>Pour pouvoir utiliser le conteneur de services, on crée une extension. Cette extension prend la forme d'une classe PHP, qu'on définit comme ceci :</p>
 
-<pre class="php"><code># src/Acme/Behat/AcmeExtension/Extension.php
+<pre class="language-php"><code># src/Acme/Behat/AcmeExtension/Extension.php
 namespace Acme\Behat\AcmeExtension;
 
 use Behat\Behat\Extension\Extension as BaseExtension;
@@ -244,7 +244,7 @@ class Extension extends BaseExtension
 
 <p>Il ne nous reste plus qu'à l'activer dans <code>behat.yml</code> :</p>
 
-<pre class="yaml"><code>default:
+<pre class="language-yaml"><code>default:
     extensions:
         Acme\Behat\AcmeExtension\Extension:
             fixtures: fixtures.yml
@@ -262,7 +262,7 @@ class Extension extends BaseExtension
 
 <p>Nous créons dans un premier temps un service permettant d'accéder à notre application Symfony :</p>
 
-<pre class="php"><code>namespace Acme\Behat\KernelExtension;
+<pre class="language-php"><code>namespace Acme\Behat\KernelExtension;
 
 class KernelProxy
 {
@@ -305,7 +305,7 @@ class KernelProxy
 
 <p>On crée ensuite une interface pour les classes de contexte souhaitant accéder au proxy : <code>KernelProxyAwareInterface</code> :</p>
 
-<pre class="php"><code>namespace Acme\Behat\KernelExtension;
+<pre class="language-php"><code>namespace Acme\Behat\KernelExtension;
 
 interface KernelProxyAwareInterface
 {
@@ -315,7 +315,7 @@ interface KernelProxyAwareInterface
 
 <p>Dans notre classe de contexte, on implémente cette interface :</p>
 
-<pre class="php"><code>use Acme\Behat\KernelExtension\KernelAwareInterface;
+<pre class="language-php"><code>use Acme\Behat\KernelExtension\KernelAwareInterface;
 use Behat\Behat\Context\BehatContext;
 
 class FeatureContext extends BehatContext implements KernelAwareInterface
@@ -368,7 +368,7 @@ class FeatureContext extends BehatContext implements KernelAwareInterface
 
 <p>On crée notre extension Behat :</p>
 
-<pre class="php"><code># src/Acme/Behat/KernelExtension/Extension.php
+<pre class="language-php"><code># src/Acme/Behat/KernelExtension/Extension.php
 namespace Acme\Behat\KernelExtension;
 
 use Behat\Behat\Extension\Extension as BaseExtension;
@@ -395,7 +395,7 @@ class Extension extends BaseExtension
 
 <p>Finalement, dans notre fichier <code>behat.yml</code> :</p>
 
-<pre class="yaml"><code>default:
+<pre class="language-yaml"><code>default:
     extensions:
         Acme\Behat\KernelExtension\Extension: ~
 </code></pre>

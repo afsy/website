@@ -61,7 +61,7 @@ composer require friendsofsymfony/elastica-bundle 3.0.*@dev
 
 <p>On ajoute, comme d'habitude, les Bundles à notre Kernel :</p>
 
-<pre class="php"><code>// app/AppKernel.php
+<pre class="language-php"><code>// app/AppKernel.php
 public function registerBundles()
 {
     $bundles = array(
@@ -74,7 +74,7 @@ public function registerBundles()
 
 <p>Et enfin, le vif du sujet, la configuration. Notre node <abbr title="Elasticsearch">ES</abbr> expose ses API sur le port 9200 et nos deux entités seront des <strong>types</strong> dans le vocabulaire d'Elasticsearch, eux-même inclus dans un <strong>index</strong> que nous nommerons <strong>afsy</strong>.</p>
 
-<pre class="yml"><code>fos_elastica:
+<pre class="language-yaml"><code>fos_elastica:
     clients:
         default: { host: localhost, port: 9200 }
     serializer:
@@ -134,7 +134,7 @@ Refreshing afsy
 
 <p>Plutôt que de recréer l'index à chaque modification de contenu, nous allons mettre à jour l'index de façon transparente. Grâce aux <a href="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/events.html#lifecycle-events">LifeCycle Events de Doctrine</a>, il est possible de demander à notre Bundle d'envoyer dans <abbr title="Elasticsearch">ES</abbr> l'entité à chaque changement :</p>
 
-<pre class="yml"><code>persistence:
+<pre class="language-yaml"><code>persistence:
     driver: orm
     model:  Afsy\Bundle\CoreBundle\Entity\Article
     provider: ~
@@ -157,13 +157,13 @@ Refreshing afsy
 
 <p>Ainsi, le code suivant recherche "toto" dans le type Articles :</p>
 
-<pre class="php"><code>$article_type = $this-&gt;get('fos_elastica.index.afsy.article');
+<pre class="language-php"><code>$article_type = $this-&gt;get('fos_elastica.index.afsy.article');
 $article_type-&gt;search("toto");
 </code></pre>
 
 <p>Alors que celui-ci recherche aussi bien dans les Articles que dans les Authors car il cherche dans l'Index afsy :</p>
 
-<pre class="php"><code>$index = $this-&gt;get('fos_elastica.index.afsy');
+<pre class="language-php"><code>$index = $this-&gt;get('fos_elastica.index.afsy');
 $index-&gt;search("toto");
 </code></pre>
 
@@ -171,7 +171,7 @@ $index-&gt;search("toto");
 
 <p>La recherche que nous effectuons ici est la plus simple, il s'agit d'une <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html">QueryString</a> construite automatiquement pour nous par Elastica, voyons une requête plus complexe !</p>
 
-<pre class="php"><code>$type = $this-&gt;get('fos_elastica.index.afsy.article');
+<pre class="language-php"><code>$type = $this-&gt;get('fos_elastica.index.afsy.article');
 
 $query_part = new \Elastica\Query\Bool();
 $query_part-&gt;addShould(
@@ -200,7 +200,7 @@ $type-&gt;search($query);
 
 <p>Pour information, en JSON cela donne :</p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "query": {
         "filtered": {
             "query": {
@@ -247,7 +247,7 @@ $type-&gt;search($query);
 
 <p>FOSElasticaBundle permet, comme je le disais en introduction, de vous retourner vos entités plutôt que des objets <code>Elastica\Result</code>. Il utilise pour cela des Finder.</p>
 
-<pre class="yml"><code>persistence:
+<pre class="language-yaml"><code>persistence:
     driver: orm # orm, mongodb, propel are available
     model:  Afsy\Bundle\CoreBundle\Entity\Article
     provider: ~
@@ -257,7 +257,7 @@ $type-&gt;search($query);
 
 <p>La nouvelle ligne <code>finder: ~</code> dans notre configuration permet alors d'utiliser le service <code>fos_elastica.manager.orm</code> et de lancer des recherches sur des entités plutôt que sur des types <abbr title="Elasticsearch">ES</abbr> :</p>
 
-<pre class="php"><code>/** var FOS\ElasticaBundle\Manager\RepositoryManager */
+<pre class="language-php"><code>/** var FOS\ElasticaBundle\Manager\RepositoryManager */
 $repositoryManager = $container-&gt;get('fos_elastica.manager.orm');
 
 /** var FOS\ElasticaBundle\Repository */
@@ -271,7 +271,7 @@ $articles = $repository-&gt;find('toto');
 
 <p>La méthode <code>find()</code> accepte aussi une <code>Query</code> Elastica évidement, et il est aussi possible de créer votre propre repository :</p>
 
-<pre class="yml"><code>persistence:
+<pre class="language-yaml"><code>persistence:
     driver: orm # orm, mongodb, propel are available
     model:  Afsy\Bundle\CoreBundle\Entity\Article
     provider: ~
@@ -280,7 +280,7 @@ $articles = $repository-&gt;find('toto');
     repository: Afsy\Bundle\CoreBundle\SearchRepository\ArticleRepository
 </code></pre>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 namespace Afsy\Bundle\CoreBundle\SearchRepository;
 
@@ -326,7 +326,7 @@ class ArticleRepository extends Repository
 
 <p>Une des forces d'Elasticsearch est la possibilité de faire de l'aggregation sur les résultats et d'en sortir des statistiques. Il nous serait par exemple possible de récupérer la répartition des articles par année avec une <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-facets-date-histogram-facet.html">facette Date Histogram</a>. Voici comment l'implémenter avec Elastica :</p>
 
-<pre class="php"><code>$query = \Elastica\Query::create(); // Nous recherchons tout (MatchAll)
+<pre class="language-php"><code>$query = \Elastica\Query::create(); // Nous recherchons tout (MatchAll)
 
 $date_facet = new DateHistogram('years'); // Nous donnons un nom à la facette
 $date_facet-&gt;setField('published_at');
@@ -344,7 +344,7 @@ $query-&gt;addFacet($date_facet);
 
 <p>Nous passons donc à nouveau par notre service <code>Elastica\Type</code> pour lancer la recherche :</p>
 
-<pre class="php"><code>$articles = $this-&gt;get('fos_elastica.index.afsy.article')-&gt;search($query);
+<pre class="language-php"><code>$articles = $this-&gt;get('fos_elastica.index.afsy.article')-&gt;search($query);
 $facets = $articles-&gt;getFacets();
 $years  = $facets['years']['entries'];
 
@@ -356,7 +356,7 @@ $years  = $facets['years']['entries'];
 
 <p>Nous pouvons alors manipuler les résultats comme avec une installation standard d'Elastica. La récupération des entités Doctrine se fait ensuite via <code>TransformedFinder</code><sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup> :</p>
 
-<pre class="php"><code>$entities = $this-&gt;get('fos_elastica.finder.afsy.article')-&gt;transform($articles);
+<pre class="language-php"><code>$entities = $this-&gt;get('fos_elastica.finder.afsy.article')-&gt;transform($articles);
 </code></pre>
 
 <h2>Définir un mapping plus fin</h2>
@@ -385,7 +385,7 @@ $years  = $facets['years']['entries'];
 
 <p>C'est là qu'entre en jeu l'<a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis.html">analyse</a>. Nous devons spécifier à <abbr title="Elasticsearch">ES</abbr> comment couper nos phrases, comment transformer nos mots en tokens, quels mots utiliser pour remplacer d'autres, que filtrer... Voici donc ici un exemple complet de configuration pour la langue française, et appliqué via notre fichier de configuration - c'est cadeau ♥ - mais bien sûr à adapter à vos besoins !</p>
 
-<pre class="yml"><code>indexes:
+<pre class="language-yaml"><code>indexes:
     afsy:
         client: default
         settings:
@@ -427,7 +427,7 @@ $years  = $facets['years']['entries'];
 
 <p>Vous pouvez ensuite appliquer cette analyse aux champs que vous voulez via le mapping, lorsque vous chercherez sur ces champs, <abbr title="Elasticsearch">ES</abbr> appliquera automatiquement la même analyse à votre recherche pour ce champ là :</p>
 
-<pre class="yml"><code>types:
+<pre class="language-yaml"><code>types:
     Article:
         mappings:
             title: { analyzer: custom_french_analyzer }
@@ -436,7 +436,7 @@ $years  = $facets['years']['entries'];
 
 <p>Ces trois recherches nous retournent bien notre document contenant le mot "bundles" :</p>
 
-<pre class="php"><code>$search1 = $this-&gt;get('fos_elastica.index.afsy.article')-&gt;search(
+<pre class="language-php"><code>$search1 = $this-&gt;get('fos_elastica.index.afsy.article')-&gt;search(
     new Field('body', 'bundles')
 );
 $search2 = $this-&gt;get('fos_elastica.index.afsy.article')-&gt;search(
@@ -466,7 +466,7 @@ $search3 = $this-&gt;get('fos_elastica.index.afsy.article')-&gt;search(
 
 <p>Autre astuce, plus orientée debug, sachez que vous pouvez transformer une <code>Elastica\Request</code> en appel <code>cURL</code> facilement executable (<code>cURL</code> et <a href="https://chrome.google.com/webstore/detail/sense/doinijnbnggojdlcjifpdckfokbbfpbo">Sense</a> sont vos deux seuls amis en cas de coup dur sur la construction d'une requête) :</p>
 
-<pre class="php"><code>\Elastica\Util::convertRequestToCurlCommand($type-&gt;getIndex()-&gt;getClient()-&gt;getLastRequest())
+<pre class="language-php"><code>\Elastica\Util::convertRequestToCurlCommand($type-&gt;getIndex()-&gt;getClient()-&gt;getLastRequest())
 // curl -XGET 'http://localhost:9200/afsy/Article/_search' -d '{"query":{"query_string":{"query":"toto"}}}'
 </code></pre>
 

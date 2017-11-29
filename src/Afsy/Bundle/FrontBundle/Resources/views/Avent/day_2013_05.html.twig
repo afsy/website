@@ -60,7 +60,7 @@
     interface de recherche simple.
 </p>
 
-<pre class="php"><code>namespace MSB\LocatorBundle\Places;
+<pre class="language-php"><code>namespace MSB\LocatorBundle\Places;
 
 interface PlaceLocatorInterface
 {
@@ -101,7 +101,7 @@ interface PlaceLocatorInterface
     l'<abbr title="Unified Resource Locator" lang="en">url</abbr>.
 </p>
 
-<pre class="php"><code>namespace MSB\LocatorBundle\Places;
+<pre class="language-php"><code>namespace MSB\LocatorBundle\Places;
 
 /**
  * GooglePlaceLocator searches for places into the Google Place API
@@ -163,7 +163,7 @@ class GooglePlaceLocator implements PlaceLocatorInterface
     service de localisation de Nokia Here.
 </p>
 
-<pre class="php"><code>namespace MSB\LocatorBundle\Places;
+<pre class="language-php"><code>namespace MSB\LocatorBundle\Places;
 
 /**
  * HerePlaceLocator searches for places into the Here Place API
@@ -240,7 +240,7 @@ class HerePlaceLocator implements PlaceLocatorInterface
     permettra d'agréger les résultats provenant d'autres implémentations.
 </p>
 
-<pre class="php"><code>namespace MSB\LocatorBundle\Places;
+<pre class="language-php"><code>namespace MSB\LocatorBundle\Places;
 
 /**
  * ChainedPlaceLocator searches for places into registered
@@ -298,7 +298,7 @@ class ChainedPlaceLocator implements PlaceLocatorInterface
     également l'utilisation du fameux tag :
 </p>
 
-<pre class="xml"><code>&lt;services&gt;
+<pre class="language-xml"><code>&lt;services&gt;
     &lt;service id="msb.places.chained_locator" class="MSB\LocatorBundle\Places\ChainedPlaceLocator"&gt;
     &lt;/service&gt;
 
@@ -350,7 +350,7 @@ class ChainedPlaceLocator implements PlaceLocatorInterface
     définitions de services ayant le tag <code>place_locator</code>.
 </p>
 
-<pre class="php"><code>namespace MSB\LocatorBundle\DependencyInjection\Compiler;
+<pre class="language-php"><code>namespace MSB\LocatorBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -395,7 +395,7 @@ class PlaceLocatorPass implements CompilerPassInterface
     <code>build</code> de la classe du bundle.
 </p>
 
-<pre class="php"><code>namespace MSB\LocatorBundle;
+<pre class="language-php"><code>namespace MSB\LocatorBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -422,7 +422,7 @@ class MSBLocatorBundle extends Bundle
     rapide commande qui permet d'obtenir des résultats.
 </p>
 
-<pre class="php"><code>namespace MSB\LocatorBundle\Command;
+<pre class="language-php"><code>namespace MSB\LocatorBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
