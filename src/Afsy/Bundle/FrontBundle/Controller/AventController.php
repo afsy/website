@@ -40,7 +40,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
-            // uncomment in order to see a working example ($this->futureEnabled must be true)
+            '01-easyadminbundle-l-arriere-guichet-easy-peasy' => 'AfsyFrontBundle:Avent:day_2017_01.html.twig',
             // '04-form-et-votre-modele'                                     => 'AfsyFrontBundle:Avent:day_2017_04.html.twig',
         )
     );
