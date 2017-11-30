@@ -28,7 +28,7 @@
 
 <h4>Définition du modèle</h4>
 
-<pre class="php"><code>use Doctrine\Common\Collections\ArrayCollection;
+<pre class="language-php"><code>use Doctrine\Common\Collections\ArrayCollection;
 
 class Blog
 {
@@ -89,7 +89,7 @@ class Blog
 
 <p>A l'utilisation, nous ne manipulons pas directement les propriétés de l'objet. Nous passons systématiquement par des méthodes sur les objets, ce qui permet d'assurer la consistence de l'entité.</p>
 
-<pre class="php"><code>$blog-&gt;getName();
+<pre class="language-php"><code>$blog-&gt;getName();
 $blog-&gt;getCategories();
 $blog-&gt;getHighlightedCategories();
 
@@ -114,7 +114,7 @@ foreach ($blog-&gt;getPosts() as $post) {
 
 <p>Une fois nos entités créées, on indique à Doctrine quelles propriétés persister, les associations et autres méta-données. Dans le cas d'un blog, on définit le mapping suivant :</p>
 
-<pre class="yml"><code>Blog:
+<pre class="language-yaml"><code>Blog:
     fields:
         title: { type: string, length: 128 }
     oneToMany:
@@ -175,7 +175,7 @@ Posts:
 
 <p>La classe principalement utilisée avec Doctrine est la classe <em>EntityManager</em>. Cette classe fournit des méthodes "haut-niveau" :</p>
 
-<pre class="php"><code>$post = new Post();
+<pre class="language-php"><code>$post = new Post();
 $post
     -&gt;setTitle('Title of the post')
     -&gt;setContent('Content of the post')
@@ -206,7 +206,7 @@ post = $em-&gt;find('Post', 32); // recherche par classe et ID
 
 <p>Dans une <strong>application Symfony2</strong>, il est important de vérifier les paramètres dans <code>app/config/config_prod.yml</code> :</p>
 
-<pre class="yaml"><code>doctrine:
+<pre class="language-yaml"><code>doctrine:
     orm:
         metadata_cache_driver: apc # memcache, redis ...
 </code></pre>
@@ -244,7 +244,7 @@ Environment is correctly configured for production.
 
 <p>L'interface du <em>Driver</em> est la suivante :</p>
 
-<pre class="php"><code>namespace Doctrine\Common\Persistence\Mapping\Driver;
+<pre class="language-php"><code>namespace Doctrine\Common\Persistence\Mapping\Driver;
 
 interface MappingDriver
 {
@@ -268,7 +268,7 @@ interface MappingDriver
 
 <p>Dans notre exemple, nous appellerons une méthode statique <code>loadMetadata()</code> sur l'entité :</p>
 
-<pre class="php"><code>use Doctrine\Common\Persistence\Driver\MappingDriver;
+<pre class="language-php"><code>use Doctrine\Common\Persistence\Driver\MappingDriver;
 
 class MyDriver implements MappingDriver
 {
@@ -293,7 +293,7 @@ class MyDriver implements MappingDriver
 
 <p>Finalement dans notre entité :</p>
 
-<pre class="php"><code>class Blog
+<pre class="language-php"><code>class Blog
 {
     public static function loadMetadatas(ClassMetadata $metadata)
     {
@@ -306,7 +306,7 @@ class MyDriver implements MappingDriver
 
 <p>Il ne nous reste plus qu'à injecter notre <em>Driver</em> dans notre <em>EntityManager</em> :</p>
 
-<pre class="php"><code>use Doctrine\ORM\Tools\Setup;
+<pre class="language-php"><code>use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 
 $dbParams = array();
@@ -382,7 +382,7 @@ class StructureSubscriber implements EventSubscriber
 
 <p>Il ne reste plus qu'à l'injecter via l'<em>EventSubscriber</em> :</p>
 
-<pre class="php"><code>use Doctrine\Common\EventManager;
+<pre class="language-php"><code>use Doctrine\Common\EventManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use Subscriber\StructureSubscriber;
@@ -403,7 +403,7 @@ return EntityManager::create($conn, $config, $eventManager);
 
 <p>L'exemple ci-dessous fait beaucoup de lignes, néanmoins la logique est assez simple :</p>
 
-<pre class="php"><code>namespace Subscriber;
+<pre class="language-php"><code>namespace Subscriber;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LoadClassMetadataEventArgs;

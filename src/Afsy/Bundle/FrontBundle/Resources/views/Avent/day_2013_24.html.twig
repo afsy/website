@@ -24,7 +24,7 @@
 
 <p>Il n'est pas rare de lancer des "process" externes lorsqu'on exécute une commande Symfony; un truc du genre :</p>
 
-<pre class="php"><code>$process = new Process('ls -lsa');
+<pre class="language-php"><code>$process = new Process('ls -lsa');
 $process-&gt;run();
 $output-&gt;writeln($process-&gt;getOutput());
 </code></pre>
@@ -33,7 +33,7 @@ $output-&gt;writeln($process-&gt;getOutput());
 
 <p>Voici néanmoins une manière assez élégante :</p>
 
-<pre class="php"><code>$callback = function ($type, $buffer) use ($output) {
+<pre class="language-php"><code>$callback = function ($type, $buffer) use ($output) {
     $output-&gt;write($buffer);
 };
 
@@ -42,7 +42,7 @@ $process-&gt;run(OutputInterface::VERBOSITY_VERBOSE &lt; $output-&gt;getVerbosit
 
 <p>Et pour avoir une jolie sortie qui ne mélange pas la sortie standard avec la sortie d'erreur, voici un bout de code extrait de Sismo :</p>
 
-<pre class="php"><code>$callback = function ($type, $buffer) use ($output, &amp;$startedOut, &amp;$startedErr) {
+<pre class="language-php"><code>$callback = function ($type, $buffer) use ($output, &amp;$startedOut, &amp;$startedErr) {
     if ('err' === $type) {
         if (!$startedErr) {
             $output-&gt;write("\n&lt;bg=red;fg=white&gt; ERR &lt;/&gt; ");
@@ -71,21 +71,21 @@ $process-&gt;run(OutputInterface::VERBOSITY_VERBOSE &lt; $output-&gt;getVerbosit
 
 <p>Je vous parlerais plus tard de ce formatteur, car dans ce cas précis, Symfony 2.5 fournira un helper <code>process</code> qui englobe ce comportement par défaut :</p>
 
-<pre class="php"><code>$helper = $this-&gt;getHelper('process');
+<pre class="language-php"><code>$helper = $this-&gt;getHelper('process');
 $process = $helper-&gt;run($output, 'ls -lsa');
 $output-&gt;writeln($process-&gt;getOutput());
 </code></pre>
 
 <p>Et voilà. Pour activer le mode debug, il suffit de passer le flag <code>-vv</code> :</p>
 
-<pre class="bash"><code>$ ./app/console ... -vv
+<pre class="language-bash"><code>$ ./app/console ... -vv
 </code></pre>
 
 <p><img src="/bundles/afsyfront/images/avent/24-debug-2.png" alt="" /></p>
 
 <p>Pour obtenir le détail de la sortie standard et de la sortie d'erreur, utilisez <code>-vvv</code> :</p>
 
-<pre class="bash"><code>$ ./app/console ... -vvv
+<pre class="language-bash"><code>$ ./app/console ... -vvv
 </code></pre>
 
 <p><img src="/bundles/afsyfront/images/avent/24-debug-3.png" alt="" /></p>
@@ -96,7 +96,7 @@ $output-&gt;writeln($process-&gt;getOutput());
 
 <p>Le helper vous laisse la main si vous souhaitez créer votre propre instance de <code>Process</code> :</p>
 
-<pre class="php"><code>$helper = $this-&gt;getHelper('process');
+<pre class="language-php"><code>$helper = $this-&gt;getHelper('process');
 
 $process = new Process('ls -lsa');
 $helper-&gt;run($output, $process);
@@ -106,7 +106,7 @@ $output-&gt;writeln($process-&gt;getOutput());
 
 <p>Vous pouvez même passer une callback qui sera ajoutée automatiquement à celle par défaut définie par le helper :</p>
 
-<pre class="php"><code>$callback = function ($type, $buffer) {
+<pre class="language-php"><code>$callback = function ($type, $buffer) {
     error_log($buffer);
 };
 
@@ -115,7 +115,7 @@ $helper-&gt;run($output, $process, null, $callback);
 
 <p>Mais alors, pourquoi avoir créé un helper <code>process</code> et un helper <code>debug_formatter</code> ? Parce qu'il est réutilisable... par exemple pour pouvoir debugger un appel HTTP réalisé avec Guzzle :</p>
 
-<pre class="php"><code>use Guzzle\Http\Client;
+<pre class="language-php"><code>use Guzzle\Http\Client;
 
 $client = new Client();
 $client-&gt;addSubscriber(new GuzzleConsolePlugin(
@@ -128,7 +128,7 @@ $client-&gt;get('http://example.com/')-&gt;send();
 
 <p>Bam ! Un appel à Guzzle du style :</p>
 
-<pre class="php"><code>$client-&gt;get('http://example.com/')-&gt;send();
+<pre class="language-php"><code>$client-&gt;get('http://example.com/')-&gt;send();
 </code></pre>
 
 <p>va maintenant pouvoir être debuggé avec les mêmes outils que nous venons de voir. Essayez de lancer votre commande avec <code>-vv</code> :</p>
@@ -145,7 +145,7 @@ $client-&gt;get('http://example.com/')-&gt;send();
 
 <p>Vous aimez ? Ce n'est que la partie visible de ces nouveaux helpers. Si vous souhaitez utiliser le <code>debug_formatter</code> pour vos propres besoins, rien de plus simple :</p>
 
-<pre class="php"><code>$formatter = $this-&gt;getHelperSet()-&gt;get('debug_formatter');
+<pre class="language-php"><code>$formatter = $this-&gt;getHelperSet()-&gt;get('debug_formatter');
 
 // start a session
 $start = $formatter-&gt;start($uuid, $cmd);

@@ -68,7 +68,7 @@ $ mkdir -p Component/AMPQ
 
 <p>Une fois notre bundle prêt, on va ajouter le bundle RabbitMQBundle au fichier <code>composer.json</code> :</p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "require": {
         "oldsound/rabbitmq-bundle": "1.2.*",
     }
@@ -82,7 +82,7 @@ $ mkdir -p Component/AMPQ
 
 <p>Enfin, l'ajouter dans le fichier <code>app/AppKernel.php</code> :</p>
 
-<pre class="php"><code>public function registerBundles()
+<pre class="language-php"><code>public function registerBundles()
 {
     $bundles = array(
         new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
@@ -94,7 +94,7 @@ $ mkdir -p Component/AMPQ
 
 <p>Pour configurer le bundle, rien de difficile : on utilise la <a href="https://github.com/videlalvaro/rabbitmqbundle#usage">configuration par défaut du bundle</a>, qu'on ajoute dans <code>app/config/config.yml</code> :</p>
 
-<pre class="yaml"><code>old_sound_rabbit_mq:
+<pre class="language-yaml"><code>old_sound_rabbit_mq:
        connections:
            default:
                host:     'localhost'
@@ -222,7 +222,7 @@ $ chmod -R 777 downloaded_pages/
 
 <p>Dans le contrôleur par défaut (<code>/src/Afsy/Bundle/TutorialBundle/Controller/DefaultController.php</code>), on va créer une méthode <code>downloadAction()</code> :</p>
 
-<pre class="php"><code>public function downloadAction()
+<pre class="language-php"><code>public function downloadAction()
 {
     // Initialize
     $pageHoover = $this-&gt;container-&gt;get('afsy.pagehoover');
@@ -240,7 +240,7 @@ $ chmod -R 777 downloaded_pages/
 
 <p>Et, bien sûr, on créera le routing associé :</p>
 
-<pre class="yaml"><code>afsy_tutorial_download:
+<pre class="language-yaml"><code>afsy_tutorial_download:
     pattern:    "/afsy/download"
     defaults:   { _controller: "AfsyTutorialBundle:Default:download" }
 </code></pre>
@@ -253,7 +253,7 @@ $ chmod -R 777 downloaded_pages/
 
 <p>Le producteur n'a besoin que de très peu d'informations : un peu de config... et c'est tout. On va donc mettre à jour la configuration du plugin pour le déclarer :</p>
 
-<pre class="yaml"><code>old_sound_rabbit_mq:
+<pre class="language-yaml"><code>old_sound_rabbit_mq:
     ...
     producers:
         afsy_download_image:
@@ -484,7 +484,7 @@ class AfsyDownloadImageConsumer implements ConsumerInterface
 
 <p>Enfin, on l'ajoute dans la configuration :</p>
 
-<pre class="yaml"><code>old_sound_rabbit_mq:
+<pre class="language-yaml"><code>old_sound_rabbit_mq:
     ...
     consumers:
         afsy_download_image:

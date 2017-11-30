@@ -206,7 +206,7 @@ Compagny\ModelBundle\Propel\Bookstore\Book:
     Il ne vous reste plus qu'à créer votre contrôleur pour lister vos livres :
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 /**
  * (c) Cedric LOMBARDOT &lt;cedric.lombardot@youcare.fr&gt;
@@ -429,7 +429,7 @@ class ListController extends Controller
 
 <p>Vous pouvez aussi exécuter cette requête d'explain hors symfony :</p>
 
-<pre class="php"><code>$explainArray = BookQuery::create()-&gt;filterByAuthor('me')-&gt;explain()
+<pre class="language-php"><code>$explainArray = BookQuery::create()-&gt;filterByAuthor('me')-&gt;explain()
 </code></pre>
 
 <h3>Des méthodes simples</h3>
@@ -441,7 +441,7 @@ class ListController extends Controller
 
 <p>Vous n'avez donc plus de raisons d'écrire :</p>
 
-<pre class="php"><code>function countBook() {
+<pre class="language-php"><code>function countBook() {
     $books = BookQuery::create()-&gt;find();
 
     return count($books);
@@ -455,17 +455,17 @@ class ListController extends Controller
     c'était un suicide ! La solution :
 </p>
 
-<pre class="php"><code>$count = BookQuery::create()-&gt;count();
+<pre class="language-php"><code>$count = BookQuery::create()-&gt;count();
 </code></pre>
 
 <p>Idem pour avoir le premier livre, nous n'écrirons surtout pas :</p>
 
-<pre class="php"><code>BookQuery::create()-&gt;find()-&gt;getFirst();
+<pre class="language-php"><code>BookQuery::create()-&gt;find()-&gt;getFirst();
 </code></pre>
 
 <p>mais tout simplement :</p>
 
-<pre class="php"><code>BookQuery::create()-&gt;findOne();
+<pre class="language-php"><code>BookQuery::create()-&gt;findOne();
 </code></pre>
 
 <h3>Du code généré</h3>

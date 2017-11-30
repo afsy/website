@@ -139,10 +139,10 @@ Attention tout de même, le mécanisme CORS n'est pas supporté par tous les nav
 
 <p>Installez le bundle :</p>
 
-<pre class="bash"><code>$ composer require nelmio/cors-bundle:~1.0
+<pre class="language-bash"><code>$ composer require nelmio/cors-bundle:~1.0
 </code></pre>
 
-<pre class="php"><code>//app/appKernel.php
+<pre class="language-php"><code>//app/appKernel.php
 
 public function registerBundles()
 {
@@ -157,7 +157,7 @@ public function registerBundles()
 
 <p>puis ajoutez ces quelques lignes dans votre config.yml</p>
 
-<pre class="yml"><code>#app/config/config.yml
+<pre class="language-yaml"><code>#app/config/config.yml
 
 nelmio_cors:
 paths:
@@ -181,7 +181,7 @@ Tous les appels à l'API seront donc configurés via le Routing exposé par FOSJ
 
 <p>Côté Symfony, il faut exposer les routes de notre API :</p>
 
-<pre class="yml"><code>#app/config/routing.yml
+<pre class="language-yaml"><code>#app/config/routing.yml
 
 la_netscouade_api_demo_bundle:
 resource: LaNetscouade\ApiDemoBundle\Controller\CocktailController
@@ -193,7 +193,7 @@ prefix: api
 
 <p>Côté application Angular, il faut appeler la librairie Routing, fournie par le bundle</p>
 
-<pre class="javascript"><code>/**
+<pre class="language-javascript"><code>/**
 * Les ressources javascript de FosJsRoutingBundle doivent être chargées
 */
 (function () {
@@ -266,7 +266,7 @@ view:
 
 Puis dans le controller, on pourra spécifier le template Twig que nous souhaitons utiliser.
 
-<pre class="php">
+<pre class="language-php">
     <code>
 use FOS\RestBundle\Controller\FOSRestController;
 
