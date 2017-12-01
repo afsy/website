@@ -1,0 +1,20 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 4 - Form et votre modèle" %}
+
+{% block article_content %}
+    <p>En cours de réalisation</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/img/afsy_200x200_w.png') }}" alt="Rémi Andrieux" />
+{% endblock %}
+
+{% block article_bio %}
+<h2><a href="{% block author_url %}https://twitter.com/pimolo_{% endblock %}" target="_blank">{% block article_author %}Rémi Andrieux{% endblock %}</a></h2>
+<p>
+    Dipômé d'une licence pro dans les métiers du web, Rémi est aujourd'hui développeur PHP/Symfony chez MyLittleParis.
+</p>
+{% endblock %}

@@ -148,7 +148,7 @@ $ mv framework-standard-edition/web/index.html framework-standard-edition/src/Ac
 
 <p>On crée un <em>TodoController</em> :</p>
 
-<pre class="php"><code>// src/Acme/DemoBundle/Controller/TodoController.php
+<pre class="language-php"><code>// src/Acme/DemoBundle/Controller/TodoController.php
 &lt;?php
 
 namespace Acme\DemoBundle\Controller;
@@ -166,7 +166,7 @@ class TodoController extends Controller
 
 <p>Puis le routage :</p>
 
-<pre class="yaml"><code># src/Acme/DemoBundle/Resources/config/routing.yml;
+<pre class="language-yaml"><code># src/Acme/DemoBundle/Resources/config/routing.yml;
 index:
     path:     /
     defaults: { _controller: AcmeDemoBundle:Todo:index }
@@ -174,7 +174,7 @@ index:
 
 <p>et</p>
 
-<pre class="yaml"><code># app/config/routing.yml
+<pre class="language-yaml"><code># app/config/routing.yml
 _acme_demo:
     resource: "@AcmeDemoBundle/Resources/config/routing.yml"
 </code></pre>
@@ -184,7 +184,7 @@ _acme_demo:
     <code>AcmeDemoBundle</code> :
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -402,7 +402,7 @@ $ node index.js
 
 <p>Puis enregistrer le bundle dans l'application :</p>
 
-<pre class="php"><code>// app/AppKernel.php
+<pre class="language-php"><code>// app/AppKernel.php
 public function registerBundles()
 {
     return array(
@@ -414,7 +414,7 @@ public function registerBundles()
 
 <p>Et enfin modifier la configuration :</p>
 
-<pre class="yaml"><code>#app/config/config.yml
+<pre class="language-yaml"><code>#app/config/config.yml
 yucca_prerender:
     backend_url: http://localhost:3000
 </code></pre>
@@ -481,7 +481,7 @@ routes: {
 
 <p>Mais il faut rajouter les nouvelles routes dans Symfony2 :</p>
 
-<pre class="yaml"><code># src/Acme/DemoBundle/Resources/config/routing.yml;
+<pre class="language-yaml"><code># src/Acme/DemoBundle/Resources/config/routing.yml;
 index:
     path:     /
     defaults: { _controller: AcmeDemoBundle:Todo:index }

@@ -52,7 +52,7 @@
 <p>La méthode la plus commune pour implémenter cette fonctionnalité serait :</p>
 
 {% verbatim %}
-<pre class="twig"><code>{% for message in messages %}
+<pre class="language-twig"><code>{% for message in messages %}
 &lt;div class="comment"&gt;
     {{ message.text }}
     &lt;small&gt;
@@ -71,7 +71,7 @@
 
 <p>Voici le code correspondant dans Doctrine :</p>
 
-<pre class="php"><code>/**
+<pre class="language-php"><code>/**
  * @Entity
  * @Table(name="user",indexes={
  *     @Index(name="email_idx", columns={"email"})
@@ -103,7 +103,7 @@ class User
 
 <p>La configuration permettant d'activer le cache Doctrine dans Symfony2 est la suivante (pour memcache) :</p>
 
-<pre class="yaml"><code># app/config/config_prod.yml
+<pre class="language-yaml"><code># app/config/config_prod.yml
 
 Doctrine:
     orm:
@@ -127,7 +127,7 @@ Doctrine:
 
 <p>Dans certains cas, il peut être nécessaire de spécifier l'option <code>fetch="EAGER"</code> dans la configuration d'une relation Doctrine afin de diminuer le nombre de requêtes :</p>
 
-<pre class="php"><code>class User {
+<pre class="language-php"><code>class User {
     ...
     /**
      * @ManyToOne(targetEntity="Group", cascade={"all"}, fetch="EAGER")
@@ -176,7 +176,7 @@ Doctrine:
 
 <p>Voici un exemple simple de l'utilisation d'une requête SQL native avec Doctrine.</p>
 
-<pre class="php"><code>// Get connection
+<pre class="language-php"><code>// Get connection
 $conn = $entityManager-&gt;getConnection();
 
 // Get table name

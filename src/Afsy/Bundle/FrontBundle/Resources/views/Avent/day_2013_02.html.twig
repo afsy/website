@@ -68,7 +68,7 @@
     d'implémentation classique d'un patron de conception singleton.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 class Database
 {
@@ -165,7 +165,7 @@ class Database
     classe ci-après :
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 class UserGateway
 {
@@ -431,7 +431,7 @@ class UserGateway
     en fonction de leur expertise respective.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 class CsvDataImporter
 {
@@ -504,7 +504,7 @@ class CsvDataImporter
     tâches à ses deux dépendances.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 class DataImporter
 {
@@ -560,7 +560,7 @@ class DataImporter
     avoir à changer la moindre classe existante.
 </p>
 
-<pre class="php"><code>$importer = new DataImporter(new CsvFileLoader(), new MySQLGateway());
+<pre class="language-php"><code>$importer = new DataImporter(new CsvFileLoader(), new MySQLGateway());
 $importer = new DataImporter(new XmlFileLoader(), new MongoGateway());
 $importer = new DataImporter(new JsonFileLoader(), new ElasticSearchGateway());
 </code></pre>
@@ -611,7 +611,7 @@ $importer = new DataImporter(new JsonFileLoader(), new ElasticSearchGateway());
     initialement retournée par la méthode de la classe parente.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 abstract class AbstractLoader implements FileLoader
 {
@@ -717,7 +717,7 @@ class CsvFileLoader extends AbstractLoader
     <code>RouterInterface</code> en deux plus petites interfaces.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 interface UrlGeneratorInterface
 {
@@ -745,7 +745,7 @@ interface RouterInterface extends UrlMatcherInterface, UrlGeneratorInterface
     de générer des chemins.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 namespace Symfony\Bridge\Twig\Extension;
 
@@ -801,7 +801,7 @@ class RoutingExtension extends \Twig_Extension
     <code>CsvFileLoader</code> et <code>DataGateway</code>.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 class DataImporter
 {
@@ -837,7 +837,7 @@ class DataImporter
     composants.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 class DataImporter
 {
@@ -870,7 +870,7 @@ class DataImporter
     classes.
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 class DataImporter
 {

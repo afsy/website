@@ -45,7 +45,7 @@
     <code>Route</code> dans notre contrôleur :
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 /**
  * @Route("/meth-cookers/{slug}", name="meth_cooker", options={"expose"=true})
@@ -69,7 +69,7 @@
 
 <p>Enfin nous pouvons passer à l'utilisation dans JavaScript :</p>
 
-<pre class="javascript"><code>url = Routing.generate('meth_cookers', { slug: 'walter-white' });
+<pre class="language-javascript"><code>url = Routing.generate('meth_cookers', { slug: 'walter-white' });
 </code></pre>
 
 <p>
@@ -115,7 +115,7 @@
 </p>
 
 {% raw %}
-<pre class="twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
+<pre class="language-twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
 &lt;h1&gt;Los Pollos Hermanos meth lab&lt;/h1&gt;
 &lt;p&gt;Surface: {{ lab.surface }}&lt;/p&gt;
 </code></pre>
@@ -127,7 +127,7 @@
 </p>
 
 {% raw %}
-<pre class="twig"><code>{% javascripts %}
+<pre class="language-twig"><code>{% javascripts %}
     '../vendor/jms/twig-js/twig.js'
     '../app/Resources/templates/LosPollosHermanos/Office.twig'
     '../app/Resources/templates/LosPollosHermanos/Lab.twig'
@@ -163,7 +163,7 @@
 </p>
 
 {% raw %}
-<pre class="twig"><code>{% javascripts %}
+<pre class="language-twig"><code>{% javascripts %}
     '../app/Resources/components/lib-foo/{locale}.js'
     '../app/Resources/components/lib-bar/{locale}.js'
     output='js/lang.{locale}.js' vars=['locale']
@@ -200,7 +200,7 @@
 </p>
 
 {% raw %}
-<pre class="twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
+<pre class="language-twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
 &lt;h1&gt;{{ "los_pollos.meth_lab"|trans }}&lt;/h1&gt;
 &lt;p&gt;{{ "los_pollos.surface"|trans }}: {{ lab.surface }}&lt;/p&gt;
 </code></pre>
@@ -211,7 +211,7 @@
 </p>
 
 {% raw %}
-<pre class="twig"><code>{% javascripts
+<pre class="language-twig"><code>{% javascripts
     '../app/Resources/template/LosPollosHermanos/Office.twig'
     '../app/Resources/template/LosPollosHermanos/Lab.twig'
     output='js/templates.{locale}.js' filter="twig_js" vars=['locale']
@@ -248,7 +248,7 @@
 </p>
 
 {% raw %}
-<pre class="twig"><code>{% javascripts
+<pre class="language-twig"><code>{% javascripts
     '../app/Resources/components/moment/min/moment.min.js'
     '../app/Resources/components/moment/min/lang/{locale}.js'
     output='js/date.{locale}.js' vars=['locale']
@@ -263,7 +263,7 @@
     dans les templates :
 </p>
 
-<pre class="javascript"><code>Twig.setFilter('date', function(format) {
+<pre class="language-javascript"><code>Twig.setFilter('date', function(format) {
     return moment(date).format(format);
 });
 </code></pre>

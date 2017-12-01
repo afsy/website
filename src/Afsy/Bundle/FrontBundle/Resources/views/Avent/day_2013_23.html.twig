@@ -142,7 +142,7 @@ class GameManager
 
 <p>Et modifions notre contrôleur en conséquence :</p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 /***/
 if ($form-&gt;isValid()) {
     $game = $form-&gt;getData();
@@ -161,7 +161,7 @@ if ($form-&gt;isValid()) {
 <p>Comment répondre à cette problématique ?<br />
 Ca ressemble à une règle de validation qui prend en compte 2 attributs. Symfony propose un bon système de validation et un callback validator, ca semble la bonne solution !</p>
 
-<pre class="yml"><code># src/Afsy/Bundle/CardBundle/Resources/config/validation.yml
+<pre class="language-yaml"><code># src/Afsy/Bundle/CardBundle/Resources/config/validation.yml
 Afsy\Bundle\CardBundle\Entity\Game:
     constraints:
         - Callback: validateNbPlayers
@@ -276,7 +276,7 @@ Et surtout le <strong>rendre indépendant</strong> de tout framework ?</p>
 
 <p>Ce pattern est le plus simple à mettre en place. Vous l'avez peut-être même déjà utilisé sans vous en rendre compte. Et pourtant il va nous aider à organiser notre métier avec une <strong>sémantique</strong> qui va guider tous les développeurs de l'application.</p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 class PokerNbPlayersSpecification
 {
     public function isSatisfiedBy($game)

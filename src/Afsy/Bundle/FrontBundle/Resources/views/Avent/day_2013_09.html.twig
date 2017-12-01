@@ -49,7 +49,7 @@
     avec la liste des services à charger :
 </p>
 
-<pre class="yaml"><code># config/services.yml
+<pre class="language-yaml"><code># config/services.yml
 all:
   services:
     auth:
@@ -75,7 +75,7 @@ test:
 
 <p>Dans une action:</p>
 
-<pre class="php"><code>class myModuleActions extends sfActions
+<pre class="language-php"><code>class myModuleActions extends sfActions
 {
   public function executeIndex()
   {
@@ -87,7 +87,7 @@ test:
 
 <p>Dans une tâche en ligne de commande :</p>
 
-<pre class="php"><code>class myTask extends sfTask
+<pre class="language-php"><code>class myTask extends sfTask
 {
   public function run()
   {
@@ -103,7 +103,7 @@ test:
     faire ça).
 </p>
 
-<pre class="php"><code>sfContext::getInstance()-&gt;getService('sf_filesystem');
+<pre class="language-php"><code>sfContext::getInstance()-&gt;getService('sf_filesystem');
 </code></pre>
 
 <p>
@@ -147,7 +147,7 @@ composer install
     dans le fichier <code>config/ProjectConfiguration.class.php</code> :
 </p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 require_once __DIR__.'/../vendor/autoload.php';
 </code></pre>
 
@@ -170,7 +170,7 @@ require_once __DIR__.'/../vendor/autoload.php';
     Configuration d'un plugin (dans votre fichier <code>composer.json</code>) :
 </p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "name": "vendor/sf-avent-plugin",
     "type": "symfony1-plugin",
     "require": {
@@ -215,7 +215,7 @@ require_once __DIR__.'/../vendor/autoload.php';
     <a href="https://github.com/php-fig/fig-standards/blob/master/accepted/fr/PSR-0.md#readme">PSR-0</a> :
 </p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "autoload": {
         "psr-0": {"Acme\\": "src/"}
     }
@@ -251,7 +251,7 @@ require_once __DIR__.'/../vendor/autoload.php';
     désérialisées et chargées en mémoire :
 </p>
 
-<pre class="yaml"><code># apps/frontend/config/factories.yml
+<pre class="language-yaml"><code># apps/frontend/config/factories.yml
 all:
   routing:
     class: sfPatternRouting
@@ -286,7 +286,7 @@ all:
 
 <p>Dans votre fichier <code>factories.yml</code> :</p>
 
-<pre class="yaml"><code>mailer:
+<pre class="language-yaml"><code>mailer:
   class: sfNoMailer
 </code></pre>
 

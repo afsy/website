@@ -34,14 +34,14 @@
 
 <p>Nous génèrerons ces entités à travers la commande Symfony <code>doctrine:generate:entity</code> dans un Bundle appelé <strong>ACSEOCalendrierBundle</strong>. Il est possible de choisir n'importe quel format de mapping (annotation, yml, xml) proposé.</p>
 
-<pre class="bash"><code>&gt; php app/console doctrine:generate:entity
+<pre class="language-bash"><code>&gt; php app/console doctrine:generate:entity
 </code></pre>
 
 <h3>Installation du Bundle APYDataGrid</h3>
 
 <p>Pour disposer d'une fonctionnalité de génération en ligne de commande non encore disponible sur le Bundle d'origine (<a href="https://github.com/Abhoryo/APYDataGridBundle/pull/449">Pull Request</a> en cours), il convient de mettre à jour votre fichier <code>composer.json</code> avec les informations ci-dessous :</p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "repositories": [
         {
             "type": "vcs",
@@ -53,7 +53,7 @@
 
 <p>Puis :</p>
 
-<pre class="json"><code>{
+<pre class="language-json"><code>{
     "require": {
         ...
         "apy/datagrid-bundle": "dev-master"
@@ -64,12 +64,12 @@
 
 <p>Lancez l'installation du Bundle grâce à Composer :</p>
 
-<pre class="bash"><code>&gt; php composer.phar update
+<pre class="language-bash"><code>&gt; php composer.phar update
 </code></pre>
 
 <p>Pour finir, mettez à jour votre fichier <code>app/AppKernel.php</code>:</p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 // app/AppKernel.php
 class AppKernel extends Kernel
 {
@@ -105,7 +105,7 @@ class AppKernel extends Kernel
 
 <p>Cette commande génère le fichier <code>ACSEOCalendrierBundle/Resources/grid/Article.default.grid.yml</code> avec le contenu suivant :</p>
 
-<pre class="yaml"><code>ACSEO\Bundle\CalendrierBundle\Entity\Article:
+<pre class="language-yaml"><code>ACSEO\Bundle\CalendrierBundle\Entity\Article:
     Source:
         columns:
             id: ~
@@ -158,7 +158,7 @@ class AppKernel extends Kernel
 
 <h4>Contrôleur <code>ArticleController.php</code> :</h4>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 namespace ACSEO\Bundle\CalendrierBundle\Controller;
 
@@ -235,7 +235,7 @@ class ArticleController extends Controller
 
 <p>De nombreuses choses sont possibles uniquement par paramétrage. Ainsi, nous allons pouvoir changer l'affichage, les filtres, le format des filtres et d'autres contenus uniquement en modifiant le fichier <code>Article.default.grid.yml</code>.</p>
 
-<pre class="yaml"><code>#ACSEO\Bundle\CalendrierBundle\Entity\Article:
+<pre class="language-yaml"><code>#ACSEO\Bundle\CalendrierBundle\Entity\Article:
     Source:
         columns:
             id: ~
@@ -324,7 +324,7 @@ class ArticleController extends Controller
 
 <p>Pour cela, rien de plus simple, grâce à la fonction <code>manipulateRow()</code>:</p>
 
-<pre class="yaml"><code># déclaration de la colonne author dans Article.default.grid.yml
+<pre class="language-yaml"><code># déclaration de la colonne author dans Article.default.grid.yml
 ACSEO\Bundle\CalendrierBundle\Entity\Article:
     Source:
         columns:
@@ -341,7 +341,7 @@ ACSEO\Bundle\CalendrierBundle\Entity\Article:
             operatorsVisible: false
 </code></pre>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 //src/ACSEO/Bundle/CalendrierBundle/Controller/ArticleController.php
 
 class ArticleController extends Controller
@@ -367,7 +367,7 @@ class ArticleController extends Controller
 
 <p>Nous pouvons ajouter très simplement, des boutons d'actions pour chacune des lignes via le contrôleur :</p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 use APY\DataGridBundle\Grid\Action\RowAction;
 
@@ -395,7 +395,7 @@ class ArticleController extends Controller
 
 <p>Pour ajouter une colonne permettant d'afficher le nombre de commentaires, rien de plus simple. Nous en profiterons en plus pour faire afficher un commentaire conditionnel et ajouter des attributs sur nos lignes :</p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 //..
 use APY\DataGridBundle\Grid\Column\BlankColumn;
 //..
@@ -448,7 +448,7 @@ class ArticleController extends Controller
 
 <p>L'ajout d'un export de la liste, prenant en compte les filtres actifs, est un jeu d'enfant :</p>
 
-<pre class="php"><code>&lt;?php
+<pre class="language-php"><code>&lt;?php
 
 namespace ACSEO\Bundle\CalendrierBundle\Controller;
 //..

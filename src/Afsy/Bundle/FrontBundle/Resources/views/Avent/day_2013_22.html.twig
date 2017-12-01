@@ -61,7 +61,7 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
 
 <p>Partie Vue :</p>
 
-<pre class="twig"><code>{% block body %}
+<pre class="language-twig"><code>{% block body %}
     Bienvenue sur le site de commande au Père Noël
     {{ form_start(form) }}
 &lt;div class="row"&gt;
@@ -123,7 +123,7 @@ ko.applyBindings(new Device());
 
 <p>Regardons le widget correspondant aux menus déroulants dans le form_div_layout (j'ai volontairement enlevé certains éléments non utilisés dans notre cas pour plus de lisibilité) :</p>
 
-<pre class="twig"><code>{% block choice_widget_collapsed %}
+<pre class="language-twig"><code>{% block choice_widget_collapsed %}
 {% spaceless %}
     &lt;select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}&gt;
         {% if empty_value is not none %}
@@ -146,7 +146,7 @@ ko.applyBindings(new Device());
 
 <p>Il suffit donc de modifier le cas échéant le contenu du block choice_widget_collapsed en ajoutant les éléments dont knockout a besoin :</p>
 
-<pre class="twig"><code>{% form_theme form _self %}
+<pre class="language-twig"><code>{% form_theme form _self %}
 
 {% block choice_widget_collapsed %}
     {% spaceless %}
@@ -176,7 +176,7 @@ ko.applyBindings(new Device());
 
 <p>Nous allons donc les passer depuis Symfony :</p>
 
-<pre class="php"><code>//ChristmasController.php
+<pre class="language-php"><code>//ChristmasController.php
 /**
      * @Route("/chose-device", name="choseDevice")
      * @Template()
@@ -211,7 +211,7 @@ ko.applyBindings(new Device());
 <p>On récupère alors les données dans notre code js, et le tour est joué. Evidemment l'intérêt ici est très limité, on avait des données en dur en javascript et l'on passe à des données en dur en php. Cela prend par contre tout son sens lorsque les données deviennent dynamiques, typiquement lorsqu'on récupère des entités du modèle Symfony2.<br />
 Par exemple, créons des entités Brand et Device et utilisons des formulaires de type "entity".</p>
 
-<pre class="php"><code>//DeviceType.php
+<pre class="language-php"><code>//DeviceType.php
 $builder-&gt;add('device', 'entity', array(
             'label'     =&gt; 'Quel appareil souhaites-tu te faire offrir par le Père Noël ?',
             "class"     =&gt; 'AcmeDemoBundle:Device',
@@ -227,7 +227,7 @@ $builder-&gt;add('device', 'entity', array(
 <p>Pas besoin de changer quoi que ce soit pour l'instant dans la template puisque le type "entity" hérite de "type". Par contre, les données envoyées en json sont maintenant celles du modèle.<br />
 Pour transmettre la même structure, il nous suffit d'implémenter \JSONSerializable :</p>
 
-<pre class="php"><code>//Brand.php
+<pre class="language-php"><code>//Brand.php
 ...
 class Brand implements \JsonSerializable
 {
@@ -257,7 +257,7 @@ public function jsonSerialize()
 
 <p>et de même dans la classe Device. Il ne reste plus qu'à remplacer le tableau en dur $brands du controlleur par la liste des objets Brands trouvés en table :</p>
 
-<pre class="php"><code>//ChristmasController
+<pre class="language-php"><code>//ChristmasController
 $brands = $this-&gt;getDoctrine()-&gt;getRepository('AcmeDemoBundle:Brand')-&gt;findAll();
 </code></pre>
 

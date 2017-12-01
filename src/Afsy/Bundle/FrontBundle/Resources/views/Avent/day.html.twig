@@ -4,15 +4,12 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="http://yandex.st/highlightjs/7.5/styles/default.min.css"/>
+    <link rel="stylesheet" href="{{ asset('bundles/afsyfront/css/prism.css') }}"/>
 {% endblock stylesheets %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="http://yandex.st/highlightjs/7.5/highlight.min.js"></script>
-    <script type="text/javascript">
-      hljs.initHighlightingOnLoad();
-    </script>
+    <script src="{{ asset('bundles/afsyfront/js/prism.js') }}"></script>
 {% endblock javascripts %}
 
 {% block atom_feed %}
