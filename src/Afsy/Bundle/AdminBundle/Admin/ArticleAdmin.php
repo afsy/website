@@ -2,13 +2,13 @@
 
 namespace Afsy\Bundle\AdminBundle\Admin;
 
-use Sonata\AdminBundle\Admin\Admin;
+use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\CoreBundle\Validator\ErrorElement;
 
-class ArticleAdmin extends Admin
+class ArticleAdmin extends AbstractAdmin
 {
     protected $tagManager;
     protected $tagsData;
