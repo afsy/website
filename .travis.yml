@@ -12,8 +12,8 @@ before_script:
   - cp app/config/parameters.yml.dist app/config/parameters.yml
   - curl -s http://getcomposer.org/installer | php -- --quiet
   - php composer.phar install
-  - php app/console doctrine:schema:create -n
-  - php app/console doctrine:fixtures:load -n
+  - php bin/console doctrine:schema:create -n
+  - php bin/console doctrine:fixtures:load -n
   - mkdir -p app/cache app/logs
   - sudo chmod -R 777 app/cache app/logs
 
