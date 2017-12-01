@@ -75,7 +75,6 @@ class Article implements Taggable
      * @var \DateTime
      * @ORM\Column(type="datetime", name="event_date", nullable=true)
      * @Assert\DateTime()
-     * @Assert\GreaterThan("today")
      */
     protected $eventDate;
 
