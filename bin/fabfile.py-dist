@@ -9,43 +9,32 @@ from time import strftime
 from fabric.api import *
 from fabric.contrib.files import exists
 
-
+env.use_ssh_config = True
 env.roledefs = {
     'prod': ['@prod_ssh_server@'],
     'preprod': ['@preprod_ssh_server@']
 }
-
 path = {
     'prod': '@prod_path@',
     'preprod': '@preprod_path@'
 }
 
-env.use_ssh_config = True
-
-def wwwdata(command):
-    return sudo(command, user='www-data')
-
-@roles('preprod')
-def checkout_project(tag):
-    with cd(path[_getrole()]):
-        wwwdata('git fetch')
-        wwwdata('git fetch origin --tags')
-        wwwdata('git checkout ' + tag)
-        wwwdata('app/console cache:clear --env=prod')
-
-@roles('preprod')
+@task
 def deploy():
-    run('pwd') # go through the first connection
-    tag = "%s/%s" % (_getrole(), strftime("%Y/%m-%d-%H-%M-%S"))
-    local('git tag -a %s -m "%s"' % (tag, _getrole()))
-    local('git push')
-    local('git push --tags')
-    checkout_project(tag)
+    #run('pwd') # go through the first connection
+    print _get_role();
+    with cd(path[_get_role()]):
+        run('git fetch')
+        run('git checkout master')
+        run('git reset --hard origin/master')
+        run('composer install --prefer-dist --optimize-autoloader --no-dev')
+        run('bin/console cache:clear --no-warmup --env=prod')
+        run('bin/console cache:warmup --env=prod')
+        run('bin/console assets:install --symlink')
 
-
-def _getrole():
+def _get_role():
     for role in env.roledefs:
-        if env.host_string in env.roledefs[role]:
+        if env.host_string in env.roledefs[role] and role in env.roles:
             return role
 
     raise Exception('Role not found')
