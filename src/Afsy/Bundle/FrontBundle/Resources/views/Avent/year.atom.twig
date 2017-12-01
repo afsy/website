@@ -12,18 +12,18 @@
 
     <entry>
         <id>{{ url('avent_day', {year: year, slug: slug}) }}</id>
-        <published>{{ template.renderBlock('article_date_atom', {'day': total_day, 'year': year})|date('c') }}</published>
-        <updated>{{ template.renderBlock('article_date_atom', {'day': total_day, 'year': year})|date('c') }}</updated>
+        <published>{{ total_day ~ '-12-' ~ year|date('c') }}</published>
+        <updated>{{ total_day ~ '-12-' ~ year|date('c') }}</updated>
         <link type="text/html" rel="alternate" href="{{ url('avent_day', {year: year, slug: slug}) }}"/>
-        <title>{{ template.renderBlock('article_title', {}) }}</title>
+        <title>{{ block('article_title', template) }}</title>
         <author>
-            <name>{{ template.renderBlock('article_author', {}) }}</name>
-            <uri>{{ template.renderBlock('author_url', {}) }}</uri>
+            <name>{{ block('article_author', template) }}</name>
+            <uri>{{ block('author_url', template) }}</uri>
         </author>
         <content type="html"><![CDATA[
-            {{ template.renderBlock('article_content', {}) }}
+            {{ block('article_content', template) }}
 
-            {{ template.renderBlock('article_bio', {}) }}
+            {{ block('article_bio', template) }}
         ]]></content>
 
         {% set day = day + 1 %}
