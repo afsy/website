@@ -17,8 +17,7 @@ framework:
     assets:
         version: 3
     default_locale:  "%locale%"
-    trusted_proxies: ~
-    trusted_hosts: ['^(www\.)?afsy\.fr$']
+    trusted_hosts: ['^\.?afsy.fr$']
     session:
         # http://symfony.com/doc/current/reference/configuration/framework.html#handler-id
         handler_id:  session.handler.native_file
@@ -116,4 +115,3 @@ sonata_block:
         sonata.block.service.text:
         sonata.block.service.action:
         sonata.block.service.rss:
-
