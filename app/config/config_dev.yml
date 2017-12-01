@@ -4,7 +4,7 @@ imports:
 framework:
     router:   { resource: "%kernel.root_dir%/config/routing_dev.yml" }
     profiler: { only_exceptions: false }
-    trusted_hosts: ['^\.?afsy.fr$', 'localhost', '127.0.0.1']
+    trusted_hosts: ['^(.+\.)?afsy.fr$', 'localhost', '127.0.0.1']
 
 web_profiler:
     toolbar: true

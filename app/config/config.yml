@@ -17,7 +17,7 @@ framework:
     assets:
         version: 3
     default_locale:  "%locale%"
-    trusted_hosts: ['^\.?afsy.fr$']
+    trusted_hosts: ['^(.+\.)?afsy.fr$']
     session:
         # http://symfony.com/doc/current/reference/configuration/framework.html#handler-id
         handler_id:  session.handler.native_file
