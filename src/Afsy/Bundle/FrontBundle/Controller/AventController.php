@@ -40,7 +40,8 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
-            '01-easyadminbundle-l-arriere-guichet-easy-peasy' => 'AfsyFrontBundle:Avent:day_2017_01.html.twig',
+            '02-la-nouvelle-configuration-par-defaut-de-symfony4' => 'AfsyFrontBundle:Avent:day_2017_02.html.twig',
+            '01-easyadminbundle-l-arriere-guichet-easy-peasy'     => 'AfsyFrontBundle:Avent:day_2017_01.html.twig',
             // '04-form-et-votre-modele'                                     => 'AfsyFrontBundle:Avent:day_2017_04.html.twig',
         )
     );
