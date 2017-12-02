@@ -126,7 +126,7 @@
     </p>
     <p>
         Vous aurez donc à ajouter un <code>@deprecated</code> au dessus de la classe dépréciée.
-        Ce qui vous donnerai ceci:
+        Ce qui vous donnerait ceci&nbsp;:
     </p>
     <pre class="language-php"><code>namespace Namespace\to\your\ClassA;
 
@@ -134,6 +134,7 @@ use Namespace\to\your\ClassB;
 
 /**
 * @deprecated ClassA class is deprecated since version 3.2, to  be removed in 4.0. Use the Namespace\to\your\ClassB class instead.
+* @trigger_error('Deprecation message', E_USER_DEPRECATED);
 */
 class ClassA extends ClassB
 {
@@ -151,7 +152,7 @@ class ClassB
         Pour tagger des versions <code>alpha</code>, <code>beta</code> ou autre, il vous suffit de suffixer votre numéro
         de version (ex: <code>2.0.0-alpha</code>, <code>2.0.0-alpha+0001</code> pour un fix en alpha, …) mais il faut
         garder à l’esprit l’ordre des versions lors de vos nommage:
-        <pre class="language-git"><code>1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0</code></pre>
+        <pre class="language-git"><code>1.0.0-alpha &lt; 1.0.0-alpha.1 &lt; 1.0.0-alpha.beta &lt; 1.0.0-beta &lt; 1.0.0-beta.2 &lt; 1.0.0-beta.11 &lt; 1.0.0-rc.1 &lt; 1.0.0</code></pre>
     </p>
     <p>
         Je vous invite à aller vous documenter directement sur le site de <a href="https://semver.org/">SemVer</a>
@@ -245,7 +246,7 @@ class ClassB
         En conclusion:
         <ul>
             <li>
-                Utilisez <code>~X.Y.Z</code> ou <code>X.Y.*</code> lorsque vous n’êtes pas sur que le bundle respecte SemVer
+                Utilisez <code>~X.Y.Z</code> ou <code>X.Y.*</code> lorsque vous n’êtes pas sûr•e que le bundle respecte SemVer
             </li>
             <li>
                 Utilisez <code>^X.Y</code> ou <code>^X.Y.Z</code> lorsque le bundle que vous utilisez respecte SemVer
@@ -334,8 +335,8 @@ cleanup_job:
 
     <h2>Conclusion</h2>
     <p>
-        Tagger son application est une bonne chose, abusez en !! (pas trop quand même). Cela permet d’améliorer la
-        lisibilité dans les MEP et nous permettent de faire un tas d’autre choses.
+        Tagger son application est une bonne chose, abusez-en !! (pas trop quand même). Cela permet d’améliorer la
+        lisibilité dans les MEP et de faire un tas d’autre choses.
     </p>
     <p>
         Les numéros de versions que vous donnez ont tous un sens sémantique et peuvent être un gage de confiance et/ou
