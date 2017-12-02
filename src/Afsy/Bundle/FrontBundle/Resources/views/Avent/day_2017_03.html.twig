@@ -7,7 +7,7 @@
 {% block article_content %}
     <h1 id="déployer-un-projet-symfony-flex-sur-heroku">Déployer un projet Symfony 4 avec Flex sur Heroku</h1>
 
-    <p>Nous allons aborder trois sujets ici :</p>
+    <p>Nous allons aborder trois sujets ici :</p>
 
     <ul>
         <li>Qu'est-ce que Flex ?</li>
@@ -21,7 +21,7 @@
 
     <p>D'autres articles existent à ce propos, notamment dans le cadre de ce calendrier de l'avent, et je ne vais donc pas trop m'étaler sur le sujet.</p>
 
-    <p>En quelques phrases, je peux vous dire que Flex :</p>
+    <p>En quelques phrases, je peux vous dire que Flex :</p>
 
     <ul>
         <li>Permet d'utiliser certains alias pour installer un ou plusieurs packages (comme <code>cli</code> pour <code>symfony/console</code>, ou <code>orm</code> pour plusieurs packages relatifs à l'ORM Doctrine).</li>
@@ -51,10 +51,10 @@
 
     <p>Les applications sont exécutées dans des containers Linux appelés <strong>Dynos</strong>.</p>
 
-    <p>Il existe trois types de Dynos : <code>web</code>, <code>worker</code> et <code>one-off</code> et ils sont configurés par un fichier nommé <code>Procfile</code>.</p>
+    <p>Il existe trois types de Dynos : <code>web</code>, <code>worker</code> et <code>one-off</code> et ils sont configurés par un fichier nommé <code>Procfile</code>.</p>
 
     <ul>
-        <li>Les dynos <code>web</code> sont exécutés de façon persistante et sont configurés par votre <code>Procfile</code> et sont les seuls à recevoir les requêtes HTTP envoyés sur votre application.</li>
+        <li>Les dynos <code>web</code> sont exécutés de façon persistante et sont configurés par votre <code>Procfile</code> et sont les seuls à recevoir les requêtes HTTP envoyées sur votre application.</li>
         <li>Les dynos <code>worker</code> sont des scripts configurés dans votre <code>Procfile</code> et sont majoritairement utilisés pour des tâches de fond, comme des Queues.</li>
         <li>Les dynos <code>one-off</code> sont des dynos temporaires que vous pouvez créer, par exemple en exécutant manuellement des scripts en ligne de commande avec <code>heroku run {script...}</code>. Ils sont utilisés également au déploiement d'une release (cela permet d'éviter qu'un déploiement de 10 minutes soit décompté de votre temps de gratuité…), mais aussi par le <code>Heroku Scheduler</code> pour orchestrer des tâches de fond (similaire à <code>crontab</code>).</li>
     </ul>
@@ -65,11 +65,11 @@
 
     <p>En tant qu'utilisateur, <strong>nous n'avons pas accès à la distribution</strong>. Nous ne pouvons donc pas modifier les packages de la machine.</p>
 
-    <p>En revanche, pour pallier à cela, Heroku utilise un système de <strong>buildpacks</strong> et d'<strong>add-ons</strong> qui, eux, vont pouvoir exécuter des commandes dans la machine afin d'installer certains packages.</p>
+    <p>En revanche, pour pallier cela, Heroku utilise un système de <strong>buildpacks</strong> et d'<strong>add-ons</strong> qui, eux, vont pouvoir exécuter des commandes dans la machine afin d'installer certains packages.</p>
 
     <h4 id="les-buildpacks">Les buildpacks</h4>
 
-    <p>Les buildpacks comprennent un ensemble de scripts ayant plusieurs responsabilités :</p>
+    <p>Les buildpacks comprennent un ensemble de scripts ayant plusieurs responsabilités :</p>
 
     <ul>
         <li>Détecter le "type" de votre application (Ruby, PHP, Javascript, etc.).</li>
@@ -89,7 +89,7 @@
 
     <p>La plupart des add-ons sont payants mais offrent une option gratuite avec des services et perfomances limités.</p>
 
-    <p>Ils ont plusieurs avantages :</p>
+    <p>Ils ont plusieurs avantages :</p>
 
     <ul>
         <li>Ils sont souvent capables d'ajouter automatiquement des variables d'environnement à votre configuration afin que vous puissiez l'utiliser dans votre projet. </li>
@@ -103,21 +103,21 @@
 
     <p>Allez, maintenant qu'on sait en quoi consistent les outils que nous allons utiliser, servons-nous-en !</p>
 
-    <p>Tout d'abord, on crée le projet quelque part sur notre machine :</p>
+    <p>Tout d'abord, on crée le projet quelque part sur notre machine :</p>
 
     <pre><code class="language-sh">$ composer create-project symfony/skeleton:^4.0 my_project</code></pre>
 
-    <p>Le package <code>symfony/skeleton</code> ne contient qu'une seule chose : un fichier <code>composer.json</code> déterminant quelques dépendances pour créer un projet web avec Symfony, dont Flex.</p>
+    <p>Le package <code>symfony/skeleton</code> ne contient qu'une seule chose : un fichier <code>composer.json</code> déterminant quelques dépendances pour créer un projet web avec Symfony, dont Flex.</p>
 
-    <p>Les dépendances principales qui nous permettent de faciliter tout ça sont les suivantes :</p>
+    <p>Les dépendances principales qui nous permettent de faciliter tout ça sont les suivantes :</p>
 
     <ul>
-        <li><code>symfony/flex</code> : Le plugin Composer dont on parlait au début de cet article.</li>
-        <li><code>symfony/lts</code> : Un simple package composer permettant de définir quelle version majeure de Symfony nous allons utiliser. Ce package définit simplement des conflits de version avec la version majeure supérieure.</li>
-        <li><code>symfony/framework-bundle</code> : Le package principal qui nous permet de créer un projet web avec Symfony.</li>
+        <li><code>symfony/flex</code> : Le plugin Composer dont on parlait au début de cet article.</li>
+        <li><code>symfony/lts</code> : Un simple package composer permettant de définir quelle version majeure de Symfony nous allons utiliser. Ce package définit simplement des conflits de version avec la version majeure supérieure.</li>
+        <li><code>symfony/framework-bundle</code> : Le package principal qui nous permet de créer un projet web avec Symfony.</li>
     </ul>
 
-    <p>L'avantage, c'est que ce dernier package dispose d'une une <a href="https://github.com/symfony/recipes/tree/master/symfony/framework-bundle/3.3">recette Flex</a> qui va initialiser tout un tas d'outils dans notre projet :</p>
+    <p>L'avantage, c'est que ce dernier package dispose d'une <a href="https://github.com/symfony/recipes/tree/master/symfony/framework-bundle/3.3">recette Flex</a> qui va initialiser tout un tas d'outils dans notre projet :</p>
 
     <ul>
         <li>La configuration par défaut du framework dans le dossier <code>config/</code>.</li>
@@ -142,7 +142,7 @@
 
     <h3 id="installons-le-serveur-web-de-symfony">Installons le serveur web de Symfony</h3>
 
-    <p>Pour tester notre projet nous allons utiliser le bundle <code>WebServerBundle</code> de Symfony, qui nous permet d'exécuter des commandes utilisant le serveur PHP intégré afin de pouvoir lancer notre projet en dev :</p>
+    <p>Pour tester notre projet nous allons utiliser le bundle <code>WebServerBundle</code> de Symfony, qui nous permet d'exécuter des commandes utilisant le serveur PHP intégré afin de pouvoir lancer notre projet en dev :</p>
 
     <pre><code class="language-sh">$ composer require --dev server</code></pre>
 
@@ -150,7 +150,7 @@
 
     <h3 id="créons-un-contrôleur-par-défaut">Créons un contrôleur par défaut</h3>
 
-    <p>Ce contrôleur sera nécessaire, car désormais il n'y a plus de contrôleur par défaut dans Symfony :</p>
+    <p>Ce contrôleur sera nécessaire, car désormais il n'y a plus de contrôleur par défaut dans Symfony :</p>
 
     <pre><code class="language-php">&lt;?php
 
@@ -174,7 +174,7 @@ class DefaultController
 
     <h3 id="testons-cette-configuration">Testons cette configuration</h3>
 
-    <p>On exécute la commande du <code>WebServerBundle</code> pour voir notre site :</p>
+    <p>On exécute la commande du <code>WebServerBundle</code> pour voir notre site :</p>
 
     <pre><code class="language-sh">$ php bin/console server:run
 
@@ -183,7 +183,7 @@ class DefaultController
  // Quit the server with CONTROL-C.
 </code></pre>
 
-    <p>Cela nous donne une page de ce genre :</p>
+    <p>Cela nous donne une page de ce genre :</p>
 
     <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/default_localhost_works.jpg') }}" alt="localhost default working project" title=""></p>
 
@@ -193,16 +193,16 @@ class DefaultController
 
     <p>Maintenant nous allons préparer le déploiement sur Heroku.</p>
 
-    <p>Dans un premier temps il faut télécharger l'application en ligne de commande fournie par Heroku : <a href="https://devcenter.heroku.com/articles/heroku-cli#download-and-install">https://devcenter.heroku.com/articles/heroku-cli#download-and-install</a></p>
+    <p>Dans un premier temps il faut télécharger l'application en ligne de commande fournie par Heroku : <a href="https://devcenter.heroku.com/articles/heroku-cli#download-and-install">https://devcenter.heroku.com/articles/heroku-cli#download-and-install</a></p>
 
-    <p>Une fois fait, on peut l'exécuter pour vérifier qu'elle est bien installée et fonctionnelle :</p>
+    <p>Une fois fait, on peut l'exécuter pour vérifier qu'elle est bien installée et fonctionnelle :</p>
 
     <pre><code class="language-sh">$ heroku --version
 heroku-cli/6.14.36-15f8a25 (linux-x64) node-v8.7.0</code></pre>
 
     <h3 id="se-connecter-avec-heroku">Se connecter avec Heroku</h3>
 
-    <p>Évidemment, il faut d'abord <a href="https://signup.heroku.com/">créer un compte sur Heroku</a>, et une fois fait, il faut indiquer à la CLI de Heroku quel compte nous utilisons :</p>
+    <p>Évidemment, il faut d'abord <a href="https://signup.heroku.com/">créer un compte sur Heroku</a>, et une fois fait, il faut indiquer à la CLI de Heroku quel compte nous utilisons :</p>
 
     <pre><code class="language-sh">$ heroku login
 Enter your Heroku credentials:
@@ -216,7 +216,7 @@ Logged in as me@domain.com</code></pre>
 
     <h3 id="créer-le-projet-sur-heroku">Créer le projet sur Heroku</h3>
 
-    <p>Heroku permet de tout faire depuis la ligne de commande, alors profitons-en :</p>
+    <p>Heroku permet de tout faire depuis la ligne de commande, alors profitons-en :</p>
 
     <pre><code class="language-sh">$ heroku create
 Creating app... done, stark-escarpment-87840
@@ -226,34 +226,34 @@ https://stark-escarpment-87840.herokuapp.com/ | https://git.heroku.com/stark-esc
 
     <h3 id="installer-le-buildpack">Installer le buildpack</h3>
 
-    <p>Nous allons installer le buildpack PHP pour être sûrs de pouvoir automatiser tout ce dont nous avons besoin :</p>
+    <p>Nous allons installer le buildpack PHP pour être sûrs de pouvoir automatiser tout ce dont nous avons besoin :</p>
 
     <pre><code class="language-sh">$ heroku buildpacks:set heroku/php
 $ heroku buildpacks:set heroku/php
 Buildpack set. Next release on stark-escarpment-87840 will use heroku/php.
 Run git push heroku master to create a new release using this buildpack.</code></pre>
 
-    <p><strong>Note :</strong> En réalité nous n'avons pas vraiment besoin d'installer ce buildpack, puisqu'il est détecté automatiquement grâce à la présence d'un fichier <code>composer.json</code> à la racine de notre projet. Mais nous l'ajoutons manuellement histoire de faire les choses proprement.</p>
+    <p><strong>Note :</strong> En réalité nous n'avons pas vraiment besoin d'installer ce buildpack, puisqu'il est détecté automatiquement grâce à la présence d'un fichier <code>composer.json</code> à la racine de notre projet. Mais nous l'ajoutons manuellement histoire de faire les choses proprement.</p>
 
-    <p>Heroku nous propose de déployer mais nous ferons ça plus tard, quand le projet sera prêt :)</p>
+    <p>Heroku nous propose de déployer mais nous ferons ça plus tard, quand le projet sera prêt :)</p>
 
     <h3 id="rajouter-la-branche-heroku-en-tant-que-remote">Rajouter la branche Heroku en tant que <code>remote</code></h3>
 
     <p>L'intérêt de cette remote est de pouvoir déployer avec un simple <code>git push</code>.</p>
 
-    <p>Et l'url vient de nous être donnée, alors un simple copier/coller suffit :</p>
+    <p>Et l'url vient de nous être donnée, alors un simple copier/coller suffit :</p>
 
     <pre><code class="language-sh">$ git remote add heroku https://git.heroku.com/stark-escarpment-87840.git</code></pre>
 
-    <p><strong>Note :</strong> nommer la remote <code>heroku</code> permet à Heroku CLI de détecter automatiquement le projet en cours sans avoir à le spécifier en tant qu'argument à chaque commande.</p>
+    <p><strong>Note :</strong> nommer la remote <code>heroku</code> permet à Heroku CLI de détecter automatiquement le projet en cours sans avoir à le spécifier en tant qu'argument à chaque commande.</p>
 
     <h3 id="accéder-à-la-production">Accéder à la production</h3>
 
-    <p>Pour accéder directement à l'url de notre projet, on peut exécuter cette commande :</p>
+    <p>Pour accéder directement à l'url de notre projet, on peut exécuter cette commande :</p>
 
     <pre><code class="language-sh">$ heroku open</code></pre>
 
-    <p>Vous devriez voir quelque chose de ce genre :</p>
+    <p>Vous devriez voir quelque chose de ce genre :</p>
 
     <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/heroku_default_home.jpg') }}" alt="heroku default home" title=""></p>
 
@@ -265,7 +265,7 @@ Run git push heroku master to create a new release using this buildpack.</code><
 
     <p>Les références sont dans <code>.env.dist</code>, et à chaque package que nous ajouterons, si des variables sont ajoutées, il faudra les rajouter manuellement à Heroku.</p>
 
-    <p>Pour l'instant, seules 3 variables sont demandées par Symfony :</p>
+    <p>Pour l'instant, seules 2 variables sont demandées par Symfony :</p>
 
     <pre><code class="language-sh">$ heroku config:set APP_ENV=prod APP_SECRET=Wh4t3v3r</code></pre>
 
@@ -279,7 +279,7 @@ Run git push heroku master to create a new release using this buildpack.</code><
 
     <p>Ici nous n'avons besoin que d'un seul dyno, en l'occurence un dyno de type <code>web</code>.</p>
 
-    <p>Chaque ligne du fichier se compose de deux informations : le type de dyno et le script à exécuter.</p>
+    <p>Chaque ligne du fichier se compose de deux informations : le type de dyno et le script à exécuter.</p>
 
     <p>Le script correspondra ici à celui documenté dans le buildpack PHP, en l'occurrence une instance nginx suivie du nom du dossier servant de point d'entrée au vhost.</p>
 
@@ -331,11 +331,11 @@ remote:
 remote: Verifying deploy... done.
 To https://git.heroku.com/stark-escarpment-87840.git</code></pre>
 
-    <p>Le projet est maintenant déployé, nous pouvons l'ouvrir et le tester :</p>
+    <p>Le projet est maintenant déployé, nous pouvons l'ouvrir et le tester :</p>
 
     <pre><code class="language-sh">$ heroku open</code></pre>
 
-    <p>Et nous devrions voir ceci :</p>
+    <p>Et nous devrions voir ceci :</p>
 
     <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/heroku_prod_works.jpg') }}" alt="heroku prod working" title=""></p>
 
@@ -349,7 +349,7 @@ To https://git.heroku.com/stark-escarpment-87840.git</code></pre>
 
     <h4 id="préparer-le-projet-lui-même">Préparer le projet lui-même</h4>
 
-    <p>D'abord, installer Doctrine ORM :</p>
+    <p>D'abord, installer Doctrine ORM :</p>
 
     <pre><code class="language-sh">$ composer require require orm-pack
 Using version ^1.0 for symfony/orm-pack
@@ -360,13 +360,13 @@ Symfony operations: 3 recipes (7d946f30d2601a4530d4c10790aefad1)
   - Configuring doctrine/doctrine-migrations-bundle (1.2): From github.com/symfony/recipes:master
 (...)</code></pre>
 
-    <p>Les différentes recettes Flex vont rajouter ceci :</p>
+    <p>Les différentes recettes Flex vont rajouter ceci :</p>
 
     <ul>
-        <li><code>DoctrineBundle</code> : <br>
+        <li><code>DoctrineBundle</code> : <br>
             <ul><li>La variable d'environnement <code>DATABASE_URL</code> à notre fichier <code>.env</code>.</li>
                 <li>La configuration par défaut du bundle, utilisant cette même variable d'environnement.</li></ul></li>
-        <li><code>DoctrineMigrationsBundle</code> : <br>
+        <li><code>DoctrineMigrationsBundle</code> : <br>
             <ul><li>La configuration du bundle, permettant de stocker nos migrations dans <code>src/Migrations</code>.</li></ul></li>
     </ul>
 
@@ -374,7 +374,7 @@ Symfony operations: 3 recipes (7d946f30d2601a4530d4c10790aefad1)
 
     <h4 id="préparer-la-bdd-sur-heroku">Préparer la BDD sur Heroku</h4>
 
-    <p>Ensuite, il faut installer l'addon Heroku nécessaire à l'utilisation de notre base de données :</p>
+    <p>Ensuite, il faut installer l'addon Heroku nécessaire à l'utilisation de notre base de données :</p>
 
     <pre><code class="language-sh">$ heroku addons:create heroku-postgresql:hobby-dev
 Creating heroku-postgresql:hobby-dev on stark-escarpment-87840... free
@@ -386,10 +386,10 @@ Use heroku addons:docs heroku-postgresql to view documentation</code></pre>
 
     <p>Du coup, Heroku va utiliser un autre serveur (qui ne nous concerne pas) pour gérer la base de données, ce qui facilite grandement la gestion &amp; migration de l'application tout en laissant la BDD de son côté.</p>
 
-    <p><strong>Note :</strong> Par défaut j'utilise PostgreSQL ici, tout simplement parce qu'Heroku dispose de facilités d'utilisations et de monitoring avec ce SGBD, mais il existe aussi de très bons add-ons pour MySQL ou MariaDB, comme ClearDB ou JawsDB, qui sont eux aussi des services cloud externes, et qui peuvent être intégrés à Heroku tout comme <code>heroku-postgresql</code>.<br>
+    <p><strong>Note :</strong> Par défaut j'utilise PostgreSQL ici, tout simplement parce qu'Heroku dispose de facilités d'utilisations et de monitoring avec ce SGBD, mais il existe aussi de très bons add-ons pour MySQL ou MariaDB, comme ClearDB ou JawsDB, qui sont eux aussi des services cloud externes, et qui peuvent être intégrés à Heroku tout comme <code>heroku-postgresql</code>.<br>
         Il faut donc <strong>obligatoirement</strong> modifier nos fichiers <code>.env</code> et <code>.env.dist</code> pour changer le driver PDO de <code>mysql</code> (utilisé par défaut) à <code>pgsql</code>.</p>
 
-    <p>L'installation de l'addon aura automatiquement rajouté une variable d'environnement à la configuration du projet :</p>
+    <p>L'installation de l'addon aura automatiquement rajouté une variable d'environnement à la configuration du projet :</p>
 
     <pre><code class="language-bash">$ heroku config
 === stark-escarpment-87840 Config Vars
@@ -397,7 +397,7 @@ APP_ENV:      prod
 APP_SECRET:   Wh4t3v3r
 DATABASE_URL: postgres://...  &lt;--- Cette variable vient d'être rajoutée par l'addon heroku-postgresql</code></pre>
 
-    <p><strong>Note :</strong> Les autres add-ons cités plus haut pour MySQL et MariaDB peuvent avoir une variable d'environnement avec un nom différent. Libre à vous de changer vos fichiers <code>.env</code>, votre configuration Doctrine ou votre configuration Heroku, afin de l'utiliser.</p>
+    <p><strong>Note :</strong> Les autres add-ons cités plus haut pour MySQL et MariaDB peuvent avoir une variable d'environnement avec un nom différent. Libre à vous de changer vos fichiers <code>.env</code>, votre configuration Doctrine ou votre configuration Heroku, afin de l'utiliser.</p>
 
     <p>Il ne reste plus qu'à créer nos entités comme on le fait habituellement !</p>
 
@@ -411,7 +411,7 @@ DATABASE_URL: postgres://...  &lt;--- Cette variable vient d'être rajoutée par
 
     <p>Heroku se base sur les buildpacks pour déterminer les commandes à exécuter lors d'une release.</p>
 
-    <p>Vu que notre projet est majoritairement un projet PHP, le buildpack PHP permet de créer un script dans la section <code>scripts</code> de notre fichier <code>composer.json</code> : <code>compile</code>.</p>
+    <p>Vu que notre projet est majoritairement un projet PHP, le buildpack PHP permet de créer un script dans la section <code>scripts</code> de notre fichier <code>composer.json</code> : <code>compile</code>.</p>
 
     <p>Ce script est exécuté au moment du déploiement, via <code>composer compile</code> (et Composer détecte automatiquement que cette commande n'existe pas nativement alors il tente de la récupérer dans <code>composer.json</code>).</p>
 
@@ -426,7 +426,7 @@ DATABASE_URL: postgres://...  &lt;--- Cette variable vient d'être rajoutée par
     <pre><code class="language-sh">$ php bin/console doctrine:database:create
 $ php bin/console doctrine:migrations:diff</code></pre>
 
-    <p><strong>Note :</strong> Cette commande fonctionne <strong>uniquement</strong> si vous avez une <strong>base de données entièrement vide</strong>.<br>
+    <p><strong>Note :</strong> Cette commande fonctionne <strong>uniquement</strong> si vous avez une <strong>base de données entièrement vide</strong>.<br>
         Dans le doute, si vous voulez être sûr que la migration créée est correcte, vous pouvez exécuter cette suite de <br>
         commandes:</p>
 
@@ -436,7 +436,7 @@ $ php bin/console doctrine:migrations:diff</code></pre>
 
     <p>Et sinon, créez une migration avec la commande <code>doctrine:migrations:generate</code>, copiez un <em>dump</em> de votre base de données et collez-le directement dans le fichier de migration fraîchement créé.</p>
 
-    <p>Une fois fait, vous devriez avoir quelque chose de ce style :</p>
+    <p>Une fois fait, vous devriez avoir quelque chose de ce style :</p>
 
     <pre><code class="language-php">&lt;?php declare(strict_types = 1);
 
@@ -474,7 +474,7 @@ class Version20171106100053 extends AbstractMigration
 
     <h4 id="ajouter-les-migrations-à-notre-déploiement">Ajouter les migrations à notre déploiement</h4>
 
-    <p>Pour exécuter nos migrations, il suffit d'une seule commande :</p>
+    <p>Pour exécuter nos migrations, il suffit d'une seule commande :</p>
 
     <pre><code class="language-sh">$ php bin/console doctrine:migrations:migrate
 
@@ -499,7 +499,7 @@ Migrating up to 20171106100053 from 0
 
     <p>En l'exécutant en local, tout fonctionne. Maintenant, il faut l'exécuter en production, et <strong>seulement au déploiement</strong>.</p>
 
-    <p>Rajoutons donc un script Composer pour ça, mais pas n'importe lequel : le script que le buildpack PHP déclenche au moment du déploiement (voir plus haut).</p>
+    <p>Rajoutons donc un script Composer pour ça, mais pas n'importe lequel : le script que le buildpack PHP déclenche au moment du déploiement (voir plus haut).</p>
 
     <pre><code class="language-json">{
     "scripts": {
@@ -513,7 +513,7 @@ Migrating up to 20171106100053 from 0
 
     <p>À chaque déploiement cette commande sera exécutée dans le contexte de l'application. Et vu que tout le contexte hérite des variables d'environnement, même pas besoin de spécifier <code>--env=prod</code> comme on le faisait avant !</p>
 
-    <p>Et maintenant on déploie à nouveau :</p>
+    <p>Et maintenant on déploie à nouveau :</p>
 
     <pre><code class="language-sh">$ git add . &amp;&amp; git commit -m "Setup migrations"
 $ git push heroku master
@@ -579,7 +579,7 @@ class SimpleMessageCommand extends Command
 
     <p>Heroku Scheduler est l'add-on qui va nous permettre d'exécuter des tâches à des intervalles réguliers personnalisables.</p>
 
-    <p>Installons-le dans notre projet :</p>
+    <p>Installons-le dans notre projet :</p>
 
     <pre><code class="language-sh">$ heroku addons:create scheduler:standard
 Creating scheduler:standard on stark-escarpment-87840... free
@@ -592,11 +592,11 @@ heroku addons:open scheduler
 Created scheduler-reticulated-65091
 Use heroku addons:docs scheduler to view documentation</code></pre>
 
-    <p>Et maintenant on va ouvrir cet add-on pour le personnaliser :</p>
+    <p>Et maintenant on va ouvrir cet add-on pour le personnaliser :</p>
 
     <pre><code class="language-sh">$ heroku addons:open scheduler</code></pre>
 
-    <p>Vous devriez voir ceci:</p>
+    <p>Vous devriez voir ceci :</p>
 
     <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/scheduler_home.jpg') }}" alt="Scheduler home" title=""></p>
 
@@ -606,7 +606,7 @@ Use heroku addons:docs scheduler to view documentation</code></pre>
 
     <p>Alors la fréquence est clairement moins flexible qu'une <em>vraie</em> tâche <code>cron</code>, mais pour les usages les plus simples, ça reste la meilleure solution. Sinon, il faudra un worker, ce qui est plus complexe à mettre en place (et est plus cher). </p>
 
-    <p>On peut en tout cas exécuter notre tâche :</p>
+    <p>On peut en tout cas exécuter notre tâche :</p>
 
     <ul>
         <li>Une fois par jour à une heure/demi-heure donnée.</li>
@@ -616,7 +616,7 @@ Use heroku addons:docs scheduler to view documentation</code></pre>
 
     <p>Une fois votre commande configurée, vous pouvez attendre quelques minutes que celle-ci s'exécute.</p>
 
-    <p>Lorsque le temps est passé, vous pouvez voir les logs:</p>
+    <p>Lorsque le temps est passé, vous pouvez voir les logs :</p>
 
     <pre><code class="language-sh">$ heroku logs | grep scheduler
 2017-12-01T21:02:56.302995+00:00 heroku[scheduler.8108]: Starting process with command `php bin/console app:simple-message`
@@ -630,11 +630,11 @@ Use heroku addons:docs scheduler to view documentation</code></pre>
 
     <p>Et voilà, nous avons une routine correctement configurée !</p>
 
-    <p><strong>Note :</strong> Attention au temps d'exécution de vos commandes, car celui-ci sera décompté du temps consommé de votre dyno, qui peut vous être facturé selon votre abonnement. Ceci dit, une commande qui dure 5 secondes, exécutée 144 fois par jour, cela fait 720 secondes de consommées. Ce n'est pas grand chose comparé aux 2592000 secondes pour un serveur web allumé 24h/24… </p>
+    <p><strong>Note :</strong> Attention au temps d'exécution de vos commandes, car celui-ci sera décompté du temps consommé de votre dyno, qui peut vous être facturé selon votre abonnement. Ceci dit, une commande qui dure 5 secondes, exécutée 144 fois par jour, cela fait 21600 secondes de consommées dans le mois. Ce n'est pas grand chose comparé aux 2592000 secondes pour un serveur web allumé 24h/24… </p>
 
     <h3 id="améliorer-son-environnement-heroku">Améliorer son environnement Heroku</h3>
 
-    <p>Heroku étant plein d'addons, pour la plupart gratuits, je vous en recommande quelques-uns :</p>
+    <p>Heroku étant plein d'addons, pour la plupart gratuits, je vous en recommande quelques-uns :</p>
 
     <ul>
         <li><a href="https://elements.heroku.com/addons/autobus">Autobus</a>, un système de backups pour votre base de données, très pratique et dont le plan gratuit est idéal pour les projets simples.</li>
@@ -666,6 +666,7 @@ Use heroku addons:docs scheduler to view documentation</code></pre>
 {% block article_bio %}
 <h3><a href="{% block author_url %}https://twitter.com/pierstoval{% endblock %}" target="_blank">{% block article_author %}Alex Rock Ancelet{% endblock %}</a></h3>
 <p>
-    Alex travaille en tant que formateur & développeur chez SensioLabs, et est également lead tech pour le studio d'édition Agate.
+    Alex travaille en tant que formateur &amp; développeur chez SensioLabs, et est également lead tech pour le studio d'édition Agate.<br>
+    Il a commencé la programmation très jeune, mais ne l'a gardée que comme loisir, a appris seul sans études ni formation spécifique, mais a un goût prononcé pour le partage et la transmission de connaissances.
 </p>
 {% endblock %}
