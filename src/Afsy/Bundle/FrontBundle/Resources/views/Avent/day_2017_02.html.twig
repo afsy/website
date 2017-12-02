@@ -117,7 +117,7 @@
 
     <pre><code class="language-yaml">    _default:</code></pre>
 
-    <p>Cette directive permet de définir des conventions par défaut. Il est très important de retenir que la portée de cette directive est <em>locale</em> au fichier où elle est présente.</p>
+    <p>Cette directive permet de définir des conventions par défaut. Il est très important de retenir que sa portée est <em>locale</em> au fichier où elle est présente.</p>
 
     <p>En aucun cas définir <code>autowire: true</code> ne va activer l’autowiring au sein des autres fichiers de configuration (pas même de ceux importés depuis ce fichier, le cas échéant).</p>
 
@@ -131,7 +131,7 @@
 
     <p>Comment faire puisque seules les classes sont chargées en tant que services ?</p>
 
-    <p>Il suffit d’applique la règle de l’autowiring : créer un service du même nom que le type donné. Cela signifie généralement définir un alias :</p>
+    <p>Il suffit d’appliquer la règle de l’autowiring : créer un service du même nom que le type donné. Cela signifie généralement définir un alias :</p>
 
 
 
@@ -188,7 +188,7 @@
         App\Wow\MaBelleInterface:
             tags: [wow]</code></pre>
 
-    <p>Ainsi, chaque service défini localement se verra attribuer le tag “wow”.</p>
+    <p>Ainsi, chaque service défini localement et implémentant ”MaBelleInterface” se verra attribuer le tag “wow”.</p>
 
     <p>À quoi cela peut-il servir ? Un cas classique est de créer une collection de services (exemples typiques pour le framework : une collection de voteurs, de commandes, etc.).</p>
 
@@ -244,7 +244,7 @@
     <ul>
         <li>injecter des services en argument des actions de vos controleurs</li>
         <li>injecter des “service locators” dédiés via <code>ServiceSubscriberInterface</code></li>
-        <li>reinitialiser des services et les réutiliser pour plusieurs requêtes HTTP de suite grâce au tag <code>kernel.reset</code></li>
+        <li>réinitialiser des services et les réutiliser pour plusieurs requêtes HTTP de suite grâce au tag <code>kernel.reset</code></li>
         <li>configurer vos services en PHP plutôt qu’en Yaml</li>
         <li>etc.</li>
     </ul>
