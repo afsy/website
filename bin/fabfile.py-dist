@@ -21,12 +21,11 @@ path = {
 
 @task
 def deploy():
-    #run('pwd') # go through the first connection
-    print _get_role();
     with cd(path[_get_role()]):
         run('git fetch')
         run('git checkout master')
         run('git reset --hard origin/master')
+        run('git pull')
         run('composer install --prefer-dist --optimize-autoloader --no-dev')
         run('bin/console cache:clear --no-warmup --env=prod')
         run('bin/console cache:warmup --env=prod')
