@@ -84,7 +84,9 @@
     <hr />
     <div class="avent-author-block">
         <div class="date">
-            {{ block('article_date', {'day': day}) }}
+            {% with {'day': day} %}
+                {{ block('article_date') }}
+            {% endwith %}
         </div>
 
         <div class="avatar">

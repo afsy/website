@@ -2,7 +2,6 @@
 
 namespace Afsy\Bundle\CoreBundle\Entity;
 
-use JMS\SecurityExtraBundle\Security\Util\String;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use \Doctrine\Common\Collections\ArrayCollection;
@@ -50,7 +49,7 @@ class Author implements UserInterface
      * Author is enable to log into admin
      *
      * @ORM\Column(type="boolean", name="is_enabled")
-     * @Assert\NotBlank()
+     * @Assert\NotNull()
      */
     protected $isEnabled = false;
 

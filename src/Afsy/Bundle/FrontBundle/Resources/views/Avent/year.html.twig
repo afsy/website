@@ -29,21 +29,23 @@
         <div class="avent-author-block">
             <div class="date">
                 <a href="{{ path('avent_day', {year: year, slug: slug}) }}">
-                    {{ template.renderBlock('article_date', {'day': total_day, 'year': year}) }}
+                    {% with {'day': total_day, 'year': year} %}
+                        {{ block('article_date', template) }}
+                    {% endwith %}
                 </a>
             </div>
 
             <div class="avatar">
-                {{ template.renderBlock('article_avatar', {}) }}
+                {{ block('article_avatar', template) }}
             </div>
 
             <div class="content">
-                <h2><a href="{{ path('avent_day', {year: year, slug: slug}) }}">{{ template.renderBlock('article_title', {}) }}</a></h2>
+                <h2><a href="{{ path('avent_day', {year: year, slug: slug}) }}">{{ block('article_title', template) }}</a></h2>
 
-                <p>Écrit par <a href="{{ template.renderBlock('author_url', {}) }}">{{ template.renderBlock('article_author', {}) }}</a></p>
+                <p>Écrit par <a href="{{ block('author_url', template) }}">{{ block('article_author', template) }}</a></p>
 
                 <div class="extract">
-                    {{ template.renderBlock('article_content', {}) | afsy_extract | raw }}
+                    {{ block('article_content', template) | afsy_extract | raw }}
                 </div>
             </div>
         </div>

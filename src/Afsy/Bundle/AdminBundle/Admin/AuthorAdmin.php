@@ -2,20 +2,21 @@
 
 namespace Afsy\Bundle\AdminBundle\Admin;
 
-use Sonata\AdminBundle\Admin\Admin;
+use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
-use Sonata\AdminBundle\Validator\ErrorElement;
 use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\CoreBundle\Form\Type\BooleanType;
+use Sonata\CoreBundle\Validator\ErrorElement;
 
-class AuthorAdmin extends Admin
+class AuthorAdmin extends AbstractAdmin
 {
     protected function configureFormFields(FormMapper $formMapper)
     {
         $formMapper->add('name')
                    ->add('city', 'text', array('required' => false))
                    ->add('email')
-                   ->add('isEnabled', null, array('required' => false));
+                   ->add('isEnabled', BooleanType::class, array('required' => false, 'transform' => true));
     }
 
     protected function configureDatagridFilters(DatagridMapper $datagridMapper)

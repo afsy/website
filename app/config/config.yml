@@ -12,11 +12,16 @@ framework:
     form:            true
     csrf_protection: true
     validation:      { enable_annotations: true }
-    templating:      { engines: ['twig'], assets_version: 3 }
+    templating:
+        engines: ['twig']
+    assets:
+        version: 3
     default_locale:  "%locale%"
-    trusted_proxies: ~
-    trusted_hosts: ['.*\.?afsy.fr$']
-    session:         ~
+    trusted_hosts: ['^(.+\.)?afsy.fr$']
+    session:
+        # http://symfony.com/doc/current/reference/configuration/framework.html#handler-id
+        handler_id:  session.handler.native_file
+        save_path:   "%kernel.root_dir%/../var/sessions/%kernel.environment%"
 
 # Twig Configuration
 twig:
@@ -80,7 +85,9 @@ stof_doctrine_extensions:
 
 hwi_oauth:
     # name of the firewall in which this bundle is active, this setting MUST be set
-    firewall_name: secured_area
+    firewall_names: [secured_area]
+    #http_client:
+    #    verify_peer:   false
     resource_owners:
         sensio_connect:
             type:                sensio_connect
@@ -99,10 +106,6 @@ fpn_tag:
         tag_class:     Afsy\Bundle\CoreBundle\Entity\Tag
         tagging_class: Afsy\Bundle\CoreBundle\Entity\Tagging
 
-sonata_doctrine_orm_admin:
-    # default value is null, so doctrine uses the value defined in the configuration
-    entity_manager: ~
-
 sonata_block:
     default_contexts: [cms]
     blocks:
@@ -112,13 +115,3 @@ sonata_block:
         sonata.block.service.text:
         sonata.block.service.action:
         sonata.block.service.rss:
-
-sonata_admin:
-    title:      Afsy admin
-    title_logo: /bundles/afsyadmin/images/logo.png
-    templates:
-        layout:  AfsyAdminBundle::layout.html.twig
-    dashboard:
-        blocks:
-            # display a dashboard block
-            - { position: left, type: sonata.admin.block.admin_list }
