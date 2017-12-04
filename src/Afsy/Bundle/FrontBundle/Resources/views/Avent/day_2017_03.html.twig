@@ -172,6 +172,39 @@ class DefaultController
     }
 }</code></pre>
 
+    <p>Et n'oublions pas d'installer les annotations, pour que ça fonctionne :</p>
+
+    <pre><code class="language-sh">$ composer req annot
+Using version ^5.1 for sensio/framework-extra-bundle
+./composer.json has been updated
+Loading composer repositories with package information
+Updating dependencies (including require-dev)
+Package operations: 7 installs, 0 updates, 0 removals
+  - Installing doctrine/lexer (v1.0.1): Loading from cache
+  - Installing doctrine/inflector (v1.2.0): Loading from cache
+  - Installing doctrine/collections (v1.5.0): Loading from cache
+  - Installing doctrine/cache (v1.7.1): Loading from cache
+  - Installing doctrine/annotations (v1.5.0): Loading from cache
+  - Installing doctrine/common (v2.8.1): Loading from cache
+  - Installing sensio/framework-extra-bundle (v5.1.2): Loading from cache
+Writing lock file
+Generating autoload files
+Symfony operations: 2 recipes (3ac0e3828e0167b379d5284080768bc5)
+  - Configuring doctrine/annotations (>=1.0): From github.com/symfony/recipes:master
+  - Configuring sensio/framework-extra-bundle (>=4.0): From github.com/symfony/recipes:master
+Executing script cache:clear [OK]
+Executing script assets:install --symlink --relative public [OK]
+</code></pre>
+
+    <p>La recette de <code>doctrine/annotations</code> contient un fichier très utile :</p>
+
+    <pre><code class="language-yaml"># config/routes/annotations.yaml
+controllers:
+    resource: ../../src/Controller/
+    type: annotation</code></pre>
+
+    <p>Et hop ! Tous nos contrôleurs seront désormais automatiquement chargés via des annotations !</p>
+
     <h3 id="testons-cette-configuration">Testons cette configuration</h3>
 
     <p>On exécute la commande du <code>WebServerBundle</code> pour voir notre site :</p>
