@@ -1,0 +1,558 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 4 - Comment déboguer une erreur « segfault » de php" %}
+
+{% block article_content %}
+    <style type="text/css">
+        i {
+            font-family: sans-serif;
+        }
+    </style>
+    <h1>Comment déboguer une erreur « segfault » de php</h1>
+    <p>
+        <i>
+            Vous avez écrit un bout de code qui fait totalement planter PHP :
+            impossible d’avoir une stacktrace pour vous aider à savoir d’où cela vient.
+            Vous êtes au bon endroit : nous allons voir comment obtenir de précieuses
+            informations sur le bug que vous rencontrez. Cet article est orienté linux/ubuntu.
+            Une approche docker-compose sera également proposée.
+        </i>
+    </p>
+
+    <p>
+        ⚠️ Tout au long de cet article je vais parler de php en mode debug avec l’utilisation des symboles de debug.
+        Si ce n’est pas le mode de fonctionnement de PHP par défaut, c’est en partie parce que l’exécution dans ce
+        mode est beaucoup plus lente qu’à la normale. Pensez donc à rétablir un environnement de développement
+        classique après vos tests. Je recommande même la compilation d’une nouvelle version de PHP en local pour
+        vos essais (cf l’<a href="#compile-php">avant dernier chapitre</a>).
+    </p>
+
+    <p>Considérons le script PHP suivant qui comporte une erreur évidente :</p>
+    <pre><code class="language-php">// Fichier bug.php
+
+$x = new AppendIterator;
+$x->append($x);</code></pre>
+
+    <p>Cette erreur génère l’output suivant :</p>
+    <pre><code class="language-bash">Segmentation fault</code></pre>
+
+    <h2 id="prepare-to-debug">Préparez vous à déboguer</h2>
+    <p>Nous allons déboguer à l’aide de gdb. Pour cela vous devez :</p>
+    <ul>
+        <li>Installer GDB</li>
+    </ul>
+    <pre><code class="language-bash">$ sudo apt-get install gdb</code></pre>
+
+    <p>
+        Note: pour les plus téméraires, il existe un outil en python qui permet d’avoir
+        GDB dans une interface web depuis quelques temps. Plus d’infos sur le github du
+        projet: <a href="https://github.com/cs01/gdbgui">https://github.com/cs01/gdbgui</a>
+    </p>
+
+    <ul>
+        <li>Télécharger le .gdbinit fourni par l’équipe de PHP</li>
+    </ul>
+    <pre><code class="language-bash"># Préférez la version responsable de votre version de PHP ! Mais ces script ne sont pas souvent mis à jour.
+$ wget -O - https://raw.githubusercontent.com/php/php-src/master/.gdbinit > ~/.gdbinit</code></pre>
+
+
+    <h2>Debug PHP via un coredump</h2>
+
+    <p>
+        <i>
+            Le coredump est un fichier qui contient l’enregistrement d’une exécution de programme.
+            Cela permet de voir l’état de la mémoire et l’avancement dans le programme au moment du
+            bug facilement.
+        </i>
+    </p>
+
+    <p>
+        Tout d’abord et de manière générale, pour déboguer votre application vous aurez besoin
+        au préalable d’effectuer quelques actions :
+    </p>
+
+    <ul>
+        <li>Modifier la taille de fichier de coredump autorisée (par défaut 0)</li>
+    </ul>
+    <pre><code class="language-bash"># Vérifiez la taille autorisée
+$ ulimit -c
+$ ulimit -a # liste exhaustive des ulimits avec leur signification
+
+# Modifier la taille autorisée
+$ ulimit -c unlimited # Vous pouvez aussi spécifier une très grande valeur, les coredump sont souvent lourds
+</code></pre>
+    <ul>
+        <li>Modifier le chemin d’enregistrement de votre coredump</li>
+    </ul>
+
+    <pre><code class="language-bash"># echo "/tmp/core-%t-%p" > /proc/sys/kernel/core_pattern</code></pre>
+    <p><i>%p représente le numéro du processus et %t est le timestamp, ceci évite d’écraser un ancien coredump.</i></p>
+    <p>
+        Cette valeur est susceptible de changer suivant les paquets que vous installez, au cours du temps et au reboot.
+        Pensez à la vérifier si le core dump n’est pas au bon endroit.
+    </p>
+
+    <h3 id="install-php-with-symbols">Installer php et les symbols</h3>
+    <p>
+        Sur une installation ubuntu standard, vous avez une version “php debug” disponible dans les packages.
+        La solution la plus simple consiste à l’utiliser :
+    </p>
+    <pre><code class="language-bash"># 1. Ajout des dépôts de symboles
+# https://wiki.ubuntu.com/Debug%20Symbol%20Packages
+$ echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse
+deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse" | \
+sudo tee -a /etc/apt/sources.list.d/ddebs.list
+$ sudo apt-get update
+
+# 2. Installation des symboles de debug
+$ sudo apt-get install php-cli-dbg php7.0-fpm-dbgsym
+</code></pre>
+    <p>
+        Pour les utilisateurs du ppa oerdnj/deb.sury.org, vous trouverez un moyen de vous en sortir
+        sur le wiki <a href="https://github.com/oerdnj/deb.sury.org/wiki/Debugging-Symbols">https://github.com/oerdnj/deb.sury.org/wiki/Debugging-Symbols</a>
+    </p>
+
+    <h4 id="generate-coredump-with-phpcli">Générer un coredump en cli</h4>
+    <p>À partir de là, vous êtes déjà capable de générer un coredump facilement :</p>
+    <pre><code class="language-bash">$ php bug.php
+Segmentation fault (core dumped)</code></pre>
+    <p>
+        L’output a changé et nous informe que des informations ont été enregistrées (« core dumped »).
+        Il ne reste plus qu’à lire ce dump avec gdb :
+    </p>
+    <pre><code class="language-bash">$ ls /tmp
+core-1512403995-27412
+$ gdb php /tmp/core-1512403995-27412
+</code></pre>
+    <h4 id="generate-coredump-with-phpfpm">Générer un coredump avec php-fpm</h4>
+    <p>
+        Pour générer un coredump avec php-fpm, vous devrez au préalable configurer php-fpm.
+        Pour cela, éditez le fichier <code>/etc/php/7.0/fpm/php-fpm.conf</code>.
+        Dé-commentez la ligne <code>rlimit_core</code>
+        et spécifiez la valeur « unlimited ».
+    </p>
+    <pre><code class="language-ini">; Set max core size rlimit for the master process.
+; Possible Values: 'unlimited' or an integer greater or equal to 0
+; Default Value: system defined value
+rlimit_core = unlimited
+</code></pre>
+    <p><b>Redémarrez ensuite fpm</b> via <code>sudo service php7.0-fpm restart</code>.</p>
+
+    <p>
+        Lorsque vous lancerez votre script, le dump sera alors effectué. Vous pouvez en trouver
+        la preuve dans les logs de php-fpm :
+    </p>
+    <pre><code class="language-log"># Fichier /var/log/php7.0-fpm.log
+[03-Dec-2017 17:44:30] WARNING: [pool www] child 27719 exited on signal 11 (SIGSEGV - core dumped) after 5.293810 seconds from start
+[03-Dec-2017 17:44:30] NOTICE: [pool www] child 27723 started
+</code></pre>
+    <p>
+        Vous devez ensuite trouver le binaire de php-fpm (je l’ai trouvé dans
+        <code>/etc/init.d/php7.0-fpm</code>). Pour ubuntu je suppose que vous pouvez
+        vous attendre à quelque chose de similaire à <code>/usr/sbin/php-fpm7.0</code>.
+        Il nous suffit à présent de lancer gdb en lui donnant l’exécutable en paramètre :
+    </p>
+
+    <pre><code class="language-bash">$ ls /tmp
+core-1512323070-27719
+$ gdb /usr/sbin/php-fpm7.0 /tmp/core-1512323070-27719
+</code></pre>
+
+    <h4 id="coredump-usage">Exploiter le coredump</h4>
+    <p>
+        Une fois gdb lancé, vous pouvez tout de suite lire la backtrace en C en utilisant la commande <strong>bt</strong>.
+        Mais nous, développeurs PHP, ce qui nous intéresse c’est plutôt quelque chose de lisible dans notre
+        langage préféré. C’est là que nous allons utiliser le script <strong>.gdbinit</strong> récupéré
+        préalablement sur le dépôt de PHP.
+    </p>
+    <pre><code class="language-gdb">(gdb) source ~/.gdbinit
+(gdb) zbacktrace
+[0x7fd3627bce60] AppendIterator->rewind() [internal function]
+[0x7fd3627bce00] AppendIterator->rewind() [internal function]
+[0x7fd3627bcda0] AppendIterator->rewind() [internal function]
+[0x7fd3627bcd40] AppendIterator->rewind() [internal function]
+[0x7fd3627bcce0] AppendIterator->rewind() [internal function]
+[0x7fd3627bcc80] AppendIterator->rewind() [internal function]
+...
+</code></pre>
+
+    <p>
+        On peut alors utiliser des commandes définies dans le .gdbinit. Vous pouvez utiliser
+        la commande <strong>zbacktrace</strong> pour afficher une backtrace en mode PHP.
+        Ici la boucle infinie générée en interne nous saute aux yeux: <strong>victoire, nous
+            savons d’où vient le bug !</strong><br />
+        Pour en savoir plus sur les commandes disponibles je vous encourage à lire le chapitre dédié.
+    </p>
+
+    <h4 id="usage-of-php-sources">Utiliser les sources de php pour mieux déboguer</h4>
+    <p>
+        Vous l’avez peut être remarqué, lorsqu’on lance gdb avec le coredump nous nous retrouvons
+        avec une erreur similaire à celle-ci à chaque fois :
+    </p>
+    <pre><code class="language-bash">/build/php7.0-dFe1Vt/php7.0-7.0.22/Zend/zend_objects_API.c: No such file or directory.</code></pre>
+
+    <p>
+        Cette erreur est présente car gdb n’est pas capable de retrouver les fichiers source.
+        Et pour cause: ils ne sont pas présents ! Pourtant vous pouvez les télécharger à tout moment.
+        Utilisez la commande suivante dans le dossier de votre choix pour les télécharger :
+    </p>
+    <pre><code class="language-bash"># Cette commande ne s’utilise pas en root
+$ apt-get source php7.0-fpm</code></pre>
+
+    <p>Une fois les sources de votre package téléchargées, vous pouvez spécifier à gdb leur nouvelle localisation :</p>
+    <pre><code class="language-bash">(gdb) set substitute-path /build/php7.0-dFe1Vt/php7.0-7.0.22/ /your/path/to/php7.0-7.0.22/</code></pre>
+    <p>
+        Vous pouvez à présent utiliser gdb pour vous situer dans le code de PHP au besoin :
+    </p>
+    <pre><code class="language-bash">{{ '(gdb) list
+139   	 ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
+140    }
+141    /* }}} */
+142
+143    ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
+144    {
+145   	 /*    Make sure we hold a reference count during the destructor call
+146   		 otherwise, when the destructor ends the storage might be freed
+147   		 when the refcount reaches 0 a second time
+148   	  */' }}</code></pre>
+    <h3 id="how-to-with-docker">Générer un coredump avec docker-compose</h3>
+
+    <p>
+        Si vous utilisez un simple Dockerfile, je vous recommande de tenter les cas précédents.
+        En revanche si vous utilisez docker-compose vous allez vous sentir quelques peu désemparés
+        car <strong>l’utilisation de PHP avec les symboles n’est pas du tout prévue</strong>
+        par l’image PHP « officielle ».
+    </p>
+
+    <h4 id="create-your-php-debug-image">Créer une version de PHP en mode debug</h4>
+    <p>
+        Nous allons donc devoir tricher. L’astuce consiste à copier/coller le Dockerfile
+        correspondant à l’image que vous utilisez et remplacer le <code>FROM php:7.0</code>
+        par le contenu du fichier original. Pour moi il s’agit de PHP FPM 7.0 basé sur
+        debian jessie (si vous ne savez pas quoi prendre entre debian et alpine, prenez debian).
+        Pour moi il s’agit donc de ce <a href="Nous allons donc devoir tricher. L’astuce consiste à copier/coller le Dockerfile correspondant à l’image que vous utilisez et remplacer le `FROM php:7.0` par le contenu du fichier original. Pour moi il s’agit de PHP FPM 7.0 basé sur debian jessie (si vous ne savez pas quoi prendre entre debian et alpine, prenez debian). Pour moi il s’agit donc de ce Dockerfile:
+https://github.com/docker-library/php/blob/0bb4068bd639ba98631bc2999e0d20cae583ec00/7.0/jessie/fpm/Dockerfile
+">Dockerfile</a>. Vous trouverez la liste de touts les Dockerfile PHP à cette adresse :
+        <a href="https://github.com/docker-library/php">https://github.com/docker-library/php</a>
+    </p>
+
+    <p>Après l’avoir copié, il va falloir le modifier pour l’adapter à nos besoins :</p>
+    <ul>
+        <li>Ajouter l’option debug à la compilation de PHP</li>
+    </ul>
+
+    <p>Voici donc à quoi ressemble ma commande <code>./configure</code> dans le Dockerfile :</p>
+    <pre><code class="language-bash">./configure \
+     --build="$gnuArch" \
+     --with-config-file-path="$PHP_INI_DIR" \
+     --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
+     \
+     --disable-cgi \
+     \
+# --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
+     --enable-ftp \
+# --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
+     --enable-mbstring \
+# --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
+     --enable-mysqlnd \
+     \
+     --with-curl \
+     --with-libedit \
+     --with-openssl \
+     --with-zlib \
+     --enable-debug \         # <----- On a simplement rajouté ceci !
+     \
+# bundled pcre is too old for s390x (which isn't exactly a good sign)
+# /usr/src/php/ext/pcre/pcrelib/pcre_jit_compile.c:65:2: error: #error Unsupported architecture
+     --with-pcre-regex=/usr \
+     --with-libdir="lib/$debMultiarch" \
+     \
+     $PHP_EXTRA_CONFIGURE_ARGS</code></pre>
+    <p>Le point important est la ligne <code>--enable-debug</code>.</p>
+
+    <ul>
+        <li>Copier/coller les scripts nécessaires à l’exécution du Dockerfile (les fichiers docker-php-*) depuis le repository dans lequel vous avez récupéré le Dockerfile</li>
+        <li>Commenter/supprimer la ligne qui supprime les symboles (évidemment!)</li>
+    </ul>
+    <pre><code class="language-bash">    && make install \
+    #&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
+    && make clean \</code></pre>
+
+    <p>Une fois votre Dockerfile complet, vous devez rebuild votre docker fpm.</p>
+
+    <h4 id="change-docker-compose-ulimit">Modifier le ulimit avec docker-compose</h4>
+    <p>
+        <i>
+            Vous croyez que la galère allait s’arrêter là ? Raté. Il vous faut maintenant
+            modifier deux valeurs du kernel… Auquel vous n’avez pas accès avec docker pour
+            une question évidente de sécurité. Voici la marche à suivre pour tout de même
+            réussir à modifier chacune des valeurs qui nous intéresse.
+        </i>
+    </p>
+
+    <p>
+        Pour modifier la valeur de <code>ulimit -c</code> dans votre docker vous allez devoir modifier
+        votre configuration dans le fichier <code>docker-compose.yml</code> :
+    </p>
+
+    <pre><code class="language-yaml">version: '2'
+
+services:
+    your-docker-name:
+        build: docker/php-fpm
+        ulimits:
+            core: 100000000000</code></pre>
+    <p>
+        Nous devons spécifier une très grande valeur car il n’est pas possible de spécifier
+        « unlimited ». Vous devez redémarrer vos dockers pour que cela soit pris en compte.
+    </p>
+    <p>
+        Il nous faut maintenant réussir à modifier le core_pattern localisé dans le
+        fichier <code>/proc/sys/kernel/core_pattern</code>. Pour cela nous devons lancer un
+        docker en mode privilégié :
+    </p>
+    <pre><code class="language-bash">$ docker run -it --privileged alpine sh
+# echo "/tmp/core-%t-%p" > /proc/sys/kernel/core_pattern</code></pre>
+    <p>Cela modifie la valeur pour tous les dockers.</p>
+
+    <h4 id="generate-coredump-from-docker">Générer le coredump et l’exploiter</h4>
+    <p>Tout est prêt. Exécutez votre page ou votre script.</p>
+    <p>
+        Côté nginx vous recevrez une erreur « 502 Bad Gateway »
+        et les logs de votre docker afficheront un message similaire à ceci :
+    </p>
+    <pre><code class="language-log">your-docker-name_1        	| [04-Dec-2017 18:53:54] WARNING: [pool www] child 6 exited on signal 11 (SIGSEGV - core dumped) after 393199.005907 seconds from start
+your-docker-name_1        	| [04-Dec-2017 18:53:54] NOTICE: [pool www] child 25 started</code></pre>
+    <p>
+        Installez gdb et exploitez le coredump comme décrit à dans la section
+        présentant l’exploitation de coredump avec php-fpm. Notez que le binaire
+        est probablement situé dans <code>/usr/local/sbin/php-fpm</code> dans votre container.
+    </p>
+
+
+    <h2 id="compile-php">Compiler PHP et déboguer avec les sources</h2>
+    <p>Cela peut paraître barbare mais cette méthode a plusieurs avantages :</p>
+    <ol>
+        <li>Ne pas modifier les binaires PHP que vous utilisez au quotidien</li>
+        <li>Utiliser gdb plus facilement</li>
+        <li>Avoir les sources à portée de main pour voir ce qui se passe dans le code de PHP</li>
+    </ol>
+
+    <h3 id="compile-php-from-sources">Compiler PHP depuis les sources</h3>
+    <p>
+        <i>
+            Je vais détailler la compilation telle qu’elle se présente aujourd’hui,
+            c’est à dire la compilation d’une pré-version de PHP 7.3. Dans le monde
+            réel n’oubliez pas d’utiliser un tag pour récupérer la version qui vous convient.
+        </i>
+    </p>
+    <p>
+        Pour compiler PHP il faut tout d’abord aller télécharger les sources. Celles-ci sont disponibles sur Github :
+    </p>
+    <pre><code class="language-bash">$ git clone git@github.com:php/php-src.git && cd php-src</code></pre>
+    <p>
+        Vous aurez besoin d’installer tout un tas de librairies et surtout leur version « dev » des packages.
+    </p>
+    <pre><code class="language-bash">$ sudo apt-get update
+$ sudo apt-get install build-essential \
+    autoconf \
+    re2c \
+    bison \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libfreetype6-dev \
+    libpq-dev \
+    libxslt-dev \
+    libzip-dev
+</code></pre>
+    <p>Vous pouvez à présent lancer la compilation :</p>
+    <pre><code class="language-bash">$ buildconf --force
+$ make clean
+
+$ ./configure \
+    --with-pdo-pgsql \
+    --with-zlib-dir \
+    --with-freetype-dir \
+    --enable-mbstring \
+    --with-libxml-dir=/usr \
+    --enable-soap \
+    --enable-calendar \
+    --with-curl \
+    --with-zlib \
+    --with-gd \
+    --disable-rpath \
+    --enable-inline-optimization \
+    --with-zlib \
+    --enable-sockets \
+    --enable-sysvsem \
+    --enable-sysvshm \
+    --enable-pcntl \
+    --enable-mbregex \
+    --enable-exif \
+    --enable-bcmath \
+    --with-mhash \
+    --enable-zip \
+    --with-pcre-regex \
+    --with-pdo-mysql \
+    --with-mysqli \
+    --with-mysql-sock=/var/run/mysqld/mysqld.sock \
+    --with-jpeg-dir=/usr \
+    --with-png-dir=/usr \
+    --with-openssl \
+    --with-fpm-user=www-data \
+    --with-fpm-group=www-data \
+    --with-libdir=/lib/x86_64-linux-gnu \
+    --enable-ftp \
+    --with-kerberos \
+    --with-gettext \
+    --with-xmlrpc \
+    --with-xsl \
+    --enable-opcache \
+    --enable-intl \
+    --enable-fpm \
+    --enable-debug
+
+$ make -j "$(nproc)"
+</code></pre>
+
+    <p>
+        Ceci est la configuration que j’ai choisie. Vous pouvez modifier beaucoup d’options,
+        notamment supprimer MySQL pour PostgreSQL. La seule option réellement importante
+        c’est l’option <code>--enable-debug</code>.<br />
+        Gardez en tête que l’idéal reste d’avoir une compilation qui soit la plus analogue
+        possible à votre environnement habituel, afin de pouvoir reproduire l’erreur avec un
+        maximum de similitudes entre la version PHP compilée à la main et celle fournie par
+        votre package manager.
+    </p>
+    <p>
+        ℹ️ Il est possible que certaines options n’existent pas ou que d’autres soient manquantes
+        pour vous, n’hésitez pas à consulter la liste des options de <code>configure</code>
+        <a href="http://php.net/manual/fr/configure.about.php">http://php.net/manual/fr/configure.about.php</a>
+    </p>
+    <h3>Lancer une application Symfony avec un PHP fraîchement compilé</h3>
+    <p>
+        Vous pourriez bien entendu utiliser php-fpm avec nginx mais cela complexifie nos
+        debugs avec gdb. Je préconise une utilisation de php plus simple :
+    </p>
+
+    <pre><code class="language-bash">$ /path/to/your/php/src/folder/sapi/cli/php -S localhost:8000 web/app.php # index.php si vous utilisez Sf4!</code></pre>
+
+    <p>Cela vous permettra de rejouer facilement l’échec dans gdb.</p>
+
+    <h2 id="how-to-use-gdb">Comment utiliser GDB pour trouver nos problèmes</h2>
+    <h3 id="run-php-with-gdb">Lancer PHP avec gdb</h3>
+    <p>Tout d’abord pour déboguer avec gdb et un peu de confort, vous devez lancer PHP via gdb :</p>
+    <pre><code class="language-bash">$ gdb -args /path/to/your/php/src/folder/sapi/cli/php -args -S localhost:8000 web/app.php</code></pre>
+
+    <p>Vous pouvez ensuite lancer l’exécution via la commande <code>run</code>.</p>
+    <pre><code class="language-gdb">(gdb) run
+Starting program: /path/to/your/php/src/folder/sapi/cli/ph -args -S localhost:8000 web/app.php
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PHP 7.0.26RC1 Development Server started at Mon Dec  4 20:56:26 2017
+Listening on http://localhost:8000
+Document root is /path/to/your/application
+Press Ctrl-C to quit.
+</code></pre>
+
+    <p>
+        A partir de ce moment, vous pouvez utiliser gdb de manière classique :
+        ajoutez des break points où vous le souhaitez pour déboguer directement
+        PHP. Cet article n’a pas pour but d’expliquer le fonctionnement de gdb,
+        je vous renvoie donc vers openclassroom si vous avez besoin d’en savoir plus :
+        <a href="https://openclassrooms.com/courses/deboguer-son-programme-avec-gdb">https://openclassrooms.com/courses/deboguer-son-programme-avec-gdb</a>
+    </p>
+
+    <h3 id="more-about-gdb-user-defined">En savoir plus sur les commandes fournies par l’équipe de PHP</h3>
+    <p>Je vous l’ai dit, vous pouvez (devez !) utiliser les helpers fournis par PHP en les sourçant :</p>
+    <pre><code class="language-bash">(gdb) source ~/.gdbinit</code></pre>
+    <p>
+        Vous avez alors accès à plusieurs commandes que vous pouvez lister avec la commande
+        <code>help user-defined</code>
+    </p>
+
+    <pre><code class="language-gdb">(gdb) help user-defined
+User-defined commands.
+The commands in this class are those defined by the user.
+Use the "define" command to define a command.
+
+List of commands:
+
+____executor_globals -- 	portable way of accessing executor_globals
+____print_const_table -- User-defined
+____print_ht -- User-defined
+____print_inh_class -- User-defined
+____print_inh_iface -- User-defined
+____print_str -- User-defined
+____printzv -- User-defined
+____printzv_contents -- User-defined
+dump_bt -- 	dumps the current execution stack
+lookup_root -- 	lookup a refcounted in root
+print_const_table -- User-defined
+print_cvs -- 	Prints the compiled variables and their values
+print_ft -- 	dumps a function table (HashTable)
+print_ht -- 	dumps elements of HashTable made of zval
+print_htptr -- 	dumps elements of HashTable made of pointers
+print_htstr -- 	dumps elements of HashTable made of strings
+print_inh -- User-defined
+print_pi -- 	Takes a pointer to an object's property and prints the property information
+print_zstr -- 	print the length and contents of a zend string
+printzn -- 	print type and content of znode
+printzops -- 	dump operands of the current opline
+printzv -- 	prints zval contents
+set_ts -- 	set the ts resource
+zbacktrace -- 	prints backtrace
+
+Type "help" followed by command name for full documentation.
+Type "apropos word" to search for commands related to "word".
+Command name abbreviations are allowed if unambiguous.
+</code></pre>
+
+    <p>Le help parle de lui même mais je vais détailler un peu les commandes qui me semblent le plus utile :</p>
+    <ul>
+        <li>
+            <strong>zbacktrace</strong> : LA commande de référence. Lorsque vous avez un
+            problème qui vous pousse à utiliser gdb c’est la première qu’il faut lancer,
+            généralement elle suffit à vous faire comprendre où est l’erreur.
+            <string>Cette commande permet d’afficher une trace utilisant les objets de votre code PHP</string>;
+        </li>
+        <li>
+            <strong>printzv</strong> : Cette commande permet de récupérer des informations
+            très intéressantes sur les objets lorsque vous commencer à vous intéresser au C;
+        </li>
+        <li>
+            <strong>print_ht*</strong> : Ces fonctions vont de paire avec la précédente
+            et permettent d’afficher les valeurs contenues dans des adresses mémoire :
+            très pratique et simple à utiliser.
+        </li>
+    </ul>
+
+    <p>J’espère que cet article rendra vos debug moins pénibles dans le futur !</p>
+    <p>
+        Notez que grâce à ce genre de débug vous pourriez potentiellement résoudre des
+        problèmes de PHP répertoriés dans la
+        <a href="https://bugs.php.net/search.php?cmd=display&search_for=segfault&x=0&y=0">liste des bugs</a>.
+        A vos claviers ! 😁
+    </p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/05/maxime_veber.png') }}" alt="Maxime Veber" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url %}https://twitter.com/Nekdev{% endblock %}" target="_blank">
+            {% block article_author %}Veber Maxime{% endblock %}
+        </a>
+    </h2>
+    <p>
+        Lead developer at
+        <a target="_blank" href="https://www.biig.fr">BiiG</a>.
+    </p>
+{% endblock %}
