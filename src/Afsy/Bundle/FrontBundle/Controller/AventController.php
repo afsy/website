@@ -40,6 +40,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '05-deboguer-php-avec-gdb'                            => 'AfsyFrontBundle:Avent:day_2017_05.html.twig',
             '04-tagger-son-application'                           => 'AfsyFrontBundle:Avent:day_2017_04.html.twig',
             '03-deployer-un-projet-symfony-flex-sur-heroku'       => 'AfsyFrontBundle:Avent:day_2017_03.html.twig',
             '02-la-nouvelle-configuration-par-defaut-de-symfony4' => 'AfsyFrontBundle:Avent:day_2017_02.html.twig',
