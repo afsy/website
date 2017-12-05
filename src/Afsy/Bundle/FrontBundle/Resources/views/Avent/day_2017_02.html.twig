@@ -60,7 +60,7 @@
 
     <h3 id="chaque-service-inutilisé-doit-être-nettoyé">Chaque service inutilisé doit être nettoyé</h3>
 
-    <pre><code class="language-yaml">    _default:
+    <pre><code class="language-yaml">    _defaults:
         public: false</code></pre>
 
     <p>Lorsqu’un service est dit “privé”, on ne peut plus y accéder via l’appel <code>$container-&gt;get()</code>. La conséquence est qu’il est possible de le supprimer du container - ça ne fera aucune différence - ou bien de l’<em>inliner</em> s’il est requis par un autre service. Cette double optimisation existe depuis les débuts de Symfony 2. En l’activant par défaut, on tourne le mécanisme à notre avantage pour ne garder que les classes qui sont effectivement utilisées sous forme de service.</p>
@@ -77,7 +77,7 @@
 
 
 
-    <pre><code class="language-yaml">    _default</span>:
+    <pre><code class="language-yaml">    _defaults:
         autoconfigure: true</code></pre>
 
     <p>Le framework dispose d’une liste d’interfaces et de classes abstraites que vous pouvez implémenter pour par exemple créer une nouvelle commande pour la console, ou bien pour écouter les événements déclenchés lors du traitement d’une requête HTTP, etc.</p>
@@ -96,7 +96,7 @@
 
 
 
-    <pre><code class="language-yaml">    _default:
+    <pre><code class="language-yaml">    _defaults:
         autowiring: true</code></pre>
 
     <p>C’est le fameux <em>autowiring</em>. Cette directive dit à Symfony de regarder le constructeur et les éventuels “setters” de vos services, et d’y injecter <em>le</em> service correspondant au type requis par leurs arguments, lorsque c’est possible.</p>
@@ -115,7 +115,7 @@
 
 
 
-    <pre><code class="language-yaml">    _default:</code></pre>
+    <pre><code class="language-yaml">    _defaults:</code></pre>
 
     <p>Cette directive permet de définir des conventions par défaut. Il est très important de retenir que sa portée est <em>locale</em> au fichier où elle est présente.</p>
 
@@ -158,7 +158,7 @@
 
 
     <pre><code class="language-yaml">services:
-    _default:
+    _defaults:
         bind:
             $defaultLocale: '%kernel.default_locale%'</code></pre>
 
@@ -169,7 +169,7 @@
 
 
     <pre><code class="language-yaml">services:
-    _default:
+    _defaults:
         bind:
             App\Wow\MaBelleInterface: '@App\Wow\MonBeauService'</code></pre>
 
