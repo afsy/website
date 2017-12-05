@@ -129,8 +129,8 @@ $ gdb php /tmp/core-1512403995-27412
     <h4 id="generate-coredump-with-phpfpm">Générer un coredump avec php-fpm</h4>
     <p>
         Pour générer un coredump avec php-fpm, vous devrez au préalable configurer php-fpm.
-        Pour cela, éditez le fichier <code>/etc/php/7.0/fpm/php-fpm.conf</code>.
-        Dé-commentez la ligne <code>rlimit_core</code>
+        Pour cela, éditez le fichier <code class="language-none">/etc/php/7.0/fpm/php-fpm.conf</code>.
+        Dé-commentez la ligne <code class="language-none">rlimit_core</code>
         et spécifiez la valeur « unlimited ».
     </p>
     <pre><code class="language-ini">; Set max core size rlimit for the master process.
@@ -150,8 +150,8 @@ rlimit_core = unlimited
 </code></pre>
     <p>
         Vous devez ensuite trouver le binaire de php-fpm (je l’ai trouvé dans
-        <code>/etc/init.d/php7.0-fpm</code>). Pour ubuntu je suppose que vous pouvez
-        vous attendre à quelque chose de similaire à <code>/usr/sbin/php-fpm7.0</code>.
+        <code class="language-none">/etc/init.d/php7.0-fpm</code>). Pour ubuntu je suppose que vous pouvez
+        vous attendre à quelque chose de similaire à <code class="language-none">/usr/sbin/php-fpm7.0</code>.
         Il nous suffit à présent de lancer gdb en lui donnant l’exécutable en paramètre :
     </p>
 
@@ -229,7 +229,7 @@ $ apt-get source php7.0-fpm</code></pre>
     <h4 id="create-your-php-debug-image">Créer une version de PHP en mode debug</h4>
     <p>
         Nous allons donc devoir tricher. L’astuce consiste à copier/coller le Dockerfile
-        correspondant à l’image que vous utilisez et remplacer le <code>FROM php:7.0</code>
+        correspondant à l’image que vous utilisez et remplacer le <code class="language-none">FROM php:7.0</code>
         par le contenu du fichier original. Pour moi il s’agit de PHP FPM 7.0 basé sur
         debian jessie (si vous ne savez pas quoi prendre entre debian et alpine, prenez debian).
         Pour moi il s’agit donc de ce <a href="Nous allons donc devoir tricher. L’astuce consiste à copier/coller le Dockerfile correspondant à l’image que vous utilisez et remplacer le `FROM php:7.0` par le contenu du fichier original. Pour moi il s’agit de PHP FPM 7.0 basé sur debian jessie (si vous ne savez pas quoi prendre entre debian et alpine, prenez debian). Pour moi il s’agit donc de ce Dockerfile:
@@ -243,7 +243,7 @@ https://github.com/docker-library/php/blob/0bb4068bd639ba98631bc2999e0d20cae583e
         <li>Ajouter l’option debug à la compilation de PHP</li>
     </ul>
 
-    <p>Voici donc à quoi ressemble ma commande <code>./configure</code> dans le Dockerfile :</p>
+    <p>Voici donc à quoi ressemble ma commande <code class="language-none">./configure</code> dans le Dockerfile :</p>
     <pre><code class="language-bash">./configure \
      --build="$gnuArch" \
      --with-config-file-path="$PHP_INI_DIR" \
@@ -270,7 +270,7 @@ https://github.com/docker-library/php/blob/0bb4068bd639ba98631bc2999e0d20cae583e
      --with-libdir="lib/$debMultiarch" \
      \
      $PHP_EXTRA_CONFIGURE_ARGS</code></pre>
-    <p>Le point important est la ligne <code>--enable-debug</code>.</p>
+    <p>Le point important est la ligne <code class="language-none">--enable-debug</code>.</p>
 
     <ul>
         <li>Copier/coller les scripts nécessaires à l’exécution du Dockerfile (les fichiers docker-php-*) depuis le repository dans lequel vous avez récupéré le Dockerfile</li>
@@ -293,8 +293,8 @@ https://github.com/docker-library/php/blob/0bb4068bd639ba98631bc2999e0d20cae583e
     </p>
 
     <p>
-        Pour modifier la valeur de <code>ulimit -c</code> dans votre docker vous allez devoir modifier
-        votre configuration dans le fichier <code>docker-compose.yml</code> :
+        Pour modifier la valeur de <code class="language-none">ulimit -c</code> dans votre docker vous allez devoir modifier
+        votre configuration dans le fichier <code class="language-none">docker-compose.yml</code> :
     </p>
 
     <pre><code class="language-yaml">version: '2'
@@ -328,7 +328,7 @@ your-docker-name_1        	| [04-Dec-2017 18:53:54] NOTICE: [pool www] child 25 
     <p>
         Installez gdb et exploitez le coredump comme décrit à dans la section
         présentant l’exploitation de coredump avec php-fpm. Notez que le binaire
-        est probablement situé dans <code>/usr/local/sbin/php-fpm</code> dans votre container.
+        est probablement situé dans <code class="language-none">/usr/local/sbin/php-fpm</code> dans votre container.
     </p>
 
 
@@ -423,7 +423,7 @@ $ make -j "$(nproc)"
     <p>
         Ceci est la configuration que j’ai choisie. Vous pouvez modifier beaucoup d’options,
         notamment supprimer MySQL pour PostgreSQL. La seule option réellement importante
-        c’est l’option <code>--enable-debug</code>.<br />
+        c’est l’option <code class="language-none">--enable-debug</code>.<br />
         Gardez en tête que l’idéal reste d’avoir une compilation qui soit la plus analogue
         possible à votre environnement habituel, afin de pouvoir reproduire l’erreur avec un
         maximum de similitudes entre la version PHP compilée à la main et celle fournie par
@@ -431,7 +431,7 @@ $ make -j "$(nproc)"
     </p>
     <p>
         ℹ️ Il est possible que certaines options n’existent pas ou que d’autres soient manquantes
-        pour vous, n’hésitez pas à consulter la liste des options de <code>configure</code>
+        pour vous, n’hésitez pas à consulter la liste des options de <code class="language-none">configure</code>
         <a href="http://php.net/manual/fr/configure.about.php">http://php.net/manual/fr/configure.about.php</a>
     </p>
     <h3>Lancer une application Symfony avec un PHP fraîchement compilé</h3>
@@ -449,7 +449,7 @@ $ make -j "$(nproc)"
     <p>Tout d’abord pour déboguer avec gdb et un peu de confort, vous devez lancer PHP via gdb :</p>
     <pre><code class="language-bash">$ gdb -args /path/to/your/php/src/folder/sapi/cli/php -args -S localhost:8000 web/app.php</code></pre>
 
-    <p>Vous pouvez ensuite lancer l’exécution via la commande <code>run</code>.</p>
+    <p>Vous pouvez ensuite lancer l’exécution via la commande <code class="language-none">run</code>.</p>
     <pre><code class="language-gdb">(gdb) run
 Starting program: /path/to/your/php/src/folder/sapi/cli/ph -args -S localhost:8000 web/app.php
 [Thread debugging using libthread_db enabled]
@@ -473,7 +473,7 @@ Press Ctrl-C to quit.
     <pre><code class="language-bash">(gdb) source ~/.gdbinit</code></pre>
     <p>
         Vous avez alors accès à plusieurs commandes que vous pouvez lister avec la commande
-        <code>help user-defined</code>
+        <code class="language-none">help user-defined</code>
     </p>
 
     <pre><code class="language-gdb">(gdb) help user-defined
@@ -519,7 +519,7 @@ Command name abbreviations are allowed if unambiguous.
             <strong>zbacktrace</strong> : LA commande de référence. Lorsque vous avez un
             problème qui vous pousse à utiliser gdb c’est la première qu’il faut lancer,
             généralement elle suffit à vous faire comprendre où est l’erreur.
-            <string>Cette commande permet d’afficher une trace utilisant les objets de votre code PHP</string>;
+            <strong>Cette commande permet d’afficher une trace utilisant les objets de votre code PHP</strong>;
         </li>
         <li>
             <strong>printzv</strong> : Cette commande permet de récupérer des informations
