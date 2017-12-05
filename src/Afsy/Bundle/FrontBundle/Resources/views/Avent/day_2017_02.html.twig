@@ -63,7 +63,7 @@
     <pre><code class="language-yaml">    _default:
         public: false</code></pre>
 
-    <p>Lorsqu’un service est dit “privé”, on ne peut plus y accéder via l’appel <code>$container-&gt;get()</code>. La conséquence est qu’il est possible de le supprimer du container - ça ne fera aucune différence - ou bien de l’<em>inliner</em> s’il est utilisé par un autre service. Cette double optimisation existe depuis les débuts de Symfony 2. En l’activant par défaut, on utilise le mécanisme à notre avantage pour ne garder que les classes qui sont effectivement utilisées sous forme de service.</p>
+    <p>Lorsqu’un service est dit “privé”, on ne peut plus y accéder via l’appel <code>$container-&gt;get()</code>. La conséquence est qu’il est possible de le supprimer du container - ça ne fera aucune différence - ou bien de l’<em>inliner</em> s’il est requis par un autre service. Cette double optimisation existe depuis les débuts de Symfony 2. En l’activant par défaut, on tourne le mécanisme à notre avantage pour ne garder que les classes qui sont effectivement utilisées sous forme de service.</p>
 
     <p>Le corrolaire architectural est une lapalissade : vous ne pouvez plus accéder à vos services via l’appel <code>$container-&gt;get()</code>. C’est une excellente chose : utiliser cette méthode est un anti-pattern qui masque vos dépendances, et qui par conséquent augmente significativement et instantanément votre dette technique.</p>
 
@@ -139,6 +139,8 @@
     App\Wow\MaBelleInterface: '@App\Wow\MonBeauService'</code></pre>
 
     <p>Nous venons de définir une nouvelle convention : pour chaque argument typant <code>MaBelleInterface</code>, le service <code>MonBeauService</code> sera injecté par défaut. Si pour un service particulier cela ne convenait pas, il faudra alors avoir recours à la configuration explicite classique.</p>
+
+    <p>Pour nous simplifier la vie un peu plus, si votre application définit une interface donnée dans <code>src/</code>, et qu'une et une seule implémentation de cette interface est trouvée dans <code>src/</code> toujours, alors l'alias sera créé automatiquement par le framework.</p>
 
     <p>Il est également possible de définir partiellement un service, en laissant à l’autowiring le soin de compléter :</p>
 
@@ -216,7 +218,7 @@
     <pre><code class="language-yaml">parameters:
     my_api_key: '%env(API_KEY)%'</code></pre>
 
-    <p>Le manifeste <a href="https://12factor.net/">12-factor</a> en fait la promotion. En pratique pour Symfony, référencer une variable d’environnement permet de rendre l’application reconfigurable à la volée : recompiler le container n’est plus nécessaire pour prendre en compte un changement de clef d’API par exemple.</p>
+    <p>Le manifeste <a href="https://12factor.net/">12-factor</a> en fait la promotion. En pratique pour Symfony, référencer une variable d’environnement permet de rendre l’application reconfigurable à la volée : un changement de clef d’API par exemple sera pris en compte immédiatement, sans recompilation du container.</p>
 
     <p>Pourtant, les variables d’environnement ne sont pas recommandées pour stocker des secrets. Elles fuitent trop facilement. À la place, il est préférable de mettre vos clefs confidentielles dans le système de fichier (éventuellement virtuel), et donc de lire ces fichiers pour accéder aux valeurs.</p>
 
@@ -229,13 +231,13 @@
 
     <p><code>%env(json:file:API_KEY_FILE)%</code> va lire le fichier spécifié par la variable <code>API_KEY_FILE</code> de l’environnement, puis appeler <code>json_decode()</code> sur son contenu.</p>
 
-    <p>À utiliser lorsque nécessaire, mais pas à toutes les sauces : les paramètres classiques sont toujours à utiliser pour la configuration liée au comportement de l’application (par opposition à la configuration liée à l’infrastructure donc).</p>
+    <p>À utiliser lorsque nécessaire, mais pas à toutes les sauces : les paramètres classiques sont toujours préconisés pour la configuration liée au comportement de l’application (par opposition à la configuration liée à l’infrastructure donc).</p>
 
 
 
     <h2 id="et-les-performances-conclusion">Et les performances ? Conclusion</h2>
 
-    <p>Une caractéristique essentielle des applications Symfony est qu’elles sont compilées : la configuration une fois résolue est utilisée pour générer une classe PHP, le container. C’est lui qui est ensuite utilisé en production, et recompilé automatiquement lorsque nécessaire en dev.</p>
+    <p>Une caractéristique essentielle des applications Symfony est qu’elles sont compilées : la configuration une fois résolue génère une classe PHP, le container. C’est lui qui est ensuite utilisé en production, et recompilé automatiquement au besoin en dev.</p>
 
     <p>Vous n’avez donc aucun soucis à vous faire pour les performances, la core-team a bossé d’arrache-pied pour l’améliorer encore et toujours. Je vous invite à consulter le blog symfony.com pour plus de détails à ce sujet.</p>
 
@@ -244,7 +246,7 @@
     <ul>
         <li>injecter des services en argument des actions de vos controleurs</li>
         <li>injecter des “service locators” dédiés via <code>ServiceSubscriberInterface</code></li>
-        <li>réinitialiser des services et les réutiliser pour plusieurs requêtes HTTP de suite grâce au tag <code>kernel.reset</code></li>
+        <li>recycler vos services pour plusieurs requêtes HTTP de suite grâce au tag <code>kernel.reset</code></li>
         <li>configurer vos services en PHP plutôt qu’en Yaml</li>
         <li>etc.</li>
     </ul>
