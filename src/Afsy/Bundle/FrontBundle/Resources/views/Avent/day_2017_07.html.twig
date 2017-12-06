@@ -18,14 +18,12 @@
 
     <p>Je vais prendre un exemple simple, que l’on suivra tout au long de l’article.</p>
 
-    <p>Voici ma <i>user story </i><br>
+    <p>Voici ma <i>user story :</i><br>
         <i>En tant que gestionnaire de mon application de vente de camion transporteurs,</i> <br>
         <i>quand je suis sur le backoffice de mon application,</i> <br>
         <i>je souhaite pouvoir ajouter un modèle tout en renseignant ses informations propres : modèle, marque, année de construction, kilomètres au compteur.</i></p>
 
-    <p>(je ne m’explique toujours pas pourquoi c’est le premier exemple que j’avais en tête…)</p>
-
-    <p>ProTip pour répondre à ce besoin : <a href="https://afsy.fr/avent/2017/01-easyadminbundle-l-arriere-guichet-easy-peasy">lire l’article de Baptiste sur EasyAdmin 😄</a><br>
+    <p>ProTip pour répondre à ce besoin : <a href="https://afsy.fr/avent/2017/01-easyadminbundle-l-arriere-guichet-easy-peasy">lire l'excellent l’article de Baptiste sur EasyAdmin 😄</a><br>
         Fin. Merci d’avoir lu !</p>
 
 
@@ -172,14 +170,15 @@
 
     <p>On note que cette approche basique a l’avantage de regrouper la génération du formulaire et son remplissage, grâce à l’implémentation native du composant <code>PropertyAccess</code>.</p>
 
-    <p>Ce duo entité / formulaire est idéal dans un contexte de RAD car il permet de d’implémenter rapidement des write actions sur son modèle, tout en ayant quelque chose de clair et d’extensible. Je passe la partie controller que vous connaissez bien.</p>
+    <p>Ce duo entité / formulaire est idéal dans un contexte de RAD car il permet de d’implémenter rapidement des write actions sur son modèle, tout en ayant quelque chose de clair et extensible. Je passe la partie controller que vous connaissez bien.</p>
 
     <p>Notre besoin ici est simple, cette “magie” nous suffit amplement.</p>
 
     <p>Mais que se passe-t-il si notre besoin évolue, si on doit faire des traitements plus poussés sur nos champs ? Si on veut utiliser plusieurs champs pour ne remplir qu’une propriété ? <br>
-        On peut adapter la magie par l’implémentation de plusieurs points d’entrées permettants de mettre sa propre logique de traitement, c’est à dire les <code>FormEvents</code> et les <code>DataTransformers</code>, ce qui est suffisant dans la plupart des cas.</p>
+        On peut adapter la magie par l’implémentation de plusieurs points d’entrées permettants de mettre sa propre logique de traitement, c’est à dire les
+        <a href="https://symfony.com/doc/4.0/form/dynamic_form_modification.html"><code>FormEvents</code></a> et les <a href="https://symfony.com/doc/current/form/data_transformers.html"><code>DataTransformers</code></a>, ce qui est suffisant dans la plupart des cas.</p>
 
-    <p>La force du composant Form réside aussi dans son implémentation du design pattern <code>Composite</code>, qui apporte toute la flexibilité nécéssaire pour créer des formulaires complexes.</p>
+    <p>La force du composant Form réside aussi dans son implémentation du design pattern <code>Composite</code>, qui apporte toute la flexibilité nécessaire pour créer des formulaires complexes.</p>
 
 
 
@@ -208,7 +207,7 @@
 
     <p>Imaginons que dans mon application, pour une raison (que la raison ignore 😄) je souhaite faire un <code>flush()</code> sur chaque requête (par exemple dans un <i>listener</i> branché sur un <i>kernel event</i>).</p>
 
-    <p>Je passe dans mon formulaire, l’objet est hydraté ; la validation s’opère, disons qu’elle renvoie des erreurs. L’objet ne match pas les critères de validations, il ne doit en aucun cas se retrouvé persisté auquel cas votre base de donnée se retrouvera corrompue.</p>
+    <p>Je passe dans mon formulaire, l’objet est hydraté ; la validation s’opère, disons qu’elle renvoie des erreurs. L’objet ne match pas les critères de validations, il ne doit en aucun cas se retrouver persisté auquel cas votre base de donnée se retrouvera corrompue.</p>
 
     <p>Et pourtant… si vous utilisez un ORM et que l’objet qui vient d’être hydraté est déjà <i>managé</i>, et bien Doctrine va computer les changements et ils se retrouveront dans votre base au moment au moment du <code>flush()</code> ! <br>
         En fait, même sans avoir de listener qui flush, il suffit qu’un <code>flush()</code> se soit perdu quelque part avant la fin de la requête (dans un <i>manager</i>, ou juste avant de faire le rendu de votre template, cas classique).</p>
@@ -245,7 +244,7 @@
 
     <p>Pour valider les données avant qu’elles ne soient effectivement utilisées, l’utilisation des <code>FormEvents</code> ne semble pas vraiment adaptée : il faudrait valider alors un array de données en reprenant les règles de validation définies dans l’entité et lever une <code>FormError</code> manuellement pour chaque… ça reste faisable mais pas vraiment intuitif selon moi.</p>
 
-    <p>tl;dr: une des qualités du composant Form est qu’il permet de se coupler à vos entités et que cela permet de facilement en créer et en modifier, tout en compensant ce couplage par des points d’entrée qui permettent d’implémenter votre propre logique mais qui s’apparente un peu à du “bidouillage”, ce qui pose des limites dans un contexte d’application plus complexe.</p>
+    <p>En bref, une des qualités du composant Form est qu’il permet de se coupler à vos entités et que cela permet de facilement en créer et en modifier, tout en compensant ce couplage par des points d’entrée qui permettent d’implémenter votre propre logique mais qui s’apparente un peu à du “bidouillage”, ce qui pose des limites dans un contexte d’application plus complexe.</p>
 
     <p>Notre mission : rendre nos formulaires indépendants de nos entités.</p>
     <br><br>
@@ -393,7 +392,7 @@
     <p>Martin Fowler est lui même assez mitigé sur cette approche : <a href="https://martinfowler.com/bliki/LocalDTO.html">https://martinfowler.com/bliki/LocalDTO.html</a> (en anglais). <br>
         Marco Piverra (Ocramius), lui, recommande de l’utiliser pour tous les formulaires.</p>
 
-    <p>Personnement, je ne recommande pas d’utiliser cette pratique sur des petites applications qui n’ont pas de gros besoins évolutifs. <br>
+    <p>Personnellement, je ne recommande pas d’utiliser cette pratique sur des petites applications qui n’ont pas de gros besoins évolutifs. <br>
         Cependant je trouve cette approche intéressante si vous aimeriez avoir un formulaire qui diffère un peu de la façon dont votre objet business est fait, et/ou que vous portez beaucoup d’importance à votre design applicatif et que cela ne vous pose pas de problème d’y ajouter cette couche.</p>
 
 
