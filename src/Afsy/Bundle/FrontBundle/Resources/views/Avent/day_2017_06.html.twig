@@ -60,10 +60,8 @@
                 <li><a href="#conclusion-tests">Et mes tests Behat 😰</a></li>
             </ul></li>
     </ul>
-    <p><a name="1"></a></p>
-    <h2>1. Afficher une page d'accueil</h2>
-    <p><a name="1.1"></a></p>
-    <h3>1.1 Création d'un projet vide</h3>
+    <h2><a name="1" href="#1">¶ </a>1. Afficher une page d'accueil</h2>
+    <h3><a name="1.1" href="#1.1">¶ </a>1.1 Création d'un projet vide</h3>
     <p>Pour se lancer, je vais partir d’un projet vide mais vous pouvez partir d’un projet existant tant qu’il est en 2.7+. En dessous, il sera difficile d’utiliser le <a href="https://github.com/contentful/ContentfulBundle">bundle</a> aidant à la connexion avec le cms.</p>
     <pre><code class="language-shell">symfony new afsy 3.4</code></pre>
     <p>et on va enchainer directement sur l'installation du bundle officiel :</p>
@@ -83,8 +81,7 @@
     <pre><code class="language-yaml">#config.yml
 framework:
     templating: { engines: ['twig'] }</code></pre>
-    <p><a name="1.2"></a></p>
-    <h3>1.2 Création de l'espace Contenful</h3>
+    <h3><a name="1.2" href="#1.2">¶ </a>1.2 Création de l'espace Contenful</h3>
     <p>Désormais, destination <a href="https://contentful.com">https://contentful.com</a> !
         On va créer un compte si ce n'est pas déjà fait et ensuite on va créer un espace.
         Dans le jargon de Contentful, un <em>espace</em> se résumera très souvent à un projet mais il est tout à fait possible d'imaginer d'autres organisations. La notre se nommera afsy et partira sur un projet vide :</p>
@@ -105,10 +102,8 @@ framework:
     <p>ℹ <strong>Pour récupérer votre space-id ainsi que votre delivery_token (qu'il vous faudra dans quelques minutes), ça se passe dans le menu API &gt; Content delivery / preview tokens &gt; Website key</strong></p>
     <p>ℹ <strong>Pour récupérer/générer votre management-token, ça se passe dans le menu API &gt; Content management tokens</strong></p>
     <p>Allez voir dans la partie <code>Content</code>, vous devriez avoir la page d'accueil, cela suffira pour commencer à jouer avec cette partie de notre cms.</p>
-    <p><a name="1.3"></a></p>
-    <h3>1.3. Retour à Symfony</h3>
-    <p><a name="1.3.configuration"></a></p>
-    <h4>configuration</h4>
+    <h3><a name="1.3" href="#1.3">¶ </a>1.3. Retour à Symfony</h3>
+    <h4><a name="1.3.configuration" href="#1.3.configuration">¶ </a>configuration</h4>
     <p>Pour faire le lien avec votre espace contenful, il faut définir 2 choses relatives à configuration de Contentful: le <code>spaceId</code> et le <code>token</code>.</p>
     <pre><code class="language-yaml">#parameters.yml.dist
 parameters:
@@ -120,8 +115,7 @@ contentful:
     delivery:
         space: '%contentful_delivery_space%'
         token: '%contentful_delivery_token%'</code></pre>
-    <p><a name="1.3.controller-view"></a></p>
-    <h4>Contrôleur + Vue</h4>
+    <h4><a name="1.3.controller-view" href="#1.3.controller-view">¶ </a>Contrôleur + Vue</h4>
     <p>Pour afficher cette belle page dans notre site, on va avoir besoin d'un contrôleur <code>PageController</code> avec une action <code>showAction</code> qui sera chargée d'aller chercher dans l'api de <a href="https://www.contentful.com/" target="_blank">Contentful</a> la page relative au slug passé en <code>request</code> (homepage par défaut) et d'afficher son contenu. Avant de faire la vue et l'action, on va installer un bundle nous permettant de convertir du markdown en html pour pouvoir ensuite l'interpréter, le gros classique est le <strong>KnpMarkdownBundle</strong> donc :</p>
     <pre><code class="language-shell">composer require knplabs/knp-markdown-bundle</code></pre>
     <p>et puis l'immanquable ajout dans l'AppKernel (on tient bon, Flex sera bientôt partout ✊) :</p>
@@ -174,8 +168,7 @@ class PageController extends Controller
     <p>Si on va sur la page d'accueil... 🎊  ça communique avec <a href="https://www.contentful.com/" target="_blank">Contentful</a> et les modifications se répercuteront bien sûr dans le site lorsqu'on décidera de les publier (avec quelques petits secondes de délais, cache oblige) !</p>
     <p>C'est un peu minimaliste comme page d'accueil mais on ne va pas en rester là ; je veux y afficher une liste d'événements et j'ai envie d'avoir un design et un template spécifique pour ma page d'accueil et ce n'est pas en markdown qu'on va le faire, rassurez-vous !</p>
     <p>Je vous laisse créer une autre page, par exemple la page <code>a-propos</code> pour tester que la route <code>app_cms_page_show</code> fonctionne bien sûr les autres pages (que la page homepage).</p>
-    <p><a name="1.3.layout"></a></p>
-    <h4>L'organisation du contenu dans les pages</h4>
+    <h4><a name="1.3.layout" href="#1.3.layout">¶ </a>L'organisation du contenu dans les pages</h4>
     <p>Pour rendre la page d'accueil attractive, on m'a demandé d'avoir 3 parties :</p>
     <ol>
         <li><p>une cover permettant de mettre en avant le logo, la base ligne de l'asso et le bouton d'inscription au google group</p></li>
@@ -187,8 +180,7 @@ class PageController extends Controller
     <p>2 réflexions :
         - en l'état, ma page d'accueil a la même structure que ma page <code>a-propos</code>, je vais avoir besoin de flexibilité, il faut réussir à le faire sans trop complexifier le mécanisme
         - il peut être tentant de mettre les objectifs <strong>en dur</strong> dans le twig car <strong>c'est pas grand chose à changer</strong> et <strong>ça ne prend pas longtemps si besoin</strong>... ma philosophie est que si c'est du contenu, c'est le gestionnaire de contenu qui en est le responsable et sa place est donc dans le cms (et créer un nouveau modèle est fun, prend 3 minutes et fait gagner du temps le jour où on veut les changer).</p>
-    <p><a name="1.3.layout.goals"></a></p>
-    <h5>Les objectifs</h5>
+    <h5><a name="1.3.layout.goals" href="#1.3.layout.goals">¶ </a>Les objectifs</h5>
     <p>Pour créer le modèle Goal et ajouter le contenu (<em>3 objectifs + 3 images</em>), 2 possibilités pour vous :</p>
     <ul>
         <li>la première, très rapide, utilise le <code>cli</code> et <a href="https://assets.contentful.com/ukmha2pdldgt/6rSw9RAiCQcGmE8QiGOuCu/9353beed4a451d5c2ba54005cb393a9e/goals.json" target="_blank">ce fichier</a> :</li>
@@ -296,8 +288,7 @@ class GoalsController extends Controller
     &lt;img src="{{ goal.getPicture().file.url ~ "?fm=jpg&w=350&h=350" }}"/&gt;
 {% endif %}
 {{ goal.getDescription()|markdown|raw }}{% endraw %}</code></pre>
-    <p><a name="1.3.layout.events"></a></p>
-    <h5>Les événements</h5>
+    <h5><a name="1.3.layout.events" href="#1.3.layout.events">¶ </a>Les événements</h5>
     <p>Pour les événements, on peut s'y prendre exactement de la même manière avec la création d'un modèle de données côté <a href="https://www.contentful.com/" target="_blank">Contentful</a> et avec l'utilisation de la fonction render...</p>
     <p>Voici le fichier pour définir le modèle Event comme je l'ai fait, il y a deux événéments inclus : <a href="https://assets.contentful.com/ukmha2pdldgt/1dKVi4oVhsY8ysUCCWoSAU/e0c41adf45676181540acb6695dcb2ad/events.json" target="_blank">events.json</a>.</p>
     <p>Voici le controller <code>EventController</code> :</p>
@@ -387,13 +378,11 @@ twig:
     globals:
         googleMapAPIKEY: '%googleMapsApiKey%'
 </code></pre>
-    <p><a name="2"></a></p>
-    <h2>2. Le blog</h2>
+    <h2><a name="2" href="#2">¶ </a>2. Le blog</h2>
     <p>Créer un blog simple dans un site Symfony n'est pas très compliqué, mais <a href="https://www.contentful.com/" target="_blank">Contentful</a> va nous nous permettre d’éviter de réinventer la roue tout en solidifiant et professionnalisant notre blog.</p>
     <p>Lorsqu'on créé un nouvel espace dans Contentful, plutôt que de partir avec le squelette vide, on peut choisir le template Blog (ainsi que catalogue de produit et galerie photo) qui nous amènera un modèle éprouvé, des données de test ainsi que des exemples de consommations dans beaucoup de langages. D'ailleurs, si vous voulez voir d'autres implémentations, vous pouvez aller voir les projets <em>bac à sable</em> : <a href="https://github.com/contentful/product-catalogue-app-symfony">un catalogue de produit avec Symfony</a> ou <a href="https://github.com/contentful/blog-app-laravel">un blog avec Laravel</a>.</p>
     <p>💾&nbsp;&nbsp;Voici le fichier qu'il vous faudra importer comme précédemment avec contentful-import pour récupérer dans votre espace un blog prêt à utiliser <a href="https://assets.contentful.com/ukmha2pdldgt/3QAfbGHbPaOoGW6OY8SUog/8686303ff0b7e88b87a8253aba045543/blog.json" target="_blank">blog.json</a></p>
-    <p><a name="2.1"></a></p>
-    <h3>2.1 Un blog de base</h3>
+    <h3><a name="2.1" href="#2.1">¶ </a>2.1 Un blog de base</h3>
     <p>Le blog apporté par <a href="https://www.contentful.com/" target="_blank">Contentful</a> est minimaliste et c'est tant mieux, pas de fioriture et libre à nous d'ajouter ce que l'on souhaite. De base, on a :</p>
     <ul>
         <li>des articles</li>
@@ -401,8 +390,7 @@ twig:
         <li>des auteurs</li>
     </ul>
     <p>On va donc faire une vue Blog qui va lister tous les articles puis une vue pour afficher chaque article et ouvrir un système de commentaires sans effort. On ajoutera aussi une vue pour lister uniquement les articles d'une catégorie.</p>
-    <p><a name="2.1.index"></a></p>
-    <h4>Index du blog</h4>
+    <h4><a name="2.1.index" href="#2.1.index">¶ </a>Index du blog</h4>
     <p>Tout d'abord, on va commencer par créer le <code>PostController</code> comme ceci :</p>
     <pre><code class="language-php">&lt;?php
 namespace AppBundle\Controller\CMS;
@@ -470,8 +458,7 @@ public function indexAction()
 {% endblock %}
 {% endraw %}</code></pre>
     <p>Si on se rend sur /blog, on va désormais avoir l'affichage certes rudimentaire mais non moins opérationnel des articles de notre blog. Pour l'instant, il manque l'action de visualisation d'un article, on veut lire le contenu complet, pas juste l'extrait.</p>
-    <p><a name="2.1.show"></a></p>
-    <h4>Vue d'un article</h4>
+    <h4><a name="2.1.show" href="#2.1.show">¶ </a>Vue d'un article</h4>
     <p>Implémentons tout ça :</p>
     <pre><code class="language-php">    //src/AppBundle/Controller/CMS/PostController.php
 
@@ -523,8 +510,7 @@ public function showAction($slug)
     ...
 {% endblock %}
 ...{% endraw %}</code></pre>
-    <p><a name="2.1.listByCateg-avent"></a></p>
-    <h4>Liste des articles par catégorie + calendrier de l'avent</h4>
+    <h4><a name="2.1.listByCateg-avent" href="#2.1.listByCateg-avent">¶ </a>Liste des articles par catégorie + calendrier de l'avent</h4>
     <p>Attaquons-nous aux catégories désormais. La liste des articles d'une catégorie n'est finalement qu'une liste d'articles filtrée sur la catégorie, on va donc avoir besoin d'ajouter un action et une route particulière pour faire cette action mais on va pouvoir utiliser la même vue que l'index général&nbsp;:</p>
     <pre><code class="language-php">
 //src/AppBundle/Controller/CMS/PostController
@@ -564,8 +550,7 @@ public function listByCategoryAction($slug, EngineInterface $twigEngine)
     <p>On est libre de faire des choses évoluées très rapidement. Par exemple, pour ce besoin très précis de calendrier de l'avent, je me suis amusé à faire une petite veille et j'ai trouvé chez les amis de Codrops une expérimentation <a href="https://tympanus.net/codrops/2016/11/09/cubes-advent-calendar/">Cubes Advent Calendar</a> qui correspondait tout à fait à mes attentes&nbsp;:</p>
     <p><img src="{{  asset('bundles/afsyfront/images/avent/2017/06/avent-calendar.gif') }}" alt="calendrier de l'avent par codrops"></p>
     <p>C'est un peu long et pas si fou que ça donc je préfère détailler d'autres points mais si ca vous intéresse, retrouvez <a href="https://github.com/lenybernard/afsy.fr/commit/77ef83c1b16da80cd18dc4968c2f5f22b7674e26">l'implémentation du calendrier de l'avent ici</a>.</p>
-    <p><a name="3"></a></p>
-    <h2>3 Soumettre des événements depuis le site</h2>
+    <h2><a name="3" href="#3">¶ </a>3 Soumettre des événements depuis le site</h2>
     <p>Jusqu'à présent, on est resté dans une démarche de consommation du contenu situé dans le cms mais pour ce nouveau besoin, c'est un internaute qui doit créer, en passant par le site, un nouvel événement. Cet événement devra avoir un statut particulier "<strong>En attente</strong>" et ne s'affichera sur le site que lorsqu'il aura été validé.</p>
     <p><img src="{{  asset('bundles/afsyfront/images/avent/2017/06/171d32c5c3834ca871096277c5601dd0.png') }}" alt="image preview"></p>
     <p>Pour ce faire, on va passer par la <strong>Content Management API</strong> (contrairement à précédemment où nous utilisions la <strong>Content Delivery API</strong>). D'ailleurs, vous l'avez déjà utilisé sans forcément vous en rendre compte car c'est l'API qu'utilise le script <code>contentful-import</code> pour ajouter du contenu dans l'espace.</p>
@@ -573,12 +558,10 @@ public function listByCategoryAction($slug, EngineInterface $twigEngine)
     <p>Et oui, hélas au jour où j'écris cet article, il semble qu'on ait quelques semaines d'avance car le bundle attend la version stable de la lib <code>contentful/contentful-management</code> pour y implémenter les fonctions visant à faciliter la communication avec l'API de management.</p>
     <img src="{{  asset('bundles/afsyfront/images/avent/2017/06/ryan.gif') }}"/>
     <p>En fait, c'est pas si grave car la solution existe ! Donc avant de faire une <a href="https://github.com/contentful/ContentfulBundle/issues/20">PR</a> ou au lieu d'attendre une mise à jour du bundle, on peut déjà bricoler quelque chose de propre pour avoir accès à un petit service de <code>Management</code> qui nous permettra de créer nos événements en un claquement de doigts ou presque.</p>
-    <p><a name="3.1"></a></p>
-    <h4>3.1 Architecture&nbsp;:</h4>
+    <h4><a name="3.1" href="#3.1">¶ </a>3.1 Architecture&nbsp;:</h4>
     <p><img src="{{  asset('bundles/afsyfront/images/avent/2017/06/Event_Handler.jpg') }}" alt="image archi"></p>
     <p>Tout commence avec composer, on va installer contentful-management (il n'y a pas de version stable encore)&nbsp;:</p>
-    <p><a name="3.1.sdk-management"></a></p>
-    <h5>Installation du sdk contentful-management</h5>
+    <h5><a name="3.1.sdk-management" href="#3.1.sdk-management">¶ </a>Installation du sdk contentful-management</h5>
     <pre><code class="language-shell">composer require contentful/contentful-management:@dev</code></pre>
     <p>Ensuite, en suivant la <a href="https://www.contentful.com/developers/docs/references/content-management-api/#/reference/entries/entries-collection/create-an-entry/console/php">documentation</a>, on comprend qu'il va falloir instancier le client <code>Contentful\Management\Client</code> en lui passant le <code>content_management_api_key</code> et le <code>space_id</code>&nbsp;:</p>
     <pre><code class="language-php">use Contentful\Management\Client;
@@ -590,8 +573,7 @@ $entry = new Entry('content_type_id');
 $entry->setField('title', 'en-US', 'Entry title');
 
 $client->entry->create($entry);</code></pre>
-    <p><a name="3.1.clientServiceDeclaration"></a></p>
-    <h5>Déclaration du service</h5>
+    <h5><a name="3.1.clientServiceDeclaration" href="#3.1.clientServiceDeclaration">¶ </a>Déclaration du service</h5>
     <p>On va créer un service pour s'affranchir de cette instanciation:&nbsp;</p>
     <pre><code class="language-yaml">#parameters.yml
 parameters:
@@ -612,8 +594,7 @@ services:
         <li>un transformer <strong>AppBundle\Domain\Transformer\EventToEntryTransformer</strong> pour changer notre <strong>Event</strong> en <strong>Contentful\Management\Resource\Entry</strong></li>
         <li>un handler <strong>AppBundle\Domain\Handler\AddEventHandler</strong> pour centraliser la logique propre à la soumission d'un événement</li>
     </ul>
-    <p><a name="3.1.modelCreation"></a></p>
-    <h4>Création du modèle</h4>
+    <h4><a name="3.1.modelCreation" href="#3.1.modelCreation">¶ </a>Création du modèle</h4>
     <p>On va créer le modèle <strong>Event</strong> qui sera un miroir du <strong>content-type</strong> défini dans <strong>Contentful</strong>&nbsp;:</p>
     <pre><code class="language-php">&lt;?php
 namespace AppBundle\Domain\Model;
@@ -778,8 +759,7 @@ class Event
         return $this-&gt;longitude;
     }
 }</code></pre>
-    <p><a name="3.1.form"></a></p>
-    <h4>Création du formulaire</h4>
+    <h4><a name="3.1.form" href="#3.1.form">¶ </a>Création du formulaire</h4>
     <p>Puis on va faire la formulaire <code>EventType</code>&nbsp;:</p>
     <pre><code class="language-php">&lt;?php
 namespace AppBundle\Form;
@@ -856,8 +836,7 @@ class LocationType extends AbstractType
         ;
     }
 }</code></pre>
-    <p><a name="3.1.controller-handler-dataTransformer"></a></p>
-    <h4>Création de l'action de controller + Handler + DataTransformer</h4>
+    <h4><a name="3.1.controller-handler-dataTransformer" href="#3.1.controller-handler-dataTransformer">¶ </a>Création de l'action de controller + Handler + DataTransformer</h4>
     <p>On va ensuite ajouter l'action d'ajout dans le controller <strong>EventController</strong>:</p>
     <pre><code class="language-php">
 /**
@@ -1061,24 +1040,20 @@ class AddEventHandler
 }</code></pre>
     <p>Désormais, si on se rend sur <code>/event/new</code>, on a accès au formulaire de dépôt d'un événement et lorsqu'on le soumet, un événement est ajouté dans <a href="https://www.contentful.com/" target="_blank">Contentful</a> en brouillon.</p>
     <p>Il ne reste plus qu'à le valider. On peut imaginer que le <strong>AddEventHandler</strong> pourrait s'occuper de notifier la <em>room</em> Event dans le Slack de l'AFSY afin d'avoir une bonne réactivité mais c'est hors sujet ;)</p>
-    <p><a name="conclusion"></a></p>
-    <h2>Conclusion</h2>
+    <h2><a name="conclusion" href="#conclusion">¶ </a>Conclusion</h2>
     <p>Nous ne sommes qu'au début des CMS Headless mais on sent déjà qu'il s'agit d'une solution plus adaptée au développement applicatif moderne.</p>
-    <p><a name="conclusion-bundle"></a></p>
-    <h3>Le <a href="https://github.com/contentful/ContentfulBundle">bundle ContentfulBundle</a></h3>
+    <h3><a name="conclusion-bundle" href="#conclusion-bundle">¶ </a>Le <a href="https://github.com/contentful/ContentfulBundle">bundle ContentfulBundle</a></h3>
     <p>Fonctionnel mais il semble être encore un peu jeune. L'utilisation du client n'est pas des plus élégante et même si le sdk fait un travail conséquent notamment avec l'objet <a href="https://github.com/contentful/contentful.php/blob/master/src/Delivery/DynamicEntry.php">DynamicEntry</a>, il faut l'abstraire dans des services métiers, spécialisés dans la récupération et la préparation du contenu pour ne pas surcharger les <strong>Controllers</strong>.
         De plus, le bundle vient avec un <strong>Collector</strong> pour la <a href="https://symfony.com/doc/current/profiler/data_collector.html">WDT</a>:</p>
     <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/06/61dce631d7b2237f0ffc722c1ec8affc.png') }}" alt="debug toolbar">
         <img src="{{ asset('bundles/afsyfront/images/avent/2017/06/71b1850cb522359d2e2542fc8aa45328.png') }}" alt="profiler"></p>
     <p>C'est plutôt sympa pour garder un oeil sur le nombre de requêtes effectuées pour chaque page.</p>
     <p>Et puis comme expliqué dans l'article, des évolutions devraient arriver dans les semaines à venir pour faciliter encore l'intégration des models avec Contentful.</p>
-    <p><a name="conclusion-pricing"></a></p>
-    <h3>Le prix</h3>
+    <h3><a name="conclusion-pricing" href="#conclusion-pricing">¶ </a>Le prix</h3>
     <p>Cela ne vous aura pas échappé, en dehors de l'édition Developper, <a href="https://www.contentful.com/" target="_blank">Contentful</a> n'est pas donné, loin de là :</p>
     <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/06/ea97a8c3c19a4c0ef2e1f67954543a7b.png') }}" alt="pricing"></p>
     <p>Cependant, même l'offre Developper peut fonctionner pour des petits sites car le sdk PHP offre un système de cache permettant d'éviter les appels trop fréquents en prod : <a href="https://www.contentful.com/developers/docs/php/tutorials/caching-in-the-php-cda-sdk/">https://www.contentful.com/developers/docs/php/tutorials/caching-in-the-php-cda-sdk/</a></p>
-    <p><a name="conclusion-tests"></a></p>
-    <h3>Et mes tests Behat ? 😰</h3>
+    <h3><a name="conclusion-tests" href="#conclusion-tests">¶ </a>Et mes tests Behat ? 😰</h3>
     <p>La réponse apportée par la core team du sdk php est d'utiliser, comme eux, la librairie <a href="http://php-vcr.github.io/">PHP-VCR</a> qui permet d'enregistrer les appels API et de les enregistrer sur des cassettes (oui oui sérieux) afin de les rejouer dans les tests futurs en simulant les appels à l'API contentful.</p>
     <p>Plus d'info ici <a href="https://github.com/contentful/contentful.php/issues/170">Mock Client Call #170</a>.</p>
     <p>Allez sur ce, je vous souhaite de belles fêtes de fin d'année pleines de contenu (content full hum...) et je souhaite une bonne fête à tous les Nicolas :).</p>
