@@ -14,3 +14,4 @@ parameters:
     secret: ThisTokenIsNotSoSecretChangeIt
     sensio_connect.client_id: foo
     sensio_connect.client_secret: foo
+    app.ga_tracking: UA-xxxxxxxxx-x

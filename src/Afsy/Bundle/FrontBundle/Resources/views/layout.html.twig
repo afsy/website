@@ -4,6 +4,18 @@
 <!--[if IE 8]>    <html class="no-js lt-ie9" lang="fr"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="fr"> <!--<![endif]-->
     <head>
+        {% block head_javascripts %}
+            <!-- Global site tag (gtag.js) - Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking }}"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', "{{ ga_tracking }}");
+            </script>
+        {% endblock %}
+
         <meta charset="utf-8">
         <title>AFSY - Association Francophone des Utilisateurs de Symfony {% block page_title %}{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
