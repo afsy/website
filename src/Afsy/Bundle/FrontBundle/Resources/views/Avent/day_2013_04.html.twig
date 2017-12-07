@@ -31,7 +31,7 @@
 <p>Pour illustrer cet article, nous nous placerons dans le contexte d'un listing d'articles. Pour cela, nous reposerons sur un modèle assez simple, composé d'articles, d'auteurs et de commentaires, dont les relations sont illustrées dans le schéma ci-dessous :</p>
 
 <p>
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/schema.png') }}" class="img-article" alt="" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/schema.png') }}" alt="" />
 </p>
 
 <p>Nous génèrerons ces entités à travers la commande Symfony <code>doctrine:generate:entity</code> dans un Bundle appelé <strong>ACSEOCalendrierBundle</strong>. Il est possible de choisir n'importe quel format de mapping (annotation, yml, xml) proposé.</p>
@@ -214,7 +214,7 @@ class ArticleController extends Controller
 {% endverbatim %}
 <p>
     <strong>Et voilà !</strong><br />
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/articles-list.png') }}" class="img-article" alt="liste des articles" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/articles-list.png') }}" alt="liste des articles" />
 </p>
 
 <p>Vous avez sous les yeux un premier affichage de vos articles, sur lequel vous pouvez <strong>lister</strong>, <strong>trier</strong>, <strong>filter</strong> et utiliser la <strong>pagination</strong>. Bien entendu, l'affichage peut être optimisé, mais c'est un bon début.</p>
@@ -310,7 +310,7 @@ class ArticleController extends Controller
 <p>Moyennant un peu de CSS, l'affichage correspond désormais à l'écran ci-dessous :</p>
 
 <p>
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/nicer-articles-list.png') }}" class="img-article" alt="liste des articles plus jolie" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/nicer-articles-list.png') }}" alt="liste des articles plus jolie" />
 </p>
 
 <h3>Modification de la grille, via le contrôleur</h3>
@@ -396,7 +396,7 @@ class ArticleController extends Controller
 <p>Le rendu devrait être identique au suivant à ce stade :</p>
 
 <p>
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/delete.png') }}" class="img-article" alt="suppression" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/delete.png') }}" alt="suppression" />
 </p>
 
 <h3>Ajout d'une colonne virtuelle et modification de son rendu</h3>
@@ -451,7 +451,7 @@ class ArticleController extends Controller
 <p>Grâce à cela, nous devrions avoir l'affichage ci-dessous :</p>
 
 <p>
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/comments.png') }}" class="img-article" alt="décompte des commentaires" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/comments.png') }}" alt="décompte des commentaires" />
 </p>
 
 <h3>Ajout de fonctions d'export</h3>
@@ -477,7 +477,7 @@ class ArticleController extends Controller
 
 <p>
     On obient ensuite la sélection de l'export sur notre grille :<br />
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/export.png') }}" class="img-article" alt="export" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/04/export.png') }}" alt="export" />
 </p>
 
 <h2>Conclusion</h2>

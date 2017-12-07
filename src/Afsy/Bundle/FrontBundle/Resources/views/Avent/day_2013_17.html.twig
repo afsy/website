@@ -6,8 +6,6 @@
 
 {% block article_content %}
 
-{% verbatim %}
-
 <h1>Commencer à adopter Devops sur ses projets Symfony</h1>
 
 <p>Devops est le mouvement qui vise à réunir les équipes IT, en particulier les équipes de développement et des opérations, autour d'un objectif commun : améliorer la performance de l'organisation IT au service du métier. Cet article a pour but de démontrer la puissance de ce mouvement et les premières étapes pour adopter la culture Devops sur vos projets Symfony.</p>
@@ -17,7 +15,7 @@
 <h3>La vélocité est une nécessité dans le monde du web</h3>
 
 <p>La vitesse est la clef du succès dans l'économie digitale. Ce constat est particulièrement visible dans le monde des Start-ups, où les premiers arrivés sur un marché sont les seuls qui survivent. Mais c'est aussi valable dans les organisations plus traditionnelles où les clients attendent toujours plus de réactivité, portée par les nouvelles technologies. Comme le démontre le livre de Jason Jennings et Laurence Haughton, ce ne sont plus les gros qui mangent les petits mais les rapides qui mangent les lents.<br />
-<a href="http://www.amazon.com/gp/aw/d/0066620546"><img src="{{ asset('bundles/afsyfront/images/avent/2013/17/41OHX-eqG8L.jpg') }}" class="img-article" alt="It is the fast that eat the slow" /></a></p>
+<a href="http://www.amazon.com/gp/aw/d/0066620546"><img src="{{ asset('bundles/afsyfront/images/avent/2013/17/41OHX-eqG8L.jpg') }}" alt="It is the fast that eat the slow" /></a></p>
 
 <h3>Le goulot d'étranglement est souvent technique</h3>
 
@@ -96,7 +94,7 @@ L’équipe de développement, plus junior en âge et moins aguerrie sur l’ens
 
 <p>
     Heureusement dans la communauté Symfony, ces bonnes pratiques de développement sont déjà répandues.<br />
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/justin-bieber.jpg') }}" class="img-article" alt="Un développeur adolescent" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/justin-bieber.jpg') }}" alt="Un développeur adolescent" />
 </p>
 
 <p>Attention cependant à ne pas surestimer son niveau : avec ces bonnes pratiques on n'en est encore qu'au stade du développeur adolescent.</p>
@@ -188,7 +186,7 @@ def _getrole():
 <p>Ces applications permettent, non seulement d'avoir instantanément des informations critiques de votre application sans effort, mais elles peuvent aussi alerter en cas d'augmentation du nombre d'erreurs. Indispensable pour vérifier que le dernier déploiement n'a pas eu d'impact négatif !</p>
 
 <p>
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/dashboard-new-relic.png') }}" class="img-article" alt="Dashboard NewRelic" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/dashboard-new-relic.png') }}" alt="Dashboard NewRelic" />
 </p>
 
 <h3>Étape 4 : l'intégration continue pour détecter les erreurs avant la production</h3>
@@ -210,7 +208,7 @@ def _getrole():
 <p>Pour mettre en place un système d'intégration continue et automatiser le lancement des tests, <a href="http://jenkins-ci.org/">Jenkins</a> est l'outil standard. Il permet d'avoir un tableau de bord très complet sur les métriques du projet :</p>
 
 <p>
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/jenkins-dashboard.png') }}" class="img-article" alt="Tableau de bord Jenkins" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/jenkins-dashboard.png') }}" alt="Tableau de bord Jenkins" />
 </p>
 
 <p>Un article de blog assez complet détaille la <a href="http://blog.lazycloud.net/utiliser-jenkins-pour-un-projet-symfony2/">configuration de Jenkins pour un projet Symfony</a>.</p>
@@ -224,7 +222,7 @@ def _getrole():
 <p>Un dernier élément important pour diminuer les risques est la normalisation des environnements systèmes. Développer, tester et mettre en production sur 3 environnements identiques est la meilleure façon d'éviter les bugs inexpliqués et donc les maux de tête horribles. PHP est un langage heureusement très cohérent entre les différentes plateformes, mais on est jamais à l'abri d'un <a href="https://bugs.php.net/bug.php?id=53632">bug qui n'existe qu'en 32 bits</a> par exemple. Il n'y a aucune raison que le temps passé par l'application en développement, en testing et en recette soit dans un environnement qui ne garantisse pas la reproductibilité des erreurs.</p>
 
 <p>
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/vagrant.png') }}" class="img-article" alt="Logo Vagrant" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/vagrant.png') }}" alt="Logo Vagrant" />
 </p>
 
 <p>Pour cela la solution standard est <a href="http://www.vagrantup.com/">Vagrant</a>. C'est un outil qui permet de gérer très facilement la configuration d'une machine virtuelle propre à son projet. Paul Seiffert maintient une <a href="https://github.com/seiffert/default-vagrant">configuration Vagrant qu'il utilise sur ses projets PHP</a> qui est un bon départ pour démarrer son utilisation de Vagrant.</p>
@@ -260,12 +258,10 @@ def _getrole():
 
 <p>
     Ensuite le plus efficace pour explorer ce sujet encore très jeune est d'échanger avec les passionnés de Devops.<br />
-    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/paris-love-devops.png') }}" class="img-article" alt="DevopsDays Paris" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2013/17/paris-love-devops.png') }}" alt="DevopsDays Paris" />
 </p>
 
 <p>Vous nous retrouverez dans des meetups comme le <a href="http://parisdevops.fr/">meetup Paris Devops</a>, lors des conférences <a href="http://devopsdays.org/">DevopsDays</a> organisées partout dans le monde ou aux <a href="http://velocityconf.com/">Velocity Conferences</a>. J'espère vous y rencontrer nombreux !</p>
-
-{% endverbatim %}
 
 {% endblock %}
 {% block article_avatar %}
