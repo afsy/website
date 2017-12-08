@@ -40,14 +40,14 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
-            '07-decoupler-form-et-votre-modele'                   => 'AfsyFrontBundle:Avent:day_2017_07.html.twig',
-            '06-headless-is-more'                                 => 'AfsyFrontBundle:Avent:day_2017_06.html.twig',
-            '05-deboguer-php-avec-gdb'                            => 'AfsyFrontBundle:Avent:day_2017_05.html.twig',
-            '04-tagger-son-application'                           => 'AfsyFrontBundle:Avent:day_2017_04.html.twig',
-            '03-deployer-un-projet-symfony-flex-sur-heroku'       => 'AfsyFrontBundle:Avent:day_2017_03.html.twig',
-            '02-la-nouvelle-configuration-par-defaut-de-symfony4' => 'AfsyFrontBundle:Avent:day_2017_02.html.twig',
-            '01-easyadminbundle-l-arriere-guichet-easy-peasy'     => 'AfsyFrontBundle:Avent:day_2017_01.html.twig',
-            // '04-form-et-votre-modele'                                     => 'AfsyFrontBundle:Avent:day_2017_04.html.twig',
+            '08-symfony-flex-la-nouvelle-facon-de-developper-avec-symfony' => 'AfsyFrontBundle:Avent:day_2017_08.html.twig',
+            '07-decoupler-form-et-votre-modele'                            => 'AfsyFrontBundle:Avent:day_2017_07.html.twig',
+            '06-headless-is-more'                                          => 'AfsyFrontBundle:Avent:day_2017_06.html.twig',
+            '05-deboguer-php-avec-gdb'                                     => 'AfsyFrontBundle:Avent:day_2017_05.html.twig',
+            '04-tagger-son-application'                                    => 'AfsyFrontBundle:Avent:day_2017_04.html.twig',
+            '03-deployer-un-projet-symfony-flex-sur-heroku'                => 'AfsyFrontBundle:Avent:day_2017_03.html.twig',
+            '02-la-nouvelle-configuration-par-defaut-de-symfony4'          => 'AfsyFrontBundle:Avent:day_2017_02.html.twig',
+            '01-easyadminbundle-l-arriere-guichet-easy-peasy'              => 'AfsyFrontBundle:Avent:day_2017_01.html.twig',
         )
     );
 
