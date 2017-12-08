@@ -40,6 +40,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '09-utilisation-de-twig-en-phase-de-prototypage'               => 'AfsyFrontBundle:Avent:day_2017_09.html.twig',
             '08-symfony-flex-la-nouvelle-facon-de-developper-avec-symfony' => 'AfsyFrontBundle:Avent:day_2017_08.html.twig',
             '07-decoupler-form-et-votre-modele'                            => 'AfsyFrontBundle:Avent:day_2017_07.html.twig',
             '06-headless-is-more'                                          => 'AfsyFrontBundle:Avent:day_2017_06.html.twig',
