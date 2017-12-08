@@ -40,6 +40,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '10-comment-mettre-les-mains-dans-un-projet-existant' => 'AfsyFrontBundle:Avent:day_2017_10.html.twig',
             '07-decoupler-form-et-votre-modele'                   => 'AfsyFrontBundle:Avent:day_2017_07.html.twig',
             '06-headless-is-more'                                 => 'AfsyFrontBundle:Avent:day_2017_06.html.twig',
             '05-deboguer-php-avec-gdb'                            => 'AfsyFrontBundle:Avent:day_2017_05.html.twig',
