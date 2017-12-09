@@ -1,0 +1,407 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 10 - Mettre les mains dans un projet existant" %}
+
+{% block article_content %}
+    <style type="text/css">
+        i {
+            font-family: sans-serif;
+        }
+        p.highlight {
+            border-left:2px solid #1fbba6;
+            padding-left:5px;
+        }
+    </style>
+    <h1 id="comment-mettre-les-mains-dans-un-projet-existant">Mettre les mains dans un projet existant</h1>
+
+    <p>
+        Dans la vie d'un développeur, il existe des projets que l'on commence à
+        partir de zéro et des situations dans lesquelles on est amené à reprendre
+        un projet existant.
+        <br />
+        Et les projets existants c'est comme les boites de chocolats 🍫, on ne
+        sait jamais sur quoi on va tomber...Dans cet article, nous allons passer
+        en revue les différents outils et conseils pour démarrer du bon pied
+        la reprise d'un projet.
+    </p>
+
+    <p>
+        Salarié arrivé dans une nouvelle entreprise, prestataire prenant la place
+        d'un autre, il existe un grand nombre de situations qui nous emmènent à
+        repartir d'un code source existant.
+    </p>
+    <p>
+        On peut avoir de la <b>chance</b>, et tomber sur LE projet, utilisant les
+        dernières versions des différentes composants, bien documenté, avec des
+        tests couvrant la majeure partie du code, des spécifications
+        fonctionnelles à jour, un environnement de versionning et de CI aux
+        petits oignons, etc. Et puis on peut tomber sur de <i>vrais</i> projets, avec
+        leurs qualités et leurs défauts, qu'il va falloir comprendre et
+        maitriser avant de commencer à produire de la valeur ajoutée.
+    </p>
+
+    <h2 id="sommaire">Sommaire</h2>
+    <ol>
+        <li><a href="#par-ou-commencer">Par où commencer</a>
+            <ol>
+                <li><a href="#vous-avez-de-la-chance">Vous avez de la chance, vous êtes sur Symfony</a></li>
+                <li><a href="#passage-en-revue">Passage en revue de ce que vous avez à votre disposition</a></li>
+            </ol>
+        </li>
+        <li><a href="#outils-d-analyse">Les outils pour analyser l'existant</a>
+            <ol>
+
+                <li><a href="#pour-commencer">Pour commencer</a>
+                    <ol>
+                        <li><a href="#tests">Les tests bien sûr</a></li>
+                        <li><a href="#cloc"> Counting Lines Of Code</a></li>
+                        <li><a href="#afficher-le-graphe-git">Afficher le graphe Git</a></li>
+                        <li><a href="#qui-a-code">Savoir qui a contribué au code</a></li>
+                        <li><a href="#connaitre-les-fichiers">Connaitre les fichiers les plus commités / les plus sensibles</a></li>
+                    </ol>
+                </li>
+                <li><a href="#pour-approfondir">Pour approfindir</a>
+                <ol>
+                    <li><a href="#sensio-security-check">SensioLabs Security Check</a></li>
+                    <li><a href="#sensio-insight">SensioLabs Insight</a></li>
+                    <li><a href="#phpqa">Un outil pour les lancer tous</a></li>
+                </ol>
+                </li>
+            </ol>
+            <li><a href="#et-maintenant">Et maintenant, on fait quoi ?</a></li>
+            </ol>
+        </li>
+
+    </ol>
+
+    <h2 id="par-ou-commencer">Par où commencer</h2>
+
+    <h3 id="vous-avez-de-la-chance">Vous avez de la chance, vous êtes sur Symfony</h3>
+    <p>
+        Comme vous le savez probablement, l'avantage de Symfony comme de nombreux
+        Frameworks est qu'il offre une <a href="https://symfony.com/doc/current/quick_tour/the_architecture.html" target="_blank">architecture normalisée</a>
+        que l'on retrouve majoritairement sur l'ensemble des projets.
+    <p>
+    </p>
+        Même si le Framework est assez souple pour que l'on puisse changer cette
+        architecture, la majorité des projets que vous rencontrerez aura la même
+        structure, ce qui facilite une reprise.
+    </p>
+    <p class="highlight">
+        J'aime bien dans un premier temps faire un premier tour en surface pour
+        prendre connaissance des dossiers et des fichiers, et commencer à
+        comprendre la logique de mes prédécesseurs. Cela permet de <i>sentir</i>
+        les choses.
+    <p>
+
+    <h3 id="passage-en-revue">Passage en revue de ce que vous avez à votre disposition</h3>
+
+    <p>
+        Selon les circonstances, vous aurez à votre disposition plus ou moins d'élements
+        afin de reprendre votre projet. Nous laisserons de côté dans la suite de cet article
+        des éléments écrits (spécifications fonctionnelles, document d'architecture, etc.)
+        qu'il convient bien sûr de lire avant de démarrer l'exploration du code.
+    </p>
+
+    <p>
+        Vous pouvez donc avoir sous la main :
+        <ul>
+            <li><b>De la documentation</b> : docs, slides, PDF, emails (😱), qui vous permettront de comprendre le projet et son contexte.</li>
+            <li><b>Le code source du projet</b> : sinon on se demande bien comment on pourrait faire.</li>
+            <li><b>Des données</b> : que ce soit des exports de bases, des fixtures, des fichiers à importer.</li>
+            <li><b>L'historique Git</b> : qui comme on le verra peut s'avérer être un excellent outil pour mieux comprendre le projet.</li>
+        </ul>
+    </p>
+
+    <p class="highlight">
+        Bien entendu, plus vous avez d'éléments, plus simple sera la reprise.
+        Notre but sera donc de partir des moyens mis à notre disposition pour
+        produire, grâce à des outils, des informations pertinentes qui nous
+        permettront de mieux nous situer face au projet.
+    </p>
+
+    <h2 id="outils-d-analyse">Les outils pour analyser l'existant</h2>
+
+    <p>
+        Notre objectif va consister ici à utiliser des outils en complément d'une
+        analyse manuelle du projet afin de pouvoir dresser un mode opératoire
+        pour reprendre le projet dans de bonnes conditions.
+    </p>
+
+    <h3 id="pour-commencer">Pour commencer</h3>
+
+    <h4 id="tests">Les tests bien sûr</h4>
+    <p>
+        Si il existe une chose qui peut nous donner des informations, ce sont des
+        tests <strong>bien écrits</strong>. Qu'ils soient écrits avec Behat, PHPUnit,
+        ou autre, la présence de tests révèle souvent les parties du projet
+        les plus complexes.
+    </p>
+    <p class="highlight">
+        Comprennez les tests, et vous comprendrez comment fonctionne le projet.
+        Et si il n'y a pas de tests, vous savez ce qu'il vous reste à faire...
+    </p>
+    <h4 id="cloc">Counting Lines Of Code</h4>
+    <p>
+        <a href="https://github.com/AlDanial/cloc" target="_blank">cloc</a> est un utilitaire qui permet d'obtenir rapidement
+        une vision de la taille du code source par type de fichiers et du rapport code / commentaires.
+    </p>
+    <pre><code class="language-bash">$ cd /path/to/project
+    $ cloc . --exclude-dir=vendor,test,var
+     329 text files.
+     320 unique files.
+     47 files ignored.
+
+    github.com/AlDanial/cloc v 1.72  T=4.63 s (62.4 files/s, 35069.2 lines/s)
+    -------------------------------------------------------------------------------
+    Language                     files          blank        comment           code
+    -------------------------------------------------------------------------------
+    HTML                            19            712            229          32983
+    XML                             10            239              0          29579
+    PHP                            130           5905           6040          28582
+    JavaScript                      28           2684           2039          23411
+    Twig                            55           3138             12          12270
+    CSS                             20           1839            234          10700
+    Sass                             9            228              0            928
+    YAML                            11             54             31            259
+    JSON                             2              3              0             97
+    Markdown                         2             18              0             45
+    Python                           1              6              1             32
+    Bourne Shell                     1              9              0             25
+    Ruby                             1             10             11             10
+    -------------------------------------------------------------------------------
+    SUM:                           289          14845           8597         138921
+    -------------------------------------------------------------------------------
+    </code></pre>
+    <h4 id="afficher-le-graphe-git">Afficher le graphe Git</h4>
+    <p>
+        Git peut être une mine d'information sur le projet, qu'il est relativement
+        facile d'exploiter. Nous verrons que quelques outils et commandes nous
+        permettent de tirer profit de l'historique du projet.
+    </p>
+    <p>
+        La commande ci-dessous vous permettra d'avoir une visualisation dans
+        votre terminal du graphique Git des commits, avec les dates et les auteurs.
+    </p>
+
+<pre><code class="language-bash">$ git log --all --decorate --oneline --graph --date=short \
+--pretty='%C(red)%h%Creset | %C(yellow)%ad%Creset | %C(green)%an%Creset | %s'</code></pre>
+
+    <p>
+        Ce qui produira le résultat ci-dessous :
+        <img src="{{ asset('bundles/afsyfront/images/avent/2017/10/git_log_decorate.png') }}" alt="git_log_decorate"/>
+
+    </p>
+
+    <h4 id="qui-a-code">Savoir qui a contribué au code</h4>
+
+    <p>
+        Si vous êtes en contact avec les précédents développeurs du projet,
+        vous pouvez utiliser la commande ci-dessous pour lister les principaux
+        contributeurs au projet. Ils pourront peut être vous aider ou vous
+        éclairer en cas de questions.
+    </p>
+<pre><code class="language-bash">$ git shortlog -s -n -e | head </code></pre>
+
+    <h4 id="connaitre-les-fichiers">Connaitre les fichiers les plus commités / les plus sensibles</h4>
+
+    <p>
+        <a href="https://github.com/marmelab/ArcheoloGit" target="_blank">ArcheoloGit</a> est un outil de visualisation de l'âge et de l'activité des fichiers versionnés.
+        L'outil produit une <i>carte</i> des différents fichiers. Chaque fichier est représenté sous la forme d'un rectangle, dont la taille est proportionnelle au nombre de commits. La couleur des rectangles dépend de la dernière date de modification du fichier.
+    </p>
+    <p>
+        Nous utiliserons docker par simplicité pour lancer l'outil :
+    </p>
+    <pre><code class="language-bash">$ cd /path/to/project
+$ docker run -it --rm -v $PWD:/data:ro -p 8001:8000 clue/archeologit
+    Number of files: 315
+    >100%
+    Serving HTTP on 0.0.0.0 port 8000 ...</code></pre>
+
+    <p>
+        Ce qui produira le résultat ci-dessous :
+        <img src="{{ asset('bundles/afsyfront/images/avent/2017/10/archeologit.png') }}" alt="archeologit"/>
+
+        <ol>
+            <li>Les grands rectangles rouges montrent des fichiers modifiés souvents, mais qui n'ont pas été touchés depuis longtemps. Ils nécessitent une certaines attention afin de voir si un refactoring n'est pas nécessaire.</li>
+            <li>Les petits rectangles rouges montrent les fichiers rarement modifiés, et depuis longtemps. Ils sont peut être sans importance, ou peut être contiennent des bombes à retardement.</li>
+            <li>Les petits rectangles verts montrent des fichiers modifiés rarement, mais créés ou modifiés récemment. Il n'est peut être pas nécessaire de s'y pencher dès le début.</li>
+            <li>Les grands rectangles verts montrent des fichiers modifiés souvents, et récemment. Il n'est sans doute pas nécessaire de s'y pencher maintenant.</li>
+        </ol>
+    </p>
+
+    <h3 id="pour-approfondir">Pour approfondir</h3>
+
+    <h4 id="sensio-security-check">SensioLabs Security Check</h4>
+
+    <p>
+        <a href="https://security.sensiolabs.org/" target="_blank">SensioLabs Security Check</a>
+        est un outil qui analyse le fichier composer.lock de votre projet à la recherche
+        d'éventuelles failles de sécurité dans les packages qui le composent.
+    </p>
+
+    <p>
+        L'outil est très facile à utiliser, autant ne pas s'en passer.
+    </p>
+<pre><code class="language-bash">$ cd /path/to/project
+$ docker run -it --rm -v "$PWD":/app -w /app adamculp/php-security-checker:latest \
+    php /usr/local/lib/php-security-checker/vendor/bin/security-checker security:check \
+    ./composer.lock
+
+    Symfony Security Check Report
+    =============================
+
+     // Checked file: /app/composer.lock
+
+     [ERROR] 1 packages have known vulnerabilities.
+
+    symfony/symfony (v3.3.6)
+    ------------------------
+
+     * CVE-2017-16653: CVE-2017-16653: CSRF protection does not use different tokens for HTTP and HTTPS
+       http://symfony.com/blog/cve-2017-16653-csrf-protection-does-not-use-different-tokens-for-http-and-https
+     * CVE-2017-16654: CVE-2017-16654: Intl bundle readers breaking out of paths
+       http://symfony.com/blog/cve-2017-16654-intl-bundle-readers-breaking-out-of-paths
+     * CVE-2017-16790: CVE-2017-16790: Ensure that submitted data are uploaded files
+       http://symfony.com/blog/cve-2017-16790-ensure-that-submitted-data-are-uploaded-files
+     * CVE-2017-16652: CVE-2017-16652: Open redirect vulnerability on security handlers
+       http://symfony.com/blog/cve-2017-16652-open-redirect-vulnerability-on-security-handlers
+
+     ! [NOTE] This checker can only detect vulnerabilities that are referenced in
+     !        the SensioLabs security advisories database. Execute this command
+     !        regularly to check the newly discovered vulnerabilities.
+ </code></pre>
+
+    <h4 id="sensio-insight">SensioLabs Insight</h4>
+    <p>
+        Si votre projet est Open Source, ou si vous disposez d'un compte payant,
+        vous pouvez utiliser <a href="https://insight.sensiolabs.com" target="_blank">SensioLabs Insight</a>. Il s'agit d'un outil permettant de
+        mesurer la qualité du code.
+    </p>
+    <p>
+        Vous disposerez ainsi de nombreux éléments indicatifs sur le code source,
+        sous divers aspects allant de la sécurité aux best pratices de développement.
+        <img src="{{ asset('bundles/afsyfront/images/avent/2017/10/insight.png') }}" alt="insight"/>
+
+    </p>
+    <h4 id="phpqa">Un outil pour les lancer tous</h4>
+
+    <p>
+        Il existe une panoplie d'outils permettant de mesurer la qualité du code PHP
+        sous toutes ses formes. <a href="https://edgedesigncz.github.io/phpqa/" target="_blank">PHPQA</a> regroupe simplement ces outils les plus utilisés
+        afin de centraliser leur exécution.
+    </p>
+
+    <p>
+        En une seule ligne de commande, vous pourrez ainsi lancer les outils suivants
+        <ul>
+            <li>phploc</li>
+            <li>phpcs</li>
+            <li>php-cs-fixer</li>
+            <li>phpmd</li>
+            <li>pdepend</li>
+            <li>phpcpd</li>
+            <li>phpstan</li>
+        </ul>
+
+<pre><code class="language-bash">
+$ cd /path/to/project
+$ docker run --rm -u $UID -v $PWD:/app eko3alpha/docker-phpqa --report \
+--ignoredDirs vendor,build,migrations,test \
+--tools phpqa,phpmetrics,phploc,phpcs,php-cs-fixer,phpmd,pdepend,phpcpd,parallel-lint,phpstan
+</code></pre>
+
+    <p>
+        Le résultat de la commande construit des rapports au format HTML pour chacun des outils lancés.
+        Chaque onglet vous donnera de nombreuses indications sur l'état du code.
+    </p>
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/10/phpqa.png') }}" alt="phpqa"/>
+
+    <h2 id="et-maintenant">Et maintenant, on fait quoi ?</h2>
+
+    <p>
+        Grâce à tous ces outils, vous avez beaucoup d'informations
+        à votre disposition et surtout vous devriez y voir plus clair sur l'état
+        du projet que vous ne connaissiez pas il y a peu.
+    </p>
+
+    <p>
+        En fonction de ce que vous aurez pu voir, je vous invite à classer les
+        actions à mettre en oeuvre selon 3 catégories.
+    </p>
+
+    <h3>Les actions à faire avant toute chose</h3>
+    <p>
+        Il s'agit des travaux que vous devez mener avant de produire une ligne
+        de code supplémentaire. Parmis ces actions, je pense nottament aux choses
+        suivantes :
+        <ul>
+            <li>Mettre à jour des composants présentants des failles de sécurité avérées.</li>
+            <li>Modifier du code exposant des failles de sécurité (le petit SQL natif caché au fond d'un dossier et sans échappement).</li>
+            <li>Harmoniser le cod
+            <li>Faire tout ce qu'il faut pour que la structuration des données soit bonne.</li>
+            <li>Vérifier que la documentation permettant d'installer le projet est <u>complète</u>.</li>
+            <li>Mettre en place ou compléter les outils de suivi de la qualité du projet (allant du hook git à une CI complète).</li>
+        </ul>
+        A l'issue de cette étape, vous devriez être dans de bonne conditions pour que la nouvelle vie du projet démarre sur de bonnes bases</p>
+    </p>
+
+    <h3>Les actions qui amélioreront le projet et votre efficacité</h3>
+    <p>
+        En fonction du temps que vous avez à votre disposition, vous pourrez
+        mettre en place d'autre actions avant de commencer, ou intégrer ces actions
+        dans les développements ultérieurs.
+    </p>
+    <p>
+        Ces actions doivent vous mener à disposer d'un projet de meilleure qualité,
+        plus facile à maintenir, et allant dans le sens d'un schéma directeur
+        que vous aurez préalablement défini.
+    </p>
+    <p>
+        Ces actions peuvent être du type :
+        <ul>
+            <li>Supprimer les redondances de code.</li>
+            <li>Refactoriser le code pour que celui-ci corresponde à la logique Métier de votre projet.</li>
+            <li>Réduire le couplage entre les composants, mettre en place des librairies et des services là ou c'est nécessaire.</li>
+            <li>S'appuyer sur les possibilité offertes par le Framework ou ses Bundles plutôt que de réinventer la roue.</li>
+            <li>S'assurer que les composants utilisés sont pertinents, à jour et maintenus. </li>
+            <li>Faire si possible des montées en version sur ces dépendances, pour aller sur les version LTS.</li>
+            <li>Passer en revue les fichiers les plus critiques (cf. Archeologit) pour développer des tests unitaires et fonctionnels.</li>
+        </ul>
+    <h3>Les actions à faire "pour se faire plaisir"</h3>
+    <p>
+        <ul>
+            <li>Faire des montées de versions majeures, en vérifiant bien sûr de ne rien casser en passant...</li>
+            <li>Utiliser une ou des nouvelles technos en replacement progressif de certaines parties de l'appli.</li>
+            <li>Mettre en place le projet idéal tel qu'il a été décrit en début de cet article 😊.</li>
+        </ul>
+    </p>
+    <h1>Conclusion</h1>
+    <p>
+        Pour conclure, j'espère que vous trouverez dans cet article des informations
+        que vous pourrez piocher à l'avenir. Reprendre un projet existant n'est pas obligatoirement
+        une chose rébarbative, et avec quelques outils et un peu de méthodologie on peut en faire
+        une expérience satisfaisante.
+    </p>
+    <p>
+        Vous avez d'autres façons de faire, un avis sur ces outils ? N'hésitez pas
+        à commenter cet article !
+    </p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/10/nicolas-potier.png') }}" alt="Nicolas Potier"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url %}https://twitter.com/nicolaspotier{% endblock %}" target="_blank">
+            {% block article_author %}Nicolas Potier{% endblock %}
+        </a>
+    </h2>
+    <p>
+        Fondateur Associé chez ACSEO à Aix-en-Provence. <br />Organisateur (avec d'autres) des sfPot sur Aix/Marseille
+    </p>
+{% endblock %}
