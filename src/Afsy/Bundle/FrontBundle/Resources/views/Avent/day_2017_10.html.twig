@@ -149,32 +149,31 @@
         une vision de la taille du code source par type de fichiers et du rapport code / commentaires.
     </p>
     <pre><code class="language-bash">$ cd /path/to/project
-    $ cloc . --exclude-dir=vendor,test,var
-     329 text files.
-     320 unique files.
-     47 files ignored.
+$ cloc . --exclude-dir=vendor,test,var
+ 329 text files.
+ 320 unique files.
+ 47 files ignored.
 
-    github.com/AlDanial/cloc v 1.72  T=4.63 s (62.4 files/s, 35069.2 lines/s)
-    -------------------------------------------------------------------------------
-    Language                     files          blank        comment           code
-    -------------------------------------------------------------------------------
-    HTML                            19            712            229          32983
-    XML                             10            239              0          29579
-    PHP                            130           5905           6040          28582
-    JavaScript                      28           2684           2039          23411
-    Twig                            55           3138             12          12270
-    CSS                             20           1839            234          10700
-    Sass                             9            228              0            928
-    YAML                            11             54             31            259
-    JSON                             2              3              0             97
-    Markdown                         2             18              0             45
-    Python                           1              6              1             32
-    Bourne Shell                     1              9              0             25
-    Ruby                             1             10             11             10
-    -------------------------------------------------------------------------------
-    SUM:                           289          14845           8597         138921
-    -------------------------------------------------------------------------------
-    </code></pre>
+github.com/AlDanial/cloc v 1.72  T=4.63 s (62.4 files/s, 35069.2 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+HTML                            19            712            229          32983
+XML                             10            239              0          29579
+PHP                            130           5905           6040          28582
+JavaScript                      28           2684           2039          23411
+Twig                            55           3138             12          12270
+CSS                             20           1839            234          10700
+Sass                             9            228              0            928
+YAML                            11             54             31            259
+JSON                             2              3              0             97
+Markdown                         2             18              0             45
+Python                           1              6              1             32
+Bourne Shell                     1              9              0             25
+Ruby                             1             10             11             10
+-------------------------------------------------------------------------------
+SUM:                           289          14845           8597         138921
+-------------------------------------------------------------------------------</code></pre>
     <h4 id="afficher-le-graphe-git">Afficher le graphe Git</h4>
     <p>
         Git peut être une mine d'information sur le projet, qu'il est relativement
@@ -216,9 +215,9 @@
     </p>
     <pre><code class="language-bash">$ cd /path/to/project
 $ docker run -it --rm -v $PWD:/data:ro -p 8001:8000 clue/archeologit
-    Number of files: 315
-    >100%
-    Serving HTTP on 0.0.0.0 port 8000 ...</code></pre>
+Number of files: 315
+>100%
+Serving HTTP on 0.0.0.0 port 8000 ...</code></pre>
 
     <p>
         Ce qui produira le résultat ci-dessous :
@@ -247,32 +246,31 @@ $ docker run -it --rm -v $PWD:/data:ro -p 8001:8000 clue/archeologit
     </p>
 <pre><code class="language-bash">$ cd /path/to/project
 $ docker run -it --rm -v "$PWD":/app -w /app adamculp/php-security-checker:latest \
-    php /usr/local/lib/php-security-checker/vendor/bin/security-checker security:check \
-    ./composer.lock
+php /usr/local/lib/php-security-checker/vendor/bin/security-checker security:check \
+./composer.lock
 
-    Symfony Security Check Report
-    =============================
+Symfony Security Check Report
+=============================
 
-     // Checked file: /app/composer.lock
+ // Checked file: /app/composer.lock
 
-     [ERROR] 1 packages have known vulnerabilities.
+ [ERROR] 1 packages have known vulnerabilities.
 
-    symfony/symfony (v3.3.6)
-    ------------------------
+symfony/symfony (v3.3.6)
+------------------------
 
-     * CVE-2017-16653: CVE-2017-16653: CSRF protection does not use different tokens for HTTP and HTTPS
-       http://symfony.com/blog/cve-2017-16653-csrf-protection-does-not-use-different-tokens-for-http-and-https
-     * CVE-2017-16654: CVE-2017-16654: Intl bundle readers breaking out of paths
-       http://symfony.com/blog/cve-2017-16654-intl-bundle-readers-breaking-out-of-paths
-     * CVE-2017-16790: CVE-2017-16790: Ensure that submitted data are uploaded files
-       http://symfony.com/blog/cve-2017-16790-ensure-that-submitted-data-are-uploaded-files
-     * CVE-2017-16652: CVE-2017-16652: Open redirect vulnerability on security handlers
-       http://symfony.com/blog/cve-2017-16652-open-redirect-vulnerability-on-security-handlers
+ * CVE-2017-16653: CVE-2017-16653: CSRF protection does not use different tokens for HTTP and HTTPS
+   http://symfony.com/blog/cve-2017-16653-csrf-protection-does-not-use-different-tokens-for-http-and-https
+ * CVE-2017-16654: CVE-2017-16654: Intl bundle readers breaking out of paths
+   http://symfony.com/blog/cve-2017-16654-intl-bundle-readers-breaking-out-of-paths
+ * CVE-2017-16790: CVE-2017-16790: Ensure that submitted data are uploaded files
+   http://symfony.com/blog/cve-2017-16790-ensure-that-submitted-data-are-uploaded-files
+ * CVE-2017-16652: CVE-2017-16652: Open redirect vulnerability on security handlers
+   http://symfony.com/blog/cve-2017-16652-open-redirect-vulnerability-on-security-handlers
 
-     ! [NOTE] This checker can only detect vulnerabilities that are referenced in
-     !        the SensioLabs security advisories database. Execute this command
-     !        regularly to check the newly discovered vulnerabilities.
- </code></pre>
+ ! [NOTE] This checker can only detect vulnerabilities that are referenced in
+ !        the SensioLabs security advisories database. Execute this command
+ !        regularly to check the newly discovered vulnerabilities.</code></pre>
 
     <h4 id="sensio-insight">SensioLabs Insight</h4>
     <p>
@@ -306,8 +304,7 @@ $ docker run -it --rm -v "$PWD":/app -w /app adamculp/php-security-checker:lates
             <li>phpstan</li>
         </ul>
 
-<pre><code class="language-bash">
-$ cd /path/to/project
+<pre><code class="language-bash">$ cd /path/to/project
 $ docker run --rm -u $UID -v $PWD:/app eko3alpha/docker-phpqa --report \
 --ignoredDirs vendor,build,migrations,test \
 --tools phpqa,phpmetrics,phploc,phpcs,php-cs-fixer,phpmd,pdepend,phpcpd,parallel-lint,phpstan
