@@ -62,7 +62,7 @@
     </p>
     <h3>Cli</h3>
     <p>
-        Il permet de nous faciliter la vie en générant les différents objets pour le ModelManager par exemple. Des commandes d'inspections sont également disponibles pour éviter d'ouvrir une console psql.
+        Il permet de nous faciliter la vie en générant les différents objets pour le <code class="language-none">ModelManager</code> par exemple. Des commandes d'inspections sont également disponibles pour éviter d'ouvrir une console psql.
     </p>
 
     <h2 id="pommetsymfony">Pomm et Symfony</h2>
@@ -157,9 +157,9 @@
         La commande a créé 3 fichiers par tables :<br/>
         <img src="{{ asset('bundles/afsyfront/images/avent/2017/11/filesgenerate.png') }}" class="img-article"/>
         <ul>
-            <li>- Les FlexibleEntity : ce sont nos objets métiers qui seront le reflet de la projection de la requête.</li>
-            <li>- Les Model : ils permettent d'intéragir avec la base.</li>
-            <li>- Les Structure : c'est la définition de la table qui permettra à Pomm de mapper les types.</li>
+            <li>Les <code class="language-none">FlexibleEntity</code> : ce sont nos objets métiers qui seront le reflet de la projection de la requête.</li>
+            <li>Les <code class="language-none">Model</code> : ils permettent d'intéragir avec la base.</li>
+            <li>Les <code class="language-none">Structure</code> : c'est la définition de la table qui permettra à Pomm de mapper les types.</li>
         </ul>
     </p>
     <p style="clear: both;">
@@ -269,8 +269,7 @@ public function process(Request $request)
     return $this->render('registration/create.html.twig', array(
         'form' => $form->createView(),
     ));
-}
-    </code></pre>
+}</code></pre>
     <p>
         Grâce au Model, je crée un FlexibleEntity de Register. Celui-ci étant vide, puisque sans projection, je lui
         fournis la liste des propriétés qui le composeront.<br/>
@@ -380,7 +379,7 @@ public function findWithRegister()
     return $this->query($sql, [], $projection);
 }</code></pre>
     <p>
-        Résultat :
+        Résultat :<br/>
         <img src="{{ asset('bundles/afsyfront/images/avent/2017/11/capturearrayagg.png') }}"/>
     </p>
     <h2 id="multilingue">Gestion du mutilingue</h2>
@@ -464,10 +463,10 @@ SQL;
         'result' => $result
     ));
 }</code></pre>
-    <p> Grâce au client query_manager, je peux envoyer une requête directement à PostgreSQL et en recevoir l'iterator.
+    <p> Grâce au client <code class="language-none">query_manager</code>, je peux envoyer une requête directement à PostgreSQL et en recevoir l'itérateur.
         Pour les Rollup, je vous laisse les découvrir sur la doc PostgreSQL (<a href="https://www.postgresql.org/docs/devel/static/queries-table-expressions.html#QUERIES-GROUPING-SETS">voir la doc</a>).
         Attention vous pourriez avoir envie de faire du SQL 😛.
-        <br/>(Il va de soi que mettre la requête directement dans le Controller est à proscrire.)
+        <br/>(Il va de soi que mettre la requête directement dans le Contrôleur est à proscrire.)
         <br/><br/>
         <img src="{{ asset('bundles/afsyfront/images/avent/2017/11/capturestatistiques.png') }}"/><br/>
         <b>Oui c'est moche, mais le résultat est bluffant non ? 😛</b>
