@@ -18,37 +18,37 @@
         <li><a href="#multilingue">Gestion du multilingue</a></li>
         <li><a href="#statistiques">Statistiques</a></li>
         <li><a href="#conclusion">Conclusion</a></li>
-        <li><a href="#bibliographie">Bibliographie & Annexes</a></li>
+        <li><a href="#bibliographie">Bibliographie &amp; Annexes</a></li>
     </ul>
 
     <h2 id="introduction">Introduction</h2>
-    <p>Aujourd'hui, lorsque l'on parle des bases de données, nous pensons tout de suite ORM.
-        Le plus célèbre d'entre eux est sans doute Doctrine.<br/>
-        <b>Mais à quoi sert l'ORM ?</b><br/>
+    <p>Aujourd'hui, lorsque l'on parle des bases de données, nous pensons tout de suite <abbr title="Object Relational Mapper" lang="en">ORM</abbr>.
+        Le plus célèbre d'entre eux est sans doute <a href="http://www.doctrine-project.org/" target="_blank">Doctrine</a>.<br/>
+        <b>Mais à quoi sert l'<abbr title="Object Relational Mapper" lang="en">ORM</abbr> ?</b><br/>
     </p>
     <p>
         Le but premier de celui-ci est l'abstraction de la base de données. En effet, nul besoin de connaissances en SQL pour persister ou récupérer des données.<br/>
-        Celui-ci permet également de changer facilement de SGBD. Cependant, qui, dans la vie d'un projet, a besoin de ça sans refonte ?<br/><br/>
+        Celui-ci permet également de changer facilement de <abbr title="Système de Gestion de Bases de Données Relationnelles">SGBDR</abbr>. Cependant, qui, dans la vie d'un projet, a besoin de ça <br/>sans refonte ?<br/><br/>
         Le constat est qu'aujourd'hui, si bon nombre de développeurs font du Symfony avant de faire du PHP, ils sont encore plus nombreux à faire du Doctrine avant de faire du SQL.<br/>
         Ce qui était, avant, le point de départ d'un projet, est devenu complètement ignoré aujourd'hui.<br/>
-        De plus nous assistons, de nos jours à des courants qui mettent le métier au centre du développement (DDD, Clean Architecture etc..). La base de données exprime "le métier",
+        De plus nous assistons, de nos jours à des courants qui mettent le métier au centre du développement (<abbr title="Domain Driven Design" lang="en">DDD</abbr>, Clean Architecture etc..). La base de données exprime "le métier",
         et ne pas maîtriser celle-ci va donc à l'encontre de ces courants.<br/>
         <br/>
-        Dans cette introduction, il me reste un faux combat à résoudre : MySql Vs PostgreSQL. De nombreux articles traitent déjà le sujet depuis bien longtemps.
+        Dans cette introduction, il me reste un faux combat à résoudre : MySql <abbr title="versus">Vs</abbr> PostgreSQL. De nombreux articles traitent déjà le sujet depuis bien longtemps.
         Si vous êtes malgré tout persuadés que MySQL peut rivaliser avec PostgreSQL, nous allons découvrir dans cet article quelques concepts qui devraient vous convaincre du contraire.
     </p>
-    <h2 id="pommcestquoi">Pomm, c'est quoi?</h2>
+    <h2 id="pommcestquoi">Pomm, c'est quoi ?</h2>
     <p>
-        Pomm est une alternative aux ORM. Il se définit comme un Object Model Manager.
-        La principale ligne de conduite du projet est d'être la moins intrusif possible et la plus simple. Ainsi, vous l'oublierez rapidement pour vous concentrer sur PostgreSQL.
-        Pomm vous permettra de reprendre le contrôle de votre SGBD et de comprendre ce qu'il s'y passe afin de gagner en performance et bien plus.
+        <a href="http://www.pomm-project.org/" target="_blank">Pomm</a> est une alternative aux <abbr title="Object Relational Mapper" lang="en">ORM</abbr>. Il se définit comme un gestionnaire de modèle objet.
+        La principale ligne de conduite du projet est d'être la moins intrusive possible et la plus simple. Ainsi, vous l'oublierez rapidement pour vous concentrer sur PostgreSQL.
+        Pomm vous permettra de reprendre le contrôle de votre <abbr title="Système de Gestion de Bases de Données Relationnelles">SGBDR</abbr> et de comprendre ce qu'il s'y passe afin de gagner en performance et bien plus.
     </p>
 
     <h2 id="presentation">Foundation, ModelManager et Cli sont dans un bateau</h2>
-    <h3>Foundation</h3>
+    <h3 lang="en">Foundation</h3>
     <p>
-        C'est la brique principale qui permet de s'interfacer avec PostgreSQL. Elle est composée de sessions qui, elles-mêmes, embarquent des clients :
-        <ul>
+        C'est la brique principale qui s'interface avec PostgreSQL. Elle est composée de sessions qui, elles-mêmes, embarquent des clients :
+        <ul lang="en">
             <li>converter</li>
             <li>query_manager</li>
             <li>prepared_query</li>
@@ -60,9 +60,9 @@
     <h3>ModelManager</h3>
     <p>Cette brique est une extension de la première, c'est un client de la session au même titre que les précédents. Ce client apporte la modélisation objet de la base.
     </p>
-    <h3>Cli</h3>
+    <h3><abbr title="Command Line Interface" lang="en">Cli</abbr></h3>
     <p>
-        Il permet de nous faciliter la vie en générant les différents objets pour le <code class="language-none">ModelManager</code> par exemple. Des commandes d'inspections sont également disponibles pour éviter d'ouvrir une console psql.
+        Il nous facilite la vie en générant les différents objets pour le <code class="language-none">ModelManager</code> par exemple. Des commandes d'inspection sont également disponibles pour éviter d'ouvrir une console psql.
     </p>
 
     <h2 id="pommetsymfony">Pomm et Symfony</h2>
@@ -71,14 +71,19 @@
         <br/>
         Celui-ci respecte également le principe de Pomm, être le moins intrusif, le plus transparent et simple.
         <br/>
-        Il intègre tout ce dont on a besoin pour développer avec Symfony, l'accès au profiler, les commandes et les configurations en yaml.<br/>
+        Il intègre tout ce dont on a besoin pour développer avec Symfony :
+        <ul>
+            <li>l'accès au profiler</li>
+            <li>les commandes</li>
+            <li>les configurations en YAML</li>
+        </ul>
     </p>
 
     <h2 id="context">Contexte et préparation</h2>
     <p>
-        Le but de ce tutoriel sera de créer un mini système d'évévenements et de réservations. Cela nous permettra de passer en revue des concepts PostgreSQL et Pomm.<br/>
-        Pour la suite de l'article j'essaierai de ne pas complexifier l'application pour me concentrer sur l'essentiel du sujet.<br/>
-        <a href="https://github.com/stood/evenement" target="_blank">Repo. Github du tutoriel</a>
+        Le but de ce tutoriel sera de créer un mini système d'événements et de réservations. Cela nous permettra de passer en revue des concepts PostgreSQL et Pomm.<br/>
+        Pour la suite de l'article, j'essaierai de ne pas complexifier l'application pour me concentrer sur l'essentiel du sujet.<br/>
+        <a href="https://github.com/stood/evenement" target="_blank">Dépôt Github du tutoriel</a>
     </p>
     <h3>Installation Rapide</h3>
 
@@ -99,10 +104,11 @@
             <li>'db' réprésente le nom de la session que vous utiliserez dans l'application. Il est possible d'en créer autant que nous le souhaitons. Cela permet par exemple d'avoir différents accès à la base avec des identifiants différents.</li>
             <li>'dsn' c'est notre définition de connexion</li>
             <li>'session_builder' est optionnel mais cela permet de définir les Clients de l'application (<a href="https://github.com/pomm-project/Foundation/blob/master/documentation/foundation.rst#client-pooler" target="_blank">voir la doc</a>) mais également
-                les converters.<br/>
-                J'ai pour habitude de créer systématiquement un SessionBuilder car c'est le point d'entrée. Ici, j'ai ajouté un Converter HSTORE car il provient
-                d'une extension PostgreSQL et n'est donc pas déclaré par défaut.
-                <pre><code class="language-php">class DbSessionBuilder extends SessionBuilder
+                les convertisseurs.</li>
+        </ul>
+        J'ai pour habitude de créer systématiquement un SessionBuilder car c'est le point d'entrée. Ici, j'ai ajouté un convertisseur HSTORE car il provient
+        d'une extension PostgreSQL et n'est donc pas déclaré par défaut.
+        <pre><code class="language-php">class DbSessionBuilder extends SessionBuilder
 {
     protected function initializeConverterHolder(ConverterHolder $converter_holder)
     {
@@ -112,12 +118,10 @@
             ->registerConverter('Hstore', new PgHstore(), ['public.hstore']);
     }
 }</code></pre>
-            </li>
-        </ul>
     </p>
     <h3>Création de la base</h3>
     <p>
-        Contrairement aux ORM, Pomm ne construit pas la base de données depuis des fichiers xml ou grâce à des annotations. La principale raison ?
+        Contrairement aux <abbr title="Object Relational Mapper" lang="en">ORM</abbr>, Pomm ne construit pas la base de données depuis des fichiers <abbr title="eXtended Markup Language" lang="en">XML</abbr> ou grâce à des annotations. La principale raison ?
         PostgreSQL est le meilleur outil pour faire cela et il prend en compte des éléments ignorés par Pomm ( ACL, tablespaces etc.)
         <br/>
         Cela vous permettra également de gros gains, en pouvant créer, par exemple, des index.
@@ -128,7 +132,7 @@
         <b>Utilisation des schémas</b>
         <pre><code class="sql">CREATE SCHEMA application;</code></pre>
         Pour ceux qui ne connaissent pas les schémas, cela permet d'organiser vos tables en groupes logiques <br/>(exit les préfixes de table 😛).<br/>
-        Cela permet également de pouvoir attribuer des droits spécifiques à des utilisateurs sans descendre au niveau des tables et d'avoir une logique métier.
+        Cela permet également d'attribuer des droits spécifiques à des utilisateurs sans descendre au niveau des tables et d'avoir une logique métier.
         <a href="https://docs.postgresql.fr/9.5/ddl-schemas.html" target="_blank">Voir la doc sur les schémas </a>
     </p>
     <p>
@@ -148,13 +152,13 @@
     <h3>Initialisation des fichiers</h3>
     <p>
         <pre><code class="language-sh">bin/console pomm:generate:schema-all db application -d ./src -a 'App' --psr4</code></pre>
-        Cette commande permettra de créer les fichiers nécessaires à Pomm depuis la base de données.<br/>
+        Cette commande crée les fichiers nécessaires à Pomm depuis la base de données.<br/>
         <ul>
             <li>'db' : indique le nom de la session spécifiée dans le fichier "pomm.yaml"</li>
             <li>'application': nom du schéma</li>
         </ul>
 
-        La commande a créé 3 fichiers par tables :<br/>
+        La commande a créé 3 fichiers par table :<br/>
         <img src="{{ asset('bundles/afsyfront/images/avent/2017/11/filesgenerate.png') }}" class="img-article"/>
         <ul>
             <li>Les <code class="language-none">FlexibleEntity</code> : ce sont nos objets métiers qui seront le reflet de la projection de la requête.</li>
@@ -165,7 +169,7 @@
     <p style="clear: both;">
         <b>La liste des commandes disponibles dans Pomm : </b><br/>
         <img src="{{ asset('bundles/afsyfront/images/avent/2017/11/listcmdpomm.png') }}"/><br/>
-        <b>Voila nous sommes ready, nous pouvons y aller !</b>
+        <b>Voila nous sommes prêts, nous pouvons y aller !</b>
     </p>
     <h2 id="crud">CRUD</h2>
     <h3>Récupération de la liste des événements</h3>
@@ -175,13 +179,13 @@
                 ->getModel(EventModel::class)
                 ->findAll();</code></pre><br/>
         Ici, nous utilisons le Model Manager, qui nous met à disposition des fonctions de CRUD (<a href="https://github.com/pomm-project/ModelManager/blob/2.0/documentation/model_manager.rst#default-queries" target="_blank">voir les fonctions disponibles</a>).
-        'findAll()' nous renvoie un iterator d'objets Event.
+        'findAll()' nous renvoie un itérateur d'objets Event.
         <br/>
         Cependant, récupérer l'événement sans sa catégorie n'a que très peu d'intérêt. Nous allons donc enrichir la projection de notre requête et en profiter pour récupérer le nombre d'inscrits ainsi que le nombre de jours restants avant la fin de l'événement
         <pre><code class="language-php language-sql">/* src/Db/ApplicationSchema/EventModel.php */
 public function findWithCategoryAndNbRegister()
 {
-    $sql = <<< SQL
+    $sql = &lt;&lt;&lt;SQL
                     SELECT
                     :projection
                     FROM :event event
@@ -219,7 +223,7 @@ public function findWithCategoryAndNbRegister()
     <p>
         Ici nous reprenons le contrôle en écrivant nous-même la requête bien que celle-ci est simple. Nous avons enrichi
         notre projection en lui ajoutant des champs. Cette fonction renvoie un iterator de FlexibleEntity.<br/>
-        En ne maîtrisant pas correctement l'ORM que nous utilisons, il n'est pas rare que pour récupérer deux éléments liés, nous fassions deux requêtes sans même le savoir.
+        En ne maîtrisant pas correctement l'<abbr title="Object Relational Mapper" lang="en">ORM</abbr> que nous utilisons, il n'est pas rare que pour récupérer deux éléments liés, nous fassions deux requêtes sans même le savoir.
         Alors que sur des boucles qui présentent des listes, les requêtes sont multipliées par le nombre de résultats.
     </p>
     <table>
@@ -241,7 +245,7 @@ public function findWithCategoryAndNbRegister()
     <p>
         C'est là que le nom de Flexible prend tout son sens. En effet, l'objet retourné est maitenant la représentation de cette nouvelle projection.
         Nous remarquons, au passage, les typages (DateTime, TsRange, Point, Array ...).<br/>
-        C'est donc notre SGBD qui fait le travail, ou plutôt qui fait son travail en facilitant le nôtre côté PHP.
+        C'est donc notre <abbr title="Système de Gestion de Bases de Données Relationnelles">SGBDR</abbr> qui fait le travail, ou plutôt qui fait son travail en facilitant le nôtre côté PHP.
     </p>
     <h3>Enregistrement d'une inscription</h3>
     <pre><code class="language-php">/* src/Controller/RegistrationController.php */
@@ -257,13 +261,13 @@ public function process(Request $request)
     $form = $this->createForm(RegistrationType::class, $register);
     $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted() &amp;&amp; $form->isValid()) {
         $this->get('pomm')
             ->getDefaultSession()
             ->getModel(RegisterModel::class)
             ->insertOne($register);
 
-        return $this->redirect($this->generateUrl('event_list'));
+        return $this->redirectToRoute('event_list');
     }
 
     return $this->render('registration/create.html.twig', array(
@@ -271,9 +275,9 @@ public function process(Request $request)
     ));
 }</code></pre>
     <p>
-        Grâce au Model, je crée un FlexibleEntity de Register. Celui-ci étant vide, puisque sans projection, je lui
+        Grâce au Model, je crée un objet FlexibleEntity d'inscription (Register). Celui-ci étant vide, puisque sans projection, je lui
         fournis la liste des propriétés qui le composeront.<br/>
-        Le module Form a donc tout ce qu'il faut pour pouvoir mapper le formulaire avec l'objet.
+        Le module Form a donc tout ce qu'il faut pour associer le formulaire avec l'objet.
         Pour mon rattachement à l'événement j'utilise un Listener.<br/>
         N'ayant pas de Type spécifique pour Pomm, j'utilise le ChoiceList qui me permet d'indiquer les éléments à prendre en compte.
         <pre><code class="language-php">/* src/Form/EventListener/AddEventFieldSubscriber.php */
@@ -340,7 +344,7 @@ public function process(Request $request, $registerId)
         ->getModel(RegisterModel::class)
         ->deleteByPK(['register_id' => $registerId]);
 
-    return $this->redirect($this->generateUrl('event_registration_list'));
+    return $this->redirectToRoute('event_registration_list');
 }</code></pre>
     <p>
         Pour la suppression, c'est du basique !
@@ -348,13 +352,13 @@ public function process(Request $request, $registerId)
     <h2 id="liaison">Liaison multiple</h2>
     <p>
         Une des questions qui revient souvent sur Pomm : comment récupérer plusieurs éléments liés ?<br/>
-        La difficulté, pour répondre à cette question, est d'accepter de ne pas penser ORM.<br/>
+        La difficulté, pour répondre à cette question, est d'accepter de ne pas penser <abbr title="Object Relational Mapper" lang="en">ORM</abbr>.<br/>
         Nous allons récupérer la liste des évènements avec leurs inscrits.
     </p>
     <pre><code class="language-php">/* src/Db/ApplicationSchema/EventModel */
 public function findWithRegister()
 {
-    $sql = <<< SQL
+    $sql = &lt;&lt;&lt;SQL
                 SELECT
                 :projection
                 FROM :event event
@@ -384,7 +388,7 @@ public function findWithRegister()
     </p>
     <h2 id="multilingue">Gestion du mutilingue</h2>
     <p>
-        De nos jours, beaucoup d'applications nécessitent le multilingue. Avec un ORM, généralement, cela passe par une table de liaisons de traductions.<br/>
+        De nos jours, beaucoup d'applications nécessitent le multilingue. Avec un <abbr title="Object Relational Mapper" lang="en">ORM</abbr>, généralement, cela passe par une table de liaison de traductions.<br/>
         Et là, c'est le drame ! En effet, votre base double de volume et des liaisons se forment dans tous les sens. Un enfer pour le développeur !<br/>
         Pourquoi ? Avec PostgreSQL vous avez le choix depuis bien longtemps de stocker en Hstore ou en JSONB. C'est ce premier que je vais exposer ici.<br/>
         Nous pourrions stocker en JSONB mais je pense que cela équivaut à sortir la machine de guerre pour stocker un tableau à une seule dimension.
@@ -394,7 +398,7 @@ public function findWithRegister()
     <pre><code class="language-php">/* src/Db/ApplicationSchema/EventModel */
 public function findWithRegister()
 {
-    $sql = <<< SQL
+    $sql = &lt;&lt;&lt;SQL
                 SELECT
                 :projection
                 FROM :event event
@@ -438,15 +442,15 @@ public function findWithRegister()
     <h2 id="statistiques">Statistiques</h2>
     <p>
         Dans nos applications, nous avons régulièrement besoin d'afficher des statistiques.
-        Je crois que c'est à ce moment-là que j'ai détesté les ORM.
+        Je crois que c'est à ce moment-là que j'ai détesté les <abbr title="Object Relational Mapper" lang="en">ORM</abbr>.
         <br/>
         Avec Pomm, utiliser le ModelManager serait la même chose. En effet, un tableau de statistiques est avant tout un tableau, alors pourquoi vouloir modéliser celui-ci en objet ?<br/>
-        Ressortons le nombre d'inscrits par mois par événements :
+        Ressortons le nombre d'inscrits par mois par événement :
     </p>
     <pre><code class="language-php">/* src/Controller/StatisticsController.php */
 public function show()
 {
-    $sql = <<< SQL
+    $sql = &lt;&lt;&lt;SQL
 SELECT
     to_char(register.created_at, 'month') as "month",
     count(register.register_id) as nb_register
@@ -475,20 +479,20 @@ SQL;
     <p>
         Je ne suis pas là pour dire que c'était mieux avant, au contraire, toutefois je pense que nous avons boudé trop longtemps
         un language pas à la mode et que nous essayons de nous convaincre qu'un outil pourrait le faire à notre place.<br/>
-        L'abstraction des bases de données par les ORM a engendré un certain nombre de problèmes dont le plus notable est le manque de performances des requêtes.
+        L'abstraction des bases de données par les <abbr title="Object Relational Mapper" lang="en">ORM</abbr> a engendré un certain nombre de problèmes dont le plus notable est le manque de performances des requêtes.
         Pour répondre à cette problématique nous avons redimensionné les serveurs ou créé des paliatifs. Par exemple, bon nombre d'applications mettent en place
-        des systèmes de caches évolués pour résoudre des problèmes de performances avec leurs SGBD.
+        des systèmes de cache évolués pour résoudre des problèmes de performances avec leurs <abbr title="Système de Gestion de Bases de Données Relationnelles">SGBDR</abbr>.
         Des moteurs de recherche évolués ont vu le jour alors que c'est un travail que gère très bien PostgreSQL, même avec beaucoup de données.
         <br/><br/>
         J'ai commencé l'apprentissage de Pomm il y a maintenant 2 ans. Celà a été assez rapide à prendre en main, environ 2 semaines pour commencer à ne plus souffrir.
-        La plus grande difficulté reste dans le fait de penser différement qu'avec un ORM et de prendre le temps de lire la documentation de PostgreSQL.<br/>
+        La plus grande difficulté reste dans le fait de penser différement qu'avec un <abbr title="Object Relational Mapper" lang="en">ORM</abbr> et de prendre le temps de lire la documentation de PostgreSQL.<br/>
 
         PommBundle sera bientôt compatible avec symfony 4, nous travaillons activement dessus !
-    <h2 id="bibliographie">Bibliographie & Annexes</h2>
+    <h2 id="bibliographie">Bibliographie &amp; Annexes</h2>
     <ul>
         <li><a target="_blank" href="http://www.pomm-project.org/slides/whypomm/index.html">Slide de conférence de Grégoire Hubert</a></li>
-        <li><a target="_blank" href="https://www.youtube.com/watch?v=PoqzPoT8h9Y&list=PL9zDdgiGjkIcl0_ZvVdH4GKCYL6OHZDTM&index=5&">2 ans avec POMM - Vidéo au PHPTour de Nantes 2017 avec Grégoire Hubert</a></li>
-        <li><a target="_blank" href="https://www.youtube.com/watch?v=CH8AJEsVMmI&list=PL9zDdgiGjkIc_1wnKTdU68dmVZ77ayPwW&index=25">Mélanger NoSQL & SQL - Vidéo au PHPTour du luxembourg 2015 avec Grégoire Hubert</a></li>
+        <li><a target="_blank" href="https://www.youtube.com/watch?v=PoqzPoT8h9Y&amp;list=PL9zDdgiGjkIcl0_ZvVdH4GKCYL6OHZDTM&index=5&">2 ans avec POMM - Vidéo au PHPTour de Nantes 2017 avec Grégoire Hubert</a></li>
+        <li><a target="_blank" href="https://www.youtube.com/watch?v=CH8AJEsVMmI&amp;list=PL9zDdgiGjkIc_1wnKTdU68dmVZ77ayPwW&index=25">Mélanger NoSQL & SQL - Vidéo au PHPTour du luxembourg 2015 avec Grégoire Hubert</a></li>
         <li><a target="_blank" href="http://www.pomm-project.org/">Site internet du projet Pomm</a></li>
         <li><a target="_blank" href="https://github.com/pomm-project">Github Pomm</a></li>
         <li><a target="_blank" href="http:https://docs.postgresql.fr/">Doc PostgreSQL</a></li>
