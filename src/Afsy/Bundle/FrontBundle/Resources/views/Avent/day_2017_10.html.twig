@@ -56,7 +56,7 @@
                 <li><a href="#pour-commencer">Pour commencer</a>
                     <ol>
                         <li><a href="#tests">Les tests bien sûr</a></li>
-                        <li><a href="#cloc"> Counting Lines Of Code</a></li>
+                        <li><a href="#cloc">Compter les lignes de code</a></li>
                         <li><a href="#afficher-le-graphe-git">Afficher le graphe Git</a></li>
                         <li><a href="#qui-a-code">Savoir qui a contribué au code</a></li>
                         <li><a href="#connaitre-les-fichiers">Connaitre les fichiers les plus commités / les plus sensibles</a></li>
@@ -143,9 +143,9 @@
         Comprennez les tests, et vous comprendrez comment fonctionne le projet.
         Et si il n'y a pas de tests, vous savez ce qu'il vous reste à faire...
     </p>
-    <h4 id="cloc">Counting Lines Of Code</h4>
+    <h4 id="cloc">Compter les lignes de code</h4>
     <p>
-        <a href="https://github.com/AlDanial/cloc" target="_blank">cloc</a> est un utilitaire qui permet d'obtenir rapidement
+        L'utilitaire <a href="https://github.com/AlDanial/cloc" target="_blank">cloc</a> permet d'obtenir rapidement
         une vision de la taille du code source par type de fichiers et du rapport code / commentaires.
     </p>
     <pre><code class="language-bash">$ cd /path/to/project
@@ -335,12 +335,12 @@ $ docker run --rm -u $UID -v $PWD:/app eko3alpha/docker-phpqa --report \
     <h3>Les actions à faire avant toute chose</h3>
     <p>
         Il s'agit des travaux que vous devez mener avant de produire une ligne
-        de code supplémentaire. Parmis ces actions, je pense nottament aux choses
+        de code supplémentaire. Parmi ces actions, je pense notamment aux choses
         suivantes :
         <ul>
-            <li>Mettre à jour des composants présentants des failles de sécurité avérées.</li>
+            <li>Mettre à jour des composants présentant des failles de sécurité avérées.</li>
             <li>Modifier du code exposant des failles de sécurité (le petit SQL natif caché au fond d'un dossier et sans échappement).</li>
-            <li>Harmoniser le cod
+            <li>Harmoniser le code.</li>
             <li>Faire tout ce qu'il faut pour que la structuration des données soit bonne.</li>
             <li>Vérifier que la documentation permettant d'installer le projet est <u>complète</u>.</li>
             <li>Mettre en place ou compléter les outils de suivi de la qualité du projet (allant du hook git à une CI complète).</li>
