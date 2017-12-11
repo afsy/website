@@ -12,7 +12,7 @@
     </style>
     <h1 id="serverless-php-et-symfony">Serverless, PHP et Symfony</h1>
 
-    <p>Depuis une dizaine d’années, le monde du déploiement et de l’hébergement d’applications web change à une vitesse phénoménale. L’arrivée d’AWS et de leurs VMs en 2 clics, puis l’arrivée de PaaS comme Heroku, puis l’arrivée des containers. Dans le viseur aujourd’hui, ce sont les FaaS (Functions as a Service) ou "serverless”. </p>
+    <p>Depuis une dizaine d’années, le monde du déploiement et de l’hébergement d’applications web change à une vitesse phénoménale. L’arrivée de AWS et de leurs VMs en 2 clics, puis l’arrivée de PaaS comme Heroku (d'ailleurs, allez voir <a href="https://afsy.fr/avent/2017/03-deployer-un-projet-symfony-flex-sur-heroku">l'article d'Alex sur Symfony & Heroku</a> si vous ne l'avez pas encore lu!), puis l’arrivée des containers. Dans le viseur aujourd’hui, ce sont les FaaS (Functions as a Service) ou "serverless”. </p>
 
     <p>Aujourd’hui, nous allons voir en quoi ces nouvelles offres "serverless” ont un intérêt pour nous, utilisateurs et créateurs d’applications web. Nous allons également voir comment utiliser ces offres pour votre application Symfony.</p>
 
@@ -25,10 +25,10 @@
     <p>C’est tout simplement un PaaS donc? Ou bien un hébergement mutualisé à l’ancienne? Eh bien… non plus. On peut résumer les "FaaS” par les points suivants:</p>
 
     <ol>
-        <li><p><strong>Pay-as-you <em>really</em> go</strong>. Toutes les autres alternatives, <strong><em>a</em></strong> ma conaissance, facture un prix de base par mois, qui inclus une certaine quantité de trafic et/ou ressources utilisable. Pour ces offres-là, vous ne payez qu’au nombre d’exécutions.  <br>
+        <li><p><strong>Pay-as-you <em>really</em> go</strong>. Toutes les autres alternatives, à ma conaissance, facture un prix de base par mois, qui inclus une certaine quantité de trafic et/ou ressources utilisable. Pour ces offres-là, vous ne payez qu’au nombre d’exécutions.  <br>
                 C’est-à-dire: 0 requêtes = 0 €.</p></li>
         <li><p><strong>Stateless</strong>. Chaque exécution de notre fonction est indépendante. Typiquement, on ne va pas pouvoir écrire sur le disque dur pour la prochaine requête. Il faut aussi imaginer que notre fonction va être exécutée quelque part, mais nous n’avons aucun contrôle sur l’endroit.</p></li>
-        <li><p><strong>Scalable</strong>. Il n’y a plus de serveurs (à votre connaissance). Ces <strong><em>function_**</em></strong> <strong>sont des processus stateless exécutés pour quelques millisecondes voir secondes. Ces contraintes leur permettent d’être exécutées sur une quantité très importante de machine, **_a</strong> parallèle, et donc de répondre à des pics de demande extrêmement importants.</p></li>
+        <li><p><strong>Scalable</strong>. Il n’y a plus de serveurs (à votre connaissance). Ces fonctions sont des processus stateless exécutés pour quelques millisecondes voir secondes. Ces contraintes leur permettent d’être exécutées sur une quantité très importante de machines, en parallèle, et donc de répondre à des pics de demande extrêmement importants.</p></li>
     </ol>
 
     <p>Cela nous donne une solution qui ne coute rien lorsque non utilisée, mais qui permet de "scaler” (ou de répondre à de gros pics de trafic) en quelques secondes. Un bon exemple pour prouver l’intérêt de telles infrastructures est <a href="http://www.bbc.co.uk/blogs/internet/entries/683c2e2a-c1ee-490b-9a97-23214505aba4">la BBC</a>: ils utilisent AWS Lamba pour faire du rendu de frames vidéos en temps réel. Lorsque aucun rendu n’est à effectuer, cela ne leur coute rien, mais ils peuvent absorber une grande quantité d’exécution, sans ne rien changer à leur infrastructure.</p>
@@ -41,7 +41,7 @@
 
     <ol>
         <li><p><a href="https://openwhisk.apache.org">OpenWhisk</a>, un projet de la fondation Apache. Il est important de noter que OpenWhisk est disponible en version "managée” par IBM. Ce sont les <a href="https://console.bluemix.net/openwhisk/">IBM Cloud Functions</a>.</p></li>
-        <li><p><a href="https://github.com/openfaas/faas">OpenFaaS</a> et <a href="https://github.com/fission/fission">Fission</a>, sont tous les deux <strong><em>basés</em></strong> sur l’utilisation de containers Docker. Il vous "suffit” d’un <a href="https://kubernetes.io/">cluster Kubernetes</a> pour faire tourner ces deux plateformes. </p></li>
+        <li><p><a href="https://github.com/openfaas/faas">OpenFaaS</a> et <a href="https://github.com/fission/fission">Fission</a>, sont tous les deux basés sur l’utilisation de containers Docker. Il vous "suffit” d’un <a href="https://kubernetes.io/">cluster Kubernetes</a> pour faire tourner ces deux plateformes. </p></li>
     </ol>
 
 
@@ -59,55 +59,33 @@
     <p>Nous allons créer et déployer notre application Symfony 4, dans une fonction OpenWhisk. Nous utilisons cette plateforme pour 3 raisons: c’est une plateforme de FaaS open-source, elle supporte nativement PHP et elle dispose d’une version "managée” sur le Cloud d’IBM. Je vous encourage grandement à essayer par vous même avec IBM Cloud Functions, c’est gratuit les premiers 400,000 GB-seconds (c’est bien plus qu’il vous faut pour votre "side project” !).</p>
 
     <ol>
-        <li>Configurer <code class="language-none">wsk</code>, le client OpenWhisk</li>
+        <li>
+            <strong>Configurer <code class="language-none">wsk</code>, le client OpenWhisk</strong>
+            <p>Si vous suivez mon conseil, créez votre compte IBM Cloud et suivez <a href="https://console.bluemix.net/openwhisk/learn/cli">la documentation pour configurer "wsk”</a>. Sinon, configurez "wsk” par vous meme :)</p>
+        </li>
+        <li>
+            <strong>Creer votre application Symfony</strong>
+            <p>Vous avez probablement lu <a href="https://afsy.fr/avent/2017/02-la-nouvelle-configuration-par-defaut-de-symfony4">le post de Nicolas</a>, et savez donc que l’on démarre une application Symfony 4 avec <code class="language-none">composer</code>:</p>
+            <pre><code class="language-none">$ composer create-project symfony/skeleton my-app &amp;&amp; cd my-app</code></pre>
+        </li>
+        <li>
+            <strong>Installer le "bridge” OpenWhisk</strong>
+            <pre><code class="language-none">$ composer req sroze/openwhisk-bundle</code></pre>
+        </li>
+        <li>
+            <strong>Préparer l’archive de votre application</strong>
+            <pre><code class="language-none">$ zip -X -r ../my-app.zip * .env*</code></pre>
+        </li>
+        <li>
+            <strong>Créer ou mettre à jour votre fonction</strong>
+            <pre><code class="language-none">$ wsk action update skeleton-symfony --kind php:7.1 skeleton-symfony.zip --web true</code></pre>
+        </li>
+        <li>
+            <strong>Recuperer l’URL de la fonction</strong>
+            <pre><code class="language-none">$ wsk action get skeleton-symfony --url&lt;/td&gt;</code></pre>
+            <p>Ouvrez la fonction et vous devriez avoir l’application !</p>
+        </li>
     </ol>
-
-    <p>Si vous suivez mon conseil, créez votre compte IBM Cloud et suivez <a href="https://console.bluemix.net/openwhisk/learn/cli">la documentation pour configurer "wsk”</a>. Sinon, configurez "wsk” par vous meme :)</p>
-
-    <ol>
-        <li>Creer votre application Symfony</li>
-    </ol>
-
-    <p>Vous avez probablement lu <a href="https://afsy.fr/avent/2017/02-la-nouvelle-configuration-par-defaut-de-symfony4">le post de Nicolas</a>, et savez donc que l’on démarre une application Symfony 4 avec <code class="language-none">composer</code>:</p>
-
-
-
-    <pre><code class="language-none">$ composer create-project symfony/skeleton my-app &amp;&amp; cd my-app</code></pre>
-
-    <ol>
-        <li>Installer le "bridge” OpenWhisk</li>
-    </ol>
-
-
-
-    <pre><code class="language-none">$ composer req sroze/openwhisk-bundle</code></pre>
-
-    <ol>
-        <li>Préparer l’archive de votre application</li>
-    </ol>
-
-
-
-    <pre><code class="language-none">$ zip -X -r ../my-app.zip * .env*</code></pre>
-
-    <ol>
-        <li>Créer ou mettre à jour votre fonction</li>
-    </ol>
-
-
-
-    <pre><code class="language-none">$ wsk action update skeleton-symfony --kind php:7.1 skeleton-symfony.zip --web true</code></pre>
-
-    <ol>
-        <li>Recuperer l’URL de la fonction</li>
-    </ol>
-
-
-
-    <pre><code class="language-none">$ wsk action get skeleton-symfony --url&lt;/td&gt;</code></pre>
-
-    <p>Ouvrez la fonction et vous devriez avoir l’application !</p>
-
 
 
     <h2 id="que-cest-il-passé">Que s’est-il passé ?</h2>
