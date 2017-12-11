@@ -1,0 +1,158 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 12 - Serverless, PHP et Symfony" %}
+
+{% block article_content %}
+    <style>
+        em {
+            font-family: sans-serif;
+        }
+    </style>
+    <h1 id="serverless-php-et-symfony">Serverless, PHP et Symfony</h1>
+
+    <p>Depuis une dizaine d’années, le monde du déploiement et de l’hébergement d’applications web change à une vitesse phénoménale. L’arrivée de AWS et de leurs VMs en 2 clics, puis l’arrivée de PaaS comme Heroku (d'ailleurs, allez voir <a href="https://afsy.fr/avent/2017/03-deployer-un-projet-symfony-flex-sur-heroku">l'article d'Alex sur Symfony & Heroku</a> si vous ne l'avez pas encore lu!), puis l’arrivée des containers. Dans le viseur aujourd’hui, ce sont les FaaS (Functions as a Service) ou "serverless”. </p>
+
+    <p>Aujourd’hui, nous allons voir en quoi ces nouvelles offres "serverless” ont un intérêt pour nous, utilisateurs et créateurs d’applications web. Nous allons également voir comment utiliser ces offres pour votre application Symfony.</p>
+
+
+
+    <h2 id="quest-ce-que-serverless">Qu’est-ce que serverless</h2>
+
+    <p>D’après le nom, en francais "sans-serveur”, on peut comprendre l’idée: il n’y a pas de serveur à gérer. Cela veut dire pas de machine dédiée chez OVH, pas de EC2 chez AWS ou encore pas de dyno chez Heroku. </p>
+
+    <p>C’est tout simplement un PaaS donc? Ou bien un hébergement mutualisé à l’ancienne? Eh bien… non plus. On peut résumer les "FaaS” par les points suivants:</p>
+
+    <ol>
+        <li><p><strong>Pay-as-you <em>really</em> go</strong>. Toutes les autres alternatives, à ma conaissance, facture un prix de base par mois, qui inclus une certaine quantité de trafic et/ou ressources utilisable. Pour ces offres-là, vous ne payez qu’au nombre d’exécutions.  <br>
+                C’est-à-dire: 0 requêtes = 0 €.</p></li>
+        <li><p><strong>Stateless</strong>. Chaque exécution de notre fonction est indépendante. Typiquement, on ne va pas pouvoir écrire sur le disque dur pour la prochaine requête. Il faut aussi imaginer que notre fonction va être exécutée quelque part, mais nous n’avons aucun contrôle sur l’endroit.</p></li>
+        <li><p><strong>Scalable</strong>. Il n’y a plus de serveurs (à votre connaissance). Ces fonctions sont des processus stateless exécutés pour quelques millisecondes voir secondes. Ces contraintes leur permettent d’être exécutées sur une quantité très importante de machines, en parallèle, et donc de répondre à des pics de demande extrêmement importants.</p></li>
+    </ol>
+
+    <p>Cela nous donne une solution qui ne coute rien lorsque non utilisée, mais qui permet de "scaler” (ou de répondre à de gros pics de trafic) en quelques secondes. Un bon exemple pour prouver l’intérêt de telles infrastructures est <a href="http://www.bbc.co.uk/blogs/internet/entries/683c2e2a-c1ee-490b-9a97-23214505aba4">la BBC</a>: ils utilisent AWS Lamba pour faire du rendu de frames vidéos en temps réel. Lorsque aucun rendu n’est à effectuer, cela ne leur coute rien, mais ils peuvent absorber une grande quantité d’exécution, sans ne rien changer à leur infrastructure.</p>
+
+
+
+    <h2 id="qui-sont-les-principaux-acteurs-dans-ce-domaine">Qui sont les principaux acteurs dans ce domaine?</h2>
+
+    <p>Vous l’aurez sans doutes compris, Amazon Web Services a un FaaS nommé <a href="http://docs.aws.amazon.com/lambda/latest/dg/welcome.html">"AWS Lamba”</a>, Google Cloud a les <a href="https://cloud.google.com/functions/">"Google Cloud Functions”</a>, Azure… <a href="https://azure.microsoft.com/en-gb/services/functions/">"Functions”</a>. Ces trois offres sont complètes et extrêmement bien intégrées aux différentes plateformes, mais sont propriétaires. Puisque nous parlons de Symfony, il me semble important de souligner les alternatives open-sources, que sont:</p>
+
+    <ol>
+        <li><p><a href="https://openwhisk.apache.org">OpenWhisk</a>, un projet de la fondation Apache. Il est important de noter que OpenWhisk est disponible en version "managée” par IBM. Ce sont les <a href="https://console.bluemix.net/openwhisk/">IBM Cloud Functions</a>.</p></li>
+        <li><p><a href="https://github.com/openfaas/faas">OpenFaaS</a> et <a href="https://github.com/fission/fission">Fission</a>, sont tous les deux basés sur l’utilisation de containers Docker. Il vous "suffit” d’un <a href="https://kubernetes.io/">cluster Kubernetes</a> pour faire tourner ces deux plateformes. </p></li>
+    </ol>
+
+
+
+    <h2 id="php-dans-tout-ça">PHP dans tout ça?</h2>
+
+    <p>Mis à part pour les alternatives open-sources, PHP n’est pas vraiment l’ami des trois gros "clouds”. Node.js et Go sont les grands gagnants, PHP n’est même pas officiellement supporté par l’un d’entre eux. La seule façon de lancer du PHP dans ces clouds est en utilisant un "shim”. <a href="https://aws.amazon.com/blogs/compute/scripting-languages-for-aws-lambda-running-php-ruby-and-go/">On package le binaire de PHP dans la fonction, et on demande à un petit script Node de lancer le PHP</a> (je vous assure, c’est même dans leurs documentations officielles !). </p>
+
+    <p><em>Pourtant… PHP est fait pour ça ! PHP est fait pour lancer des scripts très courts. Alors que de l’autre côté de la barrière, Node et Go ont été créés pour les scripts longs. Je n’ai pas la réponse à "pourquoi” mais je trouve ça très étonnant.</em></p>
+
+
+
+    <h2 id="deployer-notre-application-symfony">Deployer notre application Symfony</h2>
+
+    <p>Nous allons créer et déployer notre application Symfony 4, dans une fonction OpenWhisk. Nous utilisons cette plateforme pour 3 raisons: c’est une plateforme de FaaS open-source, elle supporte nativement PHP et elle dispose d’une version "managée” sur le Cloud d’IBM. Je vous encourage grandement à essayer par vous même avec IBM Cloud Functions, c’est gratuit les premiers 400,000 GB-seconds (c’est bien plus qu’il vous faut pour votre "side project” !).</p>
+
+    <ol>
+        <li>
+            <strong>Configurer <code class="language-none">wsk</code>, le client OpenWhisk</strong>
+            <p>Si vous suivez mon conseil, créez votre compte IBM Cloud et suivez <a href="https://console.bluemix.net/openwhisk/learn/cli">la documentation pour configurer "wsk”</a>. Sinon, configurez "wsk” par vous meme :)</p>
+        </li>
+        <li>
+            <strong>Creer votre application Symfony</strong>
+            <p>Vous avez probablement lu <a href="https://afsy.fr/avent/2017/02-la-nouvelle-configuration-par-defaut-de-symfony4">le post de Nicolas</a>, et savez donc que l’on démarre une application Symfony 4 avec <code class="language-none">composer</code>:</p>
+            <pre><code class="language-none">$ composer create-project symfony/skeleton my-app &amp;&amp; cd my-app</code></pre>
+        </li>
+        <li>
+            <strong>Installer le "bridge” OpenWhisk</strong>
+            <pre><code class="language-none">$ composer req sroze/openwhisk-bundle</code></pre>
+        </li>
+        <li>
+            <strong>Préparer l’archive de votre application</strong>
+            <pre><code class="language-none">$ zip -X -r ../my-app.zip * .env*</code></pre>
+        </li>
+        <li>
+            <strong>Créer ou mettre à jour votre fonction</strong>
+            <pre><code class="language-none">$ wsk action update skeleton-symfony --kind php:7.1 skeleton-symfony.zip --web true</code></pre>
+        </li>
+        <li>
+            <strong>Recuperer l’URL de la fonction</strong>
+            <pre><code class="language-none">$ wsk action get skeleton-symfony --url&lt;/td&gt;</code></pre>
+            <p>Ouvrez la fonction et vous devriez avoir l’application !</p>
+        </li>
+    </ol>
+
+
+    <h2 id="que-cest-il-passé">Que s’est-il passé ?</h2>
+
+    <p>Ces quelques étapes très simples pour déployer votre application Symfony peuvent être troublantes. Nous allons détailler ce qu’il s’est passé.</p>
+
+    <ol>
+        <li><p>Vous avez configuré votre environnement local pour pouvoir parler au serveur OpenWhisk. Rien de magique la dedans.</p></li>
+        <li><p>Vous avez créé une application Symfony. C’est très simple, c’est le tout nouveau skeleton Symfony. Je vous recommande <a href="https://afsy.fr/avent/2017/02-la-nouvelle-configuration-par-defaut-de-symfony4">l’article de Nicolas pour en savoir plus sur Symfony 4</a>.</p></li>
+        <li><p>Vous avez installé le bridge OpenWhisk pour votre application Symfony. C’est <a href="https://github.com/sroze/openwhisk-bundle">un package</a> et avant tout <a href="https://github.com/symfony/recipes-contrib/tree/master/sroze/openwhisk-bundle/0.2">une recipe pour "flex”</a>, le nouveau système de gestion de configuration de Symfony. Cette "recette” a créé <a href="https://github.com/symfony/recipes-contrib/blob/master/sroze/openwhisk-bundle/0.2/index.php#L33">un nouveau front-controller</a> (remplacant votre <code class="language-none">public/index.php</code>) qui va être exécuté lorsque la fonction est exécutée dans "le cloud”. Ce front-controller va transformer la requête de type <a href="https://console.bluemix.net/docs/openwhisk/openwhisk_webactions.html">OpenWhisk Web Action</a> en object <a href="https://symfony.com/doc/3.3/components/http_foundation.html#request">HttpFoundation Request</a>, puis faire l’inverse pour la réponse.</p></li>
+        <li><p>Puisqu’une application Symfony est un ensemble de fichiers, nous devons utiliser une application de type "package”. Ce type d’application est tout simplement un fichier ZIP de votre dossier.</p></li>
+        <li><p>Vous avez créé la fonction dans OpenWhisk. Typiquement, cela a uploadé le fichier ZIP quelque part accessible par les containers lançant vos fichiers PHP. Vous avez également utilisé le flag <code class="language-none">--web</code>, qui précise a OpenWhisk de faire en sorte que cette fonction soit accessible "depuis le web”.</p></li>
+        <li><p>Une fois la fonction créée, il ne vous reste plus qu’a récuperer l’URL de la fonction pour l’exécuter.</p></li>
+    </ol>
+
+
+
+    <h2 id="serverless-le-framework">"serverless”, le framework</h2>
+
+    <p>En général, vous n’allez pas déployer une seule fonction mais plusieurs. Vous allez n’allez pas utiliser que HTTP comme déclencheur de fonction, mais aussi un système de queue, un événement dans une base de données, etc… </p>
+
+    <p>Gérer "manuellement” tous ces cas peut être beaucoup de boulot, très répétitif, et difficile a maintenir. C’est pour ça qu’existe <a href="https://serverless.com">"serverless”</a>, un framework écrit en Node, qui permet de simplifier la gestion de nos fonctions. Il permet aussi de faire une abstraction avec OpenWhisk, AWS Lamba et toutes ces plateformes.</p>
+
+    <p>Installez serverless et son plugin OpenWhisk, et créez le fichier <code class="language-none">serverless.yml</code> dans le dossier parent de l’application "my-app” que nous venons de créer plus tôt:</p>
+
+
+
+    <pre><code class="language-yaml">service: my-project
+
+provider:
+  name: openwhisk
+  runtime: php
+
+package:
+  individually: true
+
+functions:
+  first-app:
+    handler: my-app/index.main
+  2nd-app:
+    handler: 2nd-app/index.main
+
+plugins:
+  - serverless-openwhisk</code></pre>
+
+    <p>Déployez !</p>
+
+
+
+    <pre><code class="language-none">$ serverless deploy</code></pre>
+
+
+
+    <h2 id="conclusion">Conclusion</h2>
+
+    <p>J’espère que cet article vous a permis d’en savoir plus a propos de ces "functions as a service”. Il est clair que ce nouveau genre d’offre constitue un futur encore plus simple et moins coûteux pour expérimenter divers idées, tout en créant des architectures "scalable-native”. Les outils sont toujours relativement expérimentaux et rares, mais je n’ai aucun doute qu’ensemble nous pouvons améliorer les outils pour Symfony ! </p>
+
+    <p>Happy serverlessing 😁</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/samuel-roze.jpeg') }}" alt="Samuel Roze" />
+{% endblock %}
+
+{% block article_bio %}
+<h2><a href="{% block author_url %}https://twitter.com/samuelroze?lang=fr{% endblock %}" target="_blank">{% block article_author %}Samuel Roze{% endblock %}</a></h2>
+<p>
+    Samuel a créé et continue de maintenir ContinuousPipe, un outil de deployment pour les applications containerisées, basé sur Kubernetes. Mainteneur de ApiPlatform et contributeur à de nombreux projects open-source dont Symfony, il aide de multiples startups à prototyper et designer leur architectures technique pour Kamet Ventures, un incubateur londonnien.
+</p>
+{% endblock %}

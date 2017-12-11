@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AventController extends Controller
 {
-    protected $futureEnabled = true; // useful for dev
+    protected $futureEnabled = false; // useful for dev
     protected $enabledYears = array('2013', '2017');
 
     protected $slugs = array(
@@ -40,6 +40,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '12-serverless-php-et-symfony'                                   => 'AfsyFrontBundle:Avent:day_2017_12.html.twig',
             '11-non-a-la-doctrine-decouvrez-pomm-et-re-decouvrez-postgresql' => 'AfsyFrontBundle:Avent:day_2017_11.html.twig',
             '10-comment-mettre-les-mains-dans-un-projet-existant'            => 'AfsyFrontBundle:Avent:day_2017_10.html.twig',
             '09-utilisation-de-twig-en-phase-de-prototypage'                 => 'AfsyFrontBundle:Avent:day_2017_09.html.twig',
