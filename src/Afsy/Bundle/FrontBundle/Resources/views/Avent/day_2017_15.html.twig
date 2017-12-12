@@ -1,0 +1,507 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 15 - Comment ne pas (trop) exposer Symfony !" %}
+
+{% block article_content %}
+    <style type="text/css">
+        em {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <h1>Comment ne pas (trop) exposer Symfony !</h1>
+
+    <p>
+        Au fil des années, Symfony s'est largement imposé en France comme le cadre de
+        travail préféré de la plupart des développeurs PHP professionnels. L'image
+        négative du langage véhiculée par certains opposants à PHP s'efface de jour en
+        jour au profit d'un regard plus contemporain et professionnel du développement
+        Web avec PHP.
+    </p>
+
+    <p>
+        Le couple PHP / Symfony séduit aussi bien les grandes entreprises du CAC 40,
+        les PME, les startups comme les actuelles licornes et celles en devenir.
+        L'engouement est parfois si fort que certaines d'entre elles n'hésitent plus à
+        communiquer officiellement leur préférence pour Symfony à l'occasion, entre
+        autres, des conférences comme le Symfony Live ou le Forum PHP de l'<a href="https://afup.org/">AFUP</a>
+        pour partager leur travail et leur savoir-faire.
+    </p>
+
+    <p>
+        Malgré cela, le degré de criticité de certaines applications nécessite parfois de
+        divulguer le moins d'informations possibles à propos de la pile technique afin
+        d'empêcher les utilisateurs mal intentionnés de la détourner. Comme le dit le
+        célèbre proverbe : <em>vivons heureux, vivons cachés</em>.</p>
+
+    <p>
+        Par défaut, le framework Symfony ne dévoile que peu ou prou d'informations
+        sensibles concernant son usage. Pour autant, il existe quelques indices bien
+        pratiques pour soupçonner ou attester avec certitude de l'usage de Symfony. Cet
+        article dresse la liste la plus exhaustive possible de ces indices qui révèlent
+        l'usage de Symfony dans un site Web. Les conseils et contre-mesures présentés
+        dans les sections qui suivent vous aideront à mieux cacher l'implémentation de
+        Symfony.
+    </p>
+
+    <h2 id="le-deploiement">Le déploiement</h2>
+
+    <p>
+        Le déploiement et la configuration du serveur Web constituent la première étape
+        essentielle pour masquer l'usage de Symfony. Les développeurs expérimentés
+        savent que seuls les fichiers accessibles depuis un navigateur doivent être
+        exclusivement déployés sous le dossier configuré comme étant la racine Web du
+        nom de domaine. Ainsi, dans un projet Symfony traditionnel, c'est le dossier
+        <code>web/</code> (ou <code>public/</code> pour un projet Symfony 3.4 / 4.x avec Flex) qui joue ce
+        rôle.
+    </p>
+
+    <p>
+        Par conséquent, c'est lui et seulement lui qui doit être configuré pour être le
+        répertoire de la racine Web du domaine. Certaines plateformes d'hébergement
+        empêchent la modification de la configuration du répertoire Web racine et
+        forcent parfois un nom de dossier prédéfini (<code>htdocs</code>, <code>public</code>, <code>www</code>, etc.).
+        Dans ce cas, il suffit de renommer le dossier <code>web/</code> avec le nom correspondant
+        à celui sur la plateforme d'hébergement.
+    </p>
+
+    <p>
+        La <a href="https://github.com/symfony/symfony-standard/tree/3.4">Distribution Standard de Symfony</a> embarque par
+        défaut un fichier <code>.htaccess</code> à la racine du dossier <code>web/</code>. Si le serveur Web
+        de production est basé sur Apache, il est alors conseillé de copier cette
+        configuration au niveau de l'hôte virtuel Apache. À l'inverse, si la
+        technologie est différente (nginx par exemple), alors le fichier <code>.htaccess</code>
+        devient inutile et doit être retiré.
+    </p>
+
+    <h2 id="les-fichiers-publics">Les fichiers publics</h2>
+
+    <p>
+        Pour valider la présence de Symfony sur le Web, la technique la plus simple
+        consiste à vérifier l'existence des contrôleurs frontaux <code>app.php</code> et
+        <code>app_dev.php</code> en essayant de les exécuter par les URLs. Dans l'idéal,
+        l'application doit répondre avec une réponse de type <code>404</code> lorsque ces fichiers
+        sont demandés explicitement au serveur. Pour y parvenir, il convient simplement
+        de renommer le fichier <code>web/app.php</code> en <code>web/index.php</code>.
+    </p>
+
+    <p>
+        Les développeurs Symfony expérimentés savent qu'il ne faut en aucun cas
+        déployer le fichier <code>web/app_dev.php</code> sur un serveur de production.
+        Bien que ce fichier contienne une pseudo protection empêchant son exécution
+        via une adresse IP non locale ou clairement identifiée, il n'en demeure pas
+        moins que sa simple présence sur le serveur de production confirme la thèse
+        de l'existence de Symfony. Cette thèse est d'autant plus vérifiée si l'exécution
+        de ce contrôleur frontal donne à l'utilisateur un accès au mode « débogage » de
+        Symfony ou bien, à défaut, lui retourne une réponse HTTP dont le corps
+        contient la chaîne suivante :
+    </p>
+
+    <pre><code>You are not allowed to access this file.</code></pre>
+
+    <p>
+        Une simple recherche Google avec un opérateur <code>inurl:</code> ou <code>intext:</code>
+        donne des résultats malheureusement positifs. De nombreux sites n'ayant pas été déployés
+        correctement offrent des accès complets aux espaces de débogage de Symfony.
+    </p>
+
+    <p>
+        Au même titre que le fichier <code>web/app_dev.php</code>, il convient de s'assurer que le
+        fichier <code>web/config.php</code> n'a pas été lui aussi déployé sur le serveur. Ce fichier
+        audite la configuration de PHP et du serveur Web, et met en garde les
+        développeurs si celle-ci ne convient pas. Ce fichier doit donc n'être déployé
+        qu'une seule fois afin de tester la configuration du serveur puis être retiré
+        aussitôt lorsqu'elle-ci est validée.
+    </p>
+
+    <p>
+        Ce n'est pas tout, il subsiste encore deux fichiers capables de trahir l'usage
+        de Symfony : <code>favicon.ico</code> et <code>apple-touch-icon.png</code>.
+        Il est conseillé de les supprimer s'ils ne sont pas remplacés par ceux de
+        l'application. Dans ce cas, il ne faut pas oublier de retirer la balise
+        de définition du favicon dans le gabarit <code>base.html.twig</code>.
+    </p>
+
+    <h2 id="les-urls-par-defaut">Les <abbr title="Uniform Resource Locator" lang="en">URL</abbr>s par défaut</h2>
+
+    <p>
+        Les <abbr title="Uniform Resource Locator" lang="en">URL</abbr>s par défaut
+        constituent un autre point délicat à vérifier au moment de  déployer une
+        application Symfony. L'environnement de développement d'une Distribution
+        Standard de Symfony enregistre un certain nombre d'URLs par défaut en
+        important les fichiers de configuration des routes des bundles <code>TwigBundle</code>
+        et <code>WebProfilerBundle</code>.
+    </p>
+
+    <pre><code>$ ./bin/console debug:router
+ -------------------------- -------- -------- ------ -----------------------------------
+  Name                       Method   Scheme   Host   Path
+ -------------------------- -------- -------- ------ -----------------------------------
+  _wdt                       ANY      ANY      ANY    /_wdt/{token}
+  _profiler_home             ANY      ANY      ANY    /_profiler/
+  _profiler_search           ANY      ANY      ANY    /_profiler/search
+  _profiler_search_bar       ANY      ANY      ANY    /_profiler/search_bar
+  _profiler_phpinfo          ANY      ANY      ANY    /_profiler/phpinfo
+  _profiler_search_results   ANY      ANY      ANY    /_profiler/{token}/search/results
+  _profiler_open_file        ANY      ANY      ANY    /_profiler/open
+  _profiler                  ANY      ANY      ANY    /_profiler/{token}
+  _profiler_router           ANY      ANY      ANY    /_profiler/{token}/router
+  _profiler_exception        ANY      ANY      ANY    /_profiler/{token}/exception
+  _profiler_exception_css    ANY      ANY      ANY    /_profiler/{token}/exception.css
+  _twig_error_test           ANY      ANY      ANY    /_error/{code}.{_format}
+  homepage                   ANY      ANY      ANY    /
+ -------------------------- -------- -------- ------ -----------------------------------
+</code></pre>
+
+    <p>
+        Comme ces routes sont importées par le fichier <code>app/config/routing_dev.yml</code>,
+        elles ne sont heureusement pas disponibles en production. Sauf si les
+        développeurs ont fait l'erreur de déployer le contrôleur frontal <code>web/app_dev.php</code>
+        ou bien d'importer tout simplement ces routes quel que soit l'environnement.</p>
+
+    <p>
+        Deux URLs par défaut supplémentaires peuvent trahir l'utilisation de Symfony. Il
+        s'agit des chemins <code>/bundles</code> et <code>/_fragment</code>. Le premier correspond au dossier
+        <code>web/bundles/</code> dans lequel sont déployés par défaut les médias publics (images,
+        feuilles de styles, JavaScript, etc.) des bundles installés grâce à la commande
+        <code>assets:install</code>. Il convient de déployer ces médias dans un répertoire différent
+        au moyen de liens symboliques par exemple ou par copie brute des fichiers des
+        bundles.
+    </p>
+
+    <p>
+        L'autre chemin par défaut, <code>/_fragment</code>, correspond au mécanisme de fragments
+        de Symfony. C'est lui qui gère la génération de fragments de page Web lorsque
+        l'application réalise des sous-requêtes, ou expose des <abbr title="Edge Side Includes" lang="en">ESI</abbr>
+        et <abbr title="HTML Includes" lang="en">H-Includes</abbr>. Pour ces derniers,
+        les URLs sont publiques. Il convient de modifier le chemin par défaut par
+        un autre personnalisé dans le fichier <code>app/config/config.yml</code>.
+    </p>
+
+    <pre><code class="yaml language-yaml"># app/config/config.yml
+framework:
+    fragments:
+            enabled: true
+            path: /blocks
+</code></pre>
+
+    <p>
+        La section suivante s'intéresse aux pages d'erreur par défaut.
+    </p>
+
+    <h2 id="les-pages-erreurs">Les pages d'erreur</h2>
+
+    <p>
+        Les pages d'erreur par défaut sont un autre point critique auquel une attention
+        toute particulière doit être portée. En effet, Symfony fournit des thèmes de
+        pages d'erreur très basiques lorsqu'il s'agit de rendre une page 403, 404, 500,
+        etc.
+    </p>
+
+    <pre><code class="html language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta charset="UTF-8" /&gt;
+        &lt;title&gt;An Error Occurred: Not Found&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Oops! An Error Occurred&lt;/h1&gt;
+        &lt;h2&gt;The server returned a "404 Not Found".&lt;/h2&gt;
+
+        &lt;div&gt;
+            Something is broken. Please let us know what you were doing when this error occurred.
+            We will fix it as soon as possible. Sorry for any inconvenience caused.
+        &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+    <p>
+        Une manière simple et efficace pour détecter si un site est construit avec
+        Symfony consiste à demander une page qui n'existe pas. Si la réponse est
+        similaire à celle ci-dessus, alors bingo !</p>
+
+    <p>
+        Il est donc particulièrement important d'ajouter à sa liste de contrôle de mise
+        en production que les gabarits de pages d'erreur ont bien été tous redéfinis et
+        personnalisés. Pour ce faire, il s'agit de créer les gabarits suivants au niveau
+        du dossier de l'application :
+    </p>
+
+    <ul>
+        <li><code>app/Resources/TwigBundle/views/Exception/error.html.twig</code></li>
+        <li><code>app/Resources/TwigBundle/views/Exception/error403.html.twig</code></li>
+        <li><code>app/Resources/TwigBundle/views/Exception/error404.html.twig</code></li>
+        <li><code>app/Resources/TwigBundle/views/Exception/error500.html.twig</code></li>
+        <li>etc.</li>
+    </ul>
+
+    <p>
+        Attention aussi aux variations de ces pages d'erreurs suivant le format de
+        sortie négocié dans la requête. Si l'application a été configurée pour exposer
+        des ressources dans d'autres formats (<abbr title="JavaScript Object Notation" lang="en">JSON</abbr>,
+        Atom, <abbr title="eXtended Markup Language" lang="en">XML</abbr>,
+        <abbr title="Resource Description Framework" lang="en">RDF</abbr>, etc.) au moyen de la
+        variable spéciale <code>_format</code>, il ne faudra pas oublier de surcharger les vues
+        correspondantes d'erreur. À minima :
+    </p>
+
+    <ul>
+        <li><code>app/Resources/TwigBundle/views/Exception/error.json.twig</code></li>
+        <li><code>app/Resources/TwigBundle/views/Exception/error.xml.twig</code></li>
+        <li><code>app/Resources/TwigBundle/views/Exception/error.atom.twig</code></li>
+        <li>etc.</li>
+    </ul>
+
+    <p>
+        La documentation officielle de Symfony propose
+        <a href="https://symfony.com/doc/current/controller/error_pages.html">un tutoriel complet</a>
+        qui explique comment redéfinir et personnaliser chaque page d'erreur par défaut.
+    </p>
+
+    <h2 id="les-formulaires">Les formulaires</h2>
+
+    <p>
+        Les formulaires offrent eux aussi des indices utiles à la détection de l'usage
+        de Symfony. Pour commencer, le mode de rendu des formulaires Symfony peut
+        s'avérer très utile pour révéler certains indices.
+    </p>
+
+    <p>
+        En effet, les formulaires Symfony dont le rendu est basé sur l'un des thèmes
+        prédéfinis sont assez facilement reconnaissables. Il suffit pour cela de repérer
+        certaines répétitions de patrons de balisage HTML (n&oelig;uds, ordre des attributs,
+        formatage, choix des noms de classes CSS, etc.). Des patrons qui se répètent
+        indiquent que la génération du code HTML a sans doute été automatisée. Dans une
+        application Symfony standard, les thèmes par défaut de rendu de formulaires sont
+        situés dans le dossier
+        <code>vendor/symfony/symfony/src/Symfony/Bridge/Twig/Resources/views/Form/</code>.
+    </p>
+
+    <p>
+        Certains blocs de balisage HTML sont plus facilement identifiables que d'autres.
+        C'est par exemple le cas avec un élément de formulaire conçu à partir d'une
+        définition <code>RepeatedType</code>. Avec une configuration par défaut, les deux champs
+        générés auront un nommage similaire à celui-ci dessous :
+    </p>
+
+    <pre><code class="html language-html">&lt;input type="email" name="foo[bar][first]"/&gt;
+&lt;input type="email" name="foo[bar][second]"/&gt;
+</code></pre>
+
+    <p>
+        Les deux clés <code>first</code> et <code>second</code> sont les noms par
+        défaut attribués à chacun  des champs générés. C'est un bon indice pour
+        détecter si le site utilise le composant de formulaire de Symfony.
+    </p>
+
+    <p>
+        Bien entendu, le balisage HTML ne permet pas toujours d'affirmer avec certitude
+        que l'application est développée avec Symfony mais cela reste un outil pratique.
+        Il existe en réalité deux outils supplémentaires à disposition pour augmenter le
+        degré de certitude : le jeton de protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>
+        et les messages d'erreur de validation.
+    </p>
+
+    <p>
+        Le jeton <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> est
+        par défaut automatiquement ajouté à chaque formulaire Symfony
+        généré. Sa valeur étant calculée à partir de l'identifiant de session du client,
+        il garantit que le formulaire est bien soumis par l'utilisateur qui en a fait la
+        demande. Dans un formulaire Symfony, il prend la forme d'un champ caché dont le
+        nom est par défaut <code>_token</code>. Ce nommage est propre à Symfony et révèle donc avec
+        une quasi certitude que l'application est développée sur la base de ce framework.
+        Pour le changer, c'est très simple. La première approche consiste à le faire
+        unitairement dans chaque formulaire grâce au système d'options :
+    </p>
+
+    <pre><code class="php language-php">// ...
+class ContactType extends AbstractType
+{
+    // ...
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver-&gt;setDefault('csrf_field_name', 'signature');
+    }
+}
+</code></pre>
+
+    <p>
+        Sur une application avec quelques formulaires, c'est gérable mais lorsqu'il y
+        en a beaucoup, il convient de surcharger cette valeur globalement dans la
+        configuration générale du <code>FrameworkBundle</code>.
+    </p>
+
+    <pre><code class="yaml language-yaml"># app/config/config.yml
+framework:
+    form:
+        csrf_protection:
+            field_name: signature
+</code></pre>
+
+    <p>
+        Tous les formulaires générés par le composant <em>Form</em> bénéficieront
+        à présent d'un champ caché nommé <code>signature</code> au lieu de
+        <code>_token</code> pour transporter le jeton unique de protection
+        <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>.
+    </p>
+
+    <p>
+        Enfin, pour accroître encore davantage le degré de certitude de détection de
+        Symfony, il convient de tester les messages d'erreur de validation du formulaire.
+        En effet, les contraintes de validation du composant <em lang="en">Validator</em>
+        de Symfony possèdent par défaut leurs propres messages d'erreur traduits
+        dans différentes langues. Lorsque les développeurs associent ces
+        contraintes aux propriétés de leurs objets PHP manipulés par les
+        formulaires, ils en oublient souvent de les personnaliser :
+    </p>
+
+    <pre><code class="php language-php">use Symfony\Component\Validator\Constraints as Assert;
+
+class ContactRequest
+{
+    /**
+     * @Assert\NotBlank
+     * @Assert\Length(min=5, max=60)
+     */
+    public $subject;
+}
+</code></pre>
+
+    <p>
+        En soumettant un formulaire dont les valeurs ont été volontairement laissées
+        vides ou invalides génèrera au niveau du formulaire des messages d'erreur par
+        défaut issus des fichiers de traduction de Symfony. En les comparant, il devient
+        très facile de détecter avec certitude que l'application utilise Symfony. Ces
+        messages d'erreur peuvent être redéfinis localement au niveau de l'usage des
+        contraintes comme l'illustre le listing ci-après :
+    </p>
+
+    <pre><code class="php language-php">use Symfony\Component\Validator\Constraints as Assert;
+
+class ContactRequest
+{
+    /**
+     * @Assert\NotBlank(message="Veuillez spécifier un sujet à votre demande.")
+     * @Assert\Length(
+     *   min=5,
+     *   max=60,
+     *   minMessage="Le sujet doit comporter au moins 5 caractères.",
+     *   maxMessage="Le sujet est limité à 60 caractères maximum."
+     * )
+     */
+    public $subject;
+}
+</code></pre>
+
+    <p>
+        Cette approche purement pragmatique est recommandée lorsque l'application
+        supporte une seule langue. Dans le cas des applications localisées, la solution
+        consiste à surcharger les fichiers de traduction de Symfony au niveau du dossier
+        de l'application.
+    </p>
+
+    <pre><code class="xml language-xml">&lt;!-- app/Resources/translations/validators.fr.xlf --&gt;
+&lt;?xml version="1.0"?&gt;
+&lt;xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"&gt;
+    &lt;file source-language="en" datatype="plaintext" original="file.ext"&gt;
+        &lt;body&gt;
+            &lt;trans-unit id="22"&gt;
+                &lt;source&gt;This value should not be blank.&lt;/source&gt;
+                &lt;target&gt;Ce champ est obligatoire.&lt;/target&gt;
+            &lt;/trans-unit&gt;
+        &lt;/body&gt;
+    &lt;/file&gt;
+&lt;/xliff&gt;
+</code></pre>
+
+    <p>
+        Le moment est venu de s'intéresser à la configuration de la sécurité.
+    </p>
+
+    <h2 id="la-securite">La sécurité</h2>
+
+    <p>
+        Le composant de sécurité qui offre les mécanismes d'authentification et
+        d'autorisation des utilisateurs expose lui aussi des indices qui révèlent
+        l'usage de Symfony. C'est en particulier le cas quand un site Web met à
+        disposition un formulaire de connexion.
+    </p>
+
+    <p>
+        Le premier indice consiste à identifier le chemin vers lequel les données du
+        formulaire seront transmises. Les développeurs qui apprécient faire du copier /
+        coller de la documentation laisseront sans doute l'URL d'exemple <code>/login_check</code>.
+    </p>
+
+    <p>
+        Il convient aussi d'analyser les noms des champs du formulaire qui transportent
+        l'identifiant et le mot de passe de connexion de l'utilisateur. Par défaut, le
+        pare-feu configuré dans le composant de sécurité s'attend à recevoir dans la
+        requête deux paramètres POST : <code>_username</code> et <code>_password</code>. À ces deux là
+        s'ajoutent aussi les paramètres <code>_remember_me</code>, <code>_target_path</code> et <code>_failure_path</code>
+        sous la forme de champs cachés optionnels. Par conséquent, cela dévoile encore
+        plus l'usage de Symfony par l'application. Il est donc recommandé de surcharger
+        ces valeurs par défaut au niveau de la configuration du bundle <code>SecurityBundle</code>
+        dans le fichier <code>app/config/security.yml</code>.
+    </p>
+
+    <pre><code class="yaml language-yaml"># app/config/security.yml
+security:
+    firewalls:
+        main:
+            form_login:
+                username_parameter: yolo_login
+                password_parameter: yolo_pwd
+                target_path_parameter: yolo_destination
+                failure_path_parameter: yolo_over
+            remember_me:
+                remember_me_parameter: yolo_me
+</code></pre>
+
+    <p>
+        Il existe sans doute d'autes paramètres ou indices exploitables pour
+        déterminer si un site Web utilise Symfony mais ceux-ci sont les plus
+        courants et les plus faciles à exploiter.
+    </p>
+
+    <h2 id="conclusion">Conclusion</h2>
+
+    <p>
+        Cet article a présenté la plupart des points sensibles qui exposent à tous
+        l'usage de Symfony et qu'il convient de surcharger. Cela permet ainsi de limiter
+        le nombre d'indices qui révèlent l'usage de Symfony dans une application et donc
+        de réduire le risque que des personnes mal intentionnées contournent
+        l'application pour l'exploiter à des fins différentes. Les points d'attention
+        identifiés dans cet article ne concernent que ceux de Symfony mais il se peut
+        qu'il faille aussi porter une attention particulière à certains bundles tiers
+        sujets à exposer des indices sensibles.
+    </p>
+
+    <p>
+        Bien que cette liste se veuille être la plus exhaustive possible, il existe
+        certainement d'autres indices révélateurs de l'usage de Symfony qui n'y figurent
+        pas. Je vous invite à les adresser dans les commentaires afin que je puisse les
+        ajouter à cette liste par la suite.
+    </p>
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/hhamon.png') }}" alt="Hugo Hamon" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url %}https://twitter.com/hhamon?lang=fr{% endblock %}" target="_blank">{% block article_author %}Hugo Hamon{% endblock %}</a></h2>
+    <p>
+        Après l'obtention d'une licence professionnelle en développement informatique
+        à l'Université de Savoie, Hugo Hamon a fait ses armes pendant neuf ans chez
+        SensioLabs, les créateurs de Symfony, où il a occupé de multiples rôles
+        (développeur Web, responsable de la formation, consultant technique). Il
+        rejoint ensuite la société Dayuse.com à partir du mois de janvier 2018. Hugo
+        est aussi un conférencier international, un contributeur actif au projet
+        Symfony et l'auteur (et coauteur) d'ouvrages PHP.
+    </p>
+{% endblock %}
