@@ -1,0 +1,212 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 14 - Une API GraphQL avec Symfony" %}
+
+{% block article_content %}
+    <style type="text/css">
+        em {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <h1>Une API GraphQL avec Symfony</h1>
+
+    <p>
+      GraphQL est une syntaxe pour requêter une API créée par Facebook et dont le standard a été ouvert en 2015. C’est avant tout une manière différente de concevoir une API; une architecture REST par exemple propose d’utiliser plusieurs endpoints qui standardisent la façon de recevoir des données. L’approche de GraphQL est de n’utiliser qu’un seul endpoint mais qui est capable de comprendre les données demandées et de les fournir de la façon souhaitée.
+    </p>
+
+    <p>
+      Ainsi, une requête GraphQL pour demander tous les articles d’un blog ainsi que le nom et l’avatar de toutes les personnes aimant chacun de ces articles peut ressembler à ça :
+    </p>
+    <pre><code>POST /graphql
+query {
+  posts {
+    title
+    likes {
+      name
+      avatar
+    }
+  }
+}
+</code></pre>
+<p>Et donnerait le résultat suivant :</p>
+<pre><code>
+{
+    "data": {
+         "posts": [
+           {
+                "title": "My first post",
+                "likes": [
+                    {
+                        "name": "Sacha",
+                        "avatar": "sacha.jpg"
+                    },
+                    {
+                        "name": "Mike",
+                        "avatar": "mike.jpg"
+                    }
+                ]
+            },
+            {
+                "title": "Another great post",
+                "likes": []
+            }
+        ]
+    }
+}
+</code></pre>
+<p>
+  Cet exemple illustre ce qui m’a séduit dans l’approche de GraphQL: la facilité avec laquelle on peut agréger des données de différentes sources, le tout au sein d’une même requête HTTP. Une architecture REST nous contraindrait à faire une requête HTTP supplémentaire par article, à implémenter un endpoint dédié ou encore à utiliser une option de type include pour récupérer ces données.
+</p>
+<p>
+  Je vous invite à parcourir le site <a href="http://graphql.org">graphql.org</a> pour vous faire votre propre avis ! La suite de l’article va présenter l’implémentation de la requête GraphQL vu plus haut.
+</p>
+<h2 id="l-implementation">L'implementation</h2>
+<p>
+  Créons notre projet Symfony 4 :
+</p>
+<pre><code>
+  composer create-project symfony/skeleton hello-graphql
+  composer config extra.symfony.allow-contrib true
+  composer require overblog/graphql-bundle # Le bundle que je vous recommande
+  composer require --dev overblog/graphiql-bundle # Ajoute une interface graphique
+</code></pre>
+
+<p>L'implémentation d'une API GraphQL se déroule en 2 étapes :</p>
+
+<h3>Etape 1: Définir les types qui correspondent aux données à exposer</h3>
+
+<p>
+  Notre requête précédente comportait un type User et un type Post, ces deux types représentent des objets dont nous allons lister chacun des champs.
+  Chaque champs doit être strictement typé en utilisant String, Int, ID, [] ou encore un autre type… L’utilisation d’un ! indique une valeur non null.
+</p>
+
+<p>
+  Le bundle nous permet de décrire nos types en utilisant le langage yaml.
+  Créez un nouveau fichier config/graphql/types/User.types.yaml :
+<pre><code class="yaml language-yaml">
+User:
+    type: object
+      config:
+          fields:
+              name:
+                  type: "String!"
+              avatar:
+                  type: "String"
+</code></pre>
+Ainsi qu'un nouveau fichier config/graphql/types/Post.types.yaml
+<pre><code class="yaml language-yaml">
+  Post:
+      type: object
+      config:
+          fields:
+              title:
+                  type: "String!"
+              likes:
+                  type: "[User!]!"
+</code></pre>
+</p>
+<p>
+  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolver</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant PropertyAccess, ainsi on a pas besoin d’expliquer comment résoudre des champs triviaux comme name, avatar, ou encore title.
+  On considèrera que ces champs peuvent être résolu en faisant appel à des getter sur nos entités.
+</p>
+
+<p>
+  En revanche on pourrait avoir besoin d’expliquer à GraphQL comment résoudre le champ <code>likes</code> qui récupère les utilisateurs ayant aimé un article de blog.
+  Pour cela on va utiliser l’ExpressionLanguage via la clé resolve et expliquer comment appeler notre resolver.
+  Modifions config/graphql/types/Post.types.yaml :
+  <pre><code class="yaml language-yaml">
+   # On ajoute la clé resolve
+  likes:
+      type: "[User!]!"
+      resolve: "@=resolver('postLikes', [value])"
+  </code></pre>
+  La signature pour appeler un resolver est <code>resolver(string $alias, array $args = [])</code>.
+  Ainsi <code>postLikes</code> est un alias que nous donnons à notre resolver qui recevra comme unique argument <code>value</code> qui est l’object Post.
+
+
+  Définissons alors le resolver qui correspond à l’alias <code>postLikes</code> :
+  <pre><code class="yaml language-yaml">
+services:
+  App/GraphQL/Resolver/PostResolver:
+    # Injectez les arguments nécessaires...
+    tags:
+      - { name: overblog_graphql.resolver, alias: "postLikes", method: "resolveLikes" }
+  </code></pre>
+  Enfin on implémente notre resolver qui est une pure fonction PHP avec le métier de notre application :
+  <pre><code class="php language-php">
+  class PostResolver
+{
+    // constructeur ...
+
+    public function resolveLikes(Post $post): Collection
+    {
+        return $this->userRepository->findUsersLikingPost($post);
+    }
+
+}
+</code></pre>
+</p>
+
+<h3>Etape 2: Définir le type Query qui corresponds aux champs à la racine d'une requête</h3>
+
+<p>
+  Le type Query est un type  dont les champs
+  Dans l’exemple précédent, il s’agit du champ <code>posts</code>.
+</p>
+
+<p>
+  Créez un nouveau fichier <code>config/graphql/types/Query.types.yaml</code> :
+  <pre><code class="yaml language-yaml">
+  Query:
+      type: object
+      config:
+          fields:
+              posts:
+                  type: "[Post]"
+                  resolve: "@=resolver('allPosts')"
+  </code></pre>
+  Il ne nous reste qu’à ajouter l’alias <code>allPost</code> à notre PostResolver et son implémentation :
+  <pre><code class="php language-php">
+// ...
+public function resolveAll(): Collection
+{
+    return $this->postRepository->findAll();
+}
+</code></pre>
+C’est tout pour l’implémentation !
+</p>
+
+<h2>Conclusion</h2>
+
+<p>Récapitulons l'exécution de la requête GraphQL :</p>
+
+<p>
+  L'exécution se fait de haut en bas. Ainsi le resolver <code>Query.posts</code> est exécuté en premier, puis pour chacun de ses résultats les résolveurs <code>Post.title</code> et <code>Post.likes</code> sont appelés. Enfin pour chacun des résultats de <code>Post.likes</code>, les resolveurs <code>User.name</code> et <code>User.avatar</code> sont appelés.
+</p>
+
+<p>
+Evidemment il vous reste beaucoup de choses à découvrir avant de pouvoir mettre votre API en production, comme les arguments qui permettent d’affiner vos requêtes, les mutations, la spécification Relay, les problématiques d’optimisation, cache et de sécurité…
+</p>
+
+<p>
+Malgré tout, bienvenue dans le monde merveilleux de GraphQL !
+</p>
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/spyl.jpg') }}" alt="Aurélien David" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url %}https://twitter.com/spyl94{% endblock %}" target="_blank">{% block article_author %}Aurélien David{% endblock %}</a></h2>
+    <p>
+        Après l'obtention d'un diplôme d'ingénieur en image et réalité virtuelle à l'Efrei,
+        Aurélien David a rejoint <a href="https://jolicode.com">JoliCode</a> où il accompagne la croissance de la startup <a href="http://cap-collectif.com">Cap Collectif</a> dont il est désormais le CTO.
+        Curieux, il aime expérimenter les BuzzWords du moment afin de créer le workflow de développement idéal, vous le trouverez dans les meetups parisiens dont il est régulièrement conférencier.
+        Créateur d'<a href="https://epicerie-radar.fr">Epicerie Radar</a>.
+    </p>
+{% endblock %}
