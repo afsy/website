@@ -40,6 +40,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '14-une-api-graphql-avec-symfony'                                => 'AfsyFrontBundle:Avent:day_2017_14.html.twig',
             '13-creer-une-application-cross-platform'                        => 'AfsyFrontBundle:Avent:day_2017_13.html.twig',
             '12-serverless-php-et-symfony'                                   => 'AfsyFrontBundle:Avent:day_2017_12.html.twig',
             '11-non-a-la-doctrine-decouvrez-pomm-et-re-decouvrez-postgresql' => 'AfsyFrontBundle:Avent:day_2017_11.html.twig',
