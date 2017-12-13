@@ -109,25 +109,24 @@ Ainsi qu'un nouveau fichier config/graphql/types/Post.types.yaml
 </code></pre>
 </p>
 <p>
-  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolver</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant PropertyAccess, ainsi on a pas besoin d’expliquer comment résoudre des champs triviaux comme name, avatar, ou encore title.
-  On considèrera que ces champs peuvent être résolu en faisant appel à des getter sur nos entités.
+  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant PropertyAccess, ainsi on a pas besoin d’expliquer comment résoudre des champs triviaux comme name, avatar, ou encore title.
+  On considèrera que ces champs peuvent être résolu en faisant appel à des getters sur nos entités.
 </p>
 
 <p>
-  En revanche on pourrait avoir besoin d’expliquer à GraphQL comment résoudre le champ <code>likes</code> qui récupère les utilisateurs ayant aimé un article de blog.
-  Pour cela on va utiliser l’ExpressionLanguage via la clé resolve et expliquer comment appeler notre resolver.
-  Modifions config/graphql/types/Post.types.yaml :
+  En revanche on va expliquer à GraphQL comment résoudre le champ <code>likes</code> qui récupère les utilisateurs ayant aimé un article de blog.
+  Pour cela on va utiliser l’<a href="https://symfony.com/doc/current/components/expression_language.html">ExpressionLanguage</a> via la clé <code>resolve</code> et expliquer comment appeler notre resolveur.
+  Modifions <code>config/graphql/types/Post.types.yaml</code> :
   <pre><code class="yaml language-yaml">
    # On ajoute la clé resolve
   likes:
       type: "[User!]!"
       resolve: "@=resolver('postLikes', [value])"
   </code></pre>
-  La signature pour appeler un resolver est <code>resolver(string $alias, array $args = [])</code>.
-  Ainsi <code>postLikes</code> est un alias que nous donnons à notre resolver qui recevra comme unique argument <code>value</code> qui est l’object Post.
+  La signature pour appeler un resolveur est <code>resolver(string $alias, array $args = [])</code>.
+  Ainsi <code>postLikes</code> est un alias que nous donnons à notre resolveur qui recevra comme unique argument <code>value</code> qui est l’object Post.
 
-
-  Définissons alors le resolver qui correspond à l’alias <code>postLikes</code> :
+  Définissons alors le resolveur qui correspond à l’alias <code>postLikes</code> :
   <pre><code class="yaml language-yaml">
 services:
   App/GraphQL/Resolver/PostResolver:
@@ -135,7 +134,7 @@ services:
     tags:
       - { name: overblog_graphql.resolver, alias: "postLikes", method: "resolveLikes" }
   </code></pre>
-  Enfin on implémente notre resolver qui est une pure fonction PHP avec le métier de notre application :
+  Enfin on implémente notre resolveur qui est une pure fonction PHP avec le métier de notre application :
   <pre><code class="php language-php">
   class PostResolver
 {
@@ -150,11 +149,11 @@ services:
 </code></pre>
 </p>
 
-<h3>Etape 2: Définir le type Query qui corresponds aux champs à la racine d'une requête</h3>
+<h3>Etape 2: Définir le type Query</h3>
 
 <p>
-  Le type Query est un type  dont les champs
-  Dans l’exemple précédent, il s’agit du champ <code>posts</code>.
+  Le type Query est un objet dont chaque champ peut être demandé à la racine d'une requête, c'est assez très proche d'un endpoint en architecture REST.
+  Dans notre cas, nous n'avons qu'un seul champ (<code>posts</code>) qui permet d'obtenir la liste de tous les articles.
 </p>
 
 <p>
@@ -165,7 +164,7 @@ services:
       config:
           fields:
               posts:
-                  type: "[Post]"
+                  type: "[Post!]!"
                   resolve: "@=resolver('allPosts')"
   </code></pre>
   Il ne nous reste qu’à ajouter l’alias <code>allPost</code> à notre PostResolver et son implémentation :
@@ -184,15 +183,15 @@ C’est tout pour l’implémentation !
 <p>Récapitulons l'exécution de la requête GraphQL :</p>
 
 <p>
-  L'exécution se fait de haut en bas. Ainsi le resolver <code>Query.posts</code> est exécuté en premier, puis pour chacun de ses résultats les résolveurs <code>Post.title</code> et <code>Post.likes</code> sont appelés. Enfin pour chacun des résultats de <code>Post.likes</code>, les resolveurs <code>User.name</code> et <code>User.avatar</code> sont appelés.
+  L'exécution se fait de haut en bas. Ainsi le resolveur <code>Query.posts</code> est exécuté en premier, puis pour chacun de ses résultats les résolveurs <code>Post.title</code> et <code>Post.likes</code> sont appelés. Enfin pour chacun des résultats de <code>Post.likes</code>, les resolveurs <code>User.name</code> et <code>User.avatar</code> sont appelés.
 </p>
 
 <p>
-Evidemment il vous reste beaucoup de choses à découvrir avant de pouvoir mettre votre API en production, comme les arguments qui permettent d’affiner vos requêtes, les mutations, la spécification Relay, les problématiques d’optimisation, cache et de sécurité…
+  Evidemment il vous reste beaucoup de choses à découvrir avant de pouvoir mettre votre API en production, comme les arguments qui permettent d’affiner vos requêtes, les mutations, la spécification Relay, les problématiques d’optimisation, cache et de sécurité…
 </p>
 
 <p>
-Malgré tout, bienvenue dans le monde merveilleux de GraphQL !
+  Malgré tout, bienvenue dans le monde merveilleux de GraphQL !
 </p>
 
 {% endblock %}
