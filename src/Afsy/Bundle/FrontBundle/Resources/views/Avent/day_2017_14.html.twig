@@ -14,13 +14,13 @@
     <h1>Une API GraphQL avec Symfony</h1>
 
     <p>
-      GraphQL est une syntaxe pour requêter une API créée par Facebook et dont le standard a été ouvert en 2015. C’est avant tout une manière différente de concevoir une API; une architecture REST par exemple propose d’utiliser plusieurs endpoints qui standardisent la façon de recevoir des données. L’approche de GraphQL est de n’utiliser qu’un seul endpoint mais qui est capable de comprendre les données demandées et de les fournir de la façon souhaitée.
+      Créée par Facebook, GraphQL est une syntaxe pour requêter une API. Son standard a été quant à lui ouvert en 2015. C’est avant tout une manière différente de concevoir une API; une architecture REST par exemple propose d’utiliser plusieurs endpoints qui standardisent la façon de recevoir des données. L’approche de GraphQL est de n’utiliser qu’un seul endpoint mais qui est capable de comprendre les données demandées et de les fournir de la façon souhaitée.
     </p>
 
     <p>
-      Ainsi, une requête GraphQL pour demander tous les articles d’un blog ainsi que le nom et l’avatar de toutes les personnes aimant chacun de ces articles peut ressembler à ça :
+      Ainsi, une requête GraphQL qui demandent tous les articles d'un blog, accompagnés des nom et avatar de toutes les personnes aimant ces articles, peut ressembler à cela :
     </p>
-    <pre><code>POST /graphql
+    <pre><code class="language-graphql">
 query {
   posts {
     title
@@ -32,7 +32,7 @@ query {
 }
 </code></pre>
 <p>Et donnerait le résultat suivant :</p>
-<pre><code>
+<pre><code class="language-json">>
 {
     "data": {
          "posts": [
@@ -58,10 +58,10 @@ query {
 }
 </code></pre>
 <p>
-  Cet exemple illustre ce qui m’a séduit dans l’approche de GraphQL : la facilité avec laquelle on peut agréger des données de différentes sources, le tout au sein d’une même requête HTTP. Une architecture REST nous contraindrait à faire une requête HTTP supplémentaire par article, à implémenter un endpoint dédié ou encore à utiliser une option de type include pour récupérer ces données.
+  Cet exemple illustre ce qui m’a séduit dans l’approche de GraphQL : la facilité avec laquelle on peut agréger des données de différentes sources, le tout au sein d’une même requête HTTP. Une architecture REST nous contraindrait à faire une requête HTTP supplémentaire par article, à implémenter un endpoint dédié ou encore à utiliser une option de type <em lang="en">include</em> pour récupérer ces données.
 </p>
 <p>
-  Je vous invite à parcourir le site <a href="http://graphql.org">graphql.org</a> pour vous faire votre propre avis ! La suite de l’article va présenter l’implémentation de la requête GraphQL vu plus haut.
+  Je vous invite à parcourir le site <a href="http://graphql.org">graphql.org</a> pour vous faire votre propre avis ! La suite de l’article va présenter l’implémentation de la requête GraphQL vue plus haut.
 </p>
 <h2 id="l-implementation">L'implementation</h2>
 <p>
@@ -76,15 +76,15 @@ query {
 
 <p>L'implémentation d'une API GraphQL se déroule en 2 étapes :</p>
 
-<h3>Etape 1 : Définir les types qui correspondent aux données à exposer</h3>
+<h3>Étape 1 : Définir les types qui correspondent aux données à exposer</h3>
 
 <p>
-  Notre requête précédente comportait un type User et un type Post, ces deux types représentent des objets dont nous allons lister chacun des champs.
+  Notre requête précédente comportait un type <code>User</code> et un type <code>Post</code>, ces deux types représentent des objets dont nous allons lister chacun des champs.
   Chaque champ doit être strictement typé en utilisant un type scalaire (<code>Int, Float, String, Boolean, ID</code>), un tableau ou un autre type… L’utilisation d’un <strong>!</strong> indique une valeur non null.
 </p>
 
 <p>
-  Le bundle nous permet de décrire nos types en utilisant le langage yaml.
+  Le bundle nous permet de décrire nos types en utilisant le langage <abbr title="Yet Another Markup Language" lang="en">YAML</code>.
   Créez un nouveau fichier <code>config/graphql/types/User.types.yaml</code> :
 <pre><code class="yaml language-yaml">
 User:
@@ -109,8 +109,8 @@ Ainsi qu'un nouveau fichier <code>config/graphql/types/Post.types.yaml</code> :
 </code></pre>
 </p>
 <p>
-  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant PropertyAccess, ainsi on a pas besoin d’expliquer comment résoudre des champs triviaux comme name, avatar, ou encore title.
-  On considérera que ces champs peuvent être résolu en faisant appel à des getters sur nos entités.
+  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant <em>PropertyAccess</em> afin que nous n'ayons pas besoin d’expliquer comment résoudre des champs triviaux des champs triviaux comme <code>name</code>, <code>avatar</code>, ou encore <code>title</title>.
+  On considérera que ces champs peuvent être résolus en faisant appel à des accesseurs sur nos entités.
 </p>
 
 <p>
@@ -124,7 +124,7 @@ Ainsi qu'un nouveau fichier <code>config/graphql/types/Post.types.yaml</code> :
       resolve: "@=resolver('postLikes', [value])"
   </code></pre>
   La signature pour appeler un resolveur est <code>resolver(string $alias, array $args = [])</code>.
-  Ainsi <code>postLikes</code> est un alias que nous donnons à notre resolveur qui recevra comme unique argument <code>value</code> qui est l’object Post.
+  Ainsi <code>postLikes</code> est un alias que nous donnons à notre resolveur qui recevra comme unique argument <code>value</code> qui est l’objet Post.
 
   Définissons alors le resolveur qui correspond à l’alias <code>postLikes</code> :
   <pre><code class="yaml language-yaml">
@@ -148,10 +148,10 @@ services:
 </code></pre>
 </p>
 
-<h3>Etape 2 : Définir le type Query</h3>
+<h3>Étape 2 : Définir le type Query</h3>
 
 <p>
-  Le type Query est un objet dont chaque champ peut être demandé à la racine d'une requête, c'est assez très proche d'un endpoint en architecture REST.
+  Le type <em lang="en">Query</em> est un objet dont chaque champ peut être demandé à la racine d'une requête, c'est assez proche d'un endpoint en architecture REST.
   Dans notre cas, nous n'avons qu'un seul champ (<code>posts</code>) qui permet d'obtenir la liste de tous les articles.
 </p>
 
@@ -166,7 +166,7 @@ services:
                   type: "[Post!]!"
                   resolve: "@=resolver('allPosts')"
   </code></pre>
-  Il ne nous reste qu’à ajouter l’alias <code>allPost</code> à notre PostResolver et son implémentation :
+  Il ne nous reste plus qu’à ajouter l’alias <code>allPost</code> à notre <code>PostResolver</code> et son implémentation :
   <pre><code class="php language-php">
 // ...
 public function resolveAll(): Collection
@@ -187,7 +187,7 @@ public function resolveAll(): Collection
 </p>
 
 <p>
-  Evidemment il vous reste beaucoup de choses à découvrir avant de pouvoir mettre votre API en production, comme les arguments qui permettent d’affiner vos requêtes, les mutations, la spécification Relay, les problématiques d’optimisation, cache et de sécurité…
+  Evidemment il vous reste beaucoup de choses à découvrir avant de pouvoir mettre votre API en production, comme les arguments qui permettent d’affiner vos requêtes, les mutations, la spécification <a href="http://facebook.github.io/relay/docs/en/graphql-relay-specification.html">Relay</a>, les problématiques d’optimisation, cache et de sécurité…
 </p>
 
 <p>
