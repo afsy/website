@@ -24,6 +24,12 @@
                 margin: 15px auto;
             }
         }
+
+        .server-image {
+            margin: 25px auto;
+            width: 90%;
+            max-width: 700px;
+        }
     </style>
 
     <h1 id="créer-une-application-cross-platform-avec-symfony-flex-webpack-encore-et-phonegap">
@@ -84,6 +90,10 @@
         par nginx.
     </p>
 
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/13/server.png') }}"
+         alt="Organisation du serveur"
+         class="server-image" />
+
     <p>
         Cette structuration a de nombreux avantages :
     </p>
@@ -126,22 +136,17 @@
     <pre><code class="language-bash"># Créer le projet
 composer create-project symfony/skeleton afsy &amp;&amp; cd afsy
 
-
 # Monolog et son bundle
 composer req logger
-
 
 # Doctrine, Doctrine Migrations et Doctrine Fixtures
 composer req orm migrations orm-fixtures
 
-
 # SensioFrameworkExtraBundle
 composer req annotations
 
-
 # MakerBundle, pour créer plus rapidement la structure de fichiers
 composer req maker --dev
-
 
 # PHPUnit et le bridge Symfony, pour les tests
 composer req phpunit --dev</code></pre>
