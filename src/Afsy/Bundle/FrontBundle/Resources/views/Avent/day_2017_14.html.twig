@@ -58,7 +58,7 @@ query {
 }
 </code></pre>
 <p>
-  Cet exemple illustre ce qui m’a séduit dans l’approche de GraphQL: la facilité avec laquelle on peut agréger des données de différentes sources, le tout au sein d’une même requête HTTP. Une architecture REST nous contraindrait à faire une requête HTTP supplémentaire par article, à implémenter un endpoint dédié ou encore à utiliser une option de type include pour récupérer ces données.
+  Cet exemple illustre ce qui m’a séduit dans l’approche de GraphQL : la facilité avec laquelle on peut agréger des données de différentes sources, le tout au sein d’une même requête HTTP. Une architecture REST nous contraindrait à faire une requête HTTP supplémentaire par article, à implémenter un endpoint dédié ou encore à utiliser une option de type include pour récupérer ces données.
 </p>
 <p>
   Je vous invite à parcourir le site <a href="http://graphql.org">graphql.org</a> pour vous faire votre propre avis ! La suite de l’article va présenter l’implémentation de la requête GraphQL vu plus haut.
@@ -76,7 +76,7 @@ query {
 
 <p>L'implémentation d'une API GraphQL se déroule en 2 étapes :</p>
 
-<h3>Etape 1: Définir les types qui correspondent aux données à exposer</h3>
+<h3>Etape 1 : Définir les types qui correspondent aux données à exposer</h3>
 
 <p>
   Notre requête précédente comportait un type User et un type Post, ces deux types représentent des objets dont nous allons lister chacun des champs.
@@ -144,12 +144,11 @@ services:
     {
         return $this->userRepository->findUsersLikingPost($post);
     }
-
 }
 </code></pre>
 </p>
 
-<h3>Etape 2: Définir le type Query</h3>
+<h3>Etape 2 : Définir le type Query</h3>
 
 <p>
   Le type Query est un objet dont chaque champ peut être demandé à la racine d'une requête, c'est assez très proche d'un endpoint en architecture REST.
