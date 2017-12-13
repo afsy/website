@@ -80,12 +80,12 @@ query {
 
 <p>
   Notre requête précédente comportait un type User et un type Post, ces deux types représentent des objets dont nous allons lister chacun des champs.
-  Chaque champs doit être strictement typé en utilisant String, Int, ID, [] ou encore un autre type… L’utilisation d’un ! indique une valeur non null.
+  Chaque champ doit être strictement typé en utilisant un type scalaire (<code>Int, Float, String, Boolean, ID</code>), un tableau ou un autre type… L’utilisation d’un <strong>!</strong> indique une valeur non null.
 </p>
 
 <p>
   Le bundle nous permet de décrire nos types en utilisant le langage yaml.
-  Créez un nouveau fichier config/graphql/types/User.types.yaml :
+  Créez un nouveau fichier <code>config/graphql/types/User.types.yaml</code> :
 <pre><code class="yaml language-yaml">
 User:
     type: object
@@ -96,7 +96,7 @@ User:
               avatar:
                   type: "String"
 </code></pre>
-Ainsi qu'un nouveau fichier config/graphql/types/Post.types.yaml
+Ainsi qu'un nouveau fichier <code>config/graphql/types/Post.types.yaml</code> :
 <pre><code class="yaml language-yaml">
   Post:
       type: object
@@ -110,7 +110,7 @@ Ainsi qu'un nouveau fichier config/graphql/types/Post.types.yaml
 </p>
 <p>
   Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant PropertyAccess, ainsi on a pas besoin d’expliquer comment résoudre des champs triviaux comme name, avatar, ou encore title.
-  On considèrera que ces champs peuvent être résolu en faisant appel à des getters sur nos entités.
+  On considérera que ces champs peuvent être résolu en faisant appel à des getters sur nos entités.
 </p>
 
 <p>
@@ -174,8 +174,9 @@ public function resolveAll(): Collection
     return $this->postRepository->findAll();
 }
 </code></pre>
-C’est tout pour l’implémentation !
 </p>
+
+<p>C’est tout pour l’implémentation !</p>
 
 <h2>Conclusion</h2>
 
