@@ -14,14 +14,15 @@
     <h1>Une API GraphQL avec Symfony</h1>
 
     <p>
-      Créée par Facebook, GraphQL est une syntaxe pour requêter une API. Son standard a été quant à lui ouvert en 2015. C’est avant tout une manière différente de concevoir une API; une architecture REST par exemple propose d’utiliser plusieurs endpoints qui standardisent la façon de recevoir des données. L’approche de GraphQL est de n’utiliser qu’un seul endpoint mais qui est capable de comprendre les données demandées et de les fournir de la façon souhaitée.
+      Créée par Facebook, GraphQL est une syntaxe pour requêter une API. Son standard a été quant à lui ouvert en 2015.
+      C’est avant tout une manière différente de concevoir une API ; une architecture REST par exemple propose d’utiliser plusieurs endpoints qui standardisent la façon de recevoir des données.
+      L’approche de GraphQL est de n’utiliser qu’un seul endpoint mais qui est capable de comprendre les données demandées et de les fournir de la façon souhaitée.
     </p>
 
     <p>
       Ainsi, une requête GraphQL qui demandent tous les articles d'un blog, accompagnés des nom et avatar de toutes les personnes aimant ces articles, peut ressembler à cela :
     </p>
-    <pre><code class="language-graphql">
-query {
+    <pre><code class="language-graphql">query {
   posts {
     title
     likes {
@@ -32,8 +33,7 @@ query {
 }
 </code></pre>
 <p>Et donnerait le résultat suivant :</p>
-<pre><code class="language-json">>
-{
+<pre><code class="language-json">{
     "data": {
          "posts": [
            {
@@ -67,11 +67,10 @@ query {
 <p>
   Créons notre projet Symfony 4 :
 </p>
-<pre><code>
-  composer create-project symfony/skeleton hello-graphql
-  composer config extra.symfony.allow-contrib true
-  composer require overblog/graphql-bundle # Le bundle que je vous recommande
-  composer require --dev overblog/graphiql-bundle # Ajoute une interface graphique
+<pre><code class="language-bash">composer create-project symfony/skeleton hello-graphql
+composer config extra.symfony.allow-contrib true
+composer require overblog/graphql-bundle # Le bundle que je vous recommande
+composer require --dev overblog/graphiql-bundle # Ajoute une interface graphique
 </code></pre>
 
 <p>L'implémentation d'une API GraphQL se déroule en 2 étapes :</p>
@@ -84,32 +83,30 @@ query {
 </p>
 
 <p>
-  Le bundle nous permet de décrire nos types en utilisant le langage <abbr title="Yet Another Markup Language" lang="en">YAML</code>.
+  Le bundle nous permet de décrire nos types en utilisant le langage <abbr title="Yet Another Markup Language" lang="en">YAML</abbr>.
   Créez un nouveau fichier <code>config/graphql/types/User.types.yaml</code> :
-<pre><code class="yaml language-yaml">
-User:
+</p>
+<pre><code class="yaml language-yaml">User:
     type: object
-      config:
-          fields:
-              name:
-                  type: "String!"
-              avatar:
-                  type: "String"
+    config:
+        fields:
+            name:
+                type: "String!"
+            avatar:
+                type: "String"
 </code></pre>
 Ainsi qu'un nouveau fichier <code>config/graphql/types/Post.types.yaml</code> :
-<pre><code class="yaml language-yaml">
-  Post:
-      type: object
-      config:
-          fields:
-              title:
-                  type: "String!"
-              likes:
-                  type: "[User!]!"
+<pre><code class="yaml language-yaml">Post:
+    type: object
+    config:
+        fields:
+            title:
+                type: "String!"
+            likes:
+                type: "[User!]!"
 </code></pre>
-</p>
 <p>
-  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant <em>PropertyAccess</em> afin que nous n'ayons pas besoin d’expliquer comment résoudre des champs triviaux des champs triviaux comme <code>name</code>, <code>avatar</code>, ou encore <code>title</title>.
+  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant <em>PropertyAccess</em> afin que nous n'ayons pas besoin d’expliquer comment résoudre des champs triviaux des champs triviaux comme <code>name</code>, <code>avatar</code>, ou encore <code>title</code>.
   On considérera que ces champs peuvent être résolus en faisant appel à des accesseurs sur nos entités.
 </p>
 
@@ -117,26 +114,25 @@ Ainsi qu'un nouveau fichier <code>config/graphql/types/Post.types.yaml</code> :
   En revanche on va expliquer à GraphQL comment résoudre le champ <code>likes</code> qui récupère les utilisateurs ayant aimé un article de blog.
   Pour cela on va utiliser l’<a href="https://symfony.com/doc/current/components/expression_language.html">ExpressionLanguage</a> via la clé <code>resolve</code> et expliquer comment appeler notre resolveur.
   Modifions <code>config/graphql/types/Post.types.yaml</code> :
-  <pre><code class="yaml language-yaml">
-   # On ajoute la clé resolve
-  likes:
-      type: "[User!]!"
-      resolve: "@=resolver('postLikes', [value])"
-  </code></pre>
-  La signature pour appeler un resolveur est <code>resolver(string $alias, array $args = [])</code>.
+</p>
+  <pre><code class="yaml language-yaml"># On ajoute la clé resolve
+likes:
+    type: "[User!]!"
+    resolve: "@=resolver('postLikes', [value])"
+</code></pre>
+<p>
+  La signature pour appeler un resolveur est <code class="language-php">resolver(string $alias, array $args = [])</code>.
   Ainsi <code>postLikes</code> est un alias que nous donnons à notre resolveur qui recevra comme unique argument <code>value</code> qui est l’objet Post.
-
   Définissons alors le resolveur qui correspond à l’alias <code>postLikes</code> :
-  <pre><code class="yaml language-yaml">
-services:
-  App/GraphQL/Resolver/PostResolver:
+</p>
+  <pre><code class="yaml language-yaml">services:
+    App/GraphQL/Resolver/PostResolver:
     # Injectez les arguments nécessaires...
-    tags:
-      - { name: overblog_graphql.resolver, alias: "postLikes", method: "resolveLikes" }
-  </code></pre>
+        tags:
+            - { name: overblog_graphql.resolver, alias: "postLikes", method: "resolveLikes" }
+</code></pre>
   Enfin on implémente notre resolveur qui est une pure fonction PHP avec le métier de notre application :
-  <pre><code class="php language-php">
-  class PostResolver
+  <pre><code class="php language-php">class PostResolver
 {
     // constructeur ...
 
@@ -146,7 +142,6 @@ services:
     }
 }
 </code></pre>
-</p>
 
 <h3>Étape 2 : Définir le type Query</h3>
 
@@ -157,24 +152,24 @@ services:
 
 <p>
   Créez un nouveau fichier <code>config/graphql/types/Query.types.yaml</code> :
-  <pre><code class="yaml language-yaml">
-  Query:
-      type: object
-      config:
-          fields:
-              posts:
-                  type: "[Post!]!"
-                  resolve: "@=resolver('allPosts')"
-  </code></pre>
+</p>
+  <pre><code class="yaml language-yaml">Query:
+    type: object
+    config:
+        fields:
+            posts:
+                type: "[Post!]!"
+                resolve: "@=resolver('allPosts')"
+</code></pre>
+<p>
   Il ne nous reste plus qu’à ajouter l’alias <code>allPost</code> à notre <code>PostResolver</code> et son implémentation :
-  <pre><code class="php language-php">
-// ...
+</p>
+  <pre><code class="php language-php">// ...
 public function resolveAll(): Collection
 {
     return $this->postRepository->findAll();
 }
 </code></pre>
-</p>
 
 <p>C’est tout pour l’implémentation !</p>
 
