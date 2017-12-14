@@ -1,0 +1,786 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 16 - Des astuces sécurité avec Symfony" %}
+
+{% block article_content %}
+    {% verbatim %}
+    <style type="text/css">
+        em {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <h1 id="security-code-tips-pour-symfony">Security code tips pour Symfony</h1>
+
+    <h4 id="hello-world">Hello, World!</h4>
+
+    <p>Ahh, la sécurité, enfin on va parler d’un truc que tout le monde déteste !</p>
+
+    <ul>
+        <li>Les patrons d’abord, car la sécurité coûte cher mais ne rapporte rien. <br>
+                En plus, se faire péter sa base en 2017 c’est tendance.</li>
+        <li>Les équipes marketing ensuite, car on rajoute des contraintes qui peuvent <br>
+                “abaisser le taux de conversion” des utilisateurs.</li>
+        <li>Les équipes tout court, car elles passent leur temps à switcher entre <br>
+                facebook et 2FA sur leur mobile, c’est long et fatiguant.</li>
+        <li>Les utilisateurs aussi, car ils ne peuvent pas librement mettre le nom de leur chien <br>
+                ou leur date de naissance en mot de passe.</li>
+        <li>Les ops, qui doivent scaler les performances d’une belle infrastructure <br>
+                microservice avec du handshake X.509 de partout.</li>
+        <li>Les développeurs, vous, bien entendu, car de toute façon on a pas le temps, notre framework <br>
+                fait le boulot pour nous, et puis qui oserait donc s’attaquer à une application que même le <br>
+                marketing n’arrive pas à afficher en 10ième page de Google?</li>
+    </ul>
+
+    <p>Alors voilà, on est à 10 jours de Noël, tes projets sont bouclés, tu n’as plus envie <br>
+        de bosser avant les vacances, et tu es quand-même là. Pourquoi ne pas faire une petite <br>
+        revue sur les tendances et les erreurs classiques de sécurité dans tes webapps, <br>
+        histoire de passer le temps de manière constructive ?</p>
+
+    <p>C’est parti ! ✌️</p>
+
+
+
+    <h2 id="du-noveau-dans-lowasp-top-10">Du noveau dans l’OWASP Top 10!</h2>
+
+    <p>Et oui, l’OWASP Top 10 a été mis à jour cette année, quoi de neuf ?</p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Top 10 OWASP 2013</th>
+            <th>Top 10 OWASP 2017</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>A1-Injection</td>
+            <td>A1-Injection</td>
+        </tr>
+        <tr>
+            <td>A2-Broken Authentication and Session Management</td>
+            <td>A2-Broken Authentication and Session Management</td>
+        </tr>
+        <tr>
+            <td>A3-Cross-Site Scripting (XSS)</td>
+            <td>A3-Cross-Site Scripting (XSS)</td>
+        </tr>
+        <tr>
+            <td>A4-Insecure Direct Object References</td>
+            <td>A4-Broken Access Control</td>
+        </tr>
+        <tr>
+            <td>A5-Security Misconfiguration</td>
+            <td>A5-Security Misconfiguration</td>
+        </tr>
+        <tr>
+            <td>A6-Sensitive Data Exposure</td>
+            <td>A6-Sensitive Data Exposure</td>
+        </tr>
+        <tr>
+            <td>A7-Missing Function Level Access Control</td>
+            <td>A7-Insufficient Attack Protection</td>
+        </tr>
+        <tr>
+            <td>A8-Cross-Site Request Forgery (CSRF)</td>
+            <td>A8-Cross-Site Request Forgery (CSRF)</td>
+        </tr>
+        <tr>
+            <td>A9-Using Components with Known Vulnerabilities</td>
+            <td>A9-Using Components with Known Vulnerabilities</td>
+        </tr>
+        <tr>
+            <td>A10-Unvalidated Redirects and Forwards</td>
+            <td>A10-Underprotected APIs</td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <p><strong>A4 et A7 de 2013 deviennent A4 de 2017</strong></p>
+
+    <p>Tout d’abord, dans les risques de 2013, A4 (j’accède à <code>/resource/{id}</code> sans <br>
+        que <code>{id}</code> m’appartienne) et A7 (je valide mon form en javascript mais je le revalide <br>
+        pas côté serveur) ont été mergés dans A4 de 2017.</p>
+
+    <p><strong>A7 de 2017 est désormais “Insufficient Attack Protection”</strong></p>
+
+    <p>L’OWASP pointe du doigt notre laxisme au niveau du traitement automatique des <br>
+        attaques. Afin d’être complètement efficace, il nous faut automatiquement <br>
+        détecter, monitorer, logger et répondre.</p>
+
+    <p>Un exemple classique est une attaque sur le formulaire de login: on peut <br>
+        détecter une attaque par le nombre de soumissions par ip et par minute, <br>
+        monitorer facilement sur un graphique les connexions réussies/échouées, <br>
+        et bloquer une ip si elle dépasse une certaine limite. Cela éviterait <br>
+        bruteforce, dictionnary, password reuse, et j’en passe. Sauf si le <br>
+        hacker est très motivé, auquel cas il viendra avec un grand nombre d’ips et <br>
+        il faudra trouver d’autres solutions.</p>
+
+    <p><strong>A10 de 2017 devient “Underprotected APIs”</strong></p>
+
+    <p>Nos applications utilisent de plus en plus des APIs pour accéder au backend, <br>
+        cela permet aux interfaces web et mobile de récupérer les informations en <br>
+        un même point qui centralise le code métier. L’OWASP attire notre attention <br>
+        sur le manque de protections sur celles-ci. </p>
+
+    <p>C’est assez simple à comprendre, on a moins l’occasion d’auditer nos APIs: </p>
+
+    <ul>
+        <li>on utilise un SDK bien adapté pour y accéder, mais quel comportement ont <br>
+                ces dernières quand on les utilise mal / directement ?</li>
+        <li>on ne voit pas facilement les données qui transitent entre l’app et l’API, <br>
+                sont-elles toutes nécessaires et sont-elles toutes exposables ?</li>
+    </ul>
+
+    <p>Pour débugger (voir les requêtes qui transitent, les modifier, les répéter en étant <br>
+        déconnecté), tu peux mettre votre client derrière un proxy (genre <br>
+        <a href="https://www.charlesproxy.com/">Charles</a>). C’est très instructif !</p>
+
+    <p><strong>A10 de 2013 disparait</strong></p>
+
+    <p>Les failles open redirects (le fait de rediriger l’utilisateur vers une <br>
+        url arbitraire sans la valider) ne sont plus dans le top 10 des risques, mais <br>
+        c’est pas une raison pour renvoyer une <code>RedirectResponse</code> sur le referrer ♥️.</p>
+
+
+
+    <h2 id="security-code-tips">Security Code Tips!</h2>
+
+    <p>Maintenant, faisons un petit tour dans tes applications, à grand coups de grep, afin <br>
+        de vérifier si elles contiennent quelques erreurs de base ou au moins des choses suspectes. <br>
+        Je te préviens, il s’agit souvent de cas issus d’un besoin bien tordu… du coup la solution <br>
+        proposée peut-être également tordue. Soyons pragmatique, et faisons quelque chose de sécurisé. </p>
+
+
+
+    <h3 id="xss">XSS</h3>
+
+    <p><strong>Principe de l’attaque</strong></p>
+
+    <p>Injecter du code dans tes pages afin, si possible, de placer un tag <code>&lt;script
+            src="evil.com/boom.js"/&gt;</code>. </p>
+
+    <p>De là, tout devient possible : <br>
+        - récupérer le contenu de la page (peut-être utile si l’injection en front touche le backoffice) <br>
+        - remplir des formulaires de la page même s’ils sont protégés avec un token csrf <br>
+        - récupérer le cookie de session (si le flag “httponly” a été oublié) <br>
+        - remplacer totalement le markup de la page par autre chose (phishing ou autre) <br>
+        - …</p>
+
+    <p><strong><code>{{ myVariable | raw }}</code> dans une vue</strong></p>
+
+    <ul>
+        <li>❌ Je peux bypasser l’échappement car cette variable est créée sur la base de constantes connues par le
+                backend.</li>
+        <li>⚠️ C’est sans compter sur l’évolution de ton code. Un jour, cette variable pourra peut-être être remplie
+                de manière arbitraire.</li>
+        <li>✅ Pour plus de sécurité, remplace <code>|raw</code> par <code>|purify</code> qui échappera les tags les
+                plus dangereux. Tu as seulement besoin de <a href="https://github.com/Exercise/HTMLPurifierBundle">HTMLPurifierBundle</a>.
+                A noter que pour un test ou dans un controlleur, tu pourra utiliser <code>$this-&gt;container-&gt;get('exercise_html_purifier.default')-&gt;purify($var)</code>.
+            </li>
+    </ul>
+
+    <p>Reste prudent tout de même car <code>|purify</code> n’échappe pas <code>&lt;br&gt;</code> par défaut et dans
+        certains cas, genre variable provenant de la query string <code>?variable=valeur</code>, ton application
+        pourrait être sujette au phishing.</p>
+
+    <p><strong><code>{{ myVariable }}</code> dans des tags <code>&lt;script&gt;</code></strong></p>
+
+    <ul>
+        <li>❌ Utiliser <code>{{ myVariable }}</code> me protège car Twig échappe automatiquement ma variable.</p>
+        </li>
+        <li>⚠️ Twig choisit la stratégie d’échappement sur la base de l’extension de ton fichier (ex: <code>.html.twig</code>
+                utilisera la stratégie <code>html</code>). Du coup, <code>{{ myVariable }}</code> =
+                <code>{{ myVariable | e }}</code> = <code>{{ myVariable | e('html') }}</code>.</li>
+        <li>✅ Dans un <code>.html.twig</code>, si tu es dans un tag <code>&lt;script
+                    type="text/javascript"&gt;</code>, utilise <code>{{ myVariable | e('js') }}</code>, et si tu es dans
+                un <code>&lt;style&gt;</code> (⭐️), utilise <code>{{ myVariable | e('css') }}</code>. </li>
+    </ul>
+
+    <p><strong><code>['is_safe' =&gt; ['html']</code> dans une extension twig</strong></p>
+
+    <ul>
+        <li>❌ Mon filtre <code>{{ userEntity|showUser }}</code> affiche une jolie box contenant toutes les infos
+                utilisateur, comme la mise en forme se fait en markup html, j’ai besoin d’utiliser <code>['is_safe' =&gt;
+                    ['html']</code>.</li>
+        <li>⚠️ Cela équivaut à utiliser <code>{{ userEntity|showUser|raw }}</code> sans l’option <code>is_safe</code>
+                dans l’extension. Si cette box affiche <code>userEntity.firstname</code>, il faut penser à l’échapper.
+            </li>
+        <li>✅ Quand une extension devient trop complexe, je privilégie l’utilisation de
+                <code>{{ render(controller('CommonBundle:User:userBox', {user:userEntity})) }}</code> ou
+                <code>{{ include('CommonBundle:User:userBox.html.twig', {user:userEntity}) }}</code> afin d’utiliser
+                Twig pour générer du HTML.</li>
+    </ul>
+
+
+
+    <h3 id="csrf">CSRF</h3>
+
+    <p><strong>Principe de l’attaque</strong></p>
+
+    <p>Si un hacker note qu’un formulaire ou un lien modifiant une resource ne possède pas de token CSRF, il va tenter
+        de manipuler un </p>
+
+    <p><strong>Liens modifiant une ressource</strong></p>
+
+    <p>Cette erreur est un grand classique des interfaces admin listant des ressources dans un tableau, dont chaque
+        ligne possède un lien “Effacer”.</p>
+
+    <ul>
+        <li>❌ Mes utilisateurs peuvent cliquer sur <code>&lt;a href="{{ path('photo_remove') }}"&gt;Effacer la photo&lt;/a&gt;</code>
+                pour effacer leur photo de profil.</li>
+        <li>⚠️ Un hacker pourrait inviter un utilisateur sur une page infectée qui le redirigerait directement vers
+                le lien de suppression de sa photo. </li>
+        <li>✅ La bonne pratique est d’utiliser un formulaire (qui ont par défaut un token CSRF) et la méthode POST
+                pour modifier une ressource serveur.</li>
+    </ul>
+
+    <p>Si tu veux vraiment utiliser un lien et non un formulaire, pas de problème, mais utilise: <code>&lt;a
+            href="{{ path('photo_remove', {csrf: csrf_token('photo')}) }}"&gt;Effacer ma photo&lt;/a&gt;</code>. </p>
+
+    <p>Dans un controlleur, tu devras vérifier ce token:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">if</span> (!<span
+                    class="hljs-variable">$this</span>-&gt;isCsrfTokenValid(<span
+                    class="hljs-string">'photo'</span>, <span class="hljs-variable">$csrf</span>)) {
+    <span class="hljs-keyword">throw</span> <span
+                    class="hljs-variable">$this</span>-&gt;createAccessDeniedException(<span class="hljs-string">'Désolé, votre session a expiré. Veuillez recommancer.'</span>);
+}</code></pre>
+
+    <p>Depuis un test d’intégration, tu peux générer ce token via:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-variable">$csrf</span> = <span
+                    class="hljs-variable">$this</span>-&gt;getContainer()-&gt;get(<span class="hljs-string">'security.csrf.token_manager'</span>)-&gt;getToken(<span
+                    class="hljs-string">'photo'</span>)-&gt;getValue();</code></pre>
+
+    <p><strong><code>'csrf_protection' =&gt; false,</code> dans les options de formulaire</strong></p>
+
+    <p>Le Bug Bounty Program de BlaBlaCar m’a fait découvrir des options de Symfony improbables…</p>
+
+    <ul>
+        <li>❌ J’ai mon appli mobile qui post les formulaires dans mon backend symfony de la même manière que le front
+                web, du coup les CSRF me gênent !</li>
+        <li>❌ Je cache mes pages, du coup tout le monde se retrouve avec le token d’un seul utilisateur !</li>
+        <li>⚠️ Pouvoir desactiver les tokens CSRF dans Symfony te permet d’implémenter la protection d’une autre
+                manière si tu le souhaites. Si tu grep ça dans ton projet, c’est généralement pas bon signe !</li>
+        <li>✅ Si ton app mobile poste des formulaires comme le front web, il va falloir en effet réimplémenter une
+                protection CSRF. Jette un oeil à <a href="https://github.com/dunglas/DunglasAngularCsrfBundle">cette
+                    implémentation</a> qui utilise un cookie.</li>
+        <li>✅ Au sujet du cache, <a href="https://symfony.com/doc/current/http_cache/form_csrf_caching.html">la doc
+                    de Symfony</a> est plutôt complète sur le sujet.</li>
+    </ul>
+
+    <p><strong><code>'render_rest': false,</code> in a view</strong></p>
+
+    <ul>
+        <li>❌ J’ai plusieurs formulaires et j’en utilise une partie ou une autre en fonction du contexte, du coup je
+                n’ai pas besoin des CSRF tokens partout.</li>
+        <li>⚠️ Cette option est un paramètre de <code>form_rest()</code> ou <code>form_end()</code> qui permet
+                d’ignorer les champs qui n’ont pas été affichés expliciement. Dans ces cas là, le token CSRF du
+                formulaire est généralement oublié.</li>
+        <li>✅ Si plusieurs formulaires sont insérés dans la page, il vaut mieux changer le nom du champ contenant le
+                token avec l’option <code>csrf_field_name</code> du formulaire. On va peut-être avoir 5 tokens CSRF dans
+                la page, mais c’est mieux qu’aucun.</li>
+    </ul>
+
+    <p><strong>CSRF lors d’une connexion via un fournisseur OAuth (Facebook connect, etc)</strong></p>
+
+    <p>Petit rappel sur le fonctionnement de ce type de login (par exemple Twitter):</p>
+
+    <ol>
+        <li>L’utilisateur est redirigé vers Twitter avec dans la query string un id de client, une URL de callback,
+                et “state” (j’y reviendrais).</li>
+        <li>Quand l’utilisateur s’identifie sur twitter et autorise ton application, Twitter le redirige vers l’url
+                de callback, en ajoutant un “code” et en remettant “state” dans la query string.</li>
+        <li>Le backend de ton app envoie le code et son secret à Twitter, qui en retour lui renvoie un token
+                d’accès.</li>
+        <li>Le backend de ton app appelle la route de Twitter qui permet d’obtenir des informations sur l’utilisateur
+                à l’aide de ce token d’accès.</li>
+        <li>Enfin, le backend ton app utilise les informations sur l’utilisateur renvoyées par twitter (typiquement
+                son email) pour le trouver dans ta propre base de données.</li>
+    </ol>
+
+    <p>La spécification d’oauth nous permet de mettre un token CSRF token dans le paramètre “state” de la query string à
+        l’étape 1, qui nous est renvoyé à l’étape 3. Que se passe t’il si on ne l’utilise pas ?</p>
+
+    <ol>
+        <li>Alice (la victime) est déjà connectée à son compte via le fournisseur Twitter mais n’est pas connectée
+                via Facebook.</li>
+        <li>Mallory se crée une page web qui en backend se connecte sur ton app, clique sur “Se connecter via
+                Facebook”, s’identifie sur Facebook et obtiens un code d’autorisation pour son propre compte.</li>
+        <li>Mallory réussit à convaicre Alice de visiter sa page, qui renvoie Alice vers l’url de redirection de ton
+                site avec le code d’autorisation forgé à l’étape précédente.</li>
+        <li>Mallory peut désormais se connecter au compte d’Alice à l’aide de son propre compte Facebook.</li>
+    </ol>
+
+    <p>Alors penses-y, tu dois toujours mettre un token CSRF dans le paramètre “state”, et le vérifier lors du retour
+        sur l’url de redirection. </p>
+
+    <p>Si tu utilises HWIOAuthBundle, vérifie que l’option <code>csrf: true</code> est bien activée sur tous les
+        fournisseurs que tu supportes.</p>
+
+
+
+    <h3 id="sql-injections">SQL injections</h3>
+
+    <p>C’est un grand classique mais un bon grep peut vous révéler quelques surprises….</p>
+
+
+
+    <pre class="prettyprint"><code class=" hljs perl"> <span class="hljs-keyword">grep</span> -Ri <span
+                    class="hljs-string">'delete '</span> src/|<span class="hljs-keyword">grep</span> <span
+                    class="hljs-string">'%s'</span>
+ <span class="hljs-keyword">grep</span> -Ri <span class="hljs-string">'insert '</span> src/|<span class="hljs-keyword">grep</span> <span
+                    class="hljs-string">'%s'</span>
+ <span class="hljs-keyword">grep</span> -Ri <span class="hljs-string">'update '</span> src/|<span class="hljs-keyword">grep</span> <span
+                    class="hljs-string">'%s'</span>
+ <span class="hljs-keyword">grep</span> -Ri <span class="hljs-string">'select '</span> src/|<span class="hljs-keyword">grep</span> <span
+                    class="hljs-string">'%s'</span></code></pre>
+
+    <ul>
+        <li>❌ Je dois faire des requètes SQL asynchrones pour ne pas faire rammer le front pour une action dont
+                l’utilisateur n’attend pas une réponse immédiate. Du coup, je crée ma requête à coups de
+                <code>sprintf</code> + <code>addslahes</code> et je l’envoie à un worker qui l’exécute.</li>
+        <li>⚠️ Les injections sont toujours le n” 1 de l’OWASP Top 10 depuis 2010, et sont à l’origine de <a
+                        href="https://vigilante.pw/">gigantesques leaks</a> de base de données. Y compris dans tes
+                scripts un peu crado, prends toujours le temps de bien écrire tes requêtes.</li>
+        <li>✅ Utilise les requêtes préparées bien entendu ! Envoie un json contenant la requête sous forme de requête
+                préparée, et ses paramètres.</li>
+    </ul>
+
+
+
+    <pre class="prettyprint"><code class="language-json hljs ">[
+    <span class="hljs-string">"UPDATE user SET name = :name WHERE id = :id"</span>,
+    {
+        "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span
+                        class="hljs-string">"Bob"</span></span>,
+        "<span class="hljs-attribute">id</span>": <span class="hljs-value"><span class="hljs-number">42</span>
+    </span>}
+]</code></pre>
+
+
+
+    <h3 id="open-redirect-attacks">Open redirect attacks</h3>
+
+    <p><strong>Rediriger après un login</strong></p>
+
+    <ul>
+        <li>❌ Lorsque mon utilisateur arrive sur une landing page qui nécessite d’être authentifié, je le redirige
+                vers <code>https://connect.monsite.com/login?redirect=https://landing.monsite.com/</code>.</li>
+        <li>⚠️ Si l’URL de redirection n’est pas vérifiée, il est possible d’utiliser <code>https://connect.monsite.com/login?redirect=https://some.scam.com</code>
+                ce qui permet à un pirate d’ameçonner tes utilisateurs relativement facilement (genre, fausse page de
+                login indiquant “mot de passe incorrect”).</li>
+        <li>✅ De manière générale, il faut mettre en liste blanche tous les préfixes des sites sur lesquels tu peux
+                rediriger l’utilisateur.</li>
+    </ul>
+
+    <p><strong>Liste blanche par préfix pas assez restrictive</strong></p>
+
+    <ul>
+        <li>❌ J’ai plusieurs landing pages comme <a href="https://landing.monsite.com/foo/bar.php">https://landing.monsite.com/foo/bar.php</a>,
+                <a href="https://landing.monsite.com/hello/word.php">https://landing.monsite.com/hello/word.php</a> etc,
+                alors pour sécuriser, je vérifie que l’url passée en paramètre est préfixée par “<a
+                        href="https://landing.monsite.com">https://landing.monsite.com</a>“.</li>
+        <li>⚠️ C’est pas suffisant, car le pirate peut encore créer <a href="https://landing.monsite.com.scam.com">https://landing.monsite.com.scam.com</a>
+                qui passera au travers.</li>
+        <li>✅ Si tu as une liste blanche de préfixes d’URLs, pense à bien les terminer par un <code>/</code> afin
+                qu’il ne soit pas possible de rajouter des niveaux de sous-domaines.</li>
+    </ul>
+
+    <p><strong>Rediriger l’utilisateur vers le referer</strong></p>
+
+    <ul>
+        <li>❌ Lorsque mon formulaire est valide, je crée un message flash et renvoie <code>new
+                    RedirectResponse($request-&gt;headers-&gt;get('Referer'));</code>.</li>
+        <li>⚠️ Comme le header peut-être surchargé de manière arbitraire, il convient de vérifier que ce qu’il
+                contient soit légitime.</li>
+        <li>✅ Redirige toujours vers le refeer après avoir vérifié que l’URL qu’il contient fasse partie de ton
+                application, ou implémente une liste blanche d’URLs de confiance.</li>
+    </ul>
+
+    <p>Exemple que tu peux ajouter à ton base controlleur:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">protected</span> <span
+                    class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSafeRefererOr</span><span
+                        class="hljs-params">(Request <span class="hljs-variable">$request</span>, <span
+                            class="hljs-variable">$fallback</span>)</span> {</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable">$request</span>-&gt;headers-&gt;has(<span
+                    class="hljs-string">'referer'</span>)) {
+        <span class="hljs-variable">$referer</span> = <span
+                    class="hljs-variable">$request</span>-&gt;headers-&gt;get(<span class="hljs-string">'referer'</span>);
+
+        <span class="hljs-comment">// URL begins with '/' but not '//'</span>
+        <span class="hljs-keyword">if</span> (strlen(<span class="hljs-variable">$referer</span>) &lt; <span
+                    class="hljs-number">2</span> || (<span class="hljs-variable">$referer</span>[<span
+                    class="hljs-number">0</span>] == <span class="hljs-string">'/'</span> &amp;&amp; <span
+                    class="hljs-variable">$referer</span>[<span class="hljs-number">1</span>] != <span
+                    class="hljs-string">'/'</span>)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-variable">$referer</span>;
+        }
+
+        <span class="hljs-comment">// URL starts by the same host</span>
+        <span class="hljs-variable">$baseUrl</span> = <span
+                    class="hljs-variable">$request</span>-&gt;getScheme() . <span
+                    class="hljs-string">'://'</span> . <span
+                    class="hljs-variable">$request</span>-&gt;getHost() . ((<span class="hljs-variable">$request</span>-&gt;getPort() != <span
+                    class="hljs-number">80</span> &amp;&amp; <span class="hljs-variable">$request</span>-&gt;getPort() != <span
+                    class="hljs-number">443</span>) ? <span class="hljs-string">':'</span> . <span
+                    class="hljs-variable">$request</span>-&gt;getPort() : <span class="hljs-string">''</span>) . <span
+                    class="hljs-string">'/'</span>;
+        <span class="hljs-keyword">if</span> (strncmp(<span class="hljs-variable">$referer</span>, <span
+                    class="hljs-variable">$baseUrl</span>, strlen(<span
+                    class="hljs-variable">$baseUrl</span>)) === <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-variable">$referer</span>;
+        }
+    }
+
+    <span class="hljs-comment">// referer is not safe, we prefer returning fallback url</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-variable">$fallback</span>;
+}</code></pre>
+
+
+
+    <h2 id="identification-à-laide-dun-certificat-x509-avec-symfony">Identification à l’aide d’un certificat X.509 avec
+        Symfony</h2>
+
+    <p>Pour terminer, je vous propose un tutorial complet histoire de traiter d’un sujet un peu costaud <br>
+        pour des devs non-ops.</p>
+
+    <p>Quand on veut sécuriser le traffic entre deux applications (genre dans une architecture <br>
+        micro-service) il y a l’authentification par certificats X.509 qui est beaucoup plus <br>
+        adaptée qu’un simple secret partagé.</p>
+
+    <p>Le principe ? En un mot, le serveur possède un certificat d’authorité et signe un certificat <br>
+        client dont l’email permettra d’identifier l’utilisateur. Saviez-vous que Symfony supporte <br>
+        nativement cette forme d’identification ?</p>
+
+
+
+    <h3 id="certificats">Certificats</h3>
+
+    <p>Pour commencer, votre application serveur doit tourner sur SSL, que ce soit un certificat <br>
+        signé (genre Let’s encrypt!, Comodo etc) ou non signé. </p>
+
+    <p>Dans cette démonstration, je vais partir du principe que mon API n’est pas exposée, du coup <br>
+        je commence par créer un certificat auto-signé qui sera utilisé par apache.</p>
+
+
+
+    <pre class="prettyprint"><code class="language-sh hljs ruby"><span class="hljs-variable">$ </span>mkdir -p /etc/ssl/certs/my-api
+<span class="hljs-variable">$ </span>cd /etc/ssl/certs/my-api
+
+<span class="hljs-variable">$ </span>openssl req -x509 -nodes -days <span class="hljs-number">365</span> -newkey <span
+                    class="hljs-symbol">rsa:</span><span class="hljs-number">2048</span> -keyout server.key -out server.crt
+(...)
+
+<span class="hljs-constant">Country</span> <span class="hljs-constant">Name</span> (<span class="hljs-number">2</span> letter code) [<span
+                    class="hljs-constant">AU</span>]<span class="hljs-symbol">:FR</span>
+<span class="hljs-constant">State</span> <span class="hljs-keyword">or</span> <span
+                    class="hljs-constant">Province</span> <span class="hljs-constant">Name</span> (full name) [<span
+                    class="hljs-constant">Some</span>-<span class="hljs-constant">State</span>]<span
+                    class="hljs-symbol">:</span>
+<span class="hljs-constant">Locality</span> <span class="hljs-constant">Name</span> (eg, city) []<span
+                    class="hljs-symbol">:Paris</span>
+<span class="hljs-constant">Organization</span> <span class="hljs-constant">Name</span> (eg, company) [<span
+                    class="hljs-constant">Internet</span> <span class="hljs-constant">Widgits</span> <span
+                    class="hljs-constant">Pty</span> <span class="hljs-constant">Ltd</span>]<span class="hljs-symbol">:My</span> <span
+                    class="hljs-constant">Api</span>
+<span class="hljs-constant">Organizational</span> <span class="hljs-constant">Unit</span> <span class="hljs-constant">Name</span> (eg, section) []<span
+                    class="hljs-symbol">:</span>
+<span class="hljs-constant">Common</span> <span class="hljs-constant">Name</span> (e.g. server <span
+                    class="hljs-constant">FQDN</span> <span class="hljs-keyword">or</span> <span class="hljs-constant">YOUR</span> name) []<span
+                    class="hljs-symbol">:</span>
+<span class="hljs-constant">Email</span> <span class="hljs-constant">Address</span> []<span
+                    class="hljs-symbol">:server</span><span class="hljs-variable">@my</span>.api
+
+<span class="hljs-variable">$ </span>openssl dhparam -out dhparam.pem <span class="hljs-number">2048</span></code></pre>
+
+    <p>Ensuite, je crée le certificat d’authorité:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-sh hljs css">$ <span class="hljs-tag">openssl</span> <span
+                    class="hljs-tag">genrsa</span> <span class="hljs-tag">-out</span> <span
+                    class="hljs-tag">ca</span><span class="hljs-class">.key</span> 4096
+$ <span class="hljs-tag">openssl</span> <span class="hljs-tag">req</span> <span class="hljs-tag">-new</span> <span
+                    class="hljs-tag">-x509</span> <span class="hljs-tag">-days</span> 365 <span
+                    class="hljs-tag">-key</span> <span class="hljs-tag">ca</span><span
+                    class="hljs-class">.key</span> <span class="hljs-tag">-out</span> <span
+                    class="hljs-tag">ca</span><span class="hljs-class">.crt</span>
+(...)
+
+<span class="hljs-tag">Country</span> <span class="hljs-tag">Name</span> (2 <span class="hljs-tag">letter</span> <span
+                    class="hljs-tag">code</span>) <span class="hljs-attr_selector">[AU]</span><span class="hljs-pseudo">:FR</span>
+<span class="hljs-tag">State</span> <span class="hljs-tag">or</span> <span class="hljs-tag">Province</span> <span
+                    class="hljs-tag">Name</span> (<span class="hljs-tag">full</span> <span class="hljs-tag">name</span>) <span
+                    class="hljs-attr_selector">[Some-State]</span>:
+<span class="hljs-tag">Locality</span> <span class="hljs-tag">Name</span> (<span class="hljs-tag">eg</span>, <span
+                    class="hljs-tag">city</span>) <span class="hljs-attr_selector">[]</span><span class="hljs-pseudo">:Paris</span>
+<span class="hljs-tag">Organization</span> <span class="hljs-tag">Name</span> (<span class="hljs-tag">eg</span>, <span
+                    class="hljs-tag">company</span>) <span
+                    class="hljs-attr_selector">[Internet Widgits Pty Ltd]</span><span
+                    class="hljs-pseudo">:My</span> <span class="hljs-tag">Api</span>
+<span class="hljs-tag">Organizational</span> <span class="hljs-tag">Unit</span> <span
+                    class="hljs-tag">Name</span> (<span class="hljs-tag">eg</span>, <span
+                    class="hljs-tag">section</span>) <span class="hljs-attr_selector">[]</span>:
+<span class="hljs-tag">Common</span> <span class="hljs-tag">Name</span> (<span class="hljs-tag">e</span><span
+                    class="hljs-class">.g</span>. <span class="hljs-tag">server</span> <span
+                    class="hljs-tag">FQDN</span> <span class="hljs-tag">or</span> <span
+                    class="hljs-tag">YOUR</span> <span class="hljs-tag">name</span>) <span
+                    class="hljs-attr_selector">[]</span>:
+<span class="hljs-tag">Email</span> <span class="hljs-tag">Address</span> <span
+                    class="hljs-attr_selector">[]</span><span class="hljs-pseudo">:ca</span><span class="hljs-at_rule">@<span
+                        class="hljs-keyword">my.api</span></span></code></pre>
+
+    <p>Enfin je crée le cetificat client et je le fais signer par l’authorité, attention à bien choisir <br>
+        l’email ici, on le réutilisera plus tard.</p>
+
+
+
+    <pre class="prettyprint"><code class="language-sh hljs ruby"><span class="hljs-variable">$ </span>openssl genrsa -out client.key <span
+                    class="hljs-number">4096</span>
+<span class="hljs-variable">$ </span>openssl req -new -key client.key -out client.csr
+(...)
+
+<span class="hljs-constant">Country</span> <span class="hljs-constant">Name</span> (<span class="hljs-number">2</span> letter code) [<span
+                    class="hljs-constant">AU</span>]<span class="hljs-symbol">:FR</span>
+<span class="hljs-constant">State</span> <span class="hljs-keyword">or</span> <span
+                    class="hljs-constant">Province</span> <span class="hljs-constant">Name</span> (full name) [<span
+                    class="hljs-constant">Some</span>-<span class="hljs-constant">State</span>]<span
+                    class="hljs-symbol">:</span>
+<span class="hljs-constant">Locality</span> <span class="hljs-constant">Name</span> (eg, city) []<span
+                    class="hljs-symbol">:Paris</span>
+<span class="hljs-constant">Organization</span> <span class="hljs-constant">Name</span> (eg, company) [<span
+                    class="hljs-constant">Internet</span> <span class="hljs-constant">Widgits</span> <span
+                    class="hljs-constant">Pty</span> <span class="hljs-constant">Ltd</span>]<span class="hljs-symbol">:My</span> <span
+                    class="hljs-constant">Api</span>
+<span class="hljs-constant">Organizational</span> <span class="hljs-constant">Unit</span> <span class="hljs-constant">Name</span> (eg, section) []<span
+                    class="hljs-symbol">:</span>
+<span class="hljs-constant">Common</span> <span class="hljs-constant">Name</span> (e.g. server <span
+                    class="hljs-constant">FQDN</span> <span class="hljs-keyword">or</span> <span class="hljs-constant">YOUR</span> name) []<span
+                    class="hljs-symbol">:</span>
+<span class="hljs-constant">Email</span> <span class="hljs-constant">Address</span> []<span
+                    class="hljs-symbol">:client</span><span class="hljs-variable">@my</span>.api
+
+<span class="hljs-constant">Please</span> enter the following <span class="hljs-string">'extra'</span> attributes
+to be sent with your certificate request
+<span class="hljs-constant">A</span> challenge password []<span class="hljs-symbol">:</span>
+<span class="hljs-constant">An</span> optional company name []<span class="hljs-symbol">:</span>
+
+<span class="hljs-variable">$ </span>openssl x509 -req -days <span class="hljs-number">365</span> -<span
+                    class="hljs-keyword">in</span> client.csr -<span class="hljs-constant">CA</span> ca.crt -<span
+                    class="hljs-constant">CAkey</span> ca.key -set_serial <span class="hljs-number">01</span> -out client.crt
+<span class="hljs-variable">$ </span>cat client.crt client.key &gt; client.pem</code></pre>
+
+    <p>On peut désormais configurer apache2, dans <code>/etc/apache2/sites-available</code>, on ajoute le fichier <br>
+        <code>000-localhost-ssl.conf</code>:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-apacheconfig hljs apache"><span class="hljs-tag">&lt;Directory /var/www/my-api/web&gt;</span>
+        <span class="hljs-keyword"><span class="hljs-common">Options</span></span> Indexes FollowSymLinks
+        <span class="hljs-keyword">AllowOverride</span> <span class="hljs-literal">All</span>
+        <span class="hljs-keyword">Require</span> <span class="hljs-literal">all</span> granted
+<span class="hljs-tag">&lt;/Directory&gt;</span>
+
+<span class="hljs-tag">&lt;IfModule mod_ssl.c&gt;</span>
+    <span class="hljs-tag">&lt;VirtualHost 127.0.0.1:443&gt;</span>
+        <span class="hljs-keyword"><span class="hljs-common">ServerName</span></span> 127.0.0.1
+        <span class="hljs-keyword">ServerAdmin</span> your@email.com
+        <span class="hljs-keyword"><span class="hljs-common">DocumentRoot</span></span> /var/www/my-api/web
+        <span class="hljs-keyword">ErrorLog</span> <span class="hljs-cbracket">${APACHE_LOG_DIR}</span>/error.log
+        <span class="hljs-keyword">CustomLog</span> <span class="hljs-cbracket">${APACHE_LOG_DIR}</span>/access.log combined
+        <span class="hljs-keyword">SSLCertificateFile</span> /etc/ssl/certs/my-api/server.crt
+        <span class="hljs-keyword">SSLCertificateKeyFile</span> /etc/ssl/certs/my-api/server.key
+        <span class="hljs-keyword">SSLOpenSSLConfCmd</span> DHParameters <span class="hljs-string">"/etc/ssl/certs/my-api/dhparam.pem"</span>
+        <span class="hljs-keyword">SSLCACertificateFile</span> /etc/ssl/certs/my-api/ca.crt
+        <span class="hljs-keyword">SSLVerifyClient</span> optional
+        <span class="hljs-keyword">SSLVerifyDepth</span> 1
+        <span class="hljs-keyword">SSLOptions</span> +StdEnvVars
+    <span class="hljs-tag">&lt;/VirtualHost&gt;</span>
+<span class="hljs-tag">&lt;/IfModule&gt;</span></code></pre>
+
+    <p>Vous pouvez désormais mettre <code>ca.key</code> de côté afin d’éviter que d’autres clients soient <br>
+        signés sans votre autorisation, mettre <code>client.csr</code> et <code>client.key</code> de côté pour
+        renouveler <br>
+        le cerificat sans tout regénérer, et mettre <code>client.pem</code> avec votre application client ce qui <br>
+        laisse <code>ca.crt</code>, <code>dhparam.pem</code>, <code>server.crt</code> et <code>server.key</code> dans le
+        dosier <br>
+        <code>/etc/ssl/certs/my-api</code>.</p>
+
+    <p>On active enfin le site et redémarre apache:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-sh hljs lasso">$ cd /etc/apache2/sites<span class="hljs-attribute">-enabled</span>
+$ ln <span class="hljs-attribute">-s</span> <span class="hljs-built_in">..</span>/sites<span class="hljs-attribute">-available</span>/<span
+                    class="hljs-number">000</span><span class="hljs-attribute">-localhost</span><span
+                    class="hljs-attribute">-ssl</span><span class="hljs-built_in">.</span>conf <span
+                    class="hljs-built_in">.</span><span class="hljs-subst">/</span>
+$ service apache2 restart</code></pre>
+
+
+
+    <h3 id="configuration-dans-symfony">Configuration dans Symfony</h3>
+
+    <p>Dans cette démo, je pars du principe que je n’ai qu’un seul client autorisé à utiliser l’API, <br>
+        mais rien ne vous empêche bien entendu de créer un user provider classique.</p>
+
+    <p>Voici le contenu de <code>app/config/security.yml</code>:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-yaml hljs java">security:
+
+    providers:
+        client_certificate:
+            memory:
+                users:
+                    client<span class="hljs-annotation">@my</span>.api:
+                        roles: ROLE_ADMIN
+    firewalls:
+        main:
+            pattern: ^/
+            stateless: <span class="hljs-keyword">true</span>
+            x509:
+                provider: client_certificate
+
+    access_control:
+      - { path: ^/, roles: ROLE_ADMIN, requires_channel: https, ip: <span class="hljs-number">127.0</span><span
+                    class="hljs-number">.0</span><span class="hljs-number">.1</span> }</code></pre>
+
+    <p>C’est tout ! Dans le firewall, <code>x509</code> indique à Symfony que l’utilisateur est pré-authentifié <br>
+        par Apache, à la fin du handshake SSL. Symfony regarde donc la variable <br>
+        <code>$_SERVER['SSL_CLIENT_S_DN_Email']</code> et appelle directement votre user provider avec.</p>
+
+
+
+    <h3 id="test">Test</h3>
+
+    <p>Dans votre API, ajoutez <code>AppBundle\Controller\TestController.php</code> avec le code suivant:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-preprocessor">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">AppBundle</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span
+                    class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span
+                    class="hljs-title">Controller</span>\<span class="hljs-title">Controller</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Sensio</span>\<span
+                    class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkExtraBundle</span>\<span
+                    class="hljs-title">Configuration</span>\<span class="hljs-title">Method</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Sensio</span>\<span
+                    class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkExtraBundle</span>\<span
+                    class="hljs-title">Configuration</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span
+                    class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span
+                    class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestController</span> <span
+            class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
+{</span>
+    <span class="hljs-comment">/**
+     *<span class="hljs-phpdoc"> @Route</span>("/test", name="test")
+     *<span class="hljs-phpdoc"> @Method</span>({"GET"})
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span
+                        class="hljs-keyword">function</span> <span class="hljs-title">testAction</span><span
+                        class="hljs-params">(Request <span class="hljs-variable">$request</span>)</span>
+    {</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JsonResponse([
+            <span class="hljs-string">'status'</span> =&gt; <span class="hljs-string">'OK'</span>,
+            <span class="hljs-string">'data'</span>   =&gt; sprintf(<span class="hljs-string">'Hello, %s!'</span>, <span
+                    class="hljs-variable">$request</span>-&gt;request-&gt;get(<span
+                    class="hljs-string">'name'</span>, <span class="hljs-string">'world'</span>)),
+        ]);
+    }
+}</code></pre>
+
+    <p>Dans votre application cliente, mettez:</p>
+
+
+
+    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-preprocessor">&lt;?php</span>
+
+<span class="hljs-keyword">require</span>(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>);
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">GuzzleHttp</span>\<span class="hljs-title">Client</span>;
+
+<span class="hljs-variable">$client</span> = <span class="hljs-keyword">new</span> Client([
+    <span class="hljs-string">'base_uri'</span> =&gt; <span class="hljs-string">'https://127.0.0.1'</span>,
+    <span class="hljs-string">'cert'</span>     =&gt; <span class="hljs-keyword">__DIR__</span>.<span
+                    class="hljs-string">'/cert/client.pem'</span>,
+
+    <span class="hljs-comment">// if your server certificate is self-signed...</span>
+    <span class="hljs-string">'verify'</span>   =&gt; <span class="hljs-keyword">false</span>,
+]);
+
+var_dump(
+    json_decode(<span class="hljs-variable">$client</span>-&gt;get(<span class="hljs-string">'/test'</span>)-&gt;getBody()-&gt;getContents(), <span
+                    class="hljs-keyword">true</span>)
+);</code></pre>
+
+    <p>Symfony propose d’autres “pre authenticated security firewalls”, notament pour kerberos, <a
+                href="https://symfony.com/doc/current/security/pre_authenticated.html">référez-vous <br>
+            à la documentation</a>. Pour en implémenter <br>
+        de nouveaux (genre pré-authent avec Okta, Uberproxy…), vous pouvez <br>
+        <a href="https://symfony.com/doc/current/security/custom_authentication_provider.html">créer un authentication
+            provider</a> <br>
+        (ce que fait X509 par exemple), ou bien utiliser Guard (ce qui me semble le plus rapide).</p>
+
+
+
+    <h2 id="bonus">Bonus</h2>
+
+    <p>Pour finir, et pour te remercier d’avoir survécu jusqu’à la fin de ce post, te voici quelques liens que je trouve
+        utiles:</p>
+
+    <ul>
+        <li><a href="https://www.vigilante.pw">https://www.vigilante.pw</a> et <a href="http://haveibeenpwned.com">http://haveibeenpwned.com</a>
+                pour te tenir informé des leaks de bases de données, première source des <a
+                        href="https://github.com/ninsuo/slides/blob/master/2017%20Let%27s%20continue%20to%20hack!.pdf">password
+                    reuse attacks</a>.</li>
+        <li><a href="https://haveibeenpwned.com/Passwords">https://haveibeenpwned.com/Passwords</a> et <a
+                        href="https://github.com/danielmiessler/SecLists">https://github.com/danielmiessler/SecLists</a>
+                te fournissent des bases de données de mots de passes les plus fréquemment utilisés. Si ton application
+                est sensible, tu peux intedire à tes utilisateurs d’utiliser l’un d’eux. </li>
+        <li><a href="https://howsecureismypassword.net">https://howsecureismypassword.net</a> calcule le temps qu’il
+                faudra pour bruteforcer ton mot de passe, ça peut être bon à savoir…</li>
+        <li><a href="https://onetimesecret.com">https://onetimesecret.com</a> permet de partager des clefs API ou des
+                mots de passes à tes collègues sans les mettre dans Slack ou dans un email. Ne mets que le mot de passe
+                sans aucun contexte bien entendu, sinon ça perd son intérêt !</li>
+        <li><a href="https://www.ssllabs.com/ssltest/analyze.html?d=twigfiddle.com">https://www.ssllabs.com/ssltest/analyze.html?d=twigfiddle.com</a>
+                permet de vérifier si ton certificat est correctement installé.</li>
+        <li><a href="https://www.dnsleaktest.com">https://www.dnsleaktest.com</a> te permet de vérifier si ton VPN
+                est correctement configuré, ça peut être pratique si tu te ballades sur Tor. </li>
+    </ul>
+
+    {% endverbatim %}
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/ninsuo.png') }}" alt="Alain Tiemblo"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url %}https://twitter.com/ninsuo{% endblock %}"
+           target="_blank">{% block article_author %}Alain Tiemblo{% endblock %}</a></h2>
+    <p>Alain Tiemblo est un développeur backend, et s’occupe principalement de la sécurité applicative chez BlaBlaCar
+        depuis 2015.
+        Vous pouvez revoir ses conférences sécurité web sur la chaîne Youtube de l’AFUP, <a
+                href="https://www.youtube.com/watch?v=uQTRs0rwO2E">ici</a> et <a
+                href="https://www.youtube.com/watch?v=YRRUbsXHC80">là</a>.</p>
+{% endblock %}
