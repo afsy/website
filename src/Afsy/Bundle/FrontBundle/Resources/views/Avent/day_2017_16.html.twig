@@ -19,24 +19,24 @@
     <p>Ahh, la sécurité, enfin on va parler d’un truc que tout le monde déteste !</p>
 
     <ul>
-        <li>Les patrons d’abord, car la sécurité coûte cher mais ne rapporte rien. <br>
+        <li>Les patrons d’abord, car la sécurité coûte cher mais ne rapporte rien.
                 En plus, se faire péter sa base en 2017 c’est tendance.</li>
-        <li>Les équipes marketing ensuite, car on rajoute des contraintes qui peuvent <br>
+        <li>Les équipes marketing ensuite, car on rajoute des contraintes qui peuvent
                 “abaisser le taux de conversion” des utilisateurs.</li>
-        <li>Les équipes tout court, car elles passent leur temps à switcher entre <br>
+        <li>Les équipes tout court, car elles passent leur temps à switcher entre
                 facebook et 2FA sur leur mobile, c’est long et fatiguant.</li>
-        <li>Les utilisateurs aussi, car ils ne peuvent pas librement mettre le nom de leur chien <br>
+        <li>Les utilisateurs aussi, car ils ne peuvent pas librement mettre le nom de leur chien
                 ou leur date de naissance en mot de passe.</li>
-        <li>Les ops, qui doivent scaler les performances d’une belle infrastructure <br>
+        <li>Les ops, qui doivent scaler les performances d’une belle infrastructure
                 microservice avec du handshake X.509 de partout.</li>
-        <li>Les développeurs, vous, bien entendu, car de toute façon on a pas le temps, notre framework <br>
-                fait le boulot pour nous, et puis qui oserait donc s’attaquer à une application que même le <br>
+        <li>Les développeurs, vous, bien entendu, car de toute façon on a pas le temps, notre framework
+                fait le boulot pour nous, et puis qui oserait donc s’attaquer à une application que même le
                 marketing n’arrive pas à afficher en 10ième page de Google?</li>
     </ul>
 
-    <p>Alors voilà, on est à 10 jours de Noël, tes projets sont bouclés, tu n’as plus envie <br>
-        de bosser avant les vacances, et tu es quand-même là. Pourquoi ne pas faire une petite <br>
-        revue sur les tendances et les erreurs classiques de sécurité dans tes webapps, <br>
+    <p>Alors voilà, on est à 10 jours de Noël, tes projets sont bouclés, tu n’as plus envie
+        de bosser avant les vacances, et tu es quand-même là. Pourquoi ne pas faire une petite
+        revue sur les tendances et les erreurs classiques de sécurité dans tes webapps,
         histoire de passer le temps de manière constructive ?</p>
 
     <p>C’est parti ! ✌️</p>
@@ -101,57 +101,57 @@
 
     <p><strong>A4 et A7 de 2013 deviennent A4 de 2017</strong></p>
 
-    <p>Tout d’abord, dans les risques de 2013, A4 (j’accède à <code>/resource/{id}</code> sans <br>
-        que <code>{id}</code> m’appartienne) et A7 (je valide mon form en javascript mais je le revalide <br>
+    <p>Tout d’abord, dans les risques de 2013, A4 (j’accède à <code>/resource/{id}</code> sans
+        que <code>{id}</code> m’appartienne) et A7 (je valide mon form en javascript mais je le revalide
         pas côté serveur) ont été mergés dans A4 de 2017.</p>
 
     <p><strong>A7 de 2017 est désormais “Insufficient Attack Protection”</strong></p>
 
-    <p>L’OWASP pointe du doigt notre laxisme au niveau du traitement automatique des <br>
-        attaques. Afin d’être complètement efficace, il nous faut automatiquement <br>
+    <p>L’OWASP pointe du doigt notre laxisme au niveau du traitement automatique des
+        attaques. Afin d’être complètement efficace, il nous faut automatiquement
         détecter, monitorer, logger et répondre.</p>
 
-    <p>Un exemple classique est une attaque sur le formulaire de login: on peut <br>
-        détecter une attaque par le nombre de soumissions par ip et par minute, <br>
-        monitorer facilement sur un graphique les connexions réussies/échouées, <br>
-        et bloquer une ip si elle dépasse une certaine limite. Cela éviterait <br>
-        bruteforce, dictionnary, password reuse, et j’en passe. Sauf si le <br>
-        hacker est très motivé, auquel cas il viendra avec un grand nombre d’ips et <br>
+    <p>Un exemple classique est une attaque sur le formulaire de login: on peut
+        détecter une attaque par le nombre de soumissions par ip et par minute,
+        monitorer facilement sur un graphique les connexions réussies/échouées,
+        et bloquer une ip si elle dépasse une certaine limite. Cela éviterait
+        bruteforce, dictionnary, password reuse, et j’en passe. Sauf si le
+        hacker est très motivé, auquel cas il viendra avec un grand nombre d’ips et
         il faudra trouver d’autres solutions.</p>
 
     <p><strong>A10 de 2017 devient “Underprotected APIs”</strong></p>
 
-    <p>Nos applications utilisent de plus en plus des APIs pour accéder au backend, <br>
-        cela permet aux interfaces web et mobile de récupérer les informations en <br>
-        un même point qui centralise le code métier. L’OWASP attire notre attention <br>
+    <p>Nos applications utilisent de plus en plus des APIs pour accéder au backend,
+        cela permet aux interfaces web et mobile de récupérer les informations en
+        un même point qui centralise le code métier. L’OWASP attire notre attention
         sur le manque de protections sur celles-ci. </p>
 
     <p>C’est assez simple à comprendre, on a moins l’occasion d’auditer nos APIs: </p>
 
     <ul>
-        <li>on utilise un SDK bien adapté pour y accéder, mais quel comportement ont <br>
+        <li>on utilise un SDK bien adapté pour y accéder, mais quel comportement ont
                 ces dernières quand on les utilise mal / directement ?</li>
-        <li>on ne voit pas facilement les données qui transitent entre l’app et l’API, <br>
+        <li>on ne voit pas facilement les données qui transitent entre l’app et l’API,
                 sont-elles toutes nécessaires et sont-elles toutes exposables ?</li>
     </ul>
 
-    <p>Pour débugger (voir les requêtes qui transitent, les modifier, les répéter en étant <br>
-        déconnecté), tu peux mettre votre client derrière un proxy (genre <br>
+    <p>Pour débugger (voir les requêtes qui transitent, les modifier, les répéter en étant
+        déconnecté), tu peux mettre votre client derrière un proxy (genre
         <a href="https://www.charlesproxy.com/">Charles</a>). C’est très instructif !</p>
 
     <p><strong>A10 de 2013 disparait</strong></p>
 
-    <p>Les failles open redirects (le fait de rediriger l’utilisateur vers une <br>
-        url arbitraire sans la valider) ne sont plus dans le top 10 des risques, mais <br>
+    <p>Les failles open redirects (le fait de rediriger l’utilisateur vers une
+        url arbitraire sans la valider) ne sont plus dans le top 10 des risques, mais
         c’est pas une raison pour renvoyer une <code>RedirectResponse</code> sur le referrer ♥️.</p>
 
 
 
     <h2 id="security-code-tips">Security Code Tips!</h2>
 
-    <p>Maintenant, faisons un petit tour dans tes applications, à grand coups de grep, afin <br>
-        de vérifier si elles contiennent quelques erreurs de base ou au moins des choses suspectes. <br>
-        Je te préviens, il s’agit souvent de cas issus d’un besoin bien tordu… du coup la solution <br>
+    <p>Maintenant, faisons un petit tour dans tes applications, à grand coups de grep, afin
+        de vérifier si elles contiennent quelques erreurs de base ou au moins des choses suspectes.
+        Je te préviens, il s’agit souvent de cas issus d’un besoin bien tordu… du coup la solution
         proposée peut-être également tordue. Soyons pragmatique, et faisons quelque chose de sécurisé. </p>
 
 
@@ -163,12 +163,15 @@
     <p>Injecter du code dans tes pages afin, si possible, de placer un tag <code>&lt;script
             src="evil.com/boom.js"/&gt;</code>. </p>
 
-    <p>De là, tout devient possible : <br>
-        - récupérer le contenu de la page (peut-être utile si l’injection en front touche le backoffice) <br>
-        - remplir des formulaires de la page même s’ils sont protégés avec un token csrf <br>
-        - récupérer le cookie de session (si le flag “httponly” a été oublié) <br>
-        - remplacer totalement le markup de la page par autre chose (phishing ou autre) <br>
-        - …</p>
+    <p>De là, tout devient possible :</p>
+
+    <ul>
+        <li>récupérer le contenu de la page (peut-être utile si l’injection en front touche le backoffice)</li>
+        <li>remplir des formulaires de la page même s’ils sont protégés avec un token csrf</li>
+        <li>récupérer le cookie de session (si le flag “httponly” a été oublié)</li>
+        <li>remplacer totalement le markup de la page par autre chose (phishing ou autre)</li>
+        <li>…</li>
+    </ul>
 
     <p><strong><code>{{ myVariable | raw }}</code> dans une vue</strong></p>
 
@@ -453,25 +456,25 @@
     <h2 id="identification-à-laide-dun-certificat-x509-avec-symfony">Identification à l’aide d’un certificat X.509 avec
         Symfony</h2>
 
-    <p>Pour terminer, je vous propose un tutorial complet histoire de traiter d’un sujet un peu costaud <br>
+    <p>Pour terminer, je vous propose un tutorial complet histoire de traiter d’un sujet un peu costaud
         pour des devs non-ops.</p>
 
-    <p>Quand on veut sécuriser le traffic entre deux applications (genre dans une architecture <br>
-        micro-service) il y a l’authentification par certificats X.509 qui est beaucoup plus <br>
+    <p>Quand on veut sécuriser le traffic entre deux applications (genre dans une architecture
+        micro-service) il y a l’authentification par certificats X.509 qui est beaucoup plus
         adaptée qu’un simple secret partagé.</p>
 
-    <p>Le principe ? En un mot, le serveur possède un certificat d’authorité et signe un certificat <br>
-        client dont l’email permettra d’identifier l’utilisateur. Saviez-vous que Symfony supporte <br>
+    <p>Le principe ? En un mot, le serveur possède un certificat d’authorité et signe un certificat
+        client dont l’email permettra d’identifier l’utilisateur. Saviez-vous que Symfony supporte
         nativement cette forme d’identification ?</p>
 
 
 
     <h3 id="certificats">Certificats</h3>
 
-    <p>Pour commencer, votre application serveur doit tourner sur SSL, que ce soit un certificat <br>
+    <p>Pour commencer, votre application serveur doit tourner sur SSL, que ce soit un certificat
         signé (genre Let’s encrypt!, Comodo etc) ou non signé. </p>
 
-    <p>Dans cette démonstration, je vais partir du principe que mon API n’est pas exposée, du coup <br>
+    <p>Dans cette démonstration, je vais partir du principe que mon API n’est pas exposée, du coup
         je commence par créer un certificat auto-signé qui sera utilisé par apache.</p>
 
 
@@ -542,7 +545,7 @@ $ <span class="hljs-tag">openssl</span> <span class="hljs-tag">req</span> <span 
                     class="hljs-attr_selector">[]</span><span class="hljs-pseudo">:ca</span><span class="hljs-at_rule">@<span
                         class="hljs-keyword">my.api</span></span></code></pre>
 
-    <p>Enfin je crée le cetificat client et je le fais signer par l’authorité, attention à bien choisir <br>
+    <p>Enfin je crée le cetificat client et je le fais signer par l’authorité, attention à bien choisir
         l’email ici, on le réutilisera plus tard.</p>
 
 
@@ -582,7 +585,7 @@ to be sent with your certificate request
                     class="hljs-constant">CAkey</span> ca.key -set_serial <span class="hljs-number">01</span> -out client.crt
 <span class="hljs-variable">$ </span>cat client.crt client.key &gt; client.pem</code></pre>
 
-    <p>On peut désormais configurer apache2, dans <code>/etc/apache2/sites-available</code>, on ajoute le fichier <br>
+    <p>On peut désormais configurer apache2, dans <code>/etc/apache2/sites-available</code>, on ajoute le fichier
         <code>000-localhost-ssl.conf</code>:</p>
 
 
@@ -610,12 +613,12 @@ to be sent with your certificate request
     <span class="hljs-tag">&lt;/VirtualHost&gt;</span>
 <span class="hljs-tag">&lt;/IfModule&gt;</span></code></pre>
 
-    <p>Vous pouvez désormais mettre <code>ca.key</code> de côté afin d’éviter que d’autres clients soient <br>
+    <p>Vous pouvez désormais mettre <code>ca.key</code> de côté afin d’éviter que d’autres clients soient
         signés sans votre autorisation, mettre <code>client.csr</code> et <code>client.key</code> de côté pour
-        renouveler <br>
-        le cerificat sans tout regénérer, et mettre <code>client.pem</code> avec votre application client ce qui <br>
+        renouveler
+        le cerificat sans tout regénérer, et mettre <code>client.pem</code> avec votre application client ce qui
         laisse <code>ca.crt</code>, <code>dhparam.pem</code>, <code>server.crt</code> et <code>server.key</code> dans le
-        dosier <br>
+        dosier
         <code>/etc/ssl/certs/my-api</code>.</p>
 
     <p>On active enfin le site et redémarre apache:</p>
@@ -633,7 +636,7 @@ $ service apache2 restart</code></pre>
 
     <h3 id="configuration-dans-symfony">Configuration dans Symfony</h3>
 
-    <p>Dans cette démo, je pars du principe que je n’ai qu’un seul client autorisé à utiliser l’API, <br>
+    <p>Dans cette démo, je pars du principe que je n’ai qu’un seul client autorisé à utiliser l’API,
         mais rien ne vous empêche bien entendu de créer un user provider classique.</p>
 
     <p>Voici le contenu de <code>app/config/security.yml</code>:</p>
@@ -659,8 +662,8 @@ $ service apache2 restart</code></pre>
       - { path: ^/, roles: ROLE_ADMIN, requires_channel: https, ip: <span class="hljs-number">127.0</span><span
                     class="hljs-number">.0</span><span class="hljs-number">.1</span> }</code></pre>
 
-    <p>C’est tout ! Dans le firewall, <code>x509</code> indique à Symfony que l’utilisateur est pré-authentifié <br>
-        par Apache, à la fin du handshake SSL. Symfony regarde donc la variable <br>
+    <p>C’est tout ! Dans le firewall, <code>x509</code> indique à Symfony que l’utilisateur est pré-authentifié
+        par Apache, à la fin du handshake SSL. Symfony regarde donc la variable
         <code>$_SERVER['SSL_CLIENT_S_DN_Email']</code> et appelle directement votre user provider avec.</p>
 
 
@@ -734,11 +737,11 @@ var_dump(
 );</code></pre>
 
     <p>Symfony propose d’autres “pre authenticated security firewalls”, notament pour kerberos, <a
-                href="https://symfony.com/doc/current/security/pre_authenticated.html">référez-vous <br>
-            à la documentation</a>. Pour en implémenter <br>
-        de nouveaux (genre pré-authent avec Okta, Uberproxy…), vous pouvez <br>
+                href="https://symfony.com/doc/current/security/pre_authenticated.html">référez-vous
+            à la documentation</a>. Pour en implémenter
+        de nouveaux (genre pré-authent avec Okta, Uberproxy…), vous pouvez
         <a href="https://symfony.com/doc/current/security/custom_authentication_provider.html">créer un authentication
-            provider</a> <br>
+            provider</a>
         (ce que fait X509 par exemple), ou bien utiliser Guard (ce qui me semble le plus rapide).</p>
 
 
