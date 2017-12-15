@@ -5,6 +5,7 @@
 {% block article_title "Jour 16 - Des astuces sécurité avec Symfony" %}
 
 {% block article_content %}
+    {% verbatim %}
 
     <style type="text/css">
         em {
@@ -22,7 +23,7 @@
 
     <ul>
         <li>
-            Les patrons d’abord, car la sécurité coûte cher mais ne  rapporte
+            Les patrons d’abord, car la sécurité coûte cher mais ne rapporte
             rien. En plus, se faire péter sa base en 2017 c’est tendance.
         </li>
         <li>
@@ -64,56 +65,57 @@
         Du noveau dans l’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr> Top 10 !
     </h2>
 
-    <p>Et oui, l’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr> Top 10 a été mis à jour cette année, quoi de neuf ?</p>
+    <p>Et oui, l’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr> Top 10 a été mis à jour
+        cette année, quoi de neuf ?</p>
 
     <table class="table" lang="en">
         <thead>
-            <tr>
-                <th>Top 10 OWASP 2013</th>
-                <th>Top 10 OWASP 2017</th>
-            </tr>
+        <tr>
+            <th>Top 10 OWASP 2013</th>
+            <th>Top 10 OWASP 2017</th>
+        </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>A1-Injection</td>
-                <td>A1-Injection</td>
-            </tr>
-            <tr>
-                <td>A2-Broken Authentication and Session Management</td>
-                <td>A2-Broken Authentication and Session Management</td>
-            </tr>
-            <tr>
-                <td>A3-Cross-Site Scripting (<abbr title="Cross Site Scripting" lang="en">XSS</abbr>)</td>
-                <td>A3-Cross-Site Scripting (<abbr title="Cross Site Scripting" lang="en">XSS</abbr>)</td>
-            </tr>
-            <tr>
-                <td>A4-Insecure Direct Object References</td>
-                <td>A4-Broken Access Control</td>
-            </tr>
-            <tr>
-                <td>A5-Security Misconfiguration</td>
-                <td>A5-Security Misconfiguration</td>
-            </tr>
-            <tr>
-                <td>A6-Sensitive Data Exposure</td>
-                <td>A6-Sensitive Data Exposure</td>
-            </tr>
-            <tr>
-                <td>A7-Missing Function Level Access Control</td>
-                <td>A7-Insufficient Attack Protection</td>
-            </tr>
-            <tr>
-                <td>A8-Cross-Site Request Forgery (<abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>)</td>
-                <td>A8-Cross-Site Request Forgery (<abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>)</td>
-            </tr>
-            <tr>
-                <td>A9-Using Components with Known Vulnerabilities</td>
-                <td>A9-Using Components with Known Vulnerabilities</td>
-            </tr>
-            <tr>
-                <td>A10-Unvalidated Redirects and Forwards</td>
-                <td>A10-Underprotected APIs</td>
-            </tr>
+        <tr>
+            <td>A1-Injection</td>
+            <td>A1-Injection</td>
+        </tr>
+        <tr>
+            <td>A2-Broken Authentication and Session Management</td>
+            <td>A2-Broken Authentication and Session Management</td>
+        </tr>
+        <tr>
+            <td>A3-Cross-Site Scripting (<abbr title="Cross Site Scripting" lang="en">XSS</abbr>)</td>
+            <td>A3-Cross-Site Scripting (<abbr title="Cross Site Scripting" lang="en">XSS</abbr>)</td>
+        </tr>
+        <tr>
+            <td>A4-Insecure Direct Object References</td>
+            <td>A4-Broken Access Control</td>
+        </tr>
+        <tr>
+            <td>A5-Security Misconfiguration</td>
+            <td>A5-Security Misconfiguration</td>
+        </tr>
+        <tr>
+            <td>A6-Sensitive Data Exposure</td>
+            <td>A6-Sensitive Data Exposure</td>
+        </tr>
+        <tr>
+            <td>A7-Missing Function Level Access Control</td>
+            <td>A7-Insufficient Attack Protection</td>
+        </tr>
+        <tr>
+            <td>A8-Cross-Site Request Forgery (<abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>)</td>
+            <td>A8-Cross-Site Request Forgery (<abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>)</td>
+        </tr>
+        <tr>
+            <td>A9-Using Components with Known Vulnerabilities</td>
+            <td>A9-Using Components with Known Vulnerabilities</td>
+        </tr>
+        <tr>
+            <td>A10-Unvalidated Redirects and Forwards</td>
+            <td>A10-Underprotected APIs</td>
+        </tr>
         </tbody>
     </table>
 
@@ -140,7 +142,7 @@
         peut détecter une attaque par le nombre de soumissions par adresse
         <abbr title="Internet Protocol">IP</abbr> et par minute,
         surveiller facilement sur un graphique les connexions réussies <abbr title="versus">vs</abbr>
-        échouées,  et bloquer une <abbr title="Internet Protocol">IP</abbr>
+        échouées, et bloquer une <abbr title="Internet Protocol">IP</abbr>
         si elle dépasse une certaine limite. Cela éviterait les attarques par
         force brute, dictionnaire, réutilisation de mot de passe, et j’en passe.
         Sauf si le <em lang="en">hacker</em> est très motivé, auquel cas il
@@ -148,14 +150,15 @@
         et il faudra trouver d’autres solutions.
     </p>
 
-    <p>A10 de 2017 devient « <em lang="en">Underprotected <abbr title="Application Programming Interface">API</abbr>s »</em></p>
+    <p>A10 de 2017 devient « <em lang="en">Underprotected <abbr title="Application Programming Interface">API</abbr>s »</em>
+    </p>
 
     <p>
         Nos applications utilisent de plus en plus des <abbr title="Application Programming Interface">API</abbr>s
         pour accéder au <span lang="en">backend</span>, cela permet aux interfaces
         Web et mobile de récupérer les informations en un même point qui centralise
         le code métier. L’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr>
-        attire notre attention  sur le manque de protections sur celles-ci.
+        attire notre attention sur le manque de protections sur celles-ci.
     </p>
 
     <p>
@@ -218,9 +221,13 @@
 
     <ul>
         <li>Récupérer le contenu de la page (peut-être utile si l’injection en front touche le backoffice),</li>
-        <li>Remplir des formulaires de la page même s’ils sont protégés avec un jeton <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>,</li>
+        <li>Remplir des formulaires de la page même s’ils sont protégés avec un jeton <abbr
+                    title="Cross Site Request Forgery" lang="en">CSRF</abbr>,
+        </li>
         <li>Récupérer le cookie de session si le drapeau <code>httponly</code> a été oublié,</li>
-        <li>Remplacer totalement la structure <abbr title="HyperText Markup Language" lang="en">HTML</abbr> de la page par autre chose (<span lang="en">phishing</span> ou autre),</li>
+        <li>Remplacer totalement la structure <abbr title="HyperText Markup Language" lang="en">HTML</abbr> de la page
+            par autre chose (<span lang="en">phishing</span> ou autre),
+        </li>
         <li>etc.</li>
     </ul>
 
@@ -230,7 +237,7 @@
 
     <ul>
         <li>
-            Je peux contourner l’échappement car cette variable est créée sur
+            ❌ Je peux contourner l’échappement car cette variable est créée sur
             la base de constantes connues par le backend.
         </li>
         <li>
@@ -260,7 +267,7 @@
 
     <ul>
         <li>
-            Utiliser <code>{{ myVariable }}</code> vous protège car Twig
+            ❌ Utiliser <code>{{ myVariable }}</code> vous protège car Twig
             échappe automatiquement le contenu de la variable.
         </li>
         <li>
@@ -285,7 +292,7 @@
 
     <ul>
         <li>
-            Mon filtre <code>{{ userEntity|showUser }}</code> affiche une jolie
+            ❌ Mon filtre <code>{{ userEntity|showUser }}</code> affiche une jolie
             boîte contenant toutes les informations de l'utilisateur. Comme le
             filtre génère un bloc de code <abbr title="HyperText Markup Language" lang="en">HTML</abbr>,
             j’ai besoin d’utiliser l'option <code>['is_safe' =&gt; ['html']</code>
@@ -340,7 +347,8 @@
 
     <ul>
         <li>
-            Mes utilisateurs peuvent cliquer sur le lien <code>&lt;a href="{{ path('photo_remove') }}"&gt;Effacer la photo&lt;/a&gt;</code>
+            ❌ Mes utilisateurs peuvent cliquer sur le lien <code>&lt;a href="{{ path('photo_remove') }}"&gt;Effacer la
+                photo&lt;/a&gt;</code>
             afin d'effacer leur photo de profil.
         </li>
         <li>
@@ -377,20 +385,18 @@
 
     <p>Vous devrez ensuite contrôler la valeur de ce jeton depuis votre contrôleur.</p>
 
-    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">if</span> (!<span
-                    class="hljs-variable">$this</span>-&gt;isCsrfTokenValid(<span
-                    class="hljs-string">'photo'</span>, <span class="hljs-variable">$csrf</span>)) {
-    <span class="hljs-keyword">throw</span> <span
-                    class="hljs-variable">$this</span>-&gt;createAccessDeniedException(<span class="hljs-string">'Désolé, votre session a expiré. Veuillez recommancer.'</span>);
-}</code></pre>
+    <pre><code class="language-php">if (!$this-&gt;isCsrfTokenValid('photo', $csrf)) {
+    throw $this-&gt;createAccessDeniedException('Désolé, votre session a expiré. Veuillez recommancer.');
+}
+</code></pre>
 
     <p>Il est aussi très facile de générer ce jeton depuis un test d’intégration :</p>
 
-    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-variable">$csrf</span> = <span
-                    class="hljs-variable">$client</span>-&gt;getContainer()-&gt;get(<span class="hljs-string">'security.csrf.token_manager'</span>)-&gt;getToken(<span
-                    class="hljs-string">'photo'</span>)-&gt;getValue();</code></pre>
+    <pre><code class="language-php">$csrf = $this-&gt;getContainer()-&gt;get('security.csrf.token_manager')-&gt;getToken('photo')-&gt;getValue();
+</code></pre>
 
-    <p><strong>Désactivation la protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> des formulaires.</strong></p>
+    <p><strong>Désactivation la protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> des
+            formulaires.</strong></p>
 
     <p><strong><code>'csrf_protection' =&gt; false,</code> dans les options de formulaire.</strong></p>
 
@@ -401,13 +407,13 @@
 
     <ul>
         <li>
-            J’ai mon appli mobile qui poste les formulaires dans mon backend
+            ❌ J’ai mon appli mobile qui poste les formulaires dans mon backend
             Symfony de la même manière que le front Web. Du coup les jetons
             <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> me
             gênent !
         </li>
         <li>
-            Je mets en cache mes pages, du coup tout le monde se retrouve avec
+            ❌ Je mets en cache mes pages, du coup tout le monde se retrouve avec
             le jeton d’un seul utilisateur !
         </li>
         <li>
@@ -440,7 +446,7 @@
 
     <ul>
         <li>
-            J’ai plusieurs formulaires et j’en utilise une partie ou une autre
+            ❌ J’ai plusieurs formulaires et j’en utilise une partie ou une autre
             en fonction du contexte, du coup je n’ai pas besoin des jetons de
             protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>
             partout.
@@ -467,7 +473,8 @@
             lors d’une connexion via un fournisseur OAuth (Facebook Connect, etc.)</strong>
     </p>
 
-    <p>Petit rappel sur le fonctionnement de ce type d'authentification avec l'exemple de <em lang="en">Twitter</em>.</p>
+    <p>Petit rappel sur le fonctionnement de ce type d'authentification avec l'exemple de <em lang="en">Twitter</em>.
+    </p>
 
     <ol>
         <li>
@@ -552,19 +559,15 @@
         vous révéler parfois bien des surprises…
     </p>
 
-    <pre class="prettyprint"><code class=" hljs perl"> <span class="hljs-keyword">grep</span> -Ri <span
-                    class="hljs-string">'delete '</span> src/|<span class="hljs-keyword">grep</span> <span
-                    class="hljs-string">'%s'</span>
- <span class="hljs-keyword">grep</span> -Ri <span class="hljs-string">'insert '</span> src/|<span class="hljs-keyword">grep</span> <span
-                    class="hljs-string">'%s'</span>
- <span class="hljs-keyword">grep</span> -Ri <span class="hljs-string">'update '</span> src/|<span class="hljs-keyword">grep</span> <span
-                    class="hljs-string">'%s'</span>
- <span class="hljs-keyword">grep</span> -Ri <span class="hljs-string">'select '</span> src/|<span class="hljs-keyword">grep</span> <span
-                    class="hljs-string">'%s'</span></code></pre>
+    <pre><code class="language-none"> grep -Ri 'delete ' src/|grep '%s'
+ grep -Ri 'insert ' src/|grep '%s'
+ grep -Ri 'update ' src/|grep '%s'
+ grep -Ri 'select ' src/|grep '%s'
+</code></pre>
 
     <ul>
         <li>
-            Je dois exécuter des requêtes SQL asynchrones pour ne pas dégrader
+            ❌ Je dois exécuter des requêtes SQL asynchrones pour ne pas dégrader
             les performances du frontend pour une action dont l’utilisateur
             n’attend pas une réponse immédiate. Du coup, je crée ma requête à
             coups d'instructions <code>sprintf()</code> et <code>addslahes()</code>.
@@ -587,22 +590,22 @@
         </li>
     </ul>
 
-    <pre class="prettyprint"><code class="language-json hljs ">[
-    <span class="hljs-string">"UPDATE user SET name = :name WHERE id = :id"</span>,
+    <pre><code class="language-json">[
+    "UPDATE user SET name = :name WHERE id = :id",
     {
-        "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span
-                        class="hljs-string">"Bob"</span></span>,
-        "<span class="hljs-attribute">id</span>": <span class="hljs-value"><span class="hljs-number">42</span>
-    </span>}
-]</code></pre>
+        "name": "Bob",
+        "id": 42
+    }
+]
+</code></pre>
 
-    <h3 id="attaques-open-redirect">Attaues <em lang="en">Open Redirect</em></h3>
+    <h3 id="attaques-open-redirect">Attaques <em lang="en">Open Redirect</em></h3>
 
     <p><strong>Rediriger après une connexion</strong></p>
 
     <ul>
         <li>
-            Lorsque mon utilisateur arrive sur une <em lang="en">landing page</em>
+            ❌ Lorsque mon utilisateur arrive sur une <em lang="en">landing page</em>
             qui nécessite d’être authentifié, je le redirige vers
             <code>https://connect.monsite.com/login?redirect=https://landing.monsite.com/</code>.
         </li>
@@ -634,7 +637,7 @@
 
     <ul>
         <li>
-            J’ai plusieurs <em lang="en">landing pages</em> comme
+            ❌ J’ai plusieurs <em lang="en">landing pages</em> comme
             <a href="https://landing.monsite.com/foo/bar.php">https://landing.monsite.com/foo/bar.php</a>,
             <a href="https://landing.monsite.com/hello/word.php">https://landing.monsite.com/hello/word.php</a>,
             etc. Pour les sécuriser, je vérifie que l’<abbr title="Uniform Resource Locator" lang="en">URL</abbr>
@@ -659,7 +662,7 @@
 
     <ul>
         <li>
-            Lorsque mon formulaire est valide, mon contrôleur Symfony enregistre
+            ❌ Lorsque mon formulaire est valide, mon contrôleur Symfony enregistre
             un message <em lang="en">flash</em> dans la session, puis renvoie
             une réponse de redirection vers le <em>Referer</em> :
             <code>new RedirectResponse($request-&gt;headers-&gt;get('Referer'));</code>.
@@ -679,44 +682,26 @@
 
     <p>Exemple que vous pouvez ajouter à votre classe de base de contrôleur :</p>
 
-    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">protected</span> <span
-                    class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSafeRefererOr</span><span
-                        class="hljs-params">(Request <span class="hljs-variable">$request</span>, <span
-                            class="hljs-variable">$fallback</span>)</span> {</span>
-    <span class="hljs-keyword">if</span> (<span class="hljs-variable">$request</span>-&gt;headers-&gt;has(<span
-                    class="hljs-string">'referer'</span>)) {
-        <span class="hljs-variable">$referer</span> = <span
-                    class="hljs-variable">$request</span>-&gt;headers-&gt;get(<span class="hljs-string">'referer'</span>);
+    <pre><code class="language-php">protected function getSafeRefererOr(Request $request, $fallback) {
+    if ($request-&gt;headers-&gt;has('referer')) {
+        $referer = $request-&gt;headers-&gt;get('referer');
 
-        <span class="hljs-comment">// URL begins with '/' but not '//'</span>
-        <span class="hljs-keyword">if</span> (strlen(<span class="hljs-variable">$referer</span>) &lt; <span
-                    class="hljs-number">2</span> || (<span class="hljs-variable">$referer</span>[<span
-                    class="hljs-number">0</span>] == <span class="hljs-string">'/'</span> &amp;&amp; <span
-                    class="hljs-variable">$referer</span>[<span class="hljs-number">1</span>] != <span
-                    class="hljs-string">'/'</span>)) {
-            <span class="hljs-keyword">return</span> <span class="hljs-variable">$referer</span>;
+        // URL begins with '/' but not '//'
+        if (strlen($referer) &lt; 2 || ($referer[0] == '/' &amp;&amp; $referer[1] != '/')) {
+            return $referer;
         }
 
-        <span class="hljs-comment">// URL starts by the same host</span>
-        <span class="hljs-variable">$baseUrl</span> = <span
-                    class="hljs-variable">$request</span>-&gt;getScheme() . <span
-                    class="hljs-string">'://'</span> . <span
-                    class="hljs-variable">$request</span>-&gt;getHost() . ((<span class="hljs-variable">$request</span>-&gt;getPort() != <span
-                    class="hljs-number">80</span> &amp;&amp; <span class="hljs-variable">$request</span>-&gt;getPort() != <span
-                    class="hljs-number">443</span>) ? <span class="hljs-string">':'</span> . <span
-                    class="hljs-variable">$request</span>-&gt;getPort() : <span class="hljs-string">''</span>) . <span
-                    class="hljs-string">'/'</span>;
-        <span class="hljs-keyword">if</span> (strncmp(<span class="hljs-variable">$referer</span>, <span
-                    class="hljs-variable">$baseUrl</span>, strlen(<span
-                    class="hljs-variable">$baseUrl</span>)) === <span class="hljs-number">0</span>) {
-            <span class="hljs-keyword">return</span> <span class="hljs-variable">$referer</span>;
+        // URL starts by the same host
+        $baseUrl = $request-&gt;getScheme() . '://' . $request-&gt;getHost() . (($request-&gt;getPort() != 80 &amp;&amp; $request-&gt;getPort() != 443) ? ':' . $request-&gt;getPort() : '') . '/';
+        if (strncmp($referer, $baseUrl, strlen($baseUrl)) === 0) {
+            return $referer;
         }
     }
 
-    <span class="hljs-comment">// referer is not safe, we prefer returning fallback url</span>
-    <span class="hljs-keyword">return</span> <span class="hljs-variable">$fallback</span>;
-}</code></pre>
-
+    // referer is not safe, we prefer returning fallback url
+    return $fallback;
+}
+</code></pre>
 
     <h2 id="identification-via-un-certificat-x509-avec-symfony">
         Identification via un certificat X.509 avec Symfony
@@ -757,69 +742,37 @@
         auto-signé qui sera utilisé par Apache.
     </p>
 
-    <pre class="prettyprint"><code class="language-sh hljs ruby"><span class="hljs-variable">$ </span>mkdir -p /etc/ssl/certs/my-api
-<span class="hljs-variable">$ </span>cd /etc/ssl/certs/my-api
+    <pre><code class="language-sh">$ mkdir -p /etc/ssl/certs/my-api
+$ cd /etc/ssl/certs/my-api
 
-<span class="hljs-variable">$ </span>openssl req -x509 -nodes -days <span class="hljs-number">365</span> -newkey <span
-                    class="hljs-symbol">rsa:</span><span class="hljs-number">2048</span> -keyout server.key -out server.crt
+$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.crt
 (...)
 
-<span class="hljs-constant">Country</span> <span class="hljs-constant">Name</span> (<span class="hljs-number">2</span> letter code) [<span
-                    class="hljs-constant">AU</span>]<span class="hljs-symbol">:FR</span>
-<span class="hljs-constant">State</span> <span class="hljs-keyword">or</span> <span
-                    class="hljs-constant">Province</span> <span class="hljs-constant">Name</span> (full name) [<span
-                    class="hljs-constant">Some</span>-<span class="hljs-constant">State</span>]<span
-                    class="hljs-symbol">:</span>
-<span class="hljs-constant">Locality</span> <span class="hljs-constant">Name</span> (eg, city) []<span
-                    class="hljs-symbol">:Paris</span>
-<span class="hljs-constant">Organization</span> <span class="hljs-constant">Name</span> (eg, company) [<span
-                    class="hljs-constant">Internet</span> <span class="hljs-constant">Widgits</span> <span
-                    class="hljs-constant">Pty</span> <span class="hljs-constant">Ltd</span>]<span class="hljs-symbol">:My</span> <span
-                    class="hljs-constant">Api</span>
-<span class="hljs-constant">Organizational</span> <span class="hljs-constant">Unit</span> <span class="hljs-constant">Name</span> (eg, section) []<span
-                    class="hljs-symbol">:</span>
-<span class="hljs-constant">Common</span> <span class="hljs-constant">Name</span> (e.g. server <span
-                    class="hljs-constant">FQDN</span> <span class="hljs-keyword">or</span> <span class="hljs-constant">YOUR</span> name) []<span
-                    class="hljs-symbol">:</span>
-<span class="hljs-constant">Email</span> <span class="hljs-constant">Address</span> []<span
-                    class="hljs-symbol">:server</span><span class="hljs-variable">@my</span>.api
+Country Name (2 letter code) [AU]:FR
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:Paris
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:My Api
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:
+Email Address []:server@my.api
 
-<span class="hljs-variable">$ </span>openssl dhparam -out dhparam.pem <span class="hljs-number">2048</span></code></pre>
+$ openssl dhparam -out dhparam.pem 2048
+</code></pre>
 
     <p>Ensuite, je crée le certificat d’authorité :</p>
 
-    <pre class="prettyprint"><code class="language-sh hljs css">$ <span class="hljs-tag">openssl</span> <span
-                    class="hljs-tag">genrsa</span> <span class="hljs-tag">-out</span> <span
-                    class="hljs-tag">ca</span><span class="hljs-class">.key</span> 4096
-$ <span class="hljs-tag">openssl</span> <span class="hljs-tag">req</span> <span class="hljs-tag">-new</span> <span
-                    class="hljs-tag">-x509</span> <span class="hljs-tag">-days</span> 365 <span
-                    class="hljs-tag">-key</span> <span class="hljs-tag">ca</span><span
-                    class="hljs-class">.key</span> <span class="hljs-tag">-out</span> <span
-                    class="hljs-tag">ca</span><span class="hljs-class">.crt</span>
+    <pre><code class="language-sh">$ openssl genrsa -out ca.key 4096
+$ openssl req -new -x509 -days 365 -key ca.key -out ca.crt
 (...)
 
-<span class="hljs-tag">Country</span> <span class="hljs-tag">Name</span> (2 <span class="hljs-tag">letter</span> <span
-                    class="hljs-tag">code</span>) <span class="hljs-attr_selector">[AU]</span><span class="hljs-pseudo">:FR</span>
-<span class="hljs-tag">State</span> <span class="hljs-tag">or</span> <span class="hljs-tag">Province</span> <span
-                    class="hljs-tag">Name</span> (<span class="hljs-tag">full</span> <span class="hljs-tag">name</span>) <span
-                    class="hljs-attr_selector">[Some-State]</span>:
-<span class="hljs-tag">Locality</span> <span class="hljs-tag">Name</span> (<span class="hljs-tag">eg</span>, <span
-                    class="hljs-tag">city</span>) <span class="hljs-attr_selector">[]</span><span class="hljs-pseudo">:Paris</span>
-<span class="hljs-tag">Organization</span> <span class="hljs-tag">Name</span> (<span class="hljs-tag">eg</span>, <span
-                    class="hljs-tag">company</span>) <span
-                    class="hljs-attr_selector">[Internet Widgits Pty Ltd]</span><span
-                    class="hljs-pseudo">:My</span> <span class="hljs-tag">Api</span>
-<span class="hljs-tag">Organizational</span> <span class="hljs-tag">Unit</span> <span
-                    class="hljs-tag">Name</span> (<span class="hljs-tag">eg</span>, <span
-                    class="hljs-tag">section</span>) <span class="hljs-attr_selector">[]</span>:
-<span class="hljs-tag">Common</span> <span class="hljs-tag">Name</span> (<span class="hljs-tag">e</span><span
-                    class="hljs-class">.g</span>. <span class="hljs-tag">server</span> <span
-                    class="hljs-tag">FQDN</span> <span class="hljs-tag">or</span> <span
-                    class="hljs-tag">YOUR</span> <span class="hljs-tag">name</span>) <span
-                    class="hljs-attr_selector">[]</span>:
-<span class="hljs-tag">Email</span> <span class="hljs-tag">Address</span> <span
-                    class="hljs-attr_selector">[]</span><span class="hljs-pseudo">:ca</span><span class="hljs-at_rule">@<span
-                        class="hljs-keyword">my.api</span></span></code></pre>
+Country Name (2 letter code) [AU]:FR
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:Paris
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:My Api
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:
+Email Address []:ca@my.api
+</code></pre>
 
     <p>
         Enfin je crée le cetificat client et je le fais signer par l’authorité.
@@ -827,40 +780,27 @@ $ <span class="hljs-tag">openssl</span> <span class="hljs-tag">req</span> <span 
         plus tard.
     </p>
 
-    <pre class="prettyprint"><code class="language-sh hljs ruby"><span class="hljs-variable">$ </span>openssl genrsa -out client.key <span
-                    class="hljs-number">4096</span>
-<span class="hljs-variable">$ </span>openssl req -new -key client.key -out client.csr
+
+    <pre><code class="language-sh">$ openssl genrsa -out client.key 4096
+$ openssl req -new -key client.key -out client.csr
 (...)
 
-<span class="hljs-constant">Country</span> <span class="hljs-constant">Name</span> (<span class="hljs-number">2</span> letter code) [<span
-                    class="hljs-constant">AU</span>]<span class="hljs-symbol">:FR</span>
-<span class="hljs-constant">State</span> <span class="hljs-keyword">or</span> <span
-                    class="hljs-constant">Province</span> <span class="hljs-constant">Name</span> (full name) [<span
-                    class="hljs-constant">Some</span>-<span class="hljs-constant">State</span>]<span
-                    class="hljs-symbol">:</span>
-<span class="hljs-constant">Locality</span> <span class="hljs-constant">Name</span> (eg, city) []<span
-                    class="hljs-symbol">:Paris</span>
-<span class="hljs-constant">Organization</span> <span class="hljs-constant">Name</span> (eg, company) [<span
-                    class="hljs-constant">Internet</span> <span class="hljs-constant">Widgits</span> <span
-                    class="hljs-constant">Pty</span> <span class="hljs-constant">Ltd</span>]<span class="hljs-symbol">:My</span> <span
-                    class="hljs-constant">Api</span>
-<span class="hljs-constant">Organizational</span> <span class="hljs-constant">Unit</span> <span class="hljs-constant">Name</span> (eg, section) []<span
-                    class="hljs-symbol">:</span>
-<span class="hljs-constant">Common</span> <span class="hljs-constant">Name</span> (e.g. server <span
-                    class="hljs-constant">FQDN</span> <span class="hljs-keyword">or</span> <span class="hljs-constant">YOUR</span> name) []<span
-                    class="hljs-symbol">:</span>
-<span class="hljs-constant">Email</span> <span class="hljs-constant">Address</span> []<span
-                    class="hljs-symbol">:client</span><span class="hljs-variable">@my</span>.api
+Country Name (2 letter code) [AU]:FR
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:Paris
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:My Api
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:
+Email Address []:client@my.api
 
-<span class="hljs-constant">Please</span> enter the following <span class="hljs-string">'extra'</span> attributes
+Please enter the following 'extra' attributes
 to be sent with your certificate request
-<span class="hljs-constant">A</span> challenge password []<span class="hljs-symbol">:</span>
-<span class="hljs-constant">An</span> optional company name []<span class="hljs-symbol">:</span>
+A challenge password []:
+An optional company name []:
 
-<span class="hljs-variable">$ </span>openssl x509 -req -days <span class="hljs-number">365</span> -<span
-                    class="hljs-keyword">in</span> client.csr -<span class="hljs-constant">CA</span> ca.crt -<span
-                    class="hljs-constant">CAkey</span> ca.key -set_serial <span class="hljs-number">01</span> -out client.crt
-<span class="hljs-variable">$ </span>cat client.crt client.key &gt; client.pem</code></pre>
+$ openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+$ cat client.crt client.key &gt; client.pem
+</code></pre>
 
     <p>
         Nous pouvons désormais configurer Apache2. Dans le fichier
@@ -868,28 +808,29 @@ to be sent with your certificate request
         <code>000-localhost-ssl.conf</code> :
     </p>
 
-    <pre class="prettyprint"><code class="language-apacheconfig hljs apache"><span class="hljs-tag">&lt;Directory /var/www/my-api/web&gt;</span>
-        <span class="hljs-keyword"><span class="hljs-common">Options</span></span> Indexes FollowSymLinks
-        <span class="hljs-keyword">AllowOverride</span> <span class="hljs-literal">All</span>
-        <span class="hljs-keyword">Require</span> <span class="hljs-literal">all</span> granted
-<span class="hljs-tag">&lt;/Directory&gt;</span>
+    <pre><code class="language-apacheconf">&lt;Directory /var/www/my-api/web&gt;
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+            &lt;/Directory&gt;
 
-<span class="hljs-tag">&lt;IfModule mod_ssl.c&gt;</span>
-    <span class="hljs-tag">&lt;VirtualHost 127.0.0.1:443&gt;</span>
-        <span class="hljs-keyword"><span class="hljs-common">ServerName</span></span> 127.0.0.1
-        <span class="hljs-keyword">ServerAdmin</span> your@email.com
-        <span class="hljs-keyword"><span class="hljs-common">DocumentRoot</span></span> /var/www/my-api/web
-        <span class="hljs-keyword">ErrorLog</span> <span class="hljs-cbracket">${APACHE_LOG_DIR}</span>/error.log
-        <span class="hljs-keyword">CustomLog</span> <span class="hljs-cbracket">${APACHE_LOG_DIR}</span>/access.log combined
-        <span class="hljs-keyword">SSLCertificateFile</span> /etc/ssl/certs/my-api/server.crt
-        <span class="hljs-keyword">SSLCertificateKeyFile</span> /etc/ssl/certs/my-api/server.key
-        <span class="hljs-keyword">SSLOpenSSLConfCmd</span> DHParameters <span class="hljs-string">"/etc/ssl/certs/my-api/dhparam.pem"</span>
-        <span class="hljs-keyword">SSLCACertificateFile</span> /etc/ssl/certs/my-api/ca.crt
-        <span class="hljs-keyword">SSLVerifyClient</span> optional
-        <span class="hljs-keyword">SSLVerifyDepth</span> 1
-        <span class="hljs-keyword">SSLOptions</span> +StdEnvVars
-    <span class="hljs-tag">&lt;/VirtualHost&gt;</span>
-<span class="hljs-tag">&lt;/IfModule&gt;</span></code></pre>
+            &lt;IfModule mod_ssl.c&gt;
+	&lt;VirtualHost 127.0.0.1:443&gt;
+		ServerName 127.0.0.1
+		ServerAdmin your@email.com
+		DocumentRoot /var/www/my-api/web
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+		SSLCertificateFile /etc/ssl/certs/my-api/server.crt
+		SSLCertificateKeyFile /etc/ssl/certs/my-api/server.key
+		SSLOpenSSLConfCmd DHParameters "/etc/ssl/certs/my-api/dhparam.pem"
+		SSLCACertificateFile /etc/ssl/certs/my-api/ca.crt
+		SSLVerifyClient optional
+		SSLVerifyDepth 1
+		SSLOptions +StdEnvVars
+    &lt;/VirtualHost&gt;
+&lt;/IfModule&gt;
+</code></pre>
 
     <p>
         Vous pouvez désormais mettre <code>ca.key</code> de côté afin d’éviter
@@ -904,12 +845,12 @@ to be sent with your certificate request
 
     <p>Nous activons enfin le site et redémarrons Apache:</p>
 
-    <pre class="prettyprint"><code class="language-sh hljs lasso">$ cd /etc/apache2/sites<span class="hljs-attribute">-enabled</span>
-$ ln <span class="hljs-attribute">-s</span> <span class="hljs-built_in">..</span>/sites<span class="hljs-attribute">-available</span>/<span
-                    class="hljs-number">000</span><span class="hljs-attribute">-localhost</span><span
-                    class="hljs-attribute">-ssl</span><span class="hljs-built_in">.</span>conf <span
-                    class="hljs-built_in">.</span><span class="hljs-subst">/</span>
-$ service apache2 restart</code></pre>
+    <pre><code>
+$ cd /etc/apache2/sites-enabled
+$ ln -s ../sites-available/000-localhost-ssl.conf ./
+$ service apache2 restart
+</code></pre>
+
 
     <h3 id="configuration-dans-symfony">Configuration dans Symfony</h3>
 
@@ -921,24 +862,24 @@ $ service apache2 restart</code></pre>
 
     <p>Voici le contenu du fichier <code>app/config/security.yml</code> :</p>
 
-    <pre class="prettyprint"><code class="language-yaml hljs java">security:
+    <pre><code class="language-yaml">security:
 
     providers:
         client_certificate:
             memory:
                 users:
-                    client<span class="hljs-annotation">@my</span>.api:
+                    client@my.api:
                         roles: ROLE_ADMIN
     firewalls:
         main:
             pattern: ^/
-            stateless: <span class="hljs-keyword">true</span>
+            stateless: true
             x509:
                 provider: client_certificate
 
     access_control:
-      - { path: ^/, roles: ROLE_ADMIN, requires_channel: https, ip: <span class="hljs-number">127.0</span><span
-                    class="hljs-number">.0</span><span class="hljs-number">.1</span> }</code></pre>
+      - { path: ^/, roles: ROLE_ADMIN, requires_channel: https, ip: 127.0.0.1 }
+</code></pre>
 
     <p>
         C’est tout ! Dans la configuration du pare-feu, la clé <code>x509</code>
@@ -955,65 +896,55 @@ $ service apache2 restart</code></pre>
         avec le code suivant :
     </p>
 
-    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-preprocessor">&lt;?php</span>
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AppBundle</span>\<span class="hljs-title">Controller</span>;
+    <pre><code class="language-php">
+&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span
-                    class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span
-                    class="hljs-title">Controller</span>\<span class="hljs-title">Controller</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Sensio</span>\<span
-                    class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkExtraBundle</span>\<span
-                    class="hljs-title">Configuration</span>\<span class="hljs-title">Method</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Sensio</span>\<span
-                    class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkExtraBundle</span>\<span
-                    class="hljs-title">Configuration</span>\<span class="hljs-title">Route</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span
-                    class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span
-                    class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+namespace AppBundle\Controller;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestController</span> <span
-            class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-{</span>
-    <span class="hljs-comment">/**
-     *<span class="hljs-phpdoc"> @Route</span>("/test", name="test")
-     *<span class="hljs-phpdoc"> @Method</span>({"GET"})
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span
-                        class="hljs-keyword">function</span> <span class="hljs-title">testAction</span><span
-                        class="hljs-params">(Request <span class="hljs-variable">$request</span>)</span>
-    {</span>
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JsonResponse([
-            <span class="hljs-string">'status'</span> =&gt; <span class="hljs-string">'OK'</span>,
-            <span class="hljs-string">'data'</span>   =&gt; sprintf(<span class="hljs-string">'Hello, %s!'</span>, <span
-                    class="hljs-variable">$request</span>-&gt;request-&gt;get(<span
-                    class="hljs-string">'name'</span>, <span class="hljs-string">'world'</span>)),
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+
+class TestController extends Controller
+{
+    /**
+     * @Route("/test", name="test")
+     * @Method({"GET"})
+     */
+    public function testAction(Request $request)
+    {
+        return new JsonResponse([
+            'status' =&gt; 'OK',
+            'data'   =&gt; sprintf('Hello, %s!', $request-&gt;request-&gt;get('name', 'world')),
         ]);
     }
-}</code></pre>
+}
+</code></pre>
 
     <p>Dans votre application cliente, mettez le code suivant :</p>
 
-    <pre class="prettyprint"><code class="language-php hljs "><span class="hljs-preprocessor">&lt;?php</span>
+    <pre><code class="language-php">
+&lt;?php
 
-<span class="hljs-keyword">require</span>(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>);
+require(__DIR__.'/vendor/autoload.php');
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">GuzzleHttp</span>\<span class="hljs-title">Client</span>;
+use GuzzleHttp\Client;
 
-<span class="hljs-variable">$client</span> = <span class="hljs-keyword">new</span> Client([
-    <span class="hljs-string">'base_uri'</span> =&gt; <span class="hljs-string">'https://127.0.0.1'</span>,
-    <span class="hljs-string">'cert'</span>     =&gt; <span class="hljs-keyword">__DIR__</span>.<span
-                    class="hljs-string">'/cert/client.pem'</span>,
+$client = new Client([
+    'base_uri' =&gt; 'https://127.0.0.1',
+    'cert'     =&gt; __DIR__.'/cert/client.pem',
 
-    <span class="hljs-comment">// if your server certificate is self-signed...</span>
-    <span class="hljs-string">'verify'</span>   =&gt; <span class="hljs-keyword">false</span>,
+    // if your server certificate is self-signed...
+    'verify'   =&gt; false,
 ]);
 
 var_dump(
-    json_decode(<span class="hljs-variable">$client</span>-&gt;get(<span class="hljs-string">'/test'</span>)-&gt;getBody()-&gt;getContents(), <span
-                    class="hljs-keyword">true</span>)
-);</code></pre>
+    json_decode($client-&gt;get('/test')-&gt;getBody()-&gt;getContents(), true)
+);
+</code></pre>
 
     <p>
         Symfony propose d’autres « <em lang="en">pre authenticated security firewalls</em> »,
@@ -1021,7 +952,8 @@ var_dump(
         <a href="https://symfony.com/doc/current/security/pre_authenticated.html">référez-vous à la documentation</a>.
         Pour en implémenter de nouveaux pour Okta, Uberproxy, etc., vous pouvez
         au choix
-        <a href="https://symfony.com/doc/current/security/custom_authentication_provider.html">créer votre propre fournisseur d'authentification</a>
+        <a href="https://symfony.com/doc/current/security/custom_authentication_provider.html">créer votre propre
+            fournisseur d'authentification</a>
         (ce que fait X509 par exemple), ou bien utiliser Guard (ce qui me semble le plus rapide).
     </p>
 
@@ -1039,7 +971,8 @@ var_dump(
             <a href="http://haveibeenpwned.com">http://haveibeenpwned.com</a>
             pour vous tenir informé des fuites de bases de données, première
             source des
-            « <em><a href="https://github.com/ninsuo/slides/blob/master/2017%20Let%27s%20continue%20to%20hack!.pdf" lang="en">password reuse attacks</a></em> ».
+            « <em><a href="https://github.com/ninsuo/slides/blob/master/2017%20Let%27s%20continue%20to%20hack!.pdf"
+                     lang="en">password reuse attacks</a></em> ».
         </li>
         <li>
             <a href="https://haveibeenpwned.com/Passwords">https://haveibeenpwned.com/Passwords</a> et
@@ -1070,6 +1003,7 @@ var_dump(
         </li>
     </ul>
 
+{% endverbatim %}
 {% endblock %}
 
 {% block article_avatar %}
