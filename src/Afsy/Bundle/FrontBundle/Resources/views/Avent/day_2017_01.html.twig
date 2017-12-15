@@ -145,7 +145,7 @@ bin/console doctrine:schema:update --force
 
     <p>Avec une administration complexe, vous allez sûrement devoir appeler des constantes PHP depuis votre YAML, c'est possible depuis <a href="https://symfony.com/blog/new-in-symfony-3-2-php-constants-in-yaml-files">la version 3.2 de Symfony</a> :</p>
 
-    <pre class="language-yaml"><code>!php/const:AppBundle\Entity\Beer::ONLINE_STATE</code></pre>
+    <pre class="language-yaml"><code>!php/const AppBundle\Entity\Beer::ONLINE_STATE</code></pre>
 
     <h3>3 - Utiliser des filtres DQL</h3>
 
