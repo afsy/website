@@ -1038,6 +1038,37 @@ class AddEventHandler
         $this->client->entry->create($entry);
     }
 }</code></pre>
+    <p>Dernière chose à faire, ajouter l'appel au handler dans le Controller pour envoyer l'évenement dans le CMS :</p>
+    <pre><code class="language-php">&lt;?php
+namespace AppBundle\Controller;
+
+use AppBundle\Domain\Handler\AddEventHandler;
+//...
+
+/**
+ * @Route("/new")
+ * @Method(methods={"GET", "POST"})
+ * @param Request         $request
+ * @param AddEventHandler $addEventHandler
+ *
+ * @return Response
+ */
+public function newAction(Request $request, AddEventHandler $addEventHandler)
+{
+    $event = new Event();
+    $form = $this->createForm(EventType::class, $event);
+    if ($request->isMethod(Request::METHOD_POST)) {
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            $addEventHandler->handle($event);
+        }
+    }
+
+    return $this->render('cms/event/new.html.twig', [
+        'form' => $form->createView()
+    ]);
+}
+</code></pre>
     <p>Désormais, si on se rend sur <code>/event/new</code>, on a accès au formulaire de dépôt d'un événement et lorsqu'on le soumet, un événement est ajouté dans <a href="https://www.contentful.com/" target="_blank">Contentful</a> en brouillon.</p>
     <p>Il ne reste plus qu'à le valider. On peut imaginer que le <strong>AddEventHandler</strong> pourrait s'occuper de notifier la <em>room</em> Event dans le Slack de l'AFSY afin d'avoir une bonne réactivité mais c'est hors sujet ;)</p>
     <h2><a name="conclusion" href="#conclusion">¶ </a>Conclusion</h2>
