@@ -220,7 +220,7 @@ bin/console doctrine:schema:update --force
                     <<: { property: 'abv' } # alcohol by volume
     </code></pre>
     <p>Vous voilà YAML master ✌️</p>
-    <h3>Activer le toggle pour des propriétés non booléennes</h3>
+    <h3>5 - Activer le toggle pour des propriétés non booléennes</h3>
     <p>Vous l'avez remarqué, EasyAdmin affiche un élégant switch dans la liste lorsque la propriété affichée est une booléenne. Mais que faire si vous avez une propriété non booléenne <code>status</code> qui peut avoir comme état <code>ONLINE</code> et <code>OFFLINE</code> ? L'astuce est de passer par une propriété virtuelle dans votre entité :</p>
     <pre class="language-php"><code>public function getIsOnline()
 {
