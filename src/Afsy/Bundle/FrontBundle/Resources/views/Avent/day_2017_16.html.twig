@@ -18,7 +18,7 @@
     <h4 id="hello-world">Hello, World!</h4>
 
     <p>
-        Ahh, la sécurité, enfin nous allons parlé d’un truc que tout le monde déteste !
+        Ahh, la sécurité, enfin nous allons parler d’un truc que tout le monde déteste !
     </p>
 
     <ul>
@@ -1011,7 +1011,7 @@ var_dump(
 {% endblock %}
 
 {% block article_bio %}
-    <h2><a href="https://twitter.com/ninsuo" target="_blank">Alain Tiemblo</a></h2>
+    <h2><a href="{% block author_url 'https://twitter.com/ninsuo' %}" target="_blank">{% block article_author 'Alain Tiemblo' %}</a></h2>
     <p>
         Alain Tiemblo est un développeur backend, et s’occupe principalement de
         la sécurité applicative chez BlaBlaCar depuis 2015. Vous pouvez voir ou
