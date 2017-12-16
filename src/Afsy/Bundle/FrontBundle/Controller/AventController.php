@@ -40,6 +40,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '17-bien-demarrer-avec-symfony-et-react'                            => 'AfsyFrontBundle:Avent:day_2017_17.html.twig',
             '16-des-astuces-de-securite-avec-symfony'                        => 'AfsyFrontBundle:Avent:day_2017_16.html.twig',
             '15-comment-ne-pas-trop-exposer-symfony'                         => 'AfsyFrontBundle:Avent:day_2017_15.html.twig',
             '14-une-api-graphql-avec-symfony'                                => 'AfsyFrontBundle:Avent:day_2017_14.html.twig',
