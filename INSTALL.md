@@ -5,8 +5,8 @@ Installation
 cp app/config/parameters.yml-dist app/config/parameters.yml
 # configure app/config/parameters.yml
 composer install
-app/console doctrine:database:create
-app/console doctrine:schema:update --force
-app/console doctrine:fixtures:load
-app/console assets:install web
+bin/console doctrine:database:create
+bin/console doctrine:schema:update --force
+bin/console doctrine:fixtures:load
+bin/console assets:install web
 ```
