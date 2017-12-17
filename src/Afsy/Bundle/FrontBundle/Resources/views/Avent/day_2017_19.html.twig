@@ -17,106 +17,95 @@
 
     <p> Introduit avec Symfony 3.2, le <a href="https://symfony.com/doc/master/components/workflow.html" target="_blank">composant workflow</a> permet de gérer simplement les différents états et transitions au sein de vos objets. Découvrons ensemble l’utilisation de ce bundle avec un exemple simple de l’e-commerce et bien connu de tous: le colis. </p>
 
-    <p>Un colis ne peut avoir qu’un état à la fois. Son état peut prendre les valeurs “new”, “preparing”, “prepared”, “shipped”, “delivered”,“returned”, “lost”.</p>
+    <p>Un colis ne peut avoir qu’un état à la fois. Son état peut prendre les valeurs "new", “preparing", "prepared", "shipped", "delivered","returned", "lost".</p>
 
-    <p>Grâce au composant workflow, nous pouvons très simplement définir ces différents états et les transitions entre chacun d’entre eux. Pour cela, éditons le fichier config/packages/workflows.yml ainsi :</p>
+    <p>Grâce au composant workflow, nous pouvons très simplement définir ces différents états et les transitions entre chacun d’entre eux. Pour cela, éditons le fichier <em>config/packages/workflows.yml</em> ainsi :</p>
 
-    <pre>
-        <code class="language-yaml">
+<pre><code class="language-yaml">
 framework:
-   workflows:
-       delivery:
-           marking_store:
-               type: single_state
-               arguments:
-                   - state
-           supports:
-               - App\Entity\Packet
-           places:
-               - new
-               - preparing
-               - packed
-               - shipped
-               - delivered
-               - returned
-               - lost
-           transitions:
-               prepare:
-                   from: new
-                   to:   preparing
-               pack:
-                   from: preparing
-                   to:   packed
-               send:
-                   from: packed
-                   to:   shipped
-               deliver:
-                   from: shipped
-                   to:   delivered
-               return:
-                   from: [delivered, shipped]
-                   to:   returned
-               lose:
-                   from: [shipped, delivered]
-                   to:   lost
-        </code>
-    </pre>
+  workflows:
+    delivery:
+      marking_store:
+        type: single_state
+        arguments:
+          - state
+      supports:
+        - App\Entity\Packet
+      places:
+        - new
+        - preparing
+        - packed
+        - shipped
+        - delivered
+        - returned
+        - lost
+      transitions:
+        prepare:
+          from: new
+          to:   preparing
+        pack:
+          from: preparing
+          to:   packed
+        send:
+          from: packed
+          to:   shipped
+        deliver:
+          from: shipped
+          to:   delivered
+        return:
+          from: [delivered, shipped]
+          to:   returned
+        lose:
+          from: [shipped, delivered]
+          to:   lost
+</code></pre>
 
-    <h2>La configuration </h2>
+    <h2 id="le-composant-workflow-par-exemple-configuration">La configuration </h2>
 
     <ul>
-        <li>marking_store: définit la façon de stocker l’information d’état au sein de votre objet. Ici nous souhaitons que notre objet ne stock qu’un seul état à la fois d’où le type single_state. Aussi nous souhaiton que la valeur de notre état soit stockée dans la propriété “state” de l’objet.</li>
-        <li>supports : Définit les objets sur lesquels le workflow peut s’appliquer.</li>
-        <li>places : Définit les différents états possibles pour notre objet.</li>
-        <li>transitions : Définit la liste des transitions entre chaque état. Ici un objet en état “shipped” pourra seulement suivre les transitions “deliver” et “return”, mais aucune autre.</li>
+        <li>marking_store: définit la façon de stocker l’information d’état au sein de votre objet. Ici nous souhaitons que notre objet ne stock qu’un seul état à la fois d’où le type single_state. Aussi nous souhaiton que la valeur de notre état soit stockée dans la propriété “state" de l’objet.</li>
+        <li>supports : définit les objets sur lesquels le workflow peut s’appliquer.</li>
+        <li>places : définit les différents états possibles pour notre objet.</li>
+        <li>transitions : définit la liste des transitions entre chaque état. Ici un objet en état "shipped" pourra seulement suivre les transitions “deliver" et “return", mais aucune autre.</li>
     </ul>
 
     <p>Une fois la configuration créée, vous pouvez simplement créer un schéma de votre workflow en utilisant <a href="https://graphviz.gitlab.io/" target="_blank">Graphviz</a> : </p>
 
-    <pre>
-        <code class="language-bash">php bin/console workflow:dump delivery | dot -Tpng -o graph.png</code>
-    </pre>
+<pre><code class="language-bash">php bin/console workflow:dump delivery | dot -Tpng -o graph.png</code></pre>
 
-    Ce qui génèrera l’image suivante :
+    <p>Ce qui génèrera l’image suivante :</p>
 
     <img src="{{ asset('bundles/afsyfront/images/avent/2017/19/graph.png') }}" alt="Workflow packet example"/>
 
     <p>Doc ? Qui a dit doc ?</p>
 
-    <h2>Et la magie commence ici !</h2>
+    <h2 id="le-composant-workflow-par-exemple-magic">Et la magie commence ici !</h2>
 
-    Maintenant, vous pouvez très simplement récupérer les transitions possibles pour votre objet
+    <p>Maintenant, vous pouvez très simplement récupérer les transitions possibles pour votre objet.</p>
     <pre>
         <code class="language-php">
-...
 $packet = new Packet();
 $workflow = $this->get('workflow.delivery');
 $workflow->getEnabledTransitions($packet);
-...
         </code>
     </pre>
 
     <p>Tester si une transition est possible et l’appliquer</p>
-    <pre>
-        <code class="language-php">
-...
+<pre><code class="language-php">
 if($workflow->can($packet, 'lose') {
   $workflow->apply($packet, 'lose')
 }
-...
-        </code>
-    </pre>
+</code></pre>
 
-    <h2>Quand les règles métiers s’en mêlent.</h2>
+    <h2 id="le-composant-workflow-par-exemple-advanced">Quand les règles métiers s’en mêlent</h2>
 
-    <p>Facile, on a définit tous nos états et transitions mais nous n’avons aucune règle de gestion. Imaginons, par exemple qu’un colis ne peut être considéré comme perdu que 15 jours après avoir été expédié.</p>
+    <p>Facile, on a défini tous nos états et transitions mais nous n’avons aucune règle de gestion. Imaginons, par exemple qu’un colis ne peut être considéré comme perdu que 15 jours après avoir été expédié.</p>
 
     <p>Actuellement, rien ne limite cette contrainte dans notre modèle heureusement, c’est possible de l’implémenter via les évènements lancés par le composant.</p>
 
     <p>Dans notre cas, voici ce que cela pourra donner :</p>
 
-    <pre>
-        <code class="language-php">
+<pre><code class="language-php">
 use Symfony\Component\Workflow\Event\GuardEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -141,16 +130,15 @@ class PacketLostListener implements EventSubscriberInterface
        );
    }
 }
-        </code>
-    </pre>
+</code></pre>
 
-    <h2>Conclusion :</h2>
+    <h2 id="le-composant-workflow-par-exemple-conclusion">Conclusion</h2>
 
     <p>Simple à utiliser, ce composant vous permettra de décorréler votre workflow de votre modèle. Simple à mettre en place, mangez-en matin, midi et soir.</p>
 
-    <h3>One more thing</h3>
+    <h3 id="le-composant-workflow-par-exemple-symfony-2">One more thing</h3>
 
-    <p>Cet example a été créé sous Symfony 4, le composant a été introduit par symfony 3.2, mais si d'aventure vous étiez encore sur une version antérieur, sacher qu'il existe un <a href="https://github.com/fduch/workflow-bundle" target="_blank">bundle</a> pour intégrer ce composant à partir de symfony 2.3. Plus d'excuse ;)</p>
+    <p>Cet example a été créé sous Symfony 4, le composant a été introduit par symfony 3.2, mais si d'aventure vous étiez encore sur une version antérieur, sacher qu'il existe un <a href="https://github.com/fduch/workflow-bundle" target="_blank">bundle</a> pour intégrer ce composant à partir de symfony 2.3. Plus d'excuse ;).</p>
 
 {% endblock %}
 
