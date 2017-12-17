@@ -69,8 +69,7 @@ Le test unitaire aura une r&eacute;elle valeur lorsqu'il est appliqu&eacute; &ag
   Partir du cas fonctionnel est indispensable, surtout lorsqu'on &eacute;crit son test apr&egrave;s son code, pour &eacute;viter de tester l'impl&eacute;mentation au lieu de la fonctionnalité&nbsp;: le but est de valider que notre code r&eacute;pond &agrave; un besoin, un cas fonctionnel sp&eacute;cifique.<br />
   De plus, repartir du cas fonctionnel nous fait prendre du recul et mieux réfléchir à tous nos cas de test &ndash; dont certains qu'on n'aura peut-&ecirc;tre pas vu en premier lieu.</p>
 <p>Prenons l'exemple d'une route permettant l'ajout de commentaires&nbsp;:</p>
-<pre><code class="language-php">
-class CommentController {
+<pre><code class="language-php">class CommentController {
 	public function sendComment(string $payload) {
 		$comment = $this->serializer->unserialize($payload);
 		$this->sendCommentHandler->handle($comment);
@@ -94,8 +93,7 @@ class Comment {
 <p>L'objet <em>Comment</em>, par contre, porte une logique m&eacute;tier &ndash; le corps de mon commentaire ne peut pas &ecirc;tre vide et ne doit pas faire plus de X caract&egrave;res. Il s'agit d'une r&egrave;gle qui a &eacute;t&eacute; d&eacute;finie avec le P.O et est certainement inscrite dans les user acceptances. On va donc la tester.</p>
 <p>Pour cela, on peut &eacute;crire ces méthodes de tests tr&egrave;s simples&nbsp;:</p>
 
-<pre><code class="language-php">
-class CommentTest {
+<pre><code class="language-php">class CommentTest {
 	public function providerCommentBodyOutOfRange()
 	public function testCommentShouldThrowAnExceptionWhenBodyLengthIsOutOfRange($body, $expectedException)
 	public function testCommentShouldBeCreatedWhenBodyLengthIsWithinRange()
@@ -103,7 +101,7 @@ class CommentTest {
 </code></pre>
 
 <p>J'ai consid&eacute;r&eacute; ici que <i>&laquo;&nbsp;body is empty&nbsp;&raquo;</i> et <i>&laquo;&nbsp;body is too long&nbsp;&raquo;</i> sont deux variations d'un seul et m&ecirc;me cas d'usage fonctionnel : <i>&laquo;&nbsp;body length is out of range&nbsp;&raquo;</i>. L'effet de bord est que &ccedil;a permet de mutualiser du code.</p>
-<p><strong>Faites des m&eacute;thodes sp&eacute;cifiques &agrave; chaque cas de test</strong>,&nbsp;quittes &agrave; regrouper le code commun (pour ne pas avoir de duplication de code) dans une m&eacute;thode priv&eacute;e.<br /> L'int&eacute;r&ecirc;t est d'avoir des tests tr&egrave;s clairs, qui indiquent de mani&egrave;re simple (avec un nom de m&eacute;thode tr&egrave;s explicite) les responsabilit&eacute;s de la m&eacute;thode test&eacute;e.</p>
+<p><strong>Faites des m&eacute;thodes sp&eacute;cifiques &agrave; chaque cas de test</strong>,&nbsp;quitte &agrave; regrouper le code commun (pour ne pas avoir de duplication de code) dans une m&eacute;thode priv&eacute;e.<br /> L'int&eacute;r&ecirc;t est d'avoir des tests tr&egrave;s clairs, qui indiquent de mani&egrave;re simple (avec un nom de m&eacute;thode tr&egrave;s explicite) les responsabilit&eacute;s de la m&eacute;thode test&eacute;e.</p>
 <p>Prenez autant soin de vos tests que du reste de votre code (voir m&ecirc;me plus), vous gagnerez en lisibilit&eacute; comme en maintenance !</p>
 
 <h3>Comment m'assurer que mes tests couvrent bien tous les cas&nbsp;?</h3>
@@ -113,24 +111,21 @@ class CommentTest {
   Cette m&eacute;thode, quoique utile pour avoir une premi&egrave;re id&eacute;e et d&eacute;tecter les zones non couvertes, ne permet pas de v&eacute;rifier la <strong>qualit&eacute;</strong> de nos tests.<br /> En effet, elle se base sur le nombre de lignes <strong>ex&eacute;cut&eacute;es</strong>, et ne v&eacute;rifie pas les assertions faites ni ce qui est r&eacute;ellement test&eacute;.</p>
 <p>Imaginons une m&eacute;thode d'addition&nbsp;comme suit.</p>
 
-<pre><code class="language-php">
-public function add(int x, int y): int {
+<pre><code class="language-php">public function add(int x, int y): int {
 	return x + y;
 }
 </code></pre>
 
 <p>Le code coverage sera &agrave; 100% avec la m&eacute;thode de test suivante :</p>
 
-<pre><code class="language-php">
-public function testAdd() {
+<pre><code class="language-php">public function testAdd() {
 	add(2, 3);
 }
 </code></pre>
 
 <p>Ma m&eacute;thode de test ne teste pourtant pas grand-chose, et n'&eacute;chouera jamais, contrairement &agrave; celle-ci :</p>
 
-<pre><code class="language-php">
-public function testAdd() {
+<pre><code class="language-php">public function testAdd() {
 	$result = add(2, 3);
 
 	$this->assertEqual(5, $result);
