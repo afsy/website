@@ -1,0 +1,221 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 18 - Structurer sa démarche de test" %}
+
+{% block article_content %}
+    {% verbatim %}
+
+    <style type="text/css">
+        em {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <h1>Structurer sa démarche de test</h1>
+
+<p>Accompagner ses d&eacute;veloppements de tests automatis&eacute;s est de plus en plus courant.<br /> C'est en effet une bonne pratique de programmation, partie int&eacute;grante du cycle de d&eacute;veloppement d'une application.</p>
+<p>Cet article a pour but de repositionner les bases de cette pratique, approfondir les tests unitaires et vous pr&eacute;senter les autres types de tests automatis&eacute;s.</p>
+<p>Si vous d&eacute;veloppez d&eacute;j&agrave; en suivant les principes de <a target="_blank" href="http://referentiel.institut-agile.fr/tdd.html">TDD</a> et/ou <a target="_blank" href="http://referentiel.institut-agile.fr/bdd.html">BDD</a>, <a href="#aller-plus-loin">allez directement plus loin</a>. Dans le cas contraire, bonne lecture&nbsp;!</p>
+<h2>&nbsp;Les diff&eacute;rents types de tests</h2>
+<p>Il existe plusieurs types de tests automatis&eacute;s.<br />On en repr&eacute;sente &agrave; minima trois :</p>
+<div>
+<img src="https://dzone.com/storage/temp/6496415-testingpyramid.png" style="float: left;; margin-right:10px"/>
+<p>
+  L'id&eacute;e est qu'un <strong>test syst&egrave;me (ou test fonctionnel)</strong> co&ucirc;te cher &agrave; d&eacute;velopper et &agrave; maintenir.<br />
+  Il a un vrai int&eacute;r&ecirc;t puisqu'il permet de valider que le code produit r&eacute;pond au besoin utilisateur, mais il sera &eacute;galement assez long &agrave; ex&eacute;cuter puisqu'il fait tourner l'application dans son int&eacute;gralit&eacute;, d&eacute;pendances (base de donn&eacute;es, service d'envoi de mail, api externes, etc) incluses.
+</p>
+<p>
+  Le <strong>test d'int&eacute;gration</strong> permet de valider que toutes les m&eacute;thodes/classes d'une application interagissent bien entre elles, sans ces d&eacute;pendances.<br />
+  On simulera l'insertion en base via <a target="_blank" href="https://fr.wikipedia.org/wiki/Mock_(programmation_orient%C3%A9e_objet)">un mock</a> par exemple.
+</p>
+<p>
+  Enfin, le <strong>test unitaire</strong> a pour but de tester de fa&ccedil;on tr&egrave;s cibl&eacute;e la plus petite portion de code possible : un use case d'une m&eacute;thode par exemple.<br />
+  Ici toutes les d&eacute;pendances seront remplacées par des mocks.
+</p>
+</div>
+<p style="clear:both;padding-top:10px">
+  Chaque test a un int&eacute;r&ecirc;t, et un co&ucirc;t, diff&eacute;rent. Le but n'est donc pas de choisir l'un au détriment des autres mais de les utiliser de manière complémentaire pour couvrir au mieux notre application.<br />
+  C'est la combinaison des diff&eacute;rents types de test qui nous permettra de nous assurer qu'un nouveau d&eacute;veloppement :</p>
+<ul>
+<li>R&eacute;pond au besoin utilisateur</li>
+<li>Y r&eacute;pond parfaitement, sans bugs</li>
+<li>N'a pas introduit de r&eacute;gression sur l'existant</li>
+</ul>
+<p>
+  Nous verrons par la suite qu'il existe d'autres types de test, qui r&eacute;pondent &agrave; d'autres probl&eacute;matiques.<br />
+  Focalisons-nous pour le moment sur la base de notre pyramide&nbsp;: le test unitaire.
+</p>
+<h2>Le test unitaire</h2>
+<h3>Quoi tester&nbsp;?</h3>
+<p>On peut d&eacute;finir trois crit&egrave;res importants pour un test unitaire :</p>
+<ul>
+<li>Avoir une forte probabilit&eacute; d'&eacute;chouer lorsqu'un nouveau bug est introduit</li>
+<li>Avoir une faible probabilit&eacute; de produire un faux positif (&eacute;chouer sans qu'il n'y ai de bug)</li>
+<li>S'ex&eacute;cuter en un temps tr&egrave;s court</li>
+</ul>
+<p>
+  Certaines classes sont d&eacute;di&eacute;es &agrave; la coordination des traitements (par exemple les contr&ocirc;leurs Symfony). Ces classes ont beaucoup de d&eacute;pendances mais ne portent aucune logique m&eacute;tier et sont tr&egrave;s simples.<br />
+  Il y a peu de chances qu'une r&eacute;gression apparaisse &agrave; ce niveau, et il y a par contre de grandes chances pour que le test &eacute;choue sans qu'il n'y ai de r&eacute;gression.<br />
+  Les tests unitaires de ces classes vont être longs à écrire, potentiellement compliqués à cause des dépendances, et rarement échouer pour une bonne raison. Couvrir ces classes avec des tests unitaires n'a donc que peu d'intérêt.</p>
+<p>D'autres portent une r&eacute;elle logique m&eacute;tier (par exemple un validateur d'e-mail).<br />
+Le test unitaire aura une r&eacute;elle valeur lorsqu'il est appliqu&eacute; &agrave; ces classes &ndash; qui sont normalement suffisamment isol&eacute;es pour &ecirc;tre test&eacute;es avec pas, ou tr&egrave;s peu, de mocks.</p>
+<p>Il n'est pourtant pas toujours simple de d&eacute;finir si une classe peut, ou doit, &ecirc;tre test&eacute;e unitairement.</p>
+<p><strong>En r&egrave;gle g&eacute;n&eacute;rale</strong>&nbsp;: si une classe porte de la logique m&eacute;tier et n'est pas ais&eacute;ment testable, c'est souvent le signe que cette classe porte trop de responsabilit&eacute;s et sera donc rapidement difficile &agrave; maintenir/faire &eacute;voluer. Prenez alors du recul et voyez s'il n'est pas possible de la re-factorer<br /> Si ce n'est pas le cas, peut &ecirc;tre que des tests d'int&eacute;gration sont plus pertinents&nbsp;? Le test sera moins cibl&eacute; mais permettra malgr&eacute; tout de couvrir le cas fonctionnel d&eacute;fini.</p>
+<p>Il est &eacute;galement parfois plus co&ucirc;teux d'&eacute;crire certains tests que de ne pas le faire&nbsp;: appliquez la r&egrave;gle des 80/20 et n'&eacute;crivez pas de test s'il ne couvre pas les trois crit&egrave;res cit&eacute;s ci-dessus&nbsp;!</p>
+<h3>Comment tester&nbsp;?</h3>
+<p>
+  Partir du cas fonctionnel est indispensable, surtout lorsqu'on &eacute;crit son test apr&egrave;s son code, pour &eacute;viter de tester l'impl&eacute;mentation au lieu de la fonctionnalité&nbsp;: le but est de valider que notre code r&eacute;pond &agrave; un besoin, un cas fonctionnel sp&eacute;cifique.<br />
+  De plus, repartir du cas fonctionnel nous fait prendre du recul et mieux réfléchir à tous nos cas de test &ndash; dont certains qu'on n'aura peut-&ecirc;tre pas vu en premier lieu.</p>
+<p>Prenons l'exemple d'une route permettant l'ajout de commentaires&nbsp;:</p>
+<pre><code class="language-php">
+class CommentController {
+	public function sendComment(string $payload) {
+		$comment = $this->serializer->unserialize($payload);
+		$this->sendCommentHandler->handle($comment);
+	}
+}
+class Comment {
+	public function __construct(string $body) {
+		if ($body === '') {
+			throw new EmptyBodyException();
+		}
+		$bodyLength = strlen($body);
+		if (strlen($body) > self::MAX_BODY_LENGTH) {
+			throw new TooLongBodyException($bodyLengt, self::MAX_BODY_LENGTH);
+		}
+
+		$this->body = $body;
+	}
+}
+</code></pre>
+<p>Le contr&ocirc;leur ne fait que de la coordination&nbsp;: le tester unitairement nous assurera que les appels sont faits dans le bon ordre, mais pour &ccedil;a on serait oblig&eacute;s de d&eacute;finir un mock pour le <em>serializer</em>, un autre pour le <em>handler</em>. Il n'y a aucune logique m&eacute;tier, peu de chance de voir le test &eacute;chouer en cas de r&eacute;gression, et de fortes chances de le voir &eacute;chouer sans qu'il n'y ait de bug &ndash; si je rajoute une d&eacute;pendance par exemple.</p>
+<p>L'objet <em>Comment</em>, par contre, porte une logique m&eacute;tier &ndash; le corps de mon commentaire ne peut pas &ecirc;tre vide et ne doit pas faire plus de X caract&egrave;res. Il s'agit d'une r&egrave;gle qui a &eacute;t&eacute; d&eacute;finie avec le P.O et est certainement inscrite dans les user acceptances. On va donc la tester.</p>
+<p>Pour cela, on peut &eacute;crire ces méthodes de tests tr&egrave;s simples&nbsp;:</p>
+
+<pre><code class="language-php">
+class CommentTest {
+	public function providerCommentBodyOutOfRange()
+	public function testCommentShouldThrowAnExceptionWhenBodyLengthIsOutOfRange($body, $expectedException)
+	public function testCommentShouldBeCreatedWhenBodyLengthIsWithinRange()
+}
+</code></pre>
+
+<p>J'ai consid&eacute;r&eacute; ici que <i>&laquo;&nbsp;body is empty&nbsp;&raquo;</i> et <i>&laquo;&nbsp;body is too long&nbsp;&raquo;</i> sont deux variations d'un seul et m&ecirc;me cas d'usage fonctionnel : <i>&laquo;&nbsp;body length is out of range&nbsp;&raquo;</i>. L'effet de bord est que &ccedil;a permet de mutualiser du code.</p>
+<p><strong>Faites des m&eacute;thodes sp&eacute;cifiques &agrave; chaque cas de test</strong>,&nbsp;quittes &agrave; regrouper le code commun (pour ne pas avoir de duplication de code) dans une m&eacute;thode priv&eacute;e.<br /> L'int&eacute;r&ecirc;t est d'avoir des tests tr&egrave;s clairs, qui indiquent de mani&egrave;re simple (avec un nom de m&eacute;thode tr&egrave;s explicite) les responsabilit&eacute;s de la m&eacute;thode test&eacute;e.</p>
+<p>Prenez autant soin de vos tests que du reste de votre code (voir m&ecirc;me plus), vous gagnerez en lisibilit&eacute; comme en maintenance !</p>
+
+<h3>Comment m'assurer que mes tests couvrent bien tous les cas&nbsp;?</h3>
+<p>La m&eacute;thode la plus simple et la plus commune est de regarder le code coverage.</p>
+<p>
+  Il s'agit d'un indicateur qui mesure le nombre de lignes de code ex&eacute;cut&eacute;es lorsqu'on lance nos tests unitaires. On sait alors quel est le pourcentage de code ex&eacute;cut&eacute; et on isole rapidement les lignes de code qui ne le sont pas.<br />
+  Cette m&eacute;thode, quoique utile pour avoir une premi&egrave;re id&eacute;e et d&eacute;tecter les zones non couvertes, ne permet pas de v&eacute;rifier la <strong>qualit&eacute;</strong> de nos tests.<br /> En effet, elle se base sur le nombre de lignes <strong>ex&eacute;cut&eacute;es</strong>, et ne v&eacute;rifie pas les assertions faites ni ce qui est r&eacute;ellement test&eacute;.</p>
+<p>Imaginons une m&eacute;thode d'addition&nbsp;comme suit.</p>
+
+<pre><code class="language-php">
+public function add(int x, int y): int {
+	return x + y;
+}
+</code></pre>
+
+<p>Le code coverage sera &agrave; 100% avec la m&eacute;thode de test suivante :</p>
+
+<pre><code class="language-php">
+public function testAdd() {
+	add(2, 3);
+}
+</code></pre>
+
+<p>Ma m&eacute;thode de test ne teste pourtant pas grand-chose, et n'&eacute;chouera jamais, contrairement &agrave; celle-ci :</p>
+
+<pre><code class="language-php">
+public function testAdd() {
+	$result = add(2, 3);
+
+	$this->assertEqual(5, $result);
+}</code></pre>
+<p>Ces exemples sont très simples pour faciliter la compréhension, la réalité est souvent bien plus complexe.<br />
+ C'est pourquoi il est important de s'assurer de la qualit&eacute; de nos tests. Vont-ils bien &eacute;chouer en cas de r&eacute;gression&nbsp;?
+</p>
+<p>
+ Tester une seule et unique assertion par test permet d'obtenir des tests simples et bien cibl&eacute;s, il sera donc plus facile de d&eacute;tecter une erreur dans nos tests. Ce n'est toutefois pas toujours simple, et très difficilement mesurable de manière objective.
+</p>
+<p>C'est l&agrave; qu'interviennent les <strong>tests de mutation</strong>.</p>
+<p>
+  Le principe&nbsp;: faire muter le code couvert par des tests unitaires, puis jouer les tests et compter le nombre de mutants qui n'ont pas &eacute;t&eacute; d&eacute;tect&eacute;s.<br />
+  Quelques exemples de mutation&nbsp;:
+</p>
+<ul>
+  <li>supprimer un &laquo;&nbsp;return&nbsp;&raquo;</li>
+  <li>transformer une addition en soustraction</li>
+  <li>inverser le sens d'une condition, d'un incrément, d'une assertion, &hellip;</li>
+</ul>
+<p>Dans notre cas, la premi&egrave;re m&eacute;thode de test (qui ne teste rien) n'&eacute;chouera pas si on transforme l'addition en soustraction. La deuxi&egrave;me, par contre, &eacute;chouera (et permettra de d&eacute;tecter la mutation).</p>
+<p>La librairie <a target="_blank" href="https://github.com/humbug/humbug">Humbug</a> permet de le faire en PHP.</p>
+<p>
+  <em>Attention toutefois&nbsp;:</em> il s'agit de tests plus longs &agrave; s'ex&eacute;cuter. Il est donc conseillé de ne pas les faire tourner à chaque changement de code mais les utiliser plutôt comme un indicateur de qualité plus global (à faire tourner une fois par jour sur le master par exemple).<br />
+  De m&ecirc;me, cette m&eacute;thode reste limit&eacute;e aux lignes couvertes par vos codes.<br />
+</p>
+<p>Une utilisation intelligente du <strong>code coverage</strong> combin&eacute;e &agrave; des <strong>tests de mutation</strong> vous donnera une mesure assez pertinente de la <strong>qualit&eacute;</strong> de vos tests.<br /></p>
+<h2 id="aller-plus-loin">Aller plus loin</h2>
+<p>Nous avons vu un peu plus en détail les <strong>tests unitaires</strong>, qui vous permettent de valider que chacune des m&eacute;thodes que vous d&eacute;veloppez rempli bien la responsabilit&eacute; qui lui a &eacute;t&eacute; attribu&eacute;e.</p>
+<ul>
+<li>Deux librairies qui vous aideront&nbsp;: <a target="_blank" href="https://phpunit.de/index.html">PHPUnit</a>, <a target="_blank" href="http://atoum.org/">Atoum</a></li>
+</ul>
+<p>Les <strong>tests d'int&eacute;gration</strong> vous permettent de vous assurer que toutes vos m&eacute;thodes s'int&egrave;grent bien et qu'il n'y a pas d'incompatibilit&eacute; entre elles.</p>
+<ul>
+<li>Comme pour les T.U, <a target="_blank" href="https://phpunit.de/index.html">PHPUnit</a>, <a target="_blank" href="http://atoum.org/">Atoum</a> répondent à ce besoin</li>
+</ul>
+<p>Les <strong>tests syst&egrave;me</strong> vous permettent de v&eacute;rifier que votre application s'int&egrave;gre bien avec les autres syst&egrave;mes (base de donn&eacute;es, API externe, etc&hellip;)</p>
+<ul>
+<li><a target="_blank" href="http://behat.org/">Behat</a> est particulièrement intéressant dans ce cadre, <a target="_blank" href="https://github.com/postmanlabs/newman">Newman</a> peut toutefois également faire l'affaire. <a target="_blank" href="https://www.docker.com/">Docker</a> est souvent un allié précieux pour faire tourner ces tests (monter une base de donnée en local, etc).</li>
+</ul>
+<p>Ces trois m&eacute;thodes de test sont souvent compl&eacute;t&eacute;es par d'autres, plus pouss&eacute;es&nbsp;:</p>
+<p>La plus commune&nbsp;: les <strong>tests d'UI</strong> (pour User Interface), permettent de valider un sc&eacute;nario utilisateur, en simulant les actions d'un utilisateur sur l'interface de l'application.</p>
+<ul>
+<li><a target="_blank" href="http://www.seleniumhq.org/">Selenium</a>, <a target="_blank" href="http://casperjs.org/">CasperJS</a>, sont les outils les plus communément utilisés dans ce cadre.</li>
+</ul>
+<p>Selon le cas, vous aurez potentiellement besoin de mettre aussi en place des <strong>tests de performance</strong>. Ceux-ci vous permettront de valider que les nouveaux d&eacute;veloppements n'ont pas eu d'impact n&eacute;gatif sur le temps de r&eacute;ponse de vos APIs / pages.</p>
+<ul>
+<li><a target="_blank" href="http://www.seleniumhq.org/">Selenium</a>, mais aussi <a target="_blank" href="https://github.com/postmanlabs/newman">Newman</a> vous aideront pour ça.</li>
+</ul>
+<p>Vous pourrez avoir aussi besoin d'effectuer des <strong>tests de mont&eacute;e en charge</strong>&nbsp;: le but est de simuler l'activit&eacute; d'un grand nombre d'utilisateur sur votre application pour d&eacute;tecter les probl&egrave;mes potentiels (acc&egrave;s concurrents, goulots d'&eacute;tranglement, fuites m&eacute;moire, &hellip;) et les optimisations n&eacute;cessaires pour supporter la charge pr&eacute;vue sans risquer de ralentissement/d'interruption de service.</p>
+<ul>
+<li><em>Premi&egrave;re possibilit&eacute;</em>;&nbsp;: simuler l'activit&eacute; (via des sc&eacute;narios pr&eacute;d&eacute;finis ou non) d'un nombre d'utilisateurs d&eacute;finis, suffisamment nombreux et proportionnel &agrave; la r&eacute;alit&eacute; (10 000 utilisateurs sur deux serveurs pour une production &agrave; 500 000 utilisateurs pour 100 serveurs par exemple)</li>
+<li><em>Seconde possibilit&eacute;</em>&nbsp;: r&eacute;pliquer 10% des requ&ecirc;tes de la production sur une infrastructure 10 fois plus petite. Il faut mettre en place un syst&egrave;me de r&eacute;plication qui n'a pas d'impact n&eacute;gatif pour vos utilisateurs, toutefois vos requ&ecirc;tes seront alors exactement les m&ecirc;mes que celles de vos utilisateurs. Vos r&eacute;sultats en seront ainsi plus fiables.</li>
+</ul>
+<p>La seconde possibilit&eacute; n'est toutefois valable que pour l'existant&nbsp;: il vous faudra tout m&ecirc;me utiliser la premi&egrave;re possibilit&eacute; pour les fonctionnalit&eacute;s qui ne sont pas encore d&eacute;ploy&eacute;es en production.</p>
+<ul>
+<li>Pour ce faire, vous pouvez utiliser&nbsp;: <a target="_blank" href="http://jmeter.apache.org/">JMeter</a></li>
+</ul>
+<p>Enfin, vous pouvez vous inspirer de la <a target="_blank" href="https://medium.com/netflix-techblog/the-netflix-simian-army-16e57fbab116">chaos army de Netflix</a> pour aller plus loin dans vos tests, notamment pour vous assurer de la r&eacute;silience de votre production.</p>
+
+<h2>Conclusion</h2>
+<p>
+  Ce n'est pas toujours simple de se lancer dans les tests automatisés : il faut prendre le temps de se former, comprendre la philosophie derri&egrave;re chaque type de test pour choisir le test adéquat en fonction de la situation, avoir un code suffisamment propre et d&eacute;coupl&eacute;, mettre en place les outils n&eacute;cessaires (en local ou via un serveur d'int&eacute;gration continue), ...<br /> Il faut parfois convaincre nos amis du produit (ou nos clients) que non, ce n'est pas du temps perdu, m&ecirc;me si <strong>au d&eacute;marrage</strong> &ccedil;a augmente le co&ucirc;t des nouveaux développements.<br />
+  Toutefois, tester proprement une application a plusieurs effets positifs :</p>
+<ul>
+<li>R&eacute;fl&eacute;chir &agrave; ses sc&eacute;narios de test aide &agrave; mieux comprendre le besoin utilisateur et donc mieux y r&eacute;pondre d&egrave;s le d&eacute;part, de mani&egrave;re plus exhaustive.</li>
+<li>Une bonne couverture de tests permet de d&eacute;tecter les bugs tr&egrave;s t&ocirc;t dans le cycle de d&eacute;veloppement, leur co&ucirc;t de r&eacute;solution est donc beaucoup plus faible.</li>
+<li>Une bonne couverture de tests permet de cibler beaucoup plus vite la cause d'un bug lorsque celui-ci appara&icirc;t : la phase d'analyse est plus courte et son co&ucirc;t de r&eacute;solution, avec l'application d'un test permettant de s'assurer qu'il ne r&eacute;apparaitra pas, est plus faible &eacute;galement</li>
+</ul>
+<p>
+  Sauf si vous &ecirc;tes pay&eacute;s pour faire de la TMA ou que votre site ne restera pas plus d'un mois en ligne (et encore), les tests automatis&eacute;s sont vos amis. J'esp&egrave;re donc que cet article vous aura aid&eacute; &agrave; y voir plus clair.
+</p>
+<p>Vous avez des remarques, des questions ou d'autres outils &agrave; conseiller ? N'h&eacute;sitez pas &agrave; commenter cet article !</p>
+
+{% endverbatim %}
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/karim-ammor.png') }}" alt="Karim Ammor"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a target="_blank" href="{% block author_url 'https://twitter.com/lytare' %}" target="_blank">{% block article_author 'Karim Ammor' %}</a></h2>
+    <p>
+        Architecte logiciel chez <a href="https://enablon.fr/">Enablon</a>, leader mondial dans l'édition de logiciels orientés développement durable, environnement et gouvernance d'entreprise.<br />
+        Anciennement tech lead chez <a href="http://www.meetic.fr/">Meetic</a><br />
+    </p>
+{% endblock %}
