@@ -2,7 +2,6 @@
 
 namespace Afsy\Bundle\FrontBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -40,6 +39,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '19-composant-workflow-par-l-exemple'                            => 'AfsyFrontBundle:Avent:day_2017_19.html.twig',
             '18-structurer-sa-demarche-de-test'                              => 'AfsyFrontBundle:Avent:day_2017_18.html.twig',
             '17-bien-demarrer-avec-symfony-et-react'                         => 'AfsyFrontBundle:Avent:day_2017_17.html.twig',
             '16-des-astuces-de-securite-avec-symfony'                        => 'AfsyFrontBundle:Avent:day_2017_16.html.twig',
