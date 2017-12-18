@@ -79,12 +79,10 @@
     <h2 id="le-composant-workflow-par-exemple-magic">Et la magie commence ici !</h2>
 
     <p>Maintenant, vous pouvez très simplement récupérer les transitions possibles pour votre objet.</p>
-    <pre>
-        <code class="language-php">$packet = new Packet();
+    <pre><code class="language-php">$packet = new Packet();
 $workflow = $this-&gt;get('workflow.delivery');
 $workflow-&gt;getEnabledTransitions($packet);
-        </code>
-    </pre>
+</code></pre>
 
     <p>Tester si une transition est possible et l’appliquer</p>
 <pre><code class="language-php">if ($workflow-&gt;can($packet, 'lose')) {
@@ -92,7 +90,7 @@ $workflow-&gt;getEnabledTransitions($packet);
 }
 </code></pre>
 
-    <h2 id="le-composant-workflow-par-exemple-advanced">Quand les règles métiers s’en mêlent</h2>
+    <h2 id="le-composant-workflow-par-exemple-advanced">Quand les règles métier s’en mêlent</h2>
 
     <p>Facile, on a défini tous nos états et transitions mais nous n’avons aucune règle de gestion. Imaginons, par exemple qu’un colis ne peut être considéré comme perdu que 15 jours après avoir été expédié.</p>
 
@@ -132,7 +130,7 @@ class PacketLostListener implements EventSubscriberInterface
 
     <h3 id="le-composant-workflow-par-exemple-symfony-2" lang="en">One More Thing</h3>
 
-    <p>Cet example a été créé sous Symfony 4, le composant a été introduit par symfony 3.2, mais si d'aventure vous étiez encore sur une version antérieure, sacher qu'il existe un <a href="https://github.com/fduch/workflow-bundle" target="_blank">bundle</a> pour intégrer ce composant à partir de symfony 2.3. Plus d'excuse ;).</p>
+    <p>Cet example a été créé sous Symfony 4, le composant a été introduit par Symfony 3.2, mais si d'aventure vous étiez encore sur une version antérieure, sachez qu'il existe un <a href="https://github.com/fduch/workflow-bundle" target="_blank">bundle</a> pour intégrer ce composant à partir de Symfony 2.3. Plus d'excuse ;).</p>
 
 {% endblock %}
 
