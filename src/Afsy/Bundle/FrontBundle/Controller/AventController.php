@@ -40,6 +40,7 @@ class AventController extends Controller
         ),
         2017 => array(
             '19-composant-workflow-par-l-exemple'                            => 'AfsyFrontBundle:Avent:day_2017_19.html.twig',
+            '18-structurer-sa-demarche-de-test'                              => 'AfsyFrontBundle:Avent:day_2017_18.html.twig',
             '17-bien-demarrer-avec-symfony-et-react'                         => 'AfsyFrontBundle:Avent:day_2017_17.html.twig',
             '16-des-astuces-de-securite-avec-symfony'                        => 'AfsyFrontBundle:Avent:day_2017_16.html.twig',
             '15-comment-ne-pas-trop-exposer-symfony'                         => 'AfsyFrontBundle:Avent:day_2017_15.html.twig',
