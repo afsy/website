@@ -39,6 +39,7 @@ class AventController extends Controller
             '01-presentation-afsy'                                        => 'AfsyFrontBundle:Avent:day_2013_01.html.twig',
         ),
         2017 => array(
+            '24-unpack-tes-packs'                                            => 'AfsyFrontBundle:Avent:day_2017_24.html.twig',
             '22-log-me-tender'                                               => 'AfsyFrontBundle:Avent:day_2017_22.html.twig',
             '21-symfony-et-websockets'                                       => 'AfsyFrontBundle:Avent:day_2017_21.html.twig',
             '20-elasticsearch-6-et-symfony-4'                                => 'AfsyFrontBundle:Avent:day_2017_20.html.twig',
@@ -71,7 +72,7 @@ class AventController extends Controller
             $years = array_keys($this->slugs);
             krsort($years);
 
-            return $this->redirect($this->generateUrl('avent', array('year' => current($years))));
+            return $this->redirectToRoute('avent', array('year' => current($years)));
         }
 
         return $this->render('AfsyFrontBundle:Avent:year_'.$year.'.html.twig', array(

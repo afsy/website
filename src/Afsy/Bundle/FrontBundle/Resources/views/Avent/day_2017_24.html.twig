@@ -1,0 +1,309 @@
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 24 - Unpack tes packs" %}
+
+{% block article_content %}
+
+    <h1 id="unpacktespacks">Unpack tes packs</h1>
+
+    <p>
+        Ce calendrier de l'Avent a fait la part belle à Symfony Flex et Symfony 4.
+        Que de chemin parcouru depuis Symfony 3 ! L'équipe a travaillé dur pour
+        vous offrir une nouvelle expérience de développement. Plus flexible, plus
+        agile, plus performant, plus standard. C'est aussi moins de contraintes
+        et moins de « Symfony-cismes ». Que vous ayez à développer un micro-service
+        ou un site Web monolithique, Symfony 4 s'adapte à vos besoins. En partant
+        d'un squelette d'application qui contient le minimum de dépendances. Comme
+        vous l'avez déjà lu les jours précédents, créer un nouveau projet avec
+        Symfony 4 devient trivial avec Composer :
+    </p>
+
+    <pre><code class="bash language-bash">composer create-project symfony/skeleton mon-super-projet-php
+</code></pre>
+
+    <p>
+        Plus besoin de l'installateur, de l'édition standard, ou même de Silex.
+        Composer et Symfony 4 sont capables de vous proposer une expérience
+        optimisée en fonction de votre projet. Mieux, le framework s'adapte en
+        fonction des évolutions de vos besoins.
+    </p>
+
+    <p>
+        Aucun paquet superflu lors de la création d'un projet. Juste le minimum
+        pour démarrer avec quelques contrôleurs. Comme une application Silex.
+        Même objectif. Vous restez maître de la situation. Besoin de créer des
+        formulaires ? <code>composer req form</code>. Aucune configuration.
+        Symfony active automatiquement les formulaires. Le corollaire étant que
+        le support des formulaires est désactivé par défaut... comme toutes les
+        autres fonctionnalités. Plus de performance et moins de configuration.
+    </p>
+
+    <p>
+        Avec le système d'auto-configuration proposé par Flex et la découverte
+        automatique de vos services, décuplez votre productivité. Changez d'avis.
+        Vous en avez le droit. Partez avec Symfony comme micro-framework et
+        laissez-vous tenter par la large palette de bundles offerts par la
+        communauté. Testez un bundle, supprimez-le. Symfony s'occupe de tout. De
+        la configuration jusqu'à la désinstallation.
+    </p>
+
+    <p>
+        L'inconvénient majeur ? Ajouter chaque dépendance une à une peut vite
+        devenir fastidieux. Mais les <strong>packs</strong> sont là pour vous
+        aider. Un <em>pack</em> est un <em lang="en">metapackage</em> Composer
+        qui permet d'installer simplement une grappe de dépendances qui se
+        complètent : essayez <code>api-platform/api-pack</code> ou
+        <code>symfony/admin-pack</code>. Ou mieux encore, utilisez les alias
+        <code>api</code> ou <code>admin</code>. Nous avons fait des choix pour
+        vous. L'alias <code>orm</code> permet d'installer Doctrine. Utilisez
+        <code>mail</code> pour installer Swiftmailer.
+    </p>
+
+    <p>
+        Je suis fan de cette nouvelle version de Symfony. Les premiers retours
+        de la communauté sont très positifs. Simplicité et automatisation sont
+        les maîtres mots.
+    </p>
+
+    <p>
+        Cependant, démarrer une nouvelle application est un peu plus compliqué
+        qu'auparavant. Choisir les dépendances une à une, même avec les packs,
+        prend du temps, surtout si les projets se ressemblent. Parfois, un
+        message un peu obscur ne permet pas facilement de comprendre quel
+        composant installer.
+    </p>
+
+    <p>
+        Peut-on faire mieux ? Oui. Améliorer les messages d'erreurs. Nous y
+        travaillons. Les dernières versions patch de 3.4 et 4.0 sont déjà
+        meilleures sur ce point.
+    </p>
+
+    <p>
+        Aller plus loin encore. Oui. Par exemple, permettre de démarrer une
+        application aussi rapidement qu'avec la <em>Standard Edition</em>, tout
+        en gardant la flexibilité de la nouvelle approche. Le meilleur des deux
+        mondes.
+    </p>
+
+    <p>
+        Possible ? Bien sûr. C'est mon petit cadeau de fin d'année pour la
+        communauté Symfony. Allez, c'est parti. Je vous explique.
+    </p>
+
+    <p>
+        Les packs permettent de gagner du temps mais ils ont un inconvénient :
+        ils masquent les dépendances « réelles ». Prenons un exemple. Quand on
+        utilise le pack <code>orm</code>, Composer installe l'ORM Doctrine, le
+        bundle principal ainsi que le bundle pour les migrations. Le tout étant
+        auto-configuré pour plus de simplicité.
+    </p>
+
+    <p>
+        Imaginons maintenant que je ne souhaite pas travailler avec les
+        migrations Doctrine. Comment faire ? C'est inclus dans le pack, impossible
+        de supprimer <code>doctrine/migrations-bundle</code>. Ce <em lang="en">package</em>
+        ne fait pas partie des dépendances directes de mon projet :
+    </p>
+
+    <pre><code class="diff language-diff">diff --git a/composer.json b/composer.json
+index e24f26b..5238f98 100644
+--- a/composer.json
++++ b/composer.json
+@@ -7,6 +7,7 @@
+         "symfony/flex": "^1.0",
+         "symfony/framework-bundle": "^4.0",
+         "symfony/lts": "^4@dev",
++        "symfony/orm-pack": "^1.0",
+         "symfony/yaml": "^4.0"
+     },
+     "require-dev": {
+</code></pre>
+
+    <p>
+        Une solution de contournement pourrait être de regarder le <code>composer.json</code>
+        du pack et de copier/coller les dépendances qui nous intéressent. Mais
+        franchement, la magie du pack disparaît.
+    </p>
+
+    <p>
+        Une meilleure façon de procéder, disponible dans la dernière version de
+        Flex est de dépaqueter (<code>unpack</code>) le pack, via la commande
+        <code>unpack</code> :
+    </p>
+
+    <pre><code class="bash language-bash">composer unpack orm
+</code></pre>
+
+    <p>
+        Cette commande met à jour le fichier <code>composer.json</code> en
+        supprimant le pack et en le remplaçant par ses dépendances transitives
+        directes :
+    </p>
+
+    <pre><code class="diff language-diff">diff --git a/composer.json b/composer.json
+index 5238f98..b8c9794 100644
+--- a/composer.json
++++ b/composer.json
+@@ -3,11 +3,13 @@
+     "license": "proprietary",
+     "require": {
+         "php": "^7.1.3",
++        "doctrine/doctrine-bundle": "^1.6.10",
++        "doctrine/doctrine-migrations-bundle": "^1.3",
++        "doctrine/orm": "^2.5.11",
+         "symfony/console": "^4.0",
+         "symfony/flex": "^1.0",
+         "symfony/framework-bundle": "^4.0",
+         "symfony/lts": "^4@dev",
+-        "symfony/orm-pack": "^1.0",
+         "symfony/yaml": "^4.0"
+     },
+     "require-dev": {
+</code></pre>
+
+    <p>
+        Vous êtes maintenant libre de modifier les dépendances comme bon vous
+        semble. Pas fan des migrations Doctrine, pas de problème :
+    </p>
+
+    <pre><code class="bash language-bash">composer rem migrations
+</code></pre>
+
+    <p>
+        Il est également possible de dépaqueter un pack lors de l'installation,
+        grâce à l'option <code>--unpack</code> :
+    </p>
+
+    <pre><code class="bash language-bash">composer req orm-pack --unpack
+</code></pre>
+
+    <p>
+        Notez que la commande <code>pack</code> et l'option <code>--unpack</code>
+        ne sont disponibles que pour les packs Symfony (les paquets Composer
+        ayant le type <code>symfony-pack</code>).
+    </p>
+
+    <p>
+        Flexibilité accrue, mais surtout une opportunité pour aller plus loin.
+        Recréer la « <em lang="en">Symfony Standard Edition</em> » avec un pack
+        devient maintenant une idée acceptable. Techniquement, un tel pack aurait
+        pu être créé depuis longtemps mais avoir un ensemble de packs comme
+        dépendances sans pouvoir les dépaqueter n'avait que peu d'intérêt.
+    </p>
+
+    <p>
+        Petit problème tout de même. Un pack est une dépendance comme une autre.
+        Ce qui veut dire que seules les dépendances décrites dans la section
+        <code>require</code> sont prises en compte par Composer lors de
+        l'installation. Mais notre « <em lang="en">Standard Edition</em> »
+        devrait pouvoir déclarer des dépendances de développement, comme le
+        profiler ou le bundle <code>Maker</code>.
+    </p>
+
+    <p>
+        Pour aller plus loin, et grâce à la flexibilité nouvelle que nous donne
+        la possibilité de dépaqueter des packs simplement, il suffit de créer un
+        nouveau squelette, plutôt qu'un pack.
+    </p>
+
+    <p>
+        Bienvenue au nouveau « <em lang="en">Symfony Website Skeleton</em> ». A côté de
+        <a href="https://github.com/symfony/website-skeleton/blob/4.0/composer.json"><code>symfony/skeleton</code></a>
+        qui permet un contrôle total des dépendances, vous pouvez désormais
+        créer vos applications à partir de <code>symfony/website-skeleton</code>
+        qui simule l'ancienne « <em lang="en">Symfony Standard Edition</em> ».
+    </p>
+
+    <p>
+        Et comme un squelette devient votre <code>composer.json</code> racine,
+        les dépendances de développement sont prises en compte :
+    </p>
+
+    <pre><code class="json language-json">{
+    "name": "symfony/website-skeleton",
+    "type": "project",
+    "license": "MIT",
+    "description": "A skeleton to start a new Symfony website",
+    "require": {
+        "php": "^7.1.3",
+        "ext-iconv": "*",
+        "sensio/framework-extra-bundle": "^5.1",
+        "symfony/asset": "^4.0",
+        "symfony/browser-kit": "^4.0",
+        "symfony/console": "^4.0",
+        "symfony/css-selector": "^4.0",
+        "symfony/debug-pack": "*",
+        "symfony/expression-language": "^4.0",
+        "symfony/flex": "^1.0",
+        "symfony/framework-bundle": "^4.0",
+        "symfony/form": "^4.0",
+        "symfony/lts": "^4@dev",
+        "symfony/orm-pack": "*",
+        "symfony/monolog-bundle": "^3.1",
+        "symfony/process": "^4.0",
+        "symfony/security-bundle": "^4.0",
+        "symfony/serializer-pack": "*",
+        "symfony/validator": "^4.0",
+        "symfony/swiftmailer-bundle": "^3.1",
+        "symfony/web-link": "^4.0",
+        "symfony/webpack-encore-pack": "*",
+        "symfony/yaml": "^4.0"
+    },
+    "require-dev": {
+        "symfony/dotenv": "^4.0",
+        "symfony/maker-bundle": "^1.0",
+        "symfony/phpunit-bridge": "^4.0",
+        "symfony/profiler-pack": "*",
+        "symfony/thanks": "^1.0"
+    },
+...
+</code></pre>
+
+    <p>
+        Pour démarrer un projet, utilisez <code>composer create-project website-skeleton</code>.
+        Et bam, commencez à travailler. Tout est disponible, ou presque. Si ma
+        mémoire est bonne, seuls les composants <code>LDAP</code> et
+        <code>Workflow</code> manquent à l'appel.
+    </p>
+
+    <p>
+        La bonne nouvelle est votre capacité à réduire les dépendances si vous
+        le souhaitez. C'est le chemin inverse de <code>symfony/skeleton</code>.
+        Supprimer tout ce que vous n'allez pas utiliser. Et si une dépendance est
+        indirecte, dépaquetez ! Allez y gaiement, vous pourrez toujours rajouter
+        des dépendances supprimées plus tard. Et grâce à l'auto-configuration, c'est
+        juste une commande <code>composer</code> à lancer.
+    </p>
+
+    <p>
+        Vous êtes plutôt Silex ? Commencez avec <code>symfony/skeleton</code>.
+        Vous aimez le full-stack Symfony, partez avec <code>symfony/website-skeleton</code>.
+        Et faites évoluer à la baisse ou à la hausse vos dépendances. Vous êtes libre !
+    </p>
+
+    <p>
+        Allez, je vous laisse jouer avec tout ça, joyeuses fêtes de fin d'année à tous !
+    </p>
+
+{% endblock %}
+
+{% block article_avatar %}
+  <img src="{{ asset('bundles/afsyfront/images/avent/fabpot.png') }}" alt="Fabien Potencier" />
+{% endblock %}
+
+{% block article_bio %}
+  <h2>
+      {% block article_author %}Fabien Potencier{% endblock %}
+  </h2>
+  <p>
+      Passionné par les technologies informatiques et l'entrepreunariat, Fabien
+      Potencier (<a href="https://twitter.com/fabpot">@fabpot</a>) a fondé la
+      société <a href="https://sensiolabs.com/">SensioLabs</a> à la fin de ses
+      études. Il est le créateur du projet <a href="https://symfony.com">Symfony</a>
+      et le mainteneur de nombreux autres projets <span lang="en">Open-Source</span>.
+      Il se consacre aujourd'hui au développement de <a href="https://blackfire.io/">Blackfire.io</a>.
+  </p>
+{% endblock %}
