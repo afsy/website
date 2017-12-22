@@ -5,9 +5,9 @@
 {% block article_title "Jour 23 - Comment l’architecture hexagonale nous a facilité la vie !" %}
 
 {% block article_content %}
-    <h1>Comment l’architecture hexagonale nous a facilité la vie !</h1>
+    <h1 id="comment-l-architecture-hexagonale-nous-a-facilite-la-vie">Comment l’architecture hexagonale nous a facilité la vie !</h1>
 
-    <h2>Commençons le projet</h2>
+    <h2 id="commencons-le-projet">Commençons le projet</h2>
     <p>
         Nouveau projet, nouvelle équipe et nouveau client pour moi.
         Comme d’habitude j’ai hâte de commencer le projet et de connaître ce client pour qui je n’ai jamais travaillé.
@@ -17,7 +17,7 @@
     <ul>
         <li>« Oh le client est bien, mais pas trop habitué au mode agile. »</li>
         <li>« C’est un client avec des méthodes de travail un peu à l’ancienne »</li>
-        <li>« Tu vas voir il faut s’appuyer sur des Web Service (WS) SOAP bien sympathiques »</li>
+    <li>« Tu vas voir il faut s’appuyer sur des Web Service (WS) <abbr title="Simple Object Access Protocol"><abbr title="Simple Object Access Protocol">SOAP</abbr></abbr> bien sympathiques »</li>
         <li>« Leur plateforme de dev n’est pas très stable, parfois on ne peut plus utiliser les WS de dev, car ils ne sont plus disponibles. »</li>
     </ul>
     </p>
@@ -32,17 +32,17 @@
 
     <p>
         <strong>Problème principal :</strong>
-        trouver un outil qui nous permette de transformer les WS SOAP et leurs méthodes en langage objet.
-        Ça tombe bien, une petite librairie PHP nous permet d’effectuer une génération de classe à partir des WSDL (langage qui permet de décrire l'emplacement d'un service web ainsi que ses opérations),
+        trouver un outil qui nous permette de transformer les WS <abbr title="Simple Object Access Protocol">SOAP</abbr> et leurs méthodes en langage objet.
+        Ça tombe bien, une petite librairie PHP nous permet d’effectuer une génération de classe à partir des <abbr title="Web Services Description Language">WSDL</abbr> (langage qui permet de décrire l'emplacement d'un service web ainsi que ses opérations),
         Génial !! Problème résolu, YES !
     </p>
     <p>
         <strong>Second problème (celui qui nous intéresse aujourd'hui) :</strong>
-        comment pouvons-nous travailler sans dépendre de leur « super » WS SOAP ?
+        comment pouvons-nous travailler sans dépendre de leur « super » WS <abbr title="Simple Object Access Protocol">SOAP</abbr> ?
     </p>
     <p>
         C'est là que nous avons l'idée de mettre en place une architecture hexagonale,
-        car ça va nous permettre de détacher tout ce qui est métier de l’infrastructure et ainsi on pourra utiliser soit les WS SOAP,
+        car ça va nous permettre de détacher tout ce qui est métier de l’infrastructure et ainsi on pourra utiliser soit les WS <abbr title="Simple Object Access Protocol">SOAP</abbr>,
         soit une autre source de données (SQLite pour nous).
     </p>
 
@@ -52,8 +52,8 @@
         <a href="http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/">Pérennisez votre métier avec l'architecture hexagonale</a>
     </p>
 
-    <p align="center">
-        Principe schématisé
+    <h4 style="text-align: center;">Principe schématisé</h4>
+    <p style="text-align:center;">
         <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale.png') }}" alt="Architecture hexagonale" />
         (source :
             <a href="http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/">
@@ -64,72 +64,68 @@
 
     <p>
         Concrètement nous avons toute notre partie métier, qui possède la logique de l'application, ce qu'elle doit faire exactement.
-        Autour de laquelle nous pouvons connecter une API, une BDD, un service de cache, ...
+        Autour de laquelle nous pouvons connecter une API, une BDD, un service de cache, etc.
     </p>
     <p>
-        Tous les services ne doivent en aucun cas impacter la logique métier, donc il faut faire en sorte que tous soient un maximum indépendant.
+        Tous les services ne doivent en aucun cas impacter la logique métier, il faut donc faire en sorte que tous soient un maximum indépendant.
         Pour ce faire nous allons créer des interfaces permettant aux adaptateurs des différents services de se brancher aux métiers sans l'impacter.
-        Avec cette architecture nous pourrons ajouter n'importe quel service pour traiter nos données (repository, persister) sans qu'il y ait d'impact sur le métier !
+        Avec cette architecture nous pourrons ajouter n'importe quel service pour traiter nos données (repository, persister) sans qu'il y n'ait d'impact sur le métier !
         Voici le découpage de notre application dans le répertoire /src  :
     </p>
-
-    <code>
-        <ul style="list-style: none">
-            <li>src</li>
-            <li>├── AppBundle</li>
-            <li>│   ├── AppBundle.php</li>
-            <li>│   ├── Command</li>
-            <li>│   ├── Component</li>
-            <li>│   ├── Controller</li>
-            <li>│   ├── DependencyInjection</li>
-            <li>│   ├── Dictionary</li>
-            <li>│   ├── Doctrine</li>
-            <li>│   ├── Event</li>
-            <li>│   ├── Exception</li>
-            <li>│   ├── Form</li>
-            <li>│   ├── Http</li>
-            <li>│   ├── Monolog</li>
-            <li>│   ├── Provider</li>
-            <li>│   ├── Repository</li>
-            <li>│   ├── Resources</li>
-            <li>│   ├── Response</li>
-            <li>│   ├── Security</li>
-            <li>│   ├── Sort</li>
-            <li>│   ├── Transformer</li>
-            <li>│   ├── Twig</li>
-            <li>│   ├── Validator</li>
-            <li>│   └── Webview</li>
-            <li>├── Domain</li>
-            <li>│   ├── Model</li>
-            <li>│   ├── Persister</li>
-            <li>│   └── Repository</li>
-            <li>└── Infrastructure</li>
-            <li>├── Cache</li>
-            <li>├── Doctrine</li>
-            <li>├── Sqlite</li>
-            <li>└── Webservice</li>
-        </ul>
-    </code>
-
-    <p>
-        <ul>
-            <li>
-                <strong>/AppBundle :</strong> Code symfony
-                <ul>
-                    <li><strong>/Provider :</strong> Services faisant le lien entre les Repository et les services sf (ex. token_storage)</li>
-                </ul>
-            </li>
-            <li>
-                <strong>/Domain :</strong>Contient une abstraction du métier
-                <ul>
-                    <li><strong>/Model:</strong> Représente les modèles de données utilisés sur l’application</li>
-                    <li><strong>/Persister:</strong> Interface définissant comment les modèles sont sauvegardés</li>
-                    <li><strong>/Repository:</strong> Interface définissant comment les modèles sont récupérés</li>
-                </ul>
-            </li>
-            <li><strong>/Infrastructure :</strong> Contient les implémentations des interfaces du répertoire /Domain</li>
-        </ul>
-    </p>
+    <pre>
+        <code>
+    src
+    ├── AppBundle
+    │   ├── AppBundle.php
+    │   ├── Command
+    │   ├── Component
+    │   ├── Controller
+    │   ├── DependencyInjection
+    │   ├── Dictionary
+    │   ├── Doctrine
+    │   ├── Event
+    │   ├── Exception
+    │   ├── Form
+    │   ├── Http
+    │   ├── Monolog
+    │   ├── Provider
+    │   ├── Repository
+    │   ├── Resources
+    │   ├── Response
+    │   ├── Security
+    │   ├── Sort
+    │   ├── Transformer
+    │   ├── Twig
+    │   ├── Validator
+    │   └── Webview
+    ├── Domain
+    │   ├── Model
+    │   ├── Persister
+    │   └── Repository
+    └── Infrastructure
+    ├── Cache
+    ├── Doctrine
+    ├── Sqlite
+    └── Webservice
+        </code>
+    </pre>
+    <ul>
+        <li>
+            <strong>/AppBundle :</strong> Code symfony
+            <ul>
+                <li><strong>/Provider :</strong> Services faisant le lien entre les Repository et les services sf (ex. token_storage)</li>
+            </ul>
+        </li>
+        <li>
+            <strong>/Domain :</strong>Contient une abstraction du métier
+            <ul>
+                <li><strong>/Model:</strong> Représente les modèles de données utilisés sur l’application</li>
+                <li><strong>/Persister:</strong> Interface définissant comment les modèles sont sauvegardés</li>
+                <li><strong>/Repository:</strong> Interface définissant comment les modèles sont récupérés</li>
+            </ul>
+        </li>
+        <li><strong>/Infrastructure :</strong> Contient les implémentations des interfaces du répertoire /Domain</li>
+    </ul>
 
     <p>
         Voici notre démarche de développement pour chaque nouvelle fonctionnalités :
@@ -148,29 +144,26 @@
 
     <p>Voici à quoi peut ressembler notre application aujourd'hui :</p>
 
-    <p align="center">
-        Pour les repository (lecture des données)
-        <img src="{{ asset('') }}" alt="persister" />
+    <h4 style="text-align: center;">Pour les repository (lecture des données)</h4>
+    <p style="text-align:center">
+        <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale-repository.png') }}" alt="persister" />
+        (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
     </p>
-
-    <p align="center">
-        Pour les persister (écriture des données)
+    <br/><br/>
+    <h4 style="text-align: center;">Pour les persister (écriture des données)</h4>
+    <p style="text-align:center">
         <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale-persister.png') }}" alt="persister" />
+        (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
     </p>
 
-    <p align="center">
-        (source : schéma déssinés par <a href="https://github.com/melicerte">@melicerte</a>)
-    p>
-    <h2>Et pourquoi on ne verrai pas un exemple</h2>
+    <h2 id="exemple">Exemple</h2>
 
     <p>Nous allons ajouter la possibilité de lire un article de blog.</p>
 
-    <ul>
-        <li>
-            D'abord nous allons créer un model Article, avec un titre et un contenu.
+    <h4>D'abord nous allons créer un model Article, avec un titre et un contenu.</h4>
 
-            <pre class="language-php">
-                <code>
+    <pre class="language-php">
+        <code>
 namespace AppBundle\Domain\Model;
 
 class Article
@@ -223,15 +216,11 @@ class Article
         $this->content = $content;
     }
 }
-
-                </code>
-            </pre>
-        </li>
-
-        <p>
-            <p>Création de l'interfaces pour le repository, car nous souhaitons lire le contenu d'un article.</p>
-            <pre class="language-php">
-                <code>
+        </code>
+    </pre>
+    <h4>Création de l'interfaces pour le repository, car nous souhaitons lire le contenu d'un article.</h4>
+    <pre class="language-php">
+        <code>
 namespace AppBundle\Domain\Repository;
 
 use AppBundle\Domain\Model;
@@ -245,15 +234,13 @@ interface Article
     */
    public function getArticleByTitle(string $title): Model\Article;
 }
+        </code>
+    </pre>
 
-                </code>
-            </pre>
-        </li>
-        <li>
-            Création du repository SQLite
+    <h4>Création du repository SQLite</h4>
 
-            <pre class="language-php">
-                <code>
+    <pre class="language-php">
+        <code>
 namespace AppBundle\Infrastructure\Sqlite\Repository;
 
 use Doctrine\DBAL\Connection;
@@ -298,14 +285,13 @@ class Article implements Repository\Article
     }
 }
 
-                </code>
-            </pre>
+        </code>
+    </pre>
 
-        </li>
-        <li>
-            Création du repository avec les WS SOAP
-            <pre class="language-php">
-                <code>
+
+    <h4>Création du repository avec les WS <abbr title="Simple Object Access Protocol">SOAP</abbr></h4>
+    <pre class="language-php">
+        <code>
 namespace AppBundle\Infrastructure\Webservice\Repository;
 
 use AppBundle\Webservice\Article\ArticleService;
@@ -344,27 +330,26 @@ class Agency implements Repository\Agency
         return $response;
     }
 }
-                </code>
-            </pre>
-        </li>
-    </ul>
+        </code>
+    </pre>
 
+    <br/>
     <p>
         Chaque service utilisé a sa propre manière d'aller chercher l'information, mais le métier, lui doit seulement utiliser la méthode
-        <code>getArticleByTitle</code>. Donc, pour n'importe quel service utilisé la façon de récupérer les données pour la partie métier reste la même.
+        <code class="language-none">getArticleByTitle</code>. Donc, pour n'importe quel service utilisé la façon de récupérer les données pour la partie métier reste la même.
     </p>
 
-    <h2>Et aujourd'hui ça donne quoi ?</h2>
+    <h2 id="et-aujourd-hui-ca-donne-quoi">Et aujourd'hui ça donne quoi ?</h2>
 
     <p>
         Alors, comment je peux affirmer que cette architecture m'a facilité la vie.
-        Et bien on s'est parfois retrouvé avec des WS down toute une journée, alors que nous étions uniquement sur ce projet.
-        Du coup la partie SQLite nous a permis d'avancer sans s'arrêter, pas de pause dans le projet.
+        Et bien nous nous sommes retrouvé avec des WS en panne toute une journée, alors que nous devions travailler sur le projet.
+        Du coup la partie SQLite nous a permis d'avancer sans coupure de développement, pas de pause involontaire dans le projet.
     </p>
 
     <p>
         Une partie métier bien maitrisé, on a pu vraiment se concentrer sur les fonctionnalités désirées par le client.
-        Et cette architecture nous a permis de certifier au client que toute la partie métier n'aura pas à être modifiée s'il décide de passer des WS SOAP à une API REST par exemple.
+        Et cette architecture nous a permis de certifier au client que toute la partie métier n'aura pas à être modifiée s'il décide de passer des WS <abbr title="Simple Object Access Protocol">SOAP</abbr> à une API REST par exemple.
         Et oui, nous n'aurons que les adaptateurs à ajouter, elle est pas belle la vie ?!
     </p>
 
@@ -372,11 +357,14 @@ class Agency implements Repository\Agency
         Pour les nouvelles personnes arrivant sur le projet il est vrai que ce n'est pas tout simple,
         mais dès qu'ils ont le projet en mains ça roule plutôt pas mal !
         Voici pour preuve le petit témoignage d'un de mes collègues qui a du travailler sur le projet alors que tout était déjà en place :
+    </p>
+    <blockquote>
         <p>
             "C'est très dur de comprendre l'architecture quand on débarque sur le projet.
             Mais après tu vois et comprends pourquoi c'est fait comme ça, et tu te dis : Ah oui c'est pas mal au final"
         </p>
-    </p>
+    </blockquote>
+
 
     <p>
         Malgré les bons cotés de ce style d'architecture je ne pense pas qu'il soit la solution à tous les problèmes.
