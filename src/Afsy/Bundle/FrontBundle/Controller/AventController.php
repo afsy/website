@@ -40,6 +40,7 @@ class AventController extends Controller
         ),
         2017 => array(
             '23-comment-l-architecture-hexagonale-nous-a-facilite-la-vie'    => 'AfsyFrontBundle:Avent:day_2017_23.html.twig',
+            '22-log-me-tender'                                               => 'AfsyFrontBundle:Avent:day_2017_22.html.twig',
             '21-symfony-et-websockets'                                       => 'AfsyFrontBundle:Avent:day_2017_21.html.twig',
             '20-elasticsearch-6-et-symfony-4'                                => 'AfsyFrontBundle:Avent:day_2017_20.html.twig',
             '19-composant-workflow-par-l-exemple'                            => 'AfsyFrontBundle:Avent:day_2017_19.html.twig',
