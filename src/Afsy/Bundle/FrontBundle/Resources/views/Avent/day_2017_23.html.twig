@@ -13,40 +13,38 @@
         Comme d’habitude j’ai hâte de commencer le projet et de connaître ce client pour qui je n’ai jamais travaillé.
         Je commence à faire mon enquête pour me faire une vague idée sur ce client qui m’est inconnu.
     </p>
-    <p>
     <ul>
         <li>« Oh le client est bien, mais pas trop habitué au mode agile. »</li>
         <li>« C’est un client avec des méthodes de travail un peu à l’ancienne »</li>
-    <li>« Tu vas voir il faut s’appuyer sur des Web Service (WS) <abbr title="Simple Object Access Protocol"><abbr title="Simple Object Access Protocol">SOAP</abbr></abbr> bien sympathiques »</li>
+        <li>« Tu vas voir il faut s’appuyer sur des Webservice <abbr title="Simple Object Access Protocol"><abbr title="Simple Object Access Protocol">SOAP</abbr></abbr> bien sympathiques »</li>
         <li>« Leur plateforme de dev n’est pas très stable, parfois on ne peut plus utiliser les WS de dev, car ils ne sont plus disponibles. »</li>
     </ul>
-    </p>
 
     <p>
         Et j’en passe…
     </p>
 
     <p>
-        Vous vous imaginez-bien que même avant de commencer je me suis dis, ça va être drôle, je sens qu’on va bien s’amuser !
+        Vous vous imaginez bien que même avant de commencer je me suis dis, ça va être drôle, je sens qu’on va bien s’amuser !
     </p>
 
     <p>
         <strong>Problème principal :</strong>
-        trouver un outil qui nous permette de transformer les WS <abbr title="Simple Object Access Protocol">SOAP</abbr> et leurs méthodes en langage objet.
-        Ça tombe bien, une petite librairie PHP nous permet d’effectuer une génération de classe à partir des <abbr title="Web Services Description Language">WSDL</abbr> (langage qui permet de décrire l'emplacement d'un service web ainsi que ses opérations),
+        trouver un outil qui nous permette de transformer les Webservices <abbr title="Simple Object Access Protocol">SOAP</abbr> et leurs méthodes en langage objet.
+        Ça tombe bien, une petite librairie PHP nous permet d’effectuer une génération de classes à partir des <abbr title="Web Services Description Language">WSDL</abbr> (langage qui permet de décrire l'emplacement d'un service web ainsi que ses opérations),
         Génial !! Problème résolu, YES !
     </p>
     <p>
         <strong>Second problème (celui qui nous intéresse aujourd'hui) :</strong>
-        comment pouvons-nous travailler sans dépendre de leur « super » WS <abbr title="Simple Object Access Protocol">SOAP</abbr> ?
+        comment pouvons-nous travailler sans dépendre de leur « super » Webservices <abbr title="Simple Object Access Protocol">SOAP</abbr> ?
     </p>
     <p>
         C'est là que nous avons l'idée de mettre en place une architecture hexagonale,
-        car ça va nous permettre de détacher tout ce qui est métier de l’infrastructure et ainsi on pourra utiliser soit les WS <abbr title="Simple Object Access Protocol">SOAP</abbr>,
+        car ça va nous permettre de détacher tout ce qui est métier de l’infrastructure et ainsi on pourra utiliser soit les Webservices <abbr title="Simple Object Access Protocol">SOAP</abbr>,
         soit une autre source de données (SQLite pour nous).
     </p>
 
-    <h2>Comment avons nous utilisé ce principe d’architecture hexagonale ?</h2>
+    <h2>Comment avons-nous utilisé ce principe d’architecture hexagonale ?</h2>
     <p>
         Voici l'article que nous avons utilisé comme point d'entrée, dans notre démarche :
         <a href="http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/">Pérennisez votre métier avec l'architecture hexagonale</a>
@@ -54,23 +52,28 @@
 
     <h4 style="text-align: center;">Principe schématisé</h4>
     <p style="text-align:center;">
-        <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale.png') }}" alt="Architecture hexagonale" />
-        (source :
-            <a href="http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/">
-                http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/
-            </a>
-        )
+        <figure>
+
+            <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale.png') }}" alt="Architecture hexagonale" />
+            <figcaption style="text-align: center">
+                (source :
+                <a href="http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/">
+                    http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/
+                </a>
+                )
+            </figcaption>
+        </figure>
     </p>
 
     <p>
         Concrètement nous avons toute notre partie métier, qui possède la logique de l'application, ce qu'elle doit faire exactement.
-        Autour de laquelle nous pouvons connecter une API, une BDD, un service de cache, etc.
+        Autour de laquelle nous pouvons connecter une <abbr title="Interface de programmation applicative">API</abbr>, une <abbr title="Base de données">BDD</abbr>, un service de cache, etc.
     </p>
     <p>
-        Tous les services ne doivent en aucun cas impacter la logique métier, il faut donc faire en sorte que tous soient un maximum indépendant.
+        Tous les services ne doivent en aucun cas impacter la logique métier, il faut donc faire en sorte que tous soient un maximum indépendants.
         Pour ce faire nous allons créer des interfaces permettant aux adaptateurs des différents services de se brancher aux métiers sans l'impacter.
         Avec cette architecture nous pourrons ajouter n'importe quel service pour traiter nos données (repository, persister) sans qu'il y n'ait d'impact sur le métier !
-        Voici le découpage de notre application dans le répertoire /src  :
+        Voici le découpage de notre application dans le répertoire <code>/src</code>  :
     </p>
     <pre>
         <code>
@@ -111,60 +114,64 @@
     </pre>
     <ul>
         <li>
-            <strong>/AppBundle :</strong> Code symfony
+            <code>/AppBundle :</code> code symfony
             <ul>
-                <li><strong>/Provider :</strong> Services faisant le lien entre les Repository et les services sf (ex. token_storage)</li>
+                <li><code>/Provider :</code> services faisant le lien entre les Repository et les services symfony (ex. token_storage)</li>
             </ul>
         </li>
         <li>
-            <strong>/Domain :</strong>Contient une abstraction du métier
+            <code>/Domain :</code>contient une abstraction du métier
             <ul>
-                <li><strong>/Model:</strong> Représente les modèles de données utilisés sur l’application</li>
-                <li><strong>/Persister:</strong> Interface définissant comment les modèles sont sauvegardés</li>
-                <li><strong>/Repository:</strong> Interface définissant comment les modèles sont récupérés</li>
+                <li><code>/Model:</code> représente les modèles de données utilisés sur l’application</li>
+                <li><code>/Persister:</code> interface définissant comment les modèles sont sauvegardés</li>
+                <li><code>/Repository:</code> interface définissant comment les modèles sont récupérés</li>
             </ul>
         </li>
-        <li><strong>/Infrastructure :</strong> Contient les implémentations des interfaces du répertoire /Domain</li>
+        <li><code>/Infrastructure :</code> contient les implémentations des interfaces du répertoire /Domain</li>
     </ul>
 
     <p>
-        Voici notre démarche de développement pour chaque nouvelle fonctionnalités :
+        Voici notre démarche de développement pour chaque nouvelle fonctionnalité :
     </p>
-    <p>
-        <ul>
-            <li>Création des modèles.</li>
-            <li>Création des interfaces persister et repository. Notre politique est de créer uniquement ce dont on a besoin. Si nous avons simplement besoin de récupérer les données, on ne crée qu’un repository et vice-versa.</li>
-            <li>Développement de la partie SQLite (persister / repository) pour valider le côté fonctionnel de l'application.</li>
-            <li>Création des test fonctionnels (behat dans notre cas) pour valider que tout fonctionne.</li>
-            <li>Création des tests unitaire.</li>
-            <li>Si tout est ok en SQLite, développement des adapteurs pour la partie Webservice.</li>
-            <li>Si besoin, développement d'adaptateurs de cache nous permettant de créer le cache et de l'utiliser à la place des Webservice.</li>
-        </ul>
-    </p>
+    <ul>
+        <li>Création des modèles.</li>
+        <li>Création des interfaces <code>Persister</code> et <code>Repository</code>. Notre politique est de créer uniquement ce dont on a besoin. Si nous avons simplement besoin de récupérer les données, on ne crée qu’un repository et vice-versa.</li>
+        <li>Développement de la partie SQLite (persister / repository) pour valider le côté fonctionnel de l'application.</li>
+        <li>Création des tests fonctionnels (behat dans notre cas) pour valider que tout fonctionne.</li>
+        <li>Création des tests unitaires.</li>
+        <li>Si tout est ok en SQLite, développement des adapteurs pour la partie Webservice.</li>
+        <li>Si besoin, développement d'adaptateurs de cache nous permettant de créer le cache et de l'utiliser à la place des Webservices.</li>
+    </ul>
 
     <p>Voici à quoi peut ressembler notre application aujourd'hui :</p>
 
-    <h4 style="text-align: center;">Pour les repository (lecture des données)</h4>
+    <h4 style="text-align: center;">Pour les <code>Repository</code> (lecture des données)</h4>
     <p style="text-align:center">
-        <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale-repository.png') }}" alt="persister" />
-        (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
+        <figure>
+            <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale-repository.png') }}" alt="persister" />
+            <figcaption style="text-align: center">
+                (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
+            </figcaption>
+        </figure>
     </p>
     <br/><br/>
-    <h4 style="text-align: center;">Pour les persister (écriture des données)</h4>
+    <h4 style="text-align: center;">Pour les <code>Persister</code> (écriture des données)</h4>
     <p style="text-align:center">
-        <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale-persister.png') }}" alt="persister" />
-        (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
+        <figure>
+            <img src="{{ asset('bundles/afsyfront/images/avent/23-archi-hexagonale-persister.png') }}" alt="persister" />
+            <figcaption style="text-align: center">
+                (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
+            </figcaption>
+        </figure>
     </p>
 
     <h2 id="exemple">Exemple</h2>
 
     <p>Nous allons ajouter la possibilité de lire un article de blog.</p>
 
-    <h4>D'abord nous allons créer un model Article, avec un titre et un contenu.</h4>
+    <h4>D'abord nous créons un modèle <code>Article</code>, avec un titre et un contenu.</h4>
 
-    <pre class="language-php">
-        <code>
-namespace AppBundle\Domain\Model;
+    <pre class="language-php"><code>namespace AppBundle\Domain\Model;
 
 class Article
 {
@@ -178,7 +185,7 @@ class Article
     * @param string $title
     * @param string $content
     */
-    public function __construct($title, $content)
+    public function __construct(string $title, string $content)
     {
         $this->title = $title;
         $this->content = $content;
@@ -187,7 +194,7 @@ class Article
     /**
     * @return string
     */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -195,7 +202,7 @@ class Article
     /**
     * @param string $title
     */
-    public function setTitle($title)
+    public function setTitle(string $title)
     {
         $this->title = $title;
     }
@@ -203,7 +210,7 @@ class Article
     /**
     * @return string
     */
-    public function getContent()
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -211,17 +218,15 @@ class Article
     /**
     * @param string $content
     */
-    public function setContent($content)
+    public function setContent(string $content)
     {
         $this->content = $content;
     }
 }
         </code>
     </pre>
-    <h4>Création de l'interfaces pour le repository, car nous souhaitons lire le contenu d'un article.</h4>
-    <pre class="language-php">
-        <code>
-namespace AppBundle\Domain\Repository;
+    <h4>Création de l'interface pour le <code>Repository</code>, car nous souhaitons lire le contenu d'un article.</h4>
+    <pre class="language-php"><code>namespace AppBundle\Domain\Repository;
 
 use AppBundle\Domain\Model;
 
@@ -239,9 +244,7 @@ interface Article
 
     <h4>Création du repository SQLite</h4>
 
-    <pre class="language-php">
-        <code>
-namespace AppBundle\Infrastructure\Sqlite\Repository;
+    <pre class="language-php"><code>namespace AppBundle\Infrastructure\Sqlite\Repository;
 
 use Doctrine\DBAL\Connection;
 use AppBundle\Domain\Model;
@@ -249,7 +252,6 @@ use AppBundle\Domain\Repository;
 
 class Article implements Repository\Article
 {
-    /** @var Connection */
     private $connection;
 
     /**
@@ -261,9 +263,6 @@ class Article implements Repository\Article
         $this->connection = $connection;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getArticleByTitle(string $title): Model\Article
     {
         $qb = $this->connection->createQueryBuilder();
@@ -289,10 +288,8 @@ class Article implements Repository\Article
     </pre>
 
 
-    <h4>Création du repository avec les WS <abbr title="Simple Object Access Protocol">SOAP</abbr></h4>
-    <pre class="language-php">
-        <code>
-namespace AppBundle\Infrastructure\Webservice\Repository;
+    <h4>Création du <code>Repository</code> avec les Webservices <abbr title="Simple Object Access Protocol">SOAP</abbr></h4>
+    <pre class="language-php"><code>namespace AppBundle\Infrastructure\Webservice\Repository;
 
 use AppBundle\Webservice\Article\ArticleService;
 use AppBundle\Domain\Model;
@@ -301,10 +298,8 @@ use AppBundle\Infrastructure\Webservice\RequestBuilder\LireArticle;
 
 class Agency implements Repository\Agency
 {
-    /** @var ArticleService */
     private $articleService;
 
-    /** @var LireArticle */
     private $requestBuilder;
 
     /**
@@ -312,7 +307,7 @@ class Agency implements Repository\Agency
      * @param LireArticle      $requestBuilder
      */
     public function __construct(
-        $articleService,
+        ArticleService $articleService,
         LireArticle $requestBuilder
     ) {
         $this->articleService  = $articleService;
@@ -343,13 +338,13 @@ class Agency implements Repository\Agency
 
     <p>
         Alors, comment je peux affirmer que cette architecture m'a facilité la vie.
-        Et bien nous nous sommes retrouvé avec des WS en panne toute une journée, alors que nous devions travailler sur le projet.
+        Et bien nous nous sommes retrouvés avec des Webservices en panne toute une journée, alors que nous devions travailler sur le projet.
         Du coup la partie SQLite nous a permis d'avancer sans coupure de développement, pas de pause involontaire dans le projet.
     </p>
 
     <p>
-        Une partie métier bien maitrisé, on a pu vraiment se concentrer sur les fonctionnalités désirées par le client.
-        Et cette architecture nous a permis de certifier au client que toute la partie métier n'aura pas à être modifiée s'il décide de passer des WS <abbr title="Simple Object Access Protocol">SOAP</abbr> à une API REST par exemple.
+        Une partie métier bien maitrisée, on a pu vraiment se concentrer sur les fonctionnalités désirées par le client.
+        Et cette architecture nous a permis de certifier au client que toute la partie métier n'aura pas à être modifiée s'il décide de passer des Webservices <abbr title="Simple Object Access Protocol">SOAP</abbr> à une API REST par exemple.
         Et oui, nous n'aurons que les adaptateurs à ajouter, elle est pas belle la vie ?!
     </p>
 
