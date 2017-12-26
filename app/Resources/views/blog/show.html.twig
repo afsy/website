@@ -1,0 +1,9 @@
+{% extends 'layout.html.twig' %}
+
+{% block page_title %}
+    - {{ article.title }}
+{% endblock %}
+
+{% block body %}
+    {{ include('blog/_article.html.twig') }}
+{% endblock %}

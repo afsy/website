@@ -1,0 +1,288 @@
+{% extends 'avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 8 - Symfony Flex : la nouvelle façon de développer avec Symfony" %}
+
+{% block article_content %}
+    <style type="text/css">
+        i {
+            font-family: sans-serif;
+        }
+    </style>
+    <h1 id="symfony-flex-la-nouvelle-façon-de-développer-avec-symfony">Symfony Flex : la nouvelle façon de développer avec Symfony</h1>
+
+    <p>Les versions de Symfony 3.4 et 4.0 viennent tout juste de sortir et avec elles vient une nouvelle façon de développer des applications Symfony. Dîtes adieu à la <a href="https://github.com/symfony/symfony-standard">Standard Edition</a> et bonjour aux tout nouveaux <code>symfony/skeleton</code>, Symfony Flex et les recettes qui vont avec.</p>
+
+
+
+    <h2 id="vous-avez-dit-flex">Vous avez dit Flex ?</h2>
+
+    <p>D’un point de vue technique, <a href="https://github.com/symfony/flex">Symfony Flex</a> est juste un plugin Composer. Il se branche sur les événements Composer dès lors que vous lancez une commande qui installe, met à jour ou supprime un paquet PHP ou bundle Symfony. Son but ? <strong>Automatiser l’installation et la suppression de vos dépendances</strong> en fournissant une <strong>configuration par défaut</strong> sans avoir à aller lire la doc pour trouver quelle configuration écrire, quelles routes charger ou autre tâche rébarbative à effectuer. Et dès Symfony 4.0, Flex sera le moyen par défaut pour développer une application Symfony.</p>
+
+    <p>Il paraît qu’un bon exemple vaut mieux qu’un long discours. Alors imaginons que vous ayez une application existante en Symfony 3.3 (parce que vous êtes un dev cool et avez effectué les migrations vers les dernières versions de Symfony au fur et à mesure 💪). Vous voulez y ajouter une API en installant api-platform. Vous allez donc effectuer les tâches suivantes :</p>
+
+    <ul style="margin-left: 0">
+        <li>
+            Installation du package
+            <pre class="language-bash"><code>composer require api-platform</code></pre>
+            <br />
+        </li>
+        <li>
+            Mise à jour du kernel pour instancier et enregistrer le bundle
+            <pre class="language-php"><code>// app/AppKernel.php
+
+public function registerBundles()
+{
+    $bundles = [
+        // ...
+        new ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle(),
+    ];
+    // ...
+}</code></pre>
+            <br />
+        </li>
+        <li>
+            Import du routing fourni par le bundle
+            <pre class="language-yaml"><code># app/config/routing.yml
+api:
+    resource: '.'
+    type: 'api_platform'
+    prefix: '/api' # Optional</code></pre>
+            <br />
+        </li>
+        <li>Configuration du bundle dans <code>config.yml</code></li>
+    </ul>
+
+    <p>Rien d’insurmontable me direz-vous. Mais rappelez-vous qu’il est nécessaire de <strong>faire ces manipulations pour chaque bundle</strong> que vous ajoutez dans votre application (sans parler des autres tâches comme créer des entités Doctrine requises par certains bundles, lancer des commandes CLI, etc). C’est encore pire si nous tombons sur un bundle qui aurait des dépendances sur plusieurs autres bundles (coucou Sonata 👋). Et c’est tout de suite moins sympathique. 😬</p>
+
+    <p>Imaginons maintenant le futur. Vous êtes désormais l’heureux propriétaire d’une application en Symfony 4. Et surtout, vous rêvez toujours d’installer une API REST (puisque sans ça, mon exemple n’aurait plus beaucoup d’intérêt, avouons-le). Vous lancez donc la commande suivante :</p>
+
+
+
+    <pre class="language-bash"><code>composer require api</code></pre>
+
+    <p>Et c’est tout. Oui, vous avez bien lu, c’est tout. Flex va se charger lui-même d’enregistrer le bundle dans le kernel de Symfony, de fournir une configuration par défaut, de charger les routes nécessaires, etc. Une seule commande Composer vous aura suffi pour mettre en place une API REST fonctionnelle et sa documentation swagger/openapi.</p>
+
+
+
+    <h2 id="sous-le-capot">Sous le capot</h2>
+
+    <p>Au cœur de tout ce système d’automatisation se trouvent les <strong>recipes</strong> - ou recettes dans la langue de notre bon vieux Molière. Les recettes, hébergées sur un dépôt open source disponibles <a href="https://github.com/symfony/recipes">ici pour les officielles</a> (comprendre celles approuvées et maintenues par la core team) et <a href="https://github.com/symfony/recipes-contrib">ici pour celles de la communauté</a>, contiennent des instructions pour indiquer à Flex ce qu’il doit faire pour chaque paquet.</p>
+
+    <p>Ainsi, une recette définit plusieurs informations, la première étant les alias. </p>
+
+
+
+    <h3 id="les-aliases">Les aliases</h3>
+
+    <p>Vous vous souvenez de l’exemple précédent ?</p>
+
+
+
+    <pre class="language-bash"><code>composer require api</code></pre>
+
+    <p>Le package <code>api</code> n’existe pas pour Composer. Mais Flex intervient pour détecter si le nom de package demandé correspond à un alias, et si c’est le cas, fait en sorte que Composer installe le paquet correspondant.</p>
+
+    <p>Il existe déjà tout un tas d’alias (<code>admin</code>, <code>log</code>, <code>orm</code>, etc) et ils seront forcément non objectifs puisque que définis par la core team (les alias sont uniquement disponibles pour les recettes officielles). Là encore, cela simplifie un peu le développement Symfony en mettant plus en avant des packages de qualité, testés et maintenus.</p>
+
+    <p>Mais ce qui fait réellement l’intérêt des recettes, c’est la partie <code>configurator</code>.</p>
+
+
+
+    <h3 id="les-configurateurs">Les configurateurs</h3>
+
+    <p>Il existe actuellement 8 types de configurateurs disponibles pour les recettes Flex. Chaque type permet au plugin de configurer une partie de votre application. En voici la liste :</p>
+
+    <ul>
+        <li><code>bundles</code> permet de connaître les bundles à instancier suivant l’environnement ;</li>
+        <li><code>container</code> donne les paramètres à ajouter dans votre DIC ;</li>
+        <li><code>copy-from-package</code> indique les fichiers à copier du paquet Composer vers votre application Symfony ;</li>
+        <li><code>copy-from-recipe</code> indique les fichiers à copier de la recette vers votre application Symfony ;</li>
+        <li><code>env</code> donne les variables d’environnement à ajouter dans les fichiers <code>.env.dist</code> et <code>.env</code> de l’application ;</li>
+        <li><code>composer-scripts</code> liste les commandes à ajouter dans la section <code>scripts</code> de votre <code>composer.json</code> pour qu’elles soient lancées à la fin des commandes <code>install</code> et <code>update</code> ;</li>
+        <li><code>gitignore</code> donne les entrées à ajouter à votre <code>.gitignore</code> ;</li>
+        <li><code>post-install-output</code> permet d’afficher du texte lorsque l’installation par Composer se termine.</li>
+    </ul>
+
+    <p>Flex est suffisamment intelligent pour également supprimer ce qui a été ajouté par une recette lorsque vous supprimez le paquet associé.</p>
+
+    <p>Pour terminer sur le fonctionnement interne de Flex, prenons rapidement l’exemple du <code>manifest.json</code> présent dans la recette du <em>BazingaJsTranslationBundle</em> (bundle permettant d’exposer les traductions du site à votre JavaScript) :</p>
+
+
+
+    <pre class="language-json"><code>{
+    "bundles": {
+        "Bazinga\\Bundle\\JsTranslationBundle\\BazingaJsTranslationBundle": ["all"]
+    },
+    "copy-from-recipe": {
+        "config/": "%CONFIG_DIR%/"
+    },
+    "aliases": ["js-translation", "js-translator"]
+}</code></pre>
+
+    <p>Nous constatons qu’il existe 2 alias disponibles pour ce bundle, qu’il y a un bundle à instancier (pour tous les environnements, pas uniquement <code>prod</code> ou <code>dev</code> par exemple) et qu’il faut copier le contenu du dossier <code>config/</code> provenant du recipe dans le dossier de configuration de votre application Symfony.</p>
+
+    <p>Pour plus d’informations sur les recettes, n’hésitez pas à aller lire le README très complet du dépôt <a href="https://github.com/symfony/recipes">symfony/recipes</a>.</p>
+
+    <p>Vous en savez maintenant un peu plus sur Symfony Flex (et son fonctionnement interne). Vous êtes convaincu de ses bienfaits ? Alors regardons comment migrer votre application.</p>
+
+
+
+    <h2 id="les-pré-requis">Les pré-requis</h2>
+
+    <p>Avant de démarrer, il est à noter que Symfony Flex requiert notamment 2 choses. La première, c’est PHP 7 : les premières versions de Flex étaient même compatibles uniquement PHP 7.1+ mais la dépendance a été abaissée à PHP 7.0 récemment afin de faciliter la migration pour un maximum de gens.</p>
+
+    <p>La deuxième contrainte pour utiliser Flex est d’utiliser la structure d’application qui sera celle de Symfony 4.0. En effet, tout comme Symfony 3 en son temps, Symfony 4 apporte quelques changements dans l’arborescence par défaut :</p>
+
+    <ul>
+        <li>le kernel est déplacé de <code>app/AppKernel.php</code> vers <code>src/Kernel.php</code> ;</li>
+        <li>le dossier <code>app/config/</code> est déplacé à la racine <code>config/</code> (les paramètres spécifiques à votre infrastructure pourront d’ailleurs être définis en variables d’environnement, dans un <code>.env</code> pour les environnements de développement) ;</li>
+        <li>les dossiers <code>assets/</code> et <code>translations/</code> dans <code>app/Resources/</code> sont également déplacés à la racine ;</li>
+        <li><code>app/Resources/views/</code> est déplacé à la racine et est renommé <code>templates/</code> ;</li>
+        <li>plus de notion de bundle dans votre code applicatif, donc le contenu <code>src/{App, ...}Bundle/</code> est déplacé directement dans <code>src/</code> ;</li>
+        <li><code>web/</code> devient <code>public/</code> et nous nous retrouvons avec un unique contrôleur frontal <code>index.php</code> à la place des anciens <code>app_dev.php</code> et <code>app.php</code>. Désormais, l’environnement sera piloté uniquement par une variable d’environnement <code>APP_ENV</code> ;</li>
+        <li>tous les fichiers YAML utilisent maintenant l’extension officielle, à savoir <code>.yaml</code> au lieu de <code>.yml</code>.</li>
+    </ul>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/08/arborescence.png') }}" alt="Exemple de la nouvelle arborescence avec Symfony 4"></p>
+
+    <p>Nous pouvons noter dans ces changements une réelle volonté de <a href="https://github.com/symfony/flex/issues/56#issuecomment-312575740">se rapprocher des standards du marché</a>, employés par <a href="https://github.com/php-pds/skeleton_research#conclusion">les autres frameworks et langages</a>. Et ce n’est pas pour nous déplaire. ✨</p>
+
+
+
+    <h2 id="migrer-une-application-existante">Migrer une application existante</h2>
+
+    <p>Flex fonctionnait dès Symfony 3.3, mais en version alpha. Cela a permis à de nombreuses personnes de tester Flex au plus tôt. Plein de suggestions ont ainsi pu être apportées par la communauté et la core team en a profité pour faire plusieurs ajustements. Désormais, Symfony Flex est considéré comme stable depuis Symfony 3.4 et 4.0.</p>
+
+    <p>Malheureusement, <strong>il n’existe pas d’outils pour automatiser la migration</strong> vers Symfony Flex. Et non, il ne suffit pas simplement de lancer un <code>composer require symfony/flex</code>. Non, le plus simple est de démarrer une nouvelle application à côté et de rapatrier votre code et configuration de l’ancienne vers la nouvelle application. C’est ce que nous allons voir dans la suite, étape par étape. Cette migration permettra d’ailleurs de mieux comprendre les choix techniques qui ont conduit à tous ces changements dans l’arborescence.</p>
+
+
+
+    <h3 id="créer-la-nouvelle-application">Créer la nouvelle application</h3>
+
+    <p>Comme je l’ai dit, pour simplifier la migration, nous devrons créer une toute nouvelle application. Vous avez le choix entre démarrer en Symfony 3.4 ou 4.0. Gardez à l’esprit que la nouvelle version majeure est encore jeune et tout l’éco-système n’est pas encore compatible, ce qui risque de vous poser problème. Dans le doute, nous allons démarrer en 3.4 pour profiter de la longévité de cette version LTS.</p>
+
+    <p>Symfony Flex rend l’<a href="https://github.com/symfony/symfony-installer">installateur officiel</a> obsolète. En effet, nous retrouvons à nouveau une initialisation classique via Composer :</p>
+
+
+
+    <pre class="language-bash"><code>composer create-project symfony/skeleton:3.4 ma-nouvelle-app</code></pre>
+
+    <p>Si vous regardez le <a href="https://github.com/symfony/skeleton">repository du squelette</a>, vous constaterez qu’il s’agit d’un unique <code>composer.json</code> avec des dépendances notamment sur <code>symfony/flex</code>, <code>symfony/framework-bundle</code>. Oui, tout ce que vous trouvez d’autre dans <code>ma-nouvelle-app/</code> a été généré par Flex : la console dans <code>bin/</code>, le <code>public/index.php</code>, le kernel dans <code>src/</code> ou encore toute la configuration dans <code>config/</code>. Nous reviendrons notamment sur le contenu de dossier de <code>config/</code> dans la suite.</p>
+
+
+
+    <h3 id="réinstaller-vos-dépendances">Réinstaller vos dépendances</h3>
+
+    <p>Après avoir initialisé votre toute nouvelle application, vous allez pouvoir rapatrier vos anciennes dépendances. Pour ça, récupérez la liste des packages présents dans les sections <code>require</code> et <code>require-dev</code> de votre ancien <code>composer.json</code> et copiez les dans votre nouveau <code>composer.json</code>.</p>
+
+    <p>On lance l’installation avec la commande suivante :</p>
+
+
+
+    <pre class="language-bash"><code>composer update</code></pre>
+
+    <p>Par défaut, le squelette est configuré pour ne pas autoriser les recettes qui viennent du dépôt <code>contrib</code>. Si c’est le cas pour un ou plusieurs de vos packets, Flex va vous demander interactivement ce que vous voulez faire :</p>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/08/interactive-contrib-recipe.png') }}" alt="Flex demandant s'il faut autoriser une recette contrib"></p>
+
+    <p>Libre à vous de toujours accepter une recette contribuée par la communauté ou d’accepter au cas par cas. Il n’y a pas énormément de risques de les accepter les yeux fermés mais il faut tout de même garder à l’esprit que ces recettes ne sont pas nécessairement validées par des membres de la core team.</p>
+
+    <p>Il y a des risques que la commande Composer échoue au moment où elle lance le script qui va nettoyer le cache (la commande <code>cache:clear</code> de Symfony). En effet, certains bundles de vos dépendances n’ont peut-être pas encore de recettes Flex pour générer une configuration par défaut. Que ce soit le cas ou pas, pas d’inquiétude, nous nous en occupons dans la suite.</p>
+
+    <p>Attention ! Il ne faut pas oublier que Flex apporte une nouvelle façon de penser le développement Symfony. Puisque nous n’avons plus de dépendance sur le framework full-stack (c’est-à-dire le paquet symfony/symfony), nous n’avons plus accès aux logs <em>Monolog</em>, la fonction <code>dump()</code> du composant <em>VarDumper</em> ou encore au web profiler. Il va donc va falloir ajouter à nouveau ces outils bien pratiques lors du développement. Heureusement, <a href="https://github.com/symfony?q=pack">Symfony nous propose des <em>pack</em></a>, c’est-à-dire des méta-packages Composer qui nous permettent d’installer tous ces outils rapidement :</p>
+
+
+
+    <pre class="language-bash"><code>composer require symfony/profiler-pack symfony/debug-pack</code></pre>
+
+    <p>Et c’est la même chose si votre application utilise des formulaires, de la traduction ou toute autre fonctionnalité de Symfony qui ne serait plus incluse par défaut. 😉</p>
+
+
+
+    <h3 id="réintégrer-la-configuration">Réintégrer la configuration</h3>
+
+    <p>Il est temps de nous intéresser à la partie configuration de vos dépendances et de tout ce qui se trouve dans le dossier <code>config/</code>. Dans ce dernier, nous allons avoir le contenu suivant :</p>
+
+    <ul>
+        <li><code>bundles.php</code></li>
+        <li><code>packages/</code></li>
+        <li><code>routes/</code></li>
+        <li><code>routes.yaml</code></li>
+        <li><code>services.yaml</code></li>
+    </ul>
+
+    <p><code>bundles.php</code> contient la liste des bundles. Mis à jour par Flex évidemment, ce fichier PHP sera importé par notre tout nouveau Kernel pour lire les bundles à instancier pour l’environnement actuel.</p>
+
+    <p><code>packages/</code> et <code>routes/</code> contiennent respectivement la configuration de vos dépendances et leurs routing à importer. Ils fonctionnent de la même manière : chaque fichier dedans concerne un seul paquet. Plus simple à comprendre et moins fourre-tout que ce que nous avions précédemment dans nos <code>app/config/config.yml</code>. En bonus, tous les fichiers <code>.php</code>, <code>.yaml</code> et <code>.xml</code> présents dans ces dossiers seront automatiquement importés, c’est-à-dire que vous n’avez plus à définir manuellement les <code>import</code> pour chacun.</p>
+
+    <p>Par exemple, la configuration du FrameworkBundle (sous la clef <code>framework</code> dans le <code>app/config/config.yml</code>) trouvera sa place dans <code>config/packages/framework.yaml</code>. De même pour le TwigBundle (clef <code>twig</code>) dans <code>config/packages/twig.yaml</code>. Vous aviez de la configuration ou du routing spécifique à un environnement (comme dans <code>app/config/config_dev.yml</code> par exemple) ? Pas de soucis, si dans les dossiers <code>config/{packages ou routes}/</code> se trouve un dossier du nom d’un environnement (par exemple <code>config/packages/dev/</code>, alors son contenu ne sera chargé que pour l’environnement associé. Malin !</p>
+
+    <p><code>routes.yaml</code> contiendra les routes de votre application. Mis à part le nom du fichier (anciennement <code>routing.yml</code>) qui change, il ne devrait pas y avoir de gros changements.</p>
+
+    <p><code>services.yaml</code> contient la définition des services et paramètres de votre application. Grâce à l’<strong>autowiring</strong> et l’<strong>autoconfigure</strong>, ce fichier risque de ne pas grossir très vite. Je vous laisse relire <a href="http://www.afsy.fr/avent/2017/02-la-nouvelle-configuration-par-defaut-de-symfony4">l’article de Nicolas Grekas pour ce calendrier de l’Avent</a> à ce sujet. Pour avoir déjà développé/migré plusieurs applications avec Flex, je vous assure que ne plus avoir à enregistrer ses services est devenu un vrai confort de développement, sans aucune contrepartie.</p>
+
+    <p>Étant donné que la plupart de la configuration est générée par Flex et ses recettes, il ne faut pas hésiter à la vérifier soi-même pour s’assurer qu’elle est adaptée à votre application. La migration de configuration, en plus d’être la partie la moins agréable et la plus longue, est probablement celle où le risque d’erreurs est le plus important. Soyez vigilant.</p>
+
+    <p>À ce stade, il ne devrait vous rester que les paramètres à migrer pour en terminer avec la configuration. Dans la nouvelle arborescence, Symfony ne nous propose plus de fichiers <code>parameters.yml</code> (et son <code>parameters.yml.dist</code> associé) comme nous en avions l’habitude. Les paramètres propres à votre infrastructure (comme les accès à votre base de données, au serveur de mail) ou les paramètres qui doivent pouvoir changer sans réinitialiser le cache (comme une clef d’API) pourront être définis en variable d’environnement (dans le <code>.env</code> en local et en véritable variable d’environnement en production). Pour rappel, voici un exemple pour référencer une variable d’environnement en YAML :</p>
+
+
+
+    <pre class="language-yaml"><code>services:
+    App\\MyService:
+        arguments:
+            $myParameter: '%env(MY_ENV_VAR)%'</code></pre>
+
+    <p>Pour les autres paramètres qui dépendent uniquement de votre application (comme la locale), ils peuvent être définis dans le <code>config/services.yaml</code>. Si vous avez tout de même besoin de définir des paramètres non versionnés en YAML, vous êtes libres de rajouter un <code>config/packages/parameters.yaml</code> que vous prendrez soin de rajouter dans le <code>.gitignore</code>.</p>
+
+
+
+    <h3 id="réimporter-votre-code">Réimporter votre code</h3>
+
+    <p>Dernière étape, vous pouvez maintenant récupérer votre code. Rappelez-vous, nous n’avons plus de bundle applicatif (bye bye le AppBundle), donc vous aurez certainement le namespace à changer dans toutes vos classes PHP. N’hésitez pas utiliser les outils de refactorisation de votre IDE pour vous facilitez la tache.</p>
+
+    <p>Si vous avez des modifications à faire dans le <em>Conteneur d’Injection de Dépendances</em>, il n’est plus obligatoire de devoir le faire dans une <em>Extension</em> ou une <em>CompilerPass</em>. N’hésitez pas à les faire directement dans le Kernel se trouvant dans <code>src/</code>.</p>
+
+    <p>Vous allez maintenant pouvoir rapatrier le reste de votre application (templates, traductions, assets ou encore tests) en déplaçant tout ce petit monde à la racine de votre projet.</p>
+
+    <p>Voilà, la migration est désormais terminée. 🎉 N’hésitez pas à bien tester votre application pour vous assurer que tout est bien opérationnel.</p>
+
+
+
+    <h3 id="informations-additionnelles">Informations additionnelles</h3>
+
+    <p>Pour terminer, voici quelques petis tips pour vous aider dans la migration :</p>
+
+    <ul>
+        <li>La surcharge de templates se fait désormais dans <code>templates/bundles/{Nom du bundle}/{chemin/vers/le/template.html.twig}</code>. Ainsi, les templates d’erreurs Twig peuvent être modifiés en les surchargeant dans le dossier <code>templates/bundles/TwigBundle/Exception/</code> ;</li>
+        <li>Versionner le <code>symfony.lock</code>. Ajouté il y a quelques semaines seulement dans Flex, ce fichier permet d’aider Flex à se rappeler des recettes qu’il a déjà appliquées. Ainsi, grâce au lock, si vous supprimez un fichier généré par une recette, Flex ne cherchera pas à le recréer au prochain <code>install</code> / <code>update</code> ;</li>
+        <li>Si vous avez une erreur qui ressemble à <code>Invalid type for path "swarrot.connections.rabbitmq.port". Expected int, but got string.</code>, l’erreur est probablement liée à une limitation de Symfony. En effet, il n’est pas encore possible de passer des variables d’environnement à n’importe quelle configuration d’un bundle. Le problème est dû à Symfony qui ne résoud pas la valeur d’une variable d’environnement au moment de la validation de la configuration (une <a href="https://github.com/symfony/symfony/pull/23888">PR</a> est en cours pour réparer ça). En attendant, vous devrez donc passer par un paramètre intermédiaire dans le DIC (perdant au passage un des intérêts principaux d’une variable d’environnement, à savoir la modification au runtime, sans avoir à effacer le cache) que vous injecterez dans la configuration à la place de la variable d’environnement ;</li>
+        <li>N’oubliez pas de réappliquer les éventuelles modifications que vous auriez pu apporter à vos contrôleurs front (<code>app_*.php</code>) vers le nouveau <code>public/index.php</code> si nécessaire ;</li>
+    </ul>
+
+
+
+    <h2 id="conclusion">Conclusion</h2>
+
+    <p>Symfony Flex apporte une toute nouvelle approche pour développer une application Symfony. En plus de se rapprocher des standards industriels, cette nouvelle façon de faire simplifie l’expérience développeur (DX) en automatisant tout ce qui peut l’être.</p>
+
+    <p>Nous sommes forcés de prendre conscience et d’expliciter nos dépendances. En effet, nous n’utilisons plus une “distribution” classique avec tout activé par défaut. Au contraire, terminée la dépendance au framework full-stack ! Nous démarrons désormais avec une base de code ultra-minimaliste et nous allons venir ajouter nous-même les composants Symfony dont nous aurons réellement besoin. Ce changement de paradigme permettra peut-être de mettre un terme (ou pas) à la réputation de framework plus lourd et moins rapide que se traîne parfois (et souvent à tort) Symfony.</p>
+
+    <p>Et là où Symfony se débrouille souvent très bien d’après moi, c’est que toutes ces nouveautés et changements ne sont jamais obligatoires. Il vous sera toujours possible de développer comme vous le souhaitez, quitte à vous passer de Flex si nécessaire.</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/loick-piera.png') }}" alt="Loïck Piera" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url %}https://twitter.com/pyrech{% endblock %}" target="_blank">
+            {% block article_author %}Loick Piera{% endblock %}
+        </a>
+    </h2>
+    <p>
+        Développeur chez JoliCode et expert trottinette de bureau.
+    </p>
+{% endblock %}

@@ -1,0 +1,362 @@
+{% extends 'avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 4 - Tagger son application" %}
+
+{% block article_content %}
+    <h1>Tagger son application</h1>
+    <p>
+        Qui n’a jamais été témoin d’une mise en production catastrophique, où toute l’application se met à bugger.
+        Plus rien ne fonctionne, c’est la pagaille. Votre chef de projet vous met la pression et finit par vous
+        demander de revenir à l’ancienne version.
+    </p>
+    <p>
+        Comment faire ? Vous venez de tirer votre branche ! Vous vous mettez donc à rechercher le commit de l’ancienne
+        mise en production pour revenir dessus.
+    </p>
+
+    <h2>Utilité</h2>
+    <p>
+        Voilà pourquoi il est nécessaire de tagger son application, cela évite pas mal de problèmes lors des mises en
+        production. Si la mise en production fait passer notre application de la <code>v1.1</code> à la
+        <code>v1.2</code> mais qu’un soucis survient, on peut facilement revenir en <code>v1.1</code> par la simple
+        commande <code>git reset v1.1 --hard</code>.
+    </p>
+    <p>
+        L’utilisation de tags va nous permettre d’identifier facilement vos commits, de manipuler facilement la
+        rétrogradation / incrémentation de versions.
+    </p>
+    <p>
+        On se repère avec les numéros de versions pour la production plutôt que les numéros de commit: « On est en
+        version 2.1 » plutôt que de dire « On est sur la master au commit <code>f23e9a</code> ».
+    </p>
+
+    <h2>Un sens sémantique</h2>
+    <p>
+        Tagger son application permet aussi de donner un sens sémantique via les numéros de version utilisés.
+        En effet, la version <code>2.1.0</code> et la version <code>1.1.3</code> ne vont pas avoir la même
+        signification. On constate que les chiffres sont différents et on en devine l’évolution de l’application
+        (une <code>v2</code> signifiera que l’application s’est refaite une jeunesse par exemple).
+    </p>
+    <p>
+        C’est pourquoi il faut s’approprier une certaine logique dans son taggage. On ne va pas tagger n’importe
+        comment son application.
+        Sur un numéro de version de la forme <code>X.Y.Z</code>, on va donc chercher à donner une certaine
+        signification au <code>X</code>, <code>Y</code> et <code>Z</code>.
+    </p>
+    <p>
+        Mais attention, selon l’application que nous développons nos tags vont avoir de petites variantes. Je vais ici
+        vous prendre l’exemple d’un site web sur lequel je suis amené à faire des mises à jours fréquentes
+        (fonctionnalités, bugs, …) et le développement d’un package PHP ou un bundle Symfony.
+    </p>
+
+    <h2>Tagger un site web</h2>
+    <p>
+        Je vais vous faire part de ma manière de tagger les applications. Sachez que je ne suis pas la voix de la
+        raison, loin de là :).
+    </p>
+    <p>
+        Repartons de la base « Version X.Y.Z ». Comment je gère ces incrémentations ? Et bien cela est simple:
+        <ul>
+            <li>
+                <code>X</code>: Représente la version majeure de l’application. Je l’incrémente lorsque l’on fait évoluer
+                le site de manière considérable (nouvelle charte graphique, modification de la navigation globale, …).
+                C’est les fameuses <code>v2</code> ou <code>v3</code> dont on entend souvent parler.
+            </li>
+            <li>
+                <code>Y</code>: Représente la version mineure de l’application. Je l’incrémente lorsque l’on
+                développe de nouvelles fonctionnalités sur le site actuellement en production. C’est celle que
+                j’incrémente le plus souvent lorsque je suis sur la maintenance d’une application où nous faisons des
+                mises en production fréquentes.
+            </li>
+            <li>
+                <code>Z</code>: Représente la version de correctif. Je l’incrémente lorsque je découvre un bug en
+                production qu’il faut rapidement fixer. Je déploie rapidement le correctif et incrémente ce numéro de
+                version. Bien évidemment, comme nous développons toujours dans les règles de l’art cet indice de
+                version ne nous sert jamais ! ;)
+            </li>
+        </ul>
+    </p>
+
+    <h2>Tagger un package / bundle</h2>
+    <p>
+        Libre à chacun d’exercer le taggage comme il le souhaite (à charge du développeur de le documenter pour ses
+        utilisateurs). Il est possible d’appliquer ce que je viens de vous énumérer ci-dessus mais je n’en suis pas
+        spécialement fan.
+    </p>
+    <p>
+        Pourquoi me direz vous ? Qui n’est pas déjà tombé sur un package où la mise à jour de la version
+        <code>2.3.10</code> à la version <code>2.3.11</code> faisait crasher toute l’application qui l'utilise ?
+        C’est pourquoi j’aime avoir un cadrage de version assez strict pour mes dépendances.
+    </p>
+    <p>
+        Plusieurs solutions existent mais pour ma part je fais le choix de SemVer (Semantic Versioning). SemVer est
+        utilisé dans l’écosystème Symfony (moins dans Laravel par exemple) et est surtout utilisé sur la quasi totalité
+        des projets NPM.
+    </p>
+    <p>
+        Je vois SemVer comme une sorte de contrat entre les développeurs du package et ses utilisateurs. La version va
+        fonctionner un peu comme expliqué précédemment mais à une petite nuance près.
+        <ul>
+            <li><code>X</code>: changement non rétro compatible</li>
+            <li><code>Y</code>: changement rétro compatible</li>
+            <li><code>Z</code>: correctif</li>
+        </ul>
+    </p>
+    <p>
+        Dans ce cas précis l’utilisateur peut mettre à jour son package sans soucis, que ce soit sur la version mineure
+        (<code>Y</code>) ou celle de correctif (<code>Z</code>). Le package fonctionnera toujours pour notre application
+        et ne fera pas l’objet de BC Breaks.
+    </p>
+
+    <h3>Les BC Breaks</h3>
+    <p>
+        Lorsque nous passerons à une version majeure supérieure, nous aurons (très probablement) des BC Breaks à gérer
+        dans notre application.
+    </p>
+    <p>
+        Comment prévenir un BC Break ? Lors de votre développement d’une feature, vous vous rendez compte qu’une classe
+        n’a plus d’utilité ou que vous souhaitez la supprimer. Cela peut créer un BC Break si vous développez une
+        librairie par exemple car une personne peut avoir surchargé une méthode. Il ne faut donc pas la supprimer mais
+        la « déprécier » jusqu’à la prochaine version majeure. La prochaine version majeure supprimera tout simplement
+        la classe <code>A</code> (cf. ci dessous).
+        Admettons que nous soyons en version <code>3.2</code>, notre classe ne sera donc supprimé qu’en version
+        <code>4.0</code>.
+    </p>
+    <p>
+        Vous aurez donc à ajouter un <code>@deprecated</code> au dessus de la classe dépréciée.
+        Ce qui vous donnerait ceci&nbsp;:
+    </p>
+    <pre class="language-php"><code>namespace Namespace\to\your\ClassA;
+
+use Namespace\to\your\ClassB;
+
+/**
+* @deprecated ClassA class is deprecated since version 3.2, to  be removed in 4.0. Use the Namespace\to\your\ClassB class instead.
+* @trigger_error('Deprecation message', E_USER_DEPRECATED);
+*/
+class ClassA extends ClassB
+{
+    // ...
+}</code></pre>
+    <pre class="language-php"><code>namespace Namespace\to\your\ClassB;
+
+class ClassB
+{
+    // ...
+}</code></pre>
+
+    <h3>Tagger des versions alpha ou beta</h3>
+    <p>
+        Pour tagger des versions <code>alpha</code>, <code>beta</code> ou autre, il vous suffit de suffixer votre numéro
+        de version (ex: <code>2.0.0-alpha</code>, <code>2.0.0-alpha+0001</code> pour un fix en alpha, …) mais il faut
+        garder à l’esprit l’ordre des versions lors de vos nommage:
+        <pre class="language-git"><code>1.0.0-alpha &lt; 1.0.0-alpha.1 &lt; 1.0.0-alpha.beta &lt; 1.0.0-beta &lt; 1.0.0-beta.2 &lt; 1.0.0-beta.11 &lt; 1.0.0-rc.1 &lt; 1.0.0</code></pre>
+    </p>
+    <p>
+        Je vous invite à aller vous documenter directement sur le site de <a href="https://semver.org/">SemVer</a>
+        que je trouve complet.
+    </p>
+
+    <h2>Le cas de Symfony</h2>
+    <p>
+        Nous pouvons illustrer cette problématique de taggage à une application que vous connaissez tous: Symfony.
+    </p>
+    <p>
+        Symfony possède plusieurs versions (<code>2.8.11</code>, <code>3.3</code>, <code>4.0</code>, …) et va respecter
+        une certaine charte dans ses numéros de versions. Ne cherchez plus, c’est bien SemVer !
+    </p>
+
+    <h2>SemVer et composer</h2>
+    <p>
+        Là où je trouve SemVer puissant c’est lorsqu’on le combine avec Composer.
+        En effet, composer vous permet d’indiquer les dépendances que vous allez utiliser ainsi que leur version
+        associée.
+    </p>
+    <p>
+        « Je ne comprend pas, j’ai fais un <code>composer update</code> et mon application ne fonctionne plus ! »
+    </p>
+    <p>
+        Vous pourrez oublier cette phrase si vous faite bien attention aux dépendances que vous utilisez sur votre
+        application. Si ces dernières utilisent SemVer, il vous faudra simplement bien renseigner la version à utiliser
+        dans composer.
+    </p>
+
+    <h3>Brider les versions dans composer</h3>
+    <p>
+        Pour renseigner la version de votre paquet, vous pourrez utiliser 3 symboles:
+        <code>^</code>, <code>~</code> et <code>*</code>.
+        Chacun va avoir une signification que vous allons découvrir à travers un exemple concret.
+    </p>
+    <p>
+        Nous utilisons une librairie utilisant SemVer dont la dernière version est la <code>1.2.6</code>.
+        Comment brider composer à des versions compatibles ?
+    </p>
+    <p>
+        De base je bride toutes mes versions avec 2 notations lorsque je ne suis pas sûr que la bibliothèque utilise SemVer.
+    </p>
+    <pre class="language-json"><code>{
+   // ...
+   "require": {
+       "awkan/my-bundle-1": "~1.2.6",
+       "awkan/my-bundle-2": "1.2.*",
+       // ...
+   },
+   // ...
+}</code></pre>
+    <p>
+        Ces deux notations vont avoir le même impact: brider notre montée de version dans les versions de fix de la
+        librairie, soit le composer update ne pourra mettre à jour que l’indice <code>Z</code> de la librairie
+        (<code>1.2.7</code>, <code>1.2.13</code>, …). Cela me permet d’éviter les BC Break en pleine version mineure
+        comme j’ai déjà eu le cas.
+    </p>
+    <p>
+        Remarque: J’ai déjà pu observer un BC Break en version de fix ! Il ne nous reste plus qu’à brider totalement
+        la librairie à une version donnée. Pensez également à créer une issue sur le projet correspondant pour signaler
+        le BC Break, ça permettra aux suivants de rencontrer ce souci  ;).
+    </p>
+    <pre class="language-json"><code>{
+   // ...
+   "require": {
+       "awkan/my-bundle-1": "1.2.6",
+       // ...
+   },
+   // ...
+}</code></pre>
+    <p>
+        La dernière notation que je vais aborder ici est le <code>^</code>.
+        Dans le cas d’un bundle utilisant SemVer je vais utiliser sans soucis le <code>^</code>:
+    </p>
+    <pre class="language-json"><code>{
+   // ...
+   "require": {
+       "awkan/my-bundle-1": "^1.2",
+       "awkan/my-bundle-2": "^1.2.6",
+       // ...
+   },
+   // ...
+}</code></pre>
+    <p>
+        Le <code>^</code> va brider la version à la majeure, soit ici nous empêcher de passer en <code>2.0.0</code>
+        (accepte toutes les versions <code>>2.0.0</code>). Dans le cas de SemVer c’est parfait ! Nous profiterons des
+        corrections de bug et des nouvelles fonctionnalités du bundle SANS soucis de non rétro compatibilité.
+    </p>
+    <p>
+        En conclusion:
+        <ul>
+            <li>
+                Utilisez <code>~X.Y.Z</code> ou <code>X.Y.*</code> lorsque vous n’êtes pas sûr•e que le bundle respecte SemVer
+            </li>
+            <li>
+                Utilisez <code>^X.Y</code> ou <code>^X.Y.Z</code> lorsque le bundle que vous utilisez respecte SemVer
+            </li>
+        </ul>
+    </p>
+
+    <h2>Pour aller plus loin</h2>
+    <p>
+        Dans les développement de tous les jours, nous utilisons GitLab au boulot. Lorsque nous taggons notre
+        application, la version taggée va être soumise à la CI de Gitlab. Cette dernière va exécuter tous les tests
+        (unitaires et fonctionnels). Si les tests sont validés, le déploiement en production se fait directement de
+        manière automatisé. Cependant si les tests ont échoué, il nous faudra les corriger jusqu’à ce qu’ils passent
+        pour que la mise en production s’effectue.
+    </p>
+    <p>
+        Voici une configuration simple de la CI (à adapter bien sur …).
+    </p>
+    <pre class="language-yaml"><code>
+#.gitlab-ci.yml
+stages:
+   - test
+   - deploy
+   - cleanup
+
+before_script:
+   # Avant l’exécution du script, je copie les paramètres de mon application
+   - cp .env.test .env
+   - cp apps/api/app/config/parameters.yml.gitlab-ci apps/api/app/config/parameters.yml
+
+tests:
+   stage: test
+   script:
+       # Ici voici un exemple dans lequel:
+       # - Je "up" mes containers docker
+       # - J'installe mon application Symfony 3 et crée sa base de données
+       # - Je lance les tests
+       - docker-compose up -d
+       - docker-compose ps
+       - docker-compose exec -T --user www-data app composer install --prefer-dist --no-interaction --optimize-autoloader # Composer install
+       - docker-compose exec -T --user www-data app bin/console doctrine:schema:drop --force
+       - docker-compose exec -T --user www-data app bin/console doctrine:schema:create
+       - docker-compose exec -T --user www-data app bin/console assets:install
+       - docker-compose exec -T --user www-data app bin/console cache:warmup
+       - docker-compose exec -T --user www-data app bin/console doctrine:schema:drop --force
+       - docker-compose exec -T --user www-data app bin/console redis:flushall --no-interaction
+       - docker-compose exec -T --user www-data app bin/console doctrine:schema:create
+       - docker-compose exec -T --user www-data app bin/console doctrine:fixtures:load -n
+       - docker-compose exec -T --user www-data app ./bin/phpunit --colors=always
+   tags:
+       - docker-compose
+
+deploy:
+   stage: deploy
+   # Effectuer le deploy seulement sur les tags
+   only:
+       - tags
+   script:
+       # Effectuez ici vos commandes de déploiement
+       # Par exemple: Capistrano
+       # Si vous avez installé Capistrano sur votre site web et qu’un container (ici deployer-container) possède ruby, vous pouvez lancer la commande standard de déploiement
+       # Nous effectuons ici le déploiement du stage “prod”
+       - docker-compose exec -T --user www-data deployer-container bundle exec cap prod deploy
+
+# Son but est de cleaner les container utilisés précédemment
+cleanup_job:
+   stage: cleanup
+   # Toujours effectuer ce job, même si les anciens jobs ont échoué
+   when: always
+   script:
+       - docker-compose down
+   tags:
+       - docker-compose
+</code></pre>
+    <p>
+        La CI va donc exécuter dans l’ordre les « stages » test, deploy puis cleanup.
+        <ul>
+            <li>
+                Si les tests ne passent pas, le déploiement ne s’effectuera pas
+            </li>
+            <li>
+                Comme commenté dans le code, le cleanup quant à lui s’exécutera toujours comme nous lui avons spécifier de toujours s’effectuer
+            </li>
+        </ul>
+    </p>
+
+    <h2>Conclusion</h2>
+    <p>
+        Tagger son application est une bonne chose, abusez-en !! (pas trop quand même). Cela permet d’améliorer la
+        lisibilité dans les MEP et de faire un tas d’autre choses.
+    </p>
+    <p>
+        Les numéros de versions que vous donnez ont tous un sens sémantique et peuvent être un gage de confiance et/ou
+        qualité (comme par exemple une application utilisant SemVer).
+    </p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/donovan-bourlard.jpg') }}" alt="Donovan Bourlard" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url %}https://twitter.com/DonovanBourlard{% endblock %}" target="_blank">
+            {% block article_author %}Donovan Bourlard{% endblock %}
+        </a>
+    </h2>
+    <p>
+        Actuellement en alternance, Donovan est en 2ème année de master ICONE dispensé à La Rochelle.
+        Dans le cadre de son alternance, il occupe le poste de Développeur web Back-end chez
+        <a target="_blank" href="//biig.fr">BiiG</a>.
+    </p>
+{% endblock %}

@@ -1,7 +1,6 @@
-
 security:
     encoders:
-        Afsy\Bundle\CoreBundle\Entity\Author: sha512
+        Afsy\Entity\Author: sha512
 
     role_hierarchy:
         ROLE_ADMIN:       ROLE_USER
@@ -9,13 +8,14 @@ security:
 
     providers:
         entity:
-            entity: { class: AfsyCoreBundle:Author, property: email }
+            entity: { class: 'Afsy\Entity\Author', property: email }
 
     firewalls:
         secured_area:
             pattern:        ^/
             logout:         ~
             anonymous:      ~
+            logout_on_user_change: true
             oauth:
                 resource_owners:
                     sensio_connect: sensio_connect_login
@@ -24,7 +24,7 @@ security:
                 failure_path:   hwi_oauth_connect
 
                 oauth_user_provider:
-                    service: afsy.oauth.author.provider
+                    service: 'Afsy\Security\OAuth\AuthorEntityProvider'
 
     access_control:
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }

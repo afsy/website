@@ -1,0 +1,180 @@
+{% extends 'avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 24 - Une avancée de Symfony 2.5... parmi d'autres" %}
+
+{% block article_content %}
+
+<h1>Une avancée de Symfony 2.5... parmi d'autres</h1>
+
+<p>Pour ce dernier article du calendrier de l'avent de l'AFSY, j'ai envie de parler de Symfony 2.5. Le développement de cette nouvelle version qui sortira en <a href="http://symfony.com/roadmap?version=2.5">mai 2014</a> vient juste de commencer, mais on peut déjà noter certains changements intéressants. Sachez que toutes les nouvelles fonctionnalités seront "retro-compatible", comme pour la version 2.4.</p>
+
+<p>Ces premières semaines de développement ont permis d'ajouter de petites fonctionnalités qui peuvent se révéler très intéressantes ; en vrac :</p>
+
+<ul>
+<li>La détection par le composant Debug de l'utilisation de méthodes non définies (<a href="https://github.com/symfony/symfony/pull/9779">#9779</a>);</li>
+<li>Le support natif de l'upload simultané de plusieurs fichiers dans un formulaire (<a href="https://github.com/symfony/symfony/pull/8224">#8224</a>);</li>
+<li>La possibilité de renommer le process d'une commande (de la Console); bien pratique pour les daemons (<a href="https://github.com/symfony/symfony/pull/9780">#9780</a>);</li>
+<li>La suppression des barres de progression quand la console ne supporte pas les codes ANSI (<a href="https://github.com/symfony/symfony/pull/9846">#9846</a>);</li>
+<li>et quelques autres que je vous laisse le soin d'aller voir (<a href="https://github.com/symfony/symfony/pull/9739">#9739</a>, <a href="https://github.com/symfony/symfony/pull/9773">#9773</a>, <a href="https://github.com/symfony/symfony/pull/9843">#9843</a>), et <a href="https://github.com/symfony/symfony/pull/9650">#9650</a>.</li>
+</ul>
+
+<p>Bref, cette version 2.5 s'annonce déjà riche en avancées diverses... et j'ai bien sûr quelques surprises dans ma besace. Que diriez-vous d'avoir un aperçu d'une nouvelle fonctionnalité sur laquelle je travaille en ce moment et qui devrait se transformer en pull request dans les prochains jours ? Ok, c'est parti.</p>
+
+<p>Il n'est pas rare de lancer des "process" externes lorsqu'on exécute une commande Symfony; un truc du genre :</p>
+
+<pre class="language-php"><code>$process = new Process('ls -lsa');
+$process-&gt;run();
+$output-&gt;writeln($process-&gt;getOutput());
+</code></pre>
+
+<p>Tant que tout se passe comme prévu, pas de souci. Mais si un problème survient durant l'exécution de ce process, galère. Hormis l'ajout d'un <code>echo</code> par ci, et d'un <code>var_dump()</code> par là, difficile de comprendre le problème.</p>
+
+<p>Voici néanmoins une manière assez élégante :</p>
+
+<pre class="language-php"><code>$callback = function ($type, $buffer) use ($output) {
+    $output-&gt;write($buffer);
+};
+
+$process-&gt;run(OutputInterface::VERBOSITY_VERBOSE &lt; $output-&gt;getVerbosity() ? $callback : null);
+</code></pre>
+
+<p>Et pour avoir une jolie sortie qui ne mélange pas la sortie standard avec la sortie d'erreur, voici un bout de code extrait de Sismo :</p>
+
+<pre class="language-php"><code>$callback = function ($type, $buffer) use ($output, &amp;$startedOut, &amp;$startedErr) {
+    if ('err' === $type) {
+        if (!$startedErr) {
+            $output-&gt;write("\n&lt;bg=red;fg=white&gt; ERR &lt;/&gt; ");
+            $startedErr = true;
+            $startedOut = false;
+        }
+
+        $output-&gt;write(str_replace("\n", "\n&lt;bg=red;fg=white&gt; ERR &lt;/&gt; ", $buffer));
+    } else {
+        if (!$startedOut) {
+            $output-&gt;write("\n&lt;bg=green;fg=white&gt; OUT &lt;/&gt; ");
+            $startedOut = true;
+            $startedErr = false;
+        }
+
+        $output-&gt;write(str_replace("\n", "\n&lt;bg=green;fg=white&gt; OUT &lt;/&gt; ", $buffer));
+    }
+};
+</code></pre>
+
+<p>La sortie ressemble alors à quelque chose de ce genre :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-1.png" alt="" /></p>
+
+<p>Plutôt que de copier/coller ce bout de code dans chaque projet, je vais proposer de l'intégrer à Symfony 2.5 via un nouveau helper <code>debug_formatter</code>.</p>
+
+<p>Je vous parlerais plus tard de ce formatteur, car dans ce cas précis, Symfony 2.5 fournira un helper <code>process</code> qui englobe ce comportement par défaut :</p>
+
+<pre class="language-php"><code>$helper = $this-&gt;getHelper('process');
+$process = $helper-&gt;run($output, 'ls -lsa');
+$output-&gt;writeln($process-&gt;getOutput());
+</code></pre>
+
+<p>Et voilà. Pour activer le mode debug, il suffit de passer le flag <code>-vv</code> :</p>
+
+<pre class="language-bash"><code>$ ./app/console ... -vv
+</code></pre>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-2.png" alt="" /></p>
+
+<p>Pour obtenir le détail de la sortie standard et de la sortie d'erreur, utilisez <code>-vvv</code> :</p>
+
+<pre class="language-bash"><code>$ ./app/console ... -vvv
+</code></pre>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-3.png" alt="" /></p>
+
+<p>Et en cas de problème, les couleurs changent pour votre plus grand plaisir :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-4.png" alt="" /></p>
+
+<p>Le helper vous laisse la main si vous souhaitez créer votre propre instance de <code>Process</code> :</p>
+
+<pre class="language-php"><code>$helper = $this-&gt;getHelper('process');
+
+$process = new Process('ls -lsa');
+$helper-&gt;run($output, $process);
+
+$output-&gt;writeln($process-&gt;getOutput());
+</code></pre>
+
+<p>Vous pouvez même passer une callback qui sera ajoutée automatiquement à celle par défaut définie par le helper :</p>
+
+<pre class="language-php"><code>$callback = function ($type, $buffer) {
+    error_log($buffer);
+};
+
+$helper-&gt;run($output, $process, null, $callback);
+</code></pre>
+
+<p>Mais alors, pourquoi avoir créé un helper <code>process</code> et un helper <code>debug_formatter</code> ? Parce qu'il est réutilisable... par exemple pour pouvoir debugger un appel HTTP réalisé avec Guzzle :</p>
+
+<pre class="language-php"><code>use Guzzle\Http\Client;
+
+$client = new Client();
+$client-&gt;addSubscriber(new GuzzleConsolePlugin(
+    $output,
+    $this-&gt;getHelper('debug_formatter'))
+);
+
+$client-&gt;get('http://example.com/')-&gt;send();
+</code></pre>
+
+<p>Bam ! Un appel à Guzzle du style :</p>
+
+<pre class="language-php"><code>$client-&gt;get('http://example.com/')-&gt;send();
+</code></pre>
+
+<p>va maintenant pouvoir être debuggé avec les mêmes outils que nous venons de voir. Essayez de lancer votre commande avec <code>-vv</code> :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-5.png" alt="" /></p>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-6.png" alt="" /></p>
+
+<p>Avez-vous remarqué la bande de couleur sur la gauche de l'affichage ? Ce n'est pas qu'un effet de style, cela permet également de différencier un appel principal des appels secondaires :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-7.png" alt="" /></p>
+
+<p><img src="/bundles/afsyfront/images/avent/24-debug-8.png" alt="" /></p>
+
+<p>Vous aimez ? Ce n'est que la partie visible de ces nouveaux helpers. Si vous souhaitez utiliser le <code>debug_formatter</code> pour vos propres besoins, rien de plus simple :</p>
+
+<pre class="language-php"><code>$formatter = $this-&gt;getHelperSet()-&gt;get('debug_formatter');
+
+// start a session
+$start = $formatter-&gt;start($uuid, $cmd);
+$output-&gt;write($start);
+
+// give some feedback
+$progress = $formatter-&gt;progress($uuid, $buffer, $isError);
+$output-&gt;write($progress);
+
+// at the end
+$stop = $formatter-&gt;stop($uuid, $message, $isSuccessful);
+$output-&gt;write($stop);
+</code></pre>
+
+<p>Pas la peine d'essayer chez vous ce soir, le code n'est pas encore disponible ; profitez-en pour passer un joyeux Noël avec vos proches !</p>
+
+{% endblock article_content %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/fabien-potencier.jpg') }}" alt="Fabien Potencier" />
+{% endblock %}
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}https://connect.sensiolabs.com/profile/fabpot{% endblock %}">{% block article_author %}Fabien Potencier{% endblock %}</a>
+</h2>
+<p>
+Fabien Potencier a commencé à développer avec PHP5 en 2004 et a créé Symfony pour aider SensioLabs, sa société, a tirer profit de la puissance de PHP pour ses clients.
+</p>
+<p>
+Fabien est aussi à l'origine de plusieurs autres projets opensource, un écrivain, un blogger, un conférencier international, et l'heureux papa de deux merveilleux enfants.
+</p>
+{% endblock %}

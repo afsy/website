@@ -1,0 +1,594 @@
+{% extends 'avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 21 - RabbitMQ et Symfony2 : comment faire des traitements asynchrones et gérer les queues" %}
+
+{% block article_content %}
+<h1>RabbitMQ et Symfony2 : comment faire des traitements asynchrones et gérer les queues</h1>
+
+<p>On reproche souvent à PHP d'être un langage trop limité, notamment en ce qui concerne les traitements lourds et l'asynchronisme. Quand on a, par exemple, besoin de dérouler des actions sur un ensemble de 10 000 éléments, ça devient effectivement compliqué, et ça prend énormément de ressources serveur... sauf quand on utilise un gestionnaire de file d'attente.</p>
+
+<p>Je vais donc vous présenter aujourd'hui un système de messagerie qui implémente le protocole <a href="http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol">AMPQ</a> : <a href="http://www.rabbitmq.com/">RabbitMQ</a>, et son bundle Symfony2 <a href="https://github.com/videlalvaro/rabbitmqbundle">RabbitMQBundle</a>, développé par <a href="https://github.com/videlalvaro">Alvaro Videla</a>.</p>
+
+<h2>Un système de messagerie ?</h2>
+
+<p>Après avoir utilisé différentes API de différentes manières, un protocole de messagerie a été créé par la banque <a href="http://fr.wikipedia.org/wiki/JPMorgan_Chase">JPMorgan Chase</a> pour plus de facilité d'échange entre les différents systèmes. Au lieu d'avoir un protocole spécifique pour chaque échange, on utilise un "service de messagerie" qui dispatche automatiquement les messages. Et au lieu de faire des échanges "directs", chaque système peut envoyer un/des message(s) au service et N systèmes peuvent s'y abonner pour récupérer les messages.</p>
+
+<h3>Producteurs, consommateurs... de quoi ?</h3>
+
+<p>Dans un système de messagerie, le processus pour envoyer des messages à l'agent (<code>broker</code>) est appelé un <strong>producteur</strong> (<code>producer</code>), alors que celui qui reçoit les messages est appelé <strong>consommateur</strong> (<code>consumer</code>). En fait, tout va du producteur au consommateur... comme dans la vraie vie :)</p>
+
+<h3>Quelques explications en images</h3>
+
+<p>Ca vous semble confus ? Voici deux images pour y voir plus clair :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-1-direct-messaging.png" alt="image" /></p>
+
+<p>On a un système simple avec un appelant et un appelé, mais pas plus d'interactions.</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-2-broker-messaging.png" alt="image" /></p>
+
+<p>On a un système plus complexe où, grâce au service de messagerie, un appelant B peut communiquer directement avec 3 appelés X, Y et Z. (source des images : <a href="http://www.inspirel.com/yami4/book/4-1.html">Inspirel</a>).</p>
+
+<h2>Installation et prérequis</h2>
+
+<h3>Installation de RabbitMQ</h3>
+
+<p>Trève de bavardages, rentrons directement dans le vif du sujet. On va tout d'abord installer <a href="http://www.rabbitmq.com/">RabbitMQ</a>, et je vous rassure, avant que vous ne le demandiez, il est compatible avec <a href="http://www.rabbitmq.com/install-debian.html">Linux</a>, <a href="http://www.rabbitmq.com/install-standalone-mac.html">Mac</a> et <a href="http://www.rabbitmq.com/install-windows.html">Windows</a>.</p>
+
+<p>Une fois installé, il vous suffit de lancer le serveur avec la commande :</p>
+
+<pre class="no-highlight"><code>$ rabbitmq-server -detached
+</code></pre>
+
+<p>Ensuite, lancez votre navigateur préféré et rendez-vous à l'adresse <a href="http://localhost:15672/">http://localhost:15672/</a> pour pouvoir voir votre système de messagerie (pour l'instant vide). Par défaut, on y accède via le compte <strong>guest</strong> (mot de passe <code>guest</code>), mais vous pourrez ensuite gérer différents utilisateurs.</p>
+
+<p>Ca y est, on a un système prêt à faire des traitements asynchrones.</p>
+
+<h3>Création d'un bundle AfsyTutorialBundle</h3>
+
+<p>Pour cet exemple, nous allons créer un bundle <code>Afsy/Bundle/TutorialBundle</code> via la ligne de commande Symfony (avec XML comme format de configuration et génération de l'ensemble de la structure).</p>
+
+<pre class="no-highlight"><code>$ cd /path/to/afsy/project
+$ php app/console generate:bundle
+</code></pre>
+
+<p>Pour des raisons de simplicité, on utilisera le format YAML pour le routing, et le XML pour les services.</p>
+
+<p>On va ensuite créer les dossiers <code>Component</code> et <code>AMPQ</code> (dans le dossier Component) dans le dossier <code>Afsy</code>, afin de déclarer les différents composants qu'on va développer puis utiliser :</p>
+
+<pre class="no-highlight"><code>$ cd /src/Afsy
+$ mkdir -p Component/AMPQ 
+</code></pre>
+
+<p>C'est dans ce dossier qu'on stockera, entre autres, les différents producteurs et consommateurs.</p>
+
+<h3>Installation du RabbitMQBundle</h3>
+
+<p>Une fois notre bundle prêt, on va ajouter le bundle RabbitMQBundle au fichier <code>composer.json</code> :</p>
+
+<pre class="language-json"><code>{
+    "require": {
+        "oldsound/rabbitmq-bundle": "1.2.*",
+    }
+}
+</code></pre>
+
+<p>Puis, faire un update :</p>
+
+<pre class="no-highlight"><code>$ composer update oldsound/rabbitmq-bundle
+</code></pre>
+
+<p>Enfin, l'ajouter dans le fichier <code>app/AppKernel.php</code> :</p>
+
+<pre class="language-php"><code>public function registerBundles()
+{
+    $bundles = array(
+        new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
+    );
+}
+</code></pre>
+
+<h3>Configuration de RabbitMQBundle</h3>
+
+<p>Pour configurer le bundle, rien de difficile : on utilise la <a href="https://github.com/videlalvaro/rabbitmqbundle#usage">configuration par défaut du bundle</a>, qu'on ajoute dans <code>app/config/config.yml</code> :</p>
+
+<pre class="language-yaml"><code>old_sound_rabbit_mq:
+       connections:
+           default:
+               host:     'localhost'
+               port:     5672
+               user:     'guest'
+               password: 'guest'
+              vhost:    '/'
+              lazy:     false
+</code></pre>
+
+<p>Et c'est parti, on peut l'utiliser.</p>
+
+<h2>Un peu de mise en pratique</h2>
+
+<p>Après la théorie (et les installations), passons à la pratique. Prenons un exemple concret : un aspirateur de site, ou du moins, de page web. Pourquoi un aspirateur de site ? Parce que c'est toujours pratique de pouvoir télécharger une page depuis une application PHP, et de télécharger en même temps l'ensemble des images de cette page.</p>
+
+<h3>Un dernier prérequis</h3>
+
+<p>Une dernière chose avant de commencer à développer cet aspirateur... Dans le cadre de cet exercice, nous allons utiliser Curl pour "aspirer" les différentes pages web. Mais pour se faciliter la tâche, il vaut mieux télécharger une classe Curl, un peu comme <a href="https://github.com/php-curl-class/php-curl-class">celle-là</a> et la mettre dans le dossier <code>Afsy/Component/Curl</code>, plutôt que de faire les requêtes à la main. Les scripts suivants utiliseront seulement la méthode <em>get()</em> de cette classe.</p>
+
+<p>On enregistre ensuite la classe en tant que service dans le fichier services.xml (<code>src/Afsy/Bundle/TutorialBundle/Resources/config/services.xml</code>)</p>
+
+<pre class="xml"><code>&lt;service id="curl" class="Afsy\Component\Curl\Curl"&gt;
+&lt;/service&gt;
+</code></pre>
+
+<p>Et c'est tout bon :)</p>
+
+<h2>Un peu de mise en pratique</h2>
+
+<p>Après la théorie (et les installations), passons à la pratique. Prenons un exemple concret : un aspirateur de site, ou du moins, de page web. Pourquoi un aspirateur de site ? Parce que c'est toujours pratique de pouvoir télécharger une page, et de télécharger en même temps l'ensemble des images de cette page.</p>
+
+<h3>Un aspirateur basique</h3>
+
+<p>On va donc créer une classe d'aspirateur de page assez simple, nommée <code>PageHoover.php</code> et enregistrée dans le dossier <code>/src/Afsy/Component/</code> :</p>
+
+<pre><code class="language-php"><br />namespace Afsy\Component;
+
+use Afsy\Component\Curl\Curl;
+use Symfony\Component\DomCrawler\Crawler;
+
+class PageHoover
+{
+
+    protected $curl = null;
+    protected $options = array();
+    protected $downloadFolder = null;
+
+    /**
+     *  Main constructor
+     *  
+     *  @param (Curl) $curl         Curl class
+     *  @param (array) $options     Options list
+     *
+     *  @return (void)
+     */
+    public function __construct(Curl $curl, array $options)
+    {
+        // Initialize
+        $this-&gt;curl = $curl;
+        $this-&gt;options = $options;
+
+        // Initialize options
+        $this-&gt;downloadFolder = $options['downloadFolder'];
+    }
+
+    /**
+     *  Download page method
+     *
+     *  @param (string) $page       Page to download (url)
+     *
+     *  @return (boolean) Download status
+     */
+    public function downloadPage($page)
+    {
+        // Initialize
+        $pageParts = pathinfo($page);
+        $saveFile = $this-&gt;downloadFolder.date('Ymd-His').'-'.$pageParts['filename'].'.htm';
+
+        // Download page
+        $pageContent = $this-&gt;curl-&gt;get($page); 
+
+        // Check downloaded content
+        if(!$pageContent) { return false; }
+
+        // Save page in downloadFolder
+        if(!file_put_contents($saveFile, "\xEF\xBB\xBF".$pageContent-&gt;body))
+        {
+            // Throw error
+            throw new \Exception("Error saving file", 1);
+        }
+
+        // Initialize crawler
+        $crawler = new Crawler($pageContent-&gt;body);
+
+        // Get images list
+        $images = $crawler-&gt;filter('img')-&gt;each(function($image, $i) { return $image-&gt;attr('src'); });
+
+        // @todo : Download images
+
+        // Return status
+        return true;
+    }
+}
+</code></pre>
+
+<p>Ensuite, on l'instancie comme service dans le fichier <code>src/Afsy/Bundle/TutorialBundle/Resources/config/services.xml</code> :</p>
+
+<pre class="xml"><code>&lt;service id="afsy.pagehoover" class="Afsy\Component\PageHoover"&gt;
+    &lt;argument type="service" id="curl" /&gt;
+    &lt;argument type="collection"&gt;
+        &lt;argument key="downloadFolder"&gt;./downloaded_pages/&lt;/argument&gt;
+    &lt;/argument&gt;
+&lt;/service&gt;
+</code></pre>
+
+<p>On prendra soin, au passage, de créer le dossier <code>/web/downloaded_pages/</code> pour stocker les pages téléchargées, en lui mettant les bons droits (comme un dossier de cache) :</p>
+
+<pre class="no-highlight"><code>$ cd web/
+$ mkdir downloaded_pages
+$ chmod -R 777 downloaded_pages/
+</code></pre>
+
+<h3>Création d'une première action</h3>
+
+<p>Dans le contrôleur par défaut (<code>/src/Afsy/Bundle/TutorialBundle/Controller/DefaultController.php</code>), on va créer une méthode <code>downloadAction()</code> :</p>
+
+<pre class="language-php"><code>public function downloadAction()
+{
+    // Initialize
+    $pageHoover = $this-&gt;container-&gt;get('afsy.pagehoover');
+
+    // Download page
+    $page = 'http://afsy.fr/';
+    $pageHoover-&gt;downloadPage($page);
+
+    // Return status
+    $response = new Response();
+
+    return $response-&gt;setContent('Page "'.$page.'" is downloaded !')-&gt;send();
+}
+</code></pre>
+
+<p>Et, bien sûr, on créera le routing associé :</p>
+
+<pre class="language-yaml"><code>afsy_tutorial_download:
+    pattern:    "/afsy/download"
+    defaults:   { _controller: "AfsyTutorialBundle:Default:download" }
+</code></pre>
+
+<h2>Passons vraiment à l'action</h2>
+
+<p>Tout ça est bien beau, mais pour l'instant, c'est que du connu... Éffectivement, mais c'était requis pour pouvoir vous expliquer plus facilement le principe. Et maintenant, on va pouvoir développer la partie consacrée au téléchargement des images. Pour cela, on va d'abord créer notre premier producteur.</p>
+
+<h3>Le premier producteur</h3>
+
+<p>Le producteur n'a besoin que de très peu d'informations : un peu de config... et c'est tout. On va donc mettre à jour la configuration du plugin pour le déclarer :</p>
+
+<pre class="language-yaml"><code>old_sound_rabbit_mq:
+    ...
+    producers:
+        afsy_download_image:
+               connection:             default
+               exchange_options:       { name: 'afsy_download_image', type: direct }
+</code></pre>
+
+<p>Ensuite, on pourra l'utiliser comme un autre service. On va donc mettre à jour la configuration de notre service <strong>PageHoover</strong>, en ajoutant ce producteur en 2ème argument :</p>
+
+<pre class="xml"><code>    &lt;argument type="service" id="old_sound_rabbit_mq.afsy_download_image_producer" /&gt;
+</code></pre>
+
+<p>Vous noterez que le nom du service est très simple : <strong>old_sound_rabbit_mq.[nom_du_producteur]_producer</strong>.</p>
+
+<p>Enfin, on met à jour la classe <code>PageHoover.php</code> :</p>
+
+<pre><code class="language-php"><br />// On utilise le Producer du RabbitMqBundle
+use OldSound\RabbitMqBundle\RabbitMq\Producer;
+
+// On le déclare en variable protégée
+protected $downloadImageProducer = null;
+
+// Et on met à jour le constructeur
+public function __construct(Curl $curl, Producer $downloadImageProducer, array $[options)
+{
+    // […]
+    $this-&gt;downloadImageProducer = $downloadImageProducer;
+    // […]
+}
+
+// Et enfin, on met à jour la méthode downloadPage en ajoutant à la place de '// @todo : Download images' : 
+// Download images
+foreach ($images as $image) 
+{
+    // Initialize
+    $image = str_replace(' ', '', $image);
+    $imgExt = pathinfo($image, PATHINFO_EXTENSION);
+    $hasHost = filter_var($image, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED);
+
+    // Check host
+    if(!$hasHost) { $image = $pageParts['dirname'].$image; }
+
+    // Check extension
+    if(!in_array($imgExt, array('png', 'jpg', 'jpeg', 'gif'))){ $imgExt = 'png'; }
+
+    // Create image to publish
+    $imgToPublish = array
+    (
+        'url' =&gt; $image,
+        'savePath' =&gt; $this-&gt;downloadFolder.pathinfo($image, PATHINFO_FILENAME).'.'.$imgExt,
+        'savedHtmlFile' =&gt; $saveFile,
+    );
+
+    // Publish image
+    $sImg = serialize($imgToPublish);
+    $this-&gt;downloadImageProducer-&gt;publish($sImg);
+}
+</code></pre>
+
+<p>Même si vous l'avez compris en lisant le code, voici quelques explications :</p>
+
+<ul>
+<li>Après avoir récupéré la liste des images avec le crawler, on fait une boucle sur les urls à télécharger</li>
+<li>On vérifie l'extension de l'image, sinon on en met une par défaut</li>
+<li>On vérifie aussi que le host est bien présent, sinon on l'ajoute</li>
+<li>Et on crée un tableau que l'on enverra au format sérialisé au producteur</li>
+</ul>
+
+<p>On aurait pu utiliser le JSON comme format d'échange, mais la sérialisation est le format utilisé par l'auteur du RabbitMqBundle, donc autant le suivre.</p>
+
+<h4>Pourquoi la sérialisation ?</h4>
+
+<p>Pour pouvoir facilement passer un objet (ici, notre image à télécharger) au consommateur qui l'utilisera de manière totalement indépendante.<br />
+Il ne faut pas oublier que, lorsque le consommateur traitera ce message, il n'aura aucune information sur la provenance du message,<br />
+ni ce qu'il contient ou ne contient pas. Il saura juste qu'il doit le traiter, c'est tout.</p>
+
+<h3>Le premier consommateur</h3>
+
+<p>Il faut donc maintenant un receveur à ce tableau sérialisé, et nous allons le créer maintenant dans la classe AfsyDownloadImageConsumer dans <code>src/Afsy/Component/AMPQ/AfsyDownloadImageConsumer.php</code>. Plutôt que de le faire en plusieurs étapes, nous allons faire directement le fichier en entier, avec les méthodes suivantes :</p>
+
+<ul>
+<li>*__construct()* pour pouvoir initialiser curl et différentes options</li>
+<li><em>execute()</em> qui est la méthode principale à implémenter</li>
+<li><em>downloadImageTo()</em> une méthode de téléchargement d'une image dans un dossier</li>
+</ul>
+
+<p>Comme suit :</p>
+
+<pre><code class="language-php"><br />namespace Afsy\Component\AMPQ;
+
+use Afsy\Component\Curl\Curl;
+use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
+use PhpAmqpLib\Message\AMQPMessage;
+
+class AfsyDownloadImageConsumer implements ConsumerInterface
+{
+    /**
+     * @var Curl $curl
+     */
+    protected $curl;
+
+    // Folders
+    protected $createFolderMod = 0755;
+
+    /**
+     *  Main constructor
+     *
+     *  @param (Curl) $curl                 Curl
+     *  @param (array) $options             Array of options
+     *
+     *  @return (void)
+     */
+    public function __construct(Curl $curl, $options = array())
+    {
+        // Initialize
+        $this-&gt;curl = $curl;
+
+        // Initialize options
+        $this-&gt;createFolderMod = isset($options['createFolderMod']) ? $options['createFolderMod'] : $this-&gt;createFolderMod;
+    }
+
+    /**
+     *  Main execute method
+     *  Execute actiosn for a given message
+     *
+     *  @param (AMQPMessage) $msg       An instance of `PhpAmqpLib\Message\AMQPMessage` with the $msg-&gt;body being the data sent over RabbitMQ.
+     *
+     *  @return (boolean) Execution status (true if everything's of, false if message should be re-queued)
+     */
+    public function execute(AMQPMessage $msg)
+    {
+        // Initialize
+        $imageToDownload = unserialize($msg-&gt;body);
+
+        // Download image
+        if(!$this-&gt;downloadImageTo($imageToDownload['url'], $imageToDownload['savePath']))
+        {
+            // Image should be downloaded again
+            return false;
+        }
+
+        // Update saved html file
+        $savedHtmlFileContent = file_get_contents($imageToDownload['savedHtmlFile']);
+
+        // Update images paths
+        $savedHtmlFileContent = str_replace($imageToDownload['url'], $imageToDownload['savePath'], $savedHtmlFileContent);
+
+        // Save file
+        return file_put_contents($imageToDownload['savedHtmlFile'], $savedHtmlFileContent);
+    }
+
+    /**
+     *  Download an image to a given path
+     * 
+     *  @param (string) $downloadImagePath          Download image path 
+     *  @param (string) $saveImagePath              Save image path
+     * 
+     *  @return (boolean) Download status (or true if file already exists)
+     */
+    protected function downloadImageTo($downloadImagePath, $saveImagePath)
+    {
+        // Initialize
+        $saveImageFolder = pathinfo($saveImagePath, PATHINFO_DIRNAME);
+        $saveStatus = false;
+
+        // Check if image already exists
+        if(file_exists($saveImagePath)) 
+        { 
+            echo 'File "'.$saveImagePath.'" already exists'."\n";
+            return true; 
+        }
+
+        // Check if folder already exists
+        if(!is_dir($saveImageFolder))
+        {
+            // Initialize
+            $createFolderMod = is_int($this-&gt;createFolderMod) ? $this-&gt;createFolderMod : intval($this-&gt;createFolderMod);
+
+            // Create folder
+            mkdir($saveImageFolder, $createFolderMod, true);
+            echo 'Folder "'.$saveImageFolder.'" has been created.'."\n";
+        }
+
+        // Download image
+        try 
+        {
+            // Log download status
+            echo 'Begin download of "'.$downloadImagePath.'".'."\n";
+
+            // Get image content 
+            $imageContent = $this-&gt;curl-&gt;get($downloadImagePath);
+
+            // Check content
+            if(!$imageContent || $imageContent-&gt;headers['Status-Code'] == '404') 
+            {
+                throw new \Exception('Error downloading file "'.$downloadImagePath.'" : returns a void content or a 404 page.', 1);
+                return false;
+            }
+
+            // Save image 
+            $saveStatus = file_put_contents($saveImagePath, $imageContent);
+
+            // Log info
+            echo 'Image "'.$saveImagePath.'" has been successfully downloaded!'."\n";
+
+        } 
+        catch (\Exception $e) 
+        {
+            // Log error
+            echo '#ERROR# Image "'.$downloadImagePath.'" was not downloaded! '."\n";
+        }
+
+        // Return save status
+        return $saveStatus;
+    }
+}
+</code></pre>
+
+<p>On l'ajoute dans la liste des services disponibles :</p>
+
+<pre class="xml"><code>&lt;service id="afsy_download_image_service" class="Afsy\Component\AMPQ\AfsyDownloadImageConsumer"&gt;
+    &lt;argument type="service" id="curl" /&gt;
+    &lt;argument type="collection"&gt;
+        &lt;argument key="createFolderMod"&gt;0755&lt;/argument&gt;
+    &lt;/argument&gt;
+&lt;/service&gt;
+</code></pre>
+
+<p>Enfin, on l'ajoute dans la configuration :</p>
+
+<pre class="language-yaml"><code>old_sound_rabbit_mq:
+    ...
+    consumers:
+        afsy_download_image:
+            connection:             default
+            exchange_options:       { name: 'afsy_download_image', type: direct }
+            queue_options:          { name: 'afsy_download_image' }
+            callback:               afsy_download_image_service
+</code></pre>
+
+<p>Voilà, on a notre premier consommateur et on peut maintenant presque l'utiliser...</p>
+
+<h3>Une dernière petite chose : la file d'attente</h3>
+
+<p>On l'a vu, RabbitMQ a une <a href="http://localhost:15672/">interface web</a> et on peut y gérer les files d'attentes.<br />
+C'est ce que nous allons faire maintenant en créant la file d'attente liée à notre consommateur. Sinon, sans file d'attente, ça ne marcherait tout simplement pas.</p>
+
+<p>On va se rendre dans cette interface web, et cliquer sur l'onglet <a href="http://localhost:15672/#/queues">Queues</a>.<br />
+Puis, tout simplement ajouter une file d'attente comme suit :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-3-add-downloadimage-queue.png" alt="image" /></p>
+
+<p>Une fois ajoutée, elle apparaît directement dans la liste des files d'attente :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-4-queues-list.png" alt="image" /></p>
+
+<p>En parallèle, RabbitMQ crée automatiquement une boite d'échanges (visible dans l'onglet <a href="http://localhost:15672/#/exchanges">Exchanges</a>) avec le nom de la file d'attente :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-5-exchanges-list.png" alt="image" /></p>
+
+<p>Il ne reste plus qu'à lier la file d'attente à la boite d'échanges :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-6-add-binding.png" alt="image" /></p>
+
+<p>Ce qui donne :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-7-binded-queue.png" alt="image" /></p>
+
+<p>Et voilà !</p>
+
+<h3>Et c'est parti...</h3>
+
+<p>On peut maintenant retourner sur notre navigateur préféré pour actualiser la page et voir ce que ça donne.<br />
+Normalement (si vous êtes connectés à internet ^^), la page se télécharge bien et affiche le message "Page "http://afsy.fr/" is downloaded !"</p>
+
+<h2>Le traitement des messages</h2>
+
+<p>Une fois la page téléchargée, on peut voir que de nouveaux messages sont arrivés dans la file d'attente <code>afsy_download_image</code> :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-8-new-messages.png" alt="image" /></p>
+
+<p>Il faut maintenant les traiter. Pour ça, on va utiliser la ligne de commande et lancer la commande suivante :</p>
+
+<pre class="no-highlight"><code>$ cd /path/to/your/project
+$ php app/console rabbitmq:consumer -w -m 1 afsy_download_image
+</code></pre>
+
+<p>Les paramètres -w et -m 1 sont importants pour ce premier test :</p>
+
+<ul>
+<li><code>-w</code> permet de stopper le processus dès qu'il n'y a plus de signal UNIX</li>
+<li><code>-m 1</code> permet de ne traiter que le premier message (et bien sûr on en déduit donc que <code>-m 15</code> permet de ne traiter que les 15 premiers messages)</li>
+</ul>
+
+<p>Normalement vous devriez avoir ce type de message :</p>
+
+<p><img src="/bundles/afsyfront/images/avent/21-9-download-image.png" alt="image" /></p>
+
+<p>Ca y est ! On a bien téléchargé notre première image. On peut maintenant lancer le traitement de toutes les autres :</p>
+
+<pre class="no-highlight"><code>$ php app/console rabbitmq:consumer -w afsy_download_image
+</code></pre>
+
+<p>C'est pas plus compliqué que ça !</p>
+
+<h2>Et maintenant ?</h2>
+
+<p>On a vu comment lancer le téléchargement d'une page et le téléchargement des images liées à cette page... Et ça suffira pour aujourd'hui !<br />
+Avec ce petit aspirateur de site, que vous allez pouvoir améliorer, je vous ai expliqué comment lancer des traitements asynchrones de manière simple.<br />
+Maintenant, vous avez toutes les cartes en main pour pouvoir traiter plus de messages et de files d'attentes... voir même faire des file d'attentes en boucle :<br />
+par exemple, j'envoie un message à une file d'attente ; elle le traite et envoie un message à une autre file d'attente ; etc.</p>
+
+<p>Voici d'ailleurs quelques pistes d'améliorations :</p>
+
+<ul>
+<li>ajout de cache</li>
+<li>ajout d'une interface web</li>
+<li>listing des pages téléchargées</li>
+<li>téléchargement des images d'une page dans un dossier spécifique</li>
+<li>etc.</li>
+</ul>
+
+<p>Voilà, j'espère que cet article vous aura plu et je vous remercie de l'avoir lu jusqu'au bout. Je vais mettre les sources de ce projet sur GitHub,<br />
+pour que vous puissiez les récupérer facilement. Et si vous avez des remarques et/ou des questions, n'hésitez surtout pas !</p>
+{% endblock %}
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/clement-delmas.png') }}" alt="Clément Delmas" />
+{% endblock %}
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://clementdelmas.fr/{% endblock %}">{% block article_author %}Clément Delmas{% endblock %}</a>
+</h2>
+<p>Clément est consultant chez <a href="http://www.acensi.fr/">Acensi</a> et développeur couteau-suisse.</p>
+<p>
+    Sur Twitter :
+    <a href="https://twitter.com/clem">@clem</a>
+</p>
+{% endblock %}

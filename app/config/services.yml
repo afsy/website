@@ -1,0 +1,51 @@
+parameters:
+    locale: fr
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Afsy\:
+        resource: '../../src/*'
+        exclude: '../../src/{Bundle,Controller,Entity}'
+
+    Afsy\Controller\:
+        resource: '../../src/Controller'
+        public: true
+        tags: ['controller.service_arguments']
+
+    Afsy\Admin\ArticleAdmin:
+        tags: [{ name: 'sonata.admin', manager_type: 'orm', label: 'Article', group: 'Content' }]
+        arguments: [null, 'Afsy\Entity\Article', 'SonataAdminBundle:CRUD']
+        public: true
+        calls:
+            - [setTranslationDomain, ['AfsyAdminBundle']]
+            - [setTagManager, ['@Afsy\Tag\TagManager']]
+
+    Afsy\Admin\AuthorAdmin:
+        tags: [{ name: 'sonata.admin', manager_type: 'orm', label: 'Author', group: 'People' }]
+        arguments: [null, 'Afsy\Entity\Author', 'SonataAdminBundle:CRUD']
+        public: true
+        calls:
+            - [setTranslationDomain, ['AfsyAdminBundle']]
+
+    Afsy\Doctrine\MarkdownParserListener:
+        public: true
+        tags:
+            - {name: 'doctrine.event_listener', event: 'prePersist'}
+            - {name: 'doctrine.event_listener', event: 'preUpdate'}
+
+    Afsy\Tag\TagManager:
+        $em: '@doctrine.orm.default_entity_manager'
+        $slugifier: '@fpn_tag.slugifier.default'
+
+    Afsy\Advent\AdventCalendarRepository:
+        factory: ['Afsy\Advent\AdventCalendarRepository', 'fromFile']
+        arguments: ['%kernel.root_dir%/advent/calendars.php']
+
+    twig.extension.intl:
+        public: false
+        class: Twig_Extensions_Extension_Intl
+        tags: [{ name: twig.extension }]

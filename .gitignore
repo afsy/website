@@ -3,17 +3,6 @@
 .project
 .settings
 .idea
-
-# sf2
-web/bundles/
-app/bootstrap.php.cache
-app/cache/*
-app/logs/*
-build/
-vendor
-app/config/parameters.yml
-web/css/compiled
-web/js/compiled
 composer.phar
 
 # deployment
@@ -21,4 +10,24 @@ bin/fabfile.py
 
 # other
 *.pyc
-var/
+web/css/compiled
+web/js/compiled
+
+# Symfony Standard Defaults
+/.web-server-pid
+/app/config/parameters.yml
+/build/
+/phpunit.xml
+/var/*
+!/var/cache
+/var/cache/*
+!var/cache/.gitkeep
+!/var/logs
+/var/logs/*
+!var/logs/.gitkeep
+!/var/sessions
+/var/sessions/*
+!var/sessions/.gitkeep
+!var/SymfonyRequirements.php
+/vendor/
+/web/bundles/

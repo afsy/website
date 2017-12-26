@@ -1,3 +1,8 @@
+homepage:
+    path:  /
+    controller: 'Afsy\Controller\BlogController:index'
+    methods: GET
+
 # HWI OAauth
 hwi_oauth_redirect:
     resource: "@HWIOAuthBundle/Resources/config/routing/redirect.xml"
@@ -15,11 +20,17 @@ sensio_connect_login:
     path: /login/check-connect
 
 logout:
-    path:   /logout
+    path: /logout
+    methods: GET
 
 # Site / Admin
-afsy_front_bundle:
-    resource: "@AfsyFrontBundle/Resources/config/routing.yml"
+app:
+    resource: '../src/Controller/'
+    type: annotation
+
+app_avent:
+    resource: '../src/Avent/AdventCalendarController.php'
+    type: annotation
 
 admin_redirect:
     path: /admin
@@ -36,13 +47,3 @@ _sonata_admin:
     resource: .
     type: sonata_admin
     prefix: /admin
-
-
-# Internal routing configuration to handle ESI
-# ****** WARNING ******
-# This route should be enabled with caution as it can open a security vulnerability
-# see http://symfony.com/blog/security-release-symfony-2-0-20-and-2-1-5-released for more information
-# ****** WARNING ******
-#_internal:
-#    resource: "@FrameworkBundle/Resources/config/routing/internal.xml"
-#    prefix:   /_internal

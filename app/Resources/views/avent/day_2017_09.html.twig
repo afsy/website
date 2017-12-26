@@ -1,0 +1,185 @@
+{% extends 'avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 9 - Détournement de twig pour des prototypages d'appli" %}
+
+{% block article_content %}
+    <style type="text/css">
+        i {
+            font-family: sans-serif;
+        }
+    </style>
+    <h1>Détournement de twig pour des prototypages d'appli</h1>
+
+    <p>Certains sont fans de Ikea, montent le meuble et l'installent au milieu de leur salon. D'autres prennent un peu de temps pour détourner l'objet et en faire un meuble unique… <a href="http://mashable.com/2013/03/29/ikea-stool-bicycle/" target="_blank">ou un vélo à partir d'un tabouret</a>.</p>
+
+    <p>L'idée ici est semblable.</p>
+
+    <h2>Contexte : </h2>
+
+    <p>Août 2014, je co-fonde une société, <a href="https://www.wheeliz.com">Wheeliz</a>, tout en restant dans mon ancienne société. Je dois donc optimiser mon temps de travail. J'avais 6 mois pour créer entièrement une marketplace.</p>
+
+    <h2>Fonctionnalité à développer :</h2>
+    <p>Après le succès de notre KissKissBankBank, je me retrouve avec des codes promo à générer. Je commence à lister rapidement les conditions possibles pour la validité du code promo :</p>
+    <ul>
+        <li>ID du locataire</li>
+        <li>Email du locataire</li>
+        <li>Id de la voiture</li>
+        <li>Id du propriétaire</li>
+        <li>date de début de validité</li>
+        <li>date de fin de validité</li>
+        <li>date de début de location après le XX/XX/XXXX</li>
+        <li>date de début de location avant le XX/XX/XXXX</li>
+        <li>date de fin de location après le  XX/XX/XXXX</li>
+        <li>date de fin de location avant le  XX/XX/XXXX</li>
+        <li>parrainé par YYYYYY</li>
+        <li>nombre maximal d'utilisation / utilisateur</li>
+        <li>nombre max d'utilisation au global</li>
+        <li>durée minimale de la location</li>
+    </ul>
+    <p>Et je pense que j'en ai oublié.</p>
+    <p>Ces conditions peuvent être liées par de simples AND, ou un mix entre AND et OR.</p>
+    <p>Quand au montant:</p>
+    <ul>
+        <li>montant fixe</li>
+        <li>montant fixe / jour</li>
+        <li>X journées offertes</li>
+        <li>pourcentage montant total de la location</li>
+        <li>pourcentage commission wheeliz</li>
+        <li>pourcentage franchise d'assurance</li>
+        <li>pourcentage conducteur</li>
+        <li>pourcentage acheminement</li>
+        <li>pourcentage kilomètre supplémentaire</li>
+        <li>en donnant un montant minimum et/ou maximum</li>
+    </ul>
+    <p>Sachant que ce montant doit également pouvoir s'adapter. Exemple 5€ pour 1 journée, 10 € pour 2 journées, et 20€ pour 1 semaine, le tout avec le même code.</p>
+    <p>Bref, j'avais besoin d'une flexibilité extrême.</p>
+
+    <h2>Meilleure solution :</h2>
+    <p>Après avoir regardé un peu Prestashop, Magento, … je me suis dit qu'il fallait que je fasse un arbre de conditions. Mais là, ça veut dire UX compliquée, flexibilité assez bonne, sans montant modulable. Allez, au bas mot 1 semaine de travail.</p>
+
+    <h2>Solution retenue :</h2>
+    <p>Toutes ces conditions peuvent très bien s'écrire en PHP.</p>
+    <p>Mais faire une release pour l'ajout d'un code promo, ce n'est clairement pas l'idéal.</p>
+    <p>Ajouter du php évalué dans ma base de données ? Euh comment dire...</p>
+    <iframe src="https://giphy.com/embed/lT4sgCJwC7B4c" width="480" height="333" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+
+    <p>Si seulement j'avais à disposition un meta-langage qui puisse être compris par les commerciaux (après une petite formation, hein) et qui serait exécutable en PHP…</p>
+
+    <p>Ah, ça y est, vous me voyez venir ? Oui j'ai utilisé Twig pour “coder” le code de réduction.</p>
+
+    <p>Je me retrouve donc avec 2 tables simples :</p>
+    <ul>
+    <li>discount, qui contient mes codes promos à proprement parler;</li>
+    <li>Et discount_example, qui contient des exemples de codes promos couramment utilisés.</li>
+    </ul>
+
+    <p>Après avoir repéré l'exemple de code promo qui les intéresse, les personnes en charge du marketing ou du service client ont juste à cliquer sur un petit bouton pour accéder à un formulaire. Là, ils rentrent le nom du code promo, et emballé c'est pesé. Et si besoin, ils peuvent l'adapter à la marge (date de validité, restriction sur un utilisateur, ...).</p>
+
+    <p>Temps de développement réel : 1 journée.</p>
+    <p>Temps de création des templates de code promo : 2h</p>
+    <p>Temps de formation : 2-3 midis</p>
+
+    <p><strong>Verdict : opération très rentable pour la phase de prototype.</strong></p>
+
+    <p>Aujourd'hui, Wheeliz n'est plus au stade de prototype mais ce fonctionnement est resté, et il offre une grande souplesse, surtout dans les coups de rush (le soir à 18h pour une opération qui n'a jamais été faite jusque là, et lancée le lendemain…).</p>
+
+    <h2>Côté code, que se passe-t-il ?</h2>
+    <p>Exemple avec un code promo valable 1 seule fois par personne, jusqu'à une certaine date, et uniquement sur la première location :</p>
+
+
+<pre class="language-twig"><code>{% verbatim %}
+{% if discountAlreadyUsed(discount, loggedInUser, rental) or now>discount.usageLimitAt or ((rental.tenant.rentalsDoneCountAsTenant + rental.tenant.rentalsValidatedCountAsOwner)>=1) %}
+    0
+{% else %}
+    1
+{% endif %}
+{% endverbatim %}</code></pre>
+
+    <p>Et du coup, le code PHP qui analyse ça :</p>
+<pre class="language-php"><code>
+    /**
+     * @param DiscountEntity   $discount
+     * @param RentalEntity     $rental
+     * @param array|RentalLine[] $rentalLines
+     *
+     * @return boolean
+     */
+    public function isDiscountApplicableToRental(DiscountEntity $discount, RentalEntity $rental, array $rentalLines)
+    {
+        try {
+            $variables = $this->getTemplateVariables($discount, $rental, $rentalLines);
+
+            $toTest = $this->twigEnvironment->createTemplate($discount->getTestExpression())->render($variables);
+            $toTest = trim($toTest);
+            if ($toTest) {
+                return true;
+            }
+
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->warn('Exception while calculating discount Code: '.$e->getMessage().$e->getTraceAsString());
+
+            return false;
+        }
+    }
+</code></pre>
+
+<p>Mais pour l'application des montants, ça va un chouilla plus loin, puisque je ne récupère pas juste un booléen, mais un objet json :</p>
+
+<pre class="language-php"><code>
+/**
+* @param OrderLineEntity $orderLine
+* @param array           $variables
+*
+* @return bool
+* @throws \Exception
+* @throws \Throwable
+*/
+public function applyRubricOnLine(DiscountEntity $discount, array $variables)
+{
+   $output = null;
+   try {
+       $output = $this->twigEnvironment->createTemplate($discount->getAmountsExpression())->render(array_merge($variables, array('discount' => $discount)));
+       $json = json_decode($output, true);
+
+       if ($json) {
+           if (isset($json['debug'])) {
+               $this->logger->info('DEBUG INFO for rubric '.$orderLine->getRubric()->getId(), $json);
+               unset($json['debug']);
+           }
+
+           return $json;
+       } else {
+            $this->logger->warn('can\'t decode json amounts for discount '.$discount->getId(), $json);
+       }
+
+       return false;
+   } catch (\Exception $e) {
+       $this->logger->critical('Exception while calculating discount amounts '.$discount->getId().' : '.$e->getMessage().' '.$e->getTraceAsString().' '.$output);
+
+       throw $e;
+   }
+}
+
+</code></pre>
+    <h2>D'autres cas d'application ?</h2>
+    <p>Tout d'abord, comme quoi je suis fan de ce procédé, je le réintroduis actuellement dans un système de gamification.</p>
+    <p>Mais je vois très bien ce genre d'utilisation dans des ERP de paie, ou même comptabilité en général. En fait, le principal cas d'utilisation est quand il faut que des technico-commerciaux soient autonomes sur des formules de calcul.</p>
+    <p>On pourrait même imaginer ça pour du CMS, si toutefois nous n'avions pas lu l'excellent article présentant les <a href="{{ path('avent_day', {slug:'06-headless-is-more', year:2017}) }}">CMS Headless.</a></p>
+    <p><strong>Mais il ne faut pas perdre de vue que les personnes qui vont utiliser ceci au quotidien doivent avoir des rudiments de programmation et être formées à twig. Ce qui n'est pas le cas de tout le monde, loin s'en faut.</strong></p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/remi-janot.png') }}" alt="Rémi Janot" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        {% block article_author %}Rémi Janot{% endblock %}
+    </h2>
+    <p>
+        Co-fondateur & CTO chez Wheeliz
+    </p>
+{% endblock %}
