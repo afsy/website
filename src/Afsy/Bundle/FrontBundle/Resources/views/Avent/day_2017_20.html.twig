@@ -29,7 +29,7 @@
     <h2>Elasticsearch ? Jamais entendu parlé !</h2>
 
     <p><em>Cette section s&#39;adresse aux lecteurs qui ne connaissent pas le moteur !</em></p>
-    <p>Elasticsearch est un index de recherche gratuit et <span lang="en">Open Source</span> développé Java.
+    <p>Elasticsearch est un index de recherche gratuit et <span lang="en">Open Source</span> développé en Java.
         Semblable à une base de données <abbr title="Not Only SQL" lang="en">NoSQL</abbr>, il a la
         particularité d&#39;indexer toutes les données de vos documents, via Lucene. Un document y est représenté en
         <strong><abbr title="JavaScript Object Notation" lang="en">JSON</abbr></strong>, et la communication entre le moteur et votre application se fait en <strong><abbr title="HyperText Transfer Protocol" lang="en">HTTP</abbr></strong>, ce
@@ -85,7 +85,7 @@
             transparente avec Doctrine permet de récupérer des entités plutôt que les JSON du moteur, et de pousser
             automatiquement les modifications de votre base de données dans le moteur. Sur des projets plus gros ou
             contraignants il est cependant préférable de ne pas utiliser ces fonctionnalités pour des raisons de performances et
-            de charge - elle font la promotion de mauvaises pratiques. Implémenter soit même Elasticsearch permet de mieux
+            de charge - elle font la promotion de mauvaises pratiques. Implémenter soi-même Elasticsearch permet de mieux
             coller aux spécificités de votre projet.
         </li>
     </ul>
@@ -289,10 +289,10 @@ class IndexBuilder
         Pour ce faire nous utiliserons la méthode <code>addDocuments</code> et non pas <code>addDocument</code> ; la
         différence est de taille, car la première exploite la <a
                 href='https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html'>BULK API</a> pour
-        envoyer tous vos documents en un seul appel HTTP, alors que la seconde fera un appel par document et donc être
+        envoyer tous vos documents en un seul appel HTTP, alors que la seconde fera un appel par document et sera donc
         beaucoup plus longue.</p>
     <p>L&#39;autre point d&#39;importance concernant vos <code>Document</code> est l&#39;ID : il est facultatif dans Elasticsearch mais
-        si vous voulez retrouver vos articles de blog un jour pour les mettre à jour... Définisez-le à la main !</p>
+        si vous voulez retrouver vos articles de blog un jour pour les mettre à jour... Définissez-le à la main !</p>
 
     <pre><code class="language-php">namespace App\Elasticsearch;
 
@@ -318,7 +318,7 @@ class ArticleIndexer
     public function buildDocument(Post $post)
     {
         return new Document(
-            $post-&gt;getId(), // Manualy defined ID
+            $post-&gt;getId(), // Manually defined ID
             [
                 &#39;title&#39; =&gt; $post-&gt;getTitle(),
                 &#39;summary&#39; =&gt; $post-&gt;getSummary(),
@@ -329,7 +329,7 @@ class ArticleIndexer
                 &#39;url&#39; =&gt; $this-&gt;router-&gt;generate(&#39;blog_post&#39;, [&#39;slug&#39; =&gt; $post-&gt;getSlug()], UrlGeneratorInterface::ABSOLUTE_PATH),
                 &#39;date&#39; =&gt; $post-&gt;getPublishedAt()-&gt;format(&#39;M d, Y&#39;),
             ],
-            &quot;article&quot; // Types are deprecrated, to be removed in Elastic 7
+            &quot;article&quot; // Types are deprecated, to be removed in Elastic 7
         );
     }
 
@@ -442,7 +442,7 @@ class ElasticReindexCommand extends Command
     </ul>
     <p>Nous n&#39;avons pas la place aujourd&#39;hui d&#39;approfondir ces sujets, et je vous renvoie donc vers cet article :
         <a href='https://jolicode.com/blog/construire-un-bon-analyzer-francais-pour-elasticsearch'>construire un <code>analyzer</code> Français</a>.</p>
-    <p>Ici la requête sera toute simple ! Nous souhaitons rechecher dans les champs textuels et donner un peu plus de poids au
+    <p>Ici la requête sera toute simple ! Nous souhaitons rechercher dans les champs textuels et donner un peu plus de poids au
         titre de l&#39;article.</p>
 
     <pre><code class="language-json">GET blog/_search
