@@ -152,7 +152,7 @@ if (typeof window !== `undefined`) {
   const module = require(&quot;module&quot;);
 }
 
-// Utilisation des fonctions lifecycles de React, componentDidMount n&#39;est appelé que sur le serveur
+// Utilisation des fonctions lifecycles de React, componentDidMount n&#39;est appelé que sur le client
 export default class MyClass extends React.Component {
     ...
     componentDidMount() {
@@ -166,7 +166,7 @@ export default class MyClass extends React.Component {
 
     <h4 id="une-application-js-independante-avec-rendu-server">Une application JS indépendante avec rendu serveur</h4>
 
-    <p>Si votre choix s&#39;est posé sur une application Symfony comme API et une application React découplé, vos composants vont récupérer leur données via des requêtes HTTP au lieu d&#39;avoir des données passées via Twig.</p>
+    <p>Si votre choix s&#39;est posé sur une application Symfony comme API et une application React découplée, vos composants vont récupérer leur données via des requêtes HTTP au lieu d&#39;avoir des données passées via Twig.</p>
 
     <p>J&#39;apprécie plus particulièrement cette approche car il est plus facile de faire évoluer indépendamment le front et le back. Cependant il faudra se pencher sur le rendu serveur ainsi que le routing d&#39;une application NodeJS. Vous trouverez beaucoup, si ce n&#39;est trop d&#39;articles pour implémenter ceci. Avoir une intégration plus complète en mode single page app va vous permettre d&#39;avoir des optimisations tels que du <a href='https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/docs/guides/code-splitting.md'>code splitting par rapport au routeur</a>.</p>
 
