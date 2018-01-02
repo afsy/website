@@ -150,7 +150,7 @@
         <figure>
             <img src="{{ asset('bundles/afsyfront/images/avent/2017/23/23-archi-hexagonale-repository.png') }}" alt="persister" />
             <figcaption style="text-align: center">
-                (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
+                (source : schéma dessiné par <a href="https://github.com/melicerte">@melicerte</a>)
             </figcaption>
         </figure>
     </p>
@@ -160,7 +160,7 @@
         <figure>
             <img src="{{ asset('bundles/afsyfront/images/avent/2017/23/23-archi-hexagonale-persister.png') }}" alt="persister" />
             <figcaption style="text-align: center">
-                (source : schéma déssiné par <a href="https://github.com/melicerte">@melicerte</a>)
+                (source : schéma dessiné par <a href="https://github.com/melicerte">@melicerte</a>)
             </figcaption>
         </figure>
     </p>
@@ -255,10 +255,10 @@ class Article implements Repository\Article
     private $connection;
 
     /**
-     * @param Connection      $connection
-     * @param Hydrator\Agency $hydrator
+     * @param Connection       $connection
+     * @param Hydrator\Article $hydrator
      */
-    public function __construct(Connection $connection, Hydrator\Agency $hydrator)
+    public function __construct(Connection $connection, Hydrator\Article $hydrator)
     {
         $this->connection = $connection;
     }
@@ -277,7 +277,7 @@ class Article implements Repository\Article
         ;
 
         if ($result === false) {
-            throw new UserNotFoundException('Cette article n\'existe pas.');
+            throw new NotFoundException('Cette article n\'existe pas.');
         }
 
         return $this->hydrator->hydrate($result);
@@ -296,7 +296,7 @@ use AppBundle\Domain\Model;
 use AppBundle\Domain\Repository;
 use AppBundle\Infrastructure\Webservice\RequestBuilder\LireArticle;
 
-class Agency implements Repository\Agency
+class Article implements Repository\Article
 {
     private $articleService;
 
@@ -350,8 +350,8 @@ class Agency implements Repository\Agency
 
     <p>
         Pour les nouvelles personnes arrivant sur le projet il est vrai que ce n'est pas tout simple,
-        mais dès qu'ils ont le projet en mains ça roule plutôt pas mal !
-        Voici pour preuve le petit témoignage d'un de mes collègues qui a du travailler sur le projet alors que tout était déjà en place :
+        mais dès qu'ils ont le projet en main ça roule plutôt pas mal !
+        Voici pour preuve le petit témoignage d'un de mes collègues qui a dû travailler sur le projet alors que tout était déjà en place :
     </p>
     <blockquote>
         <p>
@@ -362,7 +362,7 @@ class Agency implements Repository\Agency
 
 
     <p>
-        Malgré les bons cotés de ce style d'architecture je ne pense pas qu'il soit la solution à tous les problèmes.
+        Malgré les bons côtés de ce style d'architecture je ne pense pas qu'il soit la solution à tous les problèmes.
         Comme pour tous projets il faut bien sûr réfléchir à ce qui convient le mieux aux besoins et aux contraintes clients.
     </p>
 
