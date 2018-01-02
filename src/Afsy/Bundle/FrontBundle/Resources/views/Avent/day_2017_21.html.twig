@@ -34,7 +34,7 @@
   <h2 id="introduction">Introduction</h2>
 
   <p>
-    Dans un site web traditionnel, lorsqu’on veut faire des échanges entre la page web qu’un utilisateur est entrain
+    Dans un site web traditionnel, lorsqu’on veut faire des échanges entre la page web qu’un utilisateur est en train
     de consulter et le serveur, le tout sans recharger la page, on fait une requête en
     <abbr title="Asynchronous JavaScript And Xml" lang="en">AJAX</abbr>.
     C’est un procédé assez simple à mettre en place mais qui a un gros inconvénient :
@@ -314,7 +314,7 @@ $server = IoServer::factory(
 
   <ol>
     <li>
-      Générer les assets, pour que le fichier JavaScript soit pris en compte :
+      Installer les assets, pour que le fichier JavaScript soit pris en compte :
       <code class="language-bash">php bin/console assets:install --symlink</code> ;
     </li>
     <li>
@@ -526,7 +526,7 @@ private function sendMessageToChannel(ConnectionInterface $conn, $channel, $user
 
   <ul>
     <li>mettre à jour le système d’envoi de messages au <em lang="en">backend</em></li>
-    <li>
+    <li>{# -#}
       ajouter une méthode d’affichage de message dans le
       <abbr title="HyperText Markup Language" lang="en">HTML</abbr>
     </li>
@@ -607,11 +607,11 @@ var userName = prompt('Hi! I need your name for the Chat please :)');
   <p>Pour envoyer un message de l’utilisateur, il nous faut deux~trois choses :</p>
 
   <ul>
-    <li>
+    <li>{# -#}
       Une méthode d’envoi du contenu présent dans le champs texte et qui ré-initialise son contenu une fois envoyé ;
     </li>
     <li>Un lien entre cette méthode et le clic sur le bouton « <em lang="en">Send</em> » ;</li>
-    <li>
+    <li>{# -#}
       Et le petit bonus : un lien entre la touche entrée et la méthode d’envoi pour envoyer automatiquement le message
       après avoir appuyé sur cette touche.
     </li>
