@@ -51,17 +51,17 @@
 <p>On peut d&eacute;finir trois crit&egrave;res importants pour un test unitaire&nbsp;:</p>
 <ul>
 <li>avoir une forte probabilit&eacute; d'&eacute;chouer lorsqu'un nouveau bug est introduit&nbsp;;</li>
-<li>avoir une faible probabilit&eacute; de produire un faux positif (&eacute;chouer sans qu'il n'y ai de bug)&nbsp;;</li>
+<li>avoir une faible probabilit&eacute; de produire un faux positif (&eacute;chouer sans qu'il n'y ait de bug)&nbsp;;</li>
 <li>s'ex&eacute;cuter en un temps tr&egrave;s court.</li>
 </ul>
 <p>
   Certaines classes sont d&eacute;di&eacute;es &agrave; la coordination des traitements (par exemple les contr&ocirc;leurs Symfony). Ces classes ont beaucoup de d&eacute;pendances mais ne portent aucune logique m&eacute;tier et sont tr&egrave;s simples.<br />
-  Il y a peu de chances qu'une r&eacute;gression apparaisse &agrave; ce niveau, et il y a par contre de grandes chances pour que le test &eacute;choue sans qu'il n'y ai de r&eacute;gression.<br />
+  Il y a peu de chances qu'une r&eacute;gression apparaisse &agrave; ce niveau, et il y a par contre de grandes chances pour que le test &eacute;choue sans qu'il n'y ait de r&eacute;gression.<br />
   Les tests unitaires de ces classes vont être longs à écrire, potentiellement compliqués à cause des dépendances, et rarement échouer pour une bonne raison. Couvrir ces classes avec des tests unitaires n'a donc que peu d'intérêt.</p>
 <p>D'autres portent une r&eacute;elle logique m&eacute;tier (par exemple un validateur d'e-mail).<br />
 Le test unitaire aura une r&eacute;elle valeur lorsqu'il est appliqu&eacute; &agrave; ces classes &ndash; qui sont normalement suffisamment isol&eacute;es pour &ecirc;tre test&eacute;es avec pas, ou tr&egrave;s peu, de mocks.</p>
 <p>Il n'est pourtant pas toujours simple de d&eacute;finir si une classe peut, ou doit, &ecirc;tre test&eacute;e unitairement.</p>
-<p><strong>En r&egrave;gle g&eacute;n&eacute;rale</strong>&nbsp;: si une classe porte de la logique m&eacute;tier et n'est pas ais&eacute;ment testable, c'est souvent le signe que cette classe porte trop de responsabilit&eacute;s et sera donc rapidement difficile &agrave; maintenir/faire &eacute;voluer. Prenez alors du recul et voyez s'il n'est pas possible de la re-factorer<br /> Si ce n'est pas le cas, peut &ecirc;tre que des tests d'int&eacute;gration sont plus pertinents&nbsp;? Le test sera moins cibl&eacute; mais permettra malgr&eacute; tout de couvrir le cas fonctionnel d&eacute;fini.</p>
+<p><strong>En r&egrave;gle g&eacute;n&eacute;rale</strong>&nbsp;: si une classe porte de la logique m&eacute;tier et n'est pas ais&eacute;ment testable, c'est souvent le signe que cette classe porte trop de responsabilit&eacute;s et sera donc rapidement difficile &agrave; maintenir/faire &eacute;voluer. Prenez alors du recul et voyez s'il n'est pas possible de la re-factorer<br /> Si ce n'est pas le cas, peut-&ecirc;tre que des tests d'int&eacute;gration sont plus pertinents&nbsp;? Le test sera moins cibl&eacute; mais permettra malgr&eacute; tout de couvrir le cas fonctionnel d&eacute;fini.</p>
 <p>Il est &eacute;galement parfois plus co&ucirc;teux d'&eacute;crire certains tests que de ne pas le faire&nbsp;: appliquez la r&egrave;gle des 80/20 et n'&eacute;crivez pas de test s'il ne couvre pas les trois crit&egrave;res cit&eacute;s ci-dessus&nbsp;!</p>
 <h3>Comment tester&nbsp;?</h3>
 <p>
