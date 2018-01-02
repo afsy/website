@@ -106,7 +106,7 @@ Ainsi qu'un nouveau fichier <code>config/graphql/types/Post.types.yaml</code> :
                 type: "[User!]!"
 </code></pre>
 <p>
-  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant <em>PropertyAccess</em> afin que nous n'ayons pas besoin d’expliquer comment résoudre des champs triviaux des champs triviaux comme <code>name</code>, <code>avatar</code>, ou encore <code>title</code>.
+  Maintenant que nous avons décrit nos types à GraphQL, nous devons lui expliquer comment résoudre chacun des champs ! C’est l’objectif d’un <strong>resolveur</strong>. Par défaut durant la phase d'exécution le bundle va utiliser le composant <em>PropertyAccess</em> afin que nous n'ayons pas besoin d’expliquer comment résoudre des champs triviaux comme <code>name</code>, <code>avatar</code>, ou encore <code>title</code>.
   On considérera que ces champs peuvent être résolus en faisant appel à des accesseurs sur nos entités.
 </p>
 
