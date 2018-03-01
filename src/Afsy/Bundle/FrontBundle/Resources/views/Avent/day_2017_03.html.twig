@@ -15,6 +15,8 @@
         <li>Créons notre projet et déployons-le !</li>
     </ul>
 
+    <p>Pour que vous le sachiez dès maintenant, si vous souhaitez consulter les sources du projet créé pour l'occasion de cet article, vous pouvez le voir <a href="https://github.com/Pierstoval/FlexAndHeroku">sur le dépôt Github associé</a>. Bonne lecture !</p>
+
     <h2 id="quest-ce-que-flex">Qu'est-ce que Flex ?</h2>
 
     <p>Flex, parfois appelé Symfony Flex, est un plugin Composer que vous pouvez installer dans tout projet PHP, et qui va permettre de standardiser la structure et la composition d'un projet.</p>
@@ -304,23 +306,70 @@ Run git push heroku master to create a new release using this buildpack.</code><
 
     <h3 id="préparons-notre-projet-pour-quil-soit-compatible-avec-heroku">Préparons notre projet pour qu'il soit compatible avec Heroku</h3>
 
-    <p>En premier lieu il faut créer un <code>Procfile</code>.</p>
+    <p>Nous allons maintenant configurer le projet pour l'envoyer sur Heroku.</p>
+
+    <p>Dans un premier temps, configurons Nginx.</p>
+
+    <h4 id="créer-une-configuration-nginx">Créer une configuration nginx</h4>
+
+    <p>Comme toute application web, nous avons besoin d'un serveur web : ça tombe bien, le buildpack PHP nous permet d'utiliser Apache ou Nginx directement !</p>
+
+    <p>Vous pouvez créer un fichier <code>heroku/nginx_host.conf</code> et y mettre ceci :</p>
+
+    <pre><code>
+# Try to serve file directly, fallback to rewrite.
+location / {
+    try_files $uri @rewriteapp;
+}
+
+# Rewrite all to index.php. This will trigger next location.
+location @rewriteapp {
+    rewrite ^(.*)$ /index.php/$1 last;
+}
+
+# Redirect everything to Heroku.
+# In development, replace this with your php-fpm/php-cgi proxy.
+location ~ ^/index\.php(/|$) {
+    try_files @heroku-fcgi @heroku-fcgi;
+    internal;
+}
+
+# Return 404 for all other php files not matching the front controller.
+# This prevents access to other php files you don't want to be accessible.
+location ~ \.php$ {
+    return 404;
+}
+</code></pre>
+
+    <p>Cette config fait plusieurs choses :</p>
+
+    <ul>
+        <li>Tente de délivrer le fichier demandé, s'il existe.</li>
+        <li>Sinon, renvoie l'intégralité de la requête HTTP au fichier <code>index.php</code>, qui sera délégué au processus FCGI configuré par Heroku (un processus <code>php-fpm</code>).</li>
+        <li>Si un autre fichier PHP est demandé, on renvoie une 404. Cela permet de faire en sorte qu'aucun fichier PHP ne soit directement exécuté et/ou visible.</li>
+    </ul>
+
+    <h4 id="créer-le-procfile">Créer le Procfile</h4>
 
     <p>Le <code>Procfile</code> est un fichier qui décrit les différents dynos que vous allez posséder dans votre projet.</p>
 
     <p>Chaque dyno sera comptabilisé dans le temps de consommation relatif à votre abonnement.</p>
 
-    <p>Ici nous n'avons besoin que d'un seul dyno, en l'occurence un dyno de type <code>web</code>.</p>
+    <p>Ici nous n'avons besoin que d'un seul dyno, en l'occurence un dyno de type <code>web</code> (pour rappel, le nom du dyno est unique, donc nous ne pouvons avoir qu'un seul dyno nommé <code>web</code>).</p>
 
-    <p>Chaque ligne du fichier se compose de deux informations : le type de dyno et le script à exécuter.</p>
+    <p>Chaque ligne du fichier se compose de deux informations : le type de dyno et le script à exécuter.</p>
 
     <p>Le script correspondra ici à celui documenté dans le buildpack PHP, en l'occurrence une instance nginx suivie du nom du dossier servant de point d'entrée au vhost.</p>
 
-    <pre><code>web: vendor/bin/heroku-php-nginx public/</code></pre>
+    <p>Nous devons également rajouter la configuration de nginx précédemment créée, nécessaire pour utiliser Symfony (sinon, seule la page d'accueil sera utilisable !).</p>
+
+    <pre><code>web: vendor/bin/heroku-php-nginx -C heroku/nginx.conf public/</code></pre>
 
     <p>Cela suffira à Heroku pour qu'il puisse exécuter notre code.</p>
 
-    <p>Il est possible de personnaliser le vhost nginx ainsi que la configuration de php-fpm, mais c'est juste l'affaire d'un argument spécifiant le fichier utilisé, et nous n'en avons pas besoin pour l'instant.</p>
+    <p>Il est possible de personnaliser également la configuration de php-fpm, ou même de complètement surcharger toute la configuration de nginx, mais c'est juste l'affaire d'un argument spécifiant le fichier utilisé, et nous n'en avons pas besoin pour l'instant.</p>
+
+    <p>Dans le doute, <a href="https://devcenter.heroku.com/articles/custom-php-settings">la documentation sur Heroku</a> vous sera utile pour savoir comment personnaliser vos paramètres.</p>
 
     <h3 id="déployer-le-projet-sur-heroku">Déployer le projet sur Heroku</h3>
 
