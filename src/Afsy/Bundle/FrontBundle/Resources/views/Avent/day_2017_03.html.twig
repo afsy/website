@@ -264,7 +264,6 @@ https://stark-escarpment-87840.herokuapp.com/ | https://git.heroku.com/stark-esc
     <p>Nous allons installer le buildpack PHP pour être sûrs de pouvoir automatiser tout ce dont nous avons besoin :</p>
 
     <pre><code class="language-sh">$ heroku buildpacks:set heroku/php
-$ heroku buildpacks:set heroku/php
 Buildpack set. Next release on stark-escarpment-87840 will use heroku/php.
 Run git push heroku master to create a new release using this buildpack.</code></pre>
 
@@ -314,7 +313,7 @@ Run git push heroku master to create a new release using this buildpack.</code><
 
     <p>Comme toute application web, nous avons besoin d'un serveur web : ça tombe bien, le buildpack PHP nous permet d'utiliser Apache ou Nginx directement !</p>
 
-    <p>Vous pouvez créer un fichier <code>heroku/nginx_host.conf</code> et y mettre ceci :</p>
+    <p>Vous pouvez créer un fichier <code>heroku/nginx.conf</code> et y mettre ceci :</p>
 
     <pre><code>
 # Try to serve file directly, fallback to rewrite.
