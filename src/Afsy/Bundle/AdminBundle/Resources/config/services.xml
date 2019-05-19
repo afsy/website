@@ -8,9 +8,8 @@
 
         <service id="afsy.tag.tag_manager" class="Afsy\Bundle\AdminBundle\Tag\TagManager">
            <argument type="service" id="doctrine.orm.entity_manager" />
-           <argument>%fpn_tag.entity.tag.class%</argument>
-           <argument>%fpn_tag.entity.tagging.class%</argument>
-           <argument type="service" id="fpn_tag.slugifier" />
+           <argument>Afsy\Bundle\CoreBundle\Entity\Tag</argument>
+           <argument>Afsy\Bundle\CoreBundle\Entity\Tagging</argument>
         </service>
 
         <service id="sonata.admin.article" class="Afsy\Bundle\AdminBundle\Admin\ArticleAdmin">

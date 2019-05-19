@@ -21,7 +21,6 @@
         "sensio/distribution-bundle": "^5.0.19",
         "sensio/framework-extra-bundle": "^3.0.2",
         "stof/doctrine-extensions-bundle": "dev-master",
-        "fpn/tag-bundle": "dev-master",
         "fpn/doctrine-extensions-taggable": "v0.9.0",
 
         "doctrine/doctrine-migrations-bundle": "^1.2",

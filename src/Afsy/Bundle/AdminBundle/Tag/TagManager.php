@@ -2,11 +2,28 @@
 
 namespace Afsy\Bundle\AdminBundle\Tag;
 
+use Doctrine\Common\Util\Inflector;
+use Doctrine\ORM\EntityManager;
 use Gedmo\Sluggable\Util\Urlizer;
-use FPN\TagBundle\Entity\TagManager as BaseTagManager;
+use DoctrineExtensions\Taggable\TagManager as BaseTagManager;
 
 class TagManager extends BaseTagManager
 {
+    public function __construct(EntityManager $em, $tagClass = null, $taggingClass = null)
+    {
+        parent::__construct($em, $tagClass, $taggingClass);
+    }
+
+    /**
+     * @see DoctrineExtensions\Taggable\TagManager::createTag()
+     */
+    protected function createTag($name)
+    {
+        $tag = parent::createTag($name);
+        $tag->setSlug($this->slugify($name));
+        return $tag;
+    }
+
     public function loadOrCreateTags(array $names)
     {
         $slugs = array();
@@ -46,5 +63,10 @@ class TagManager extends BaseTagManager
         }
 
         return $tags;
+    }
+
+    private function slugify($text)
+    {
+        return str_replace('_', '-', Inflector::tableize($text));
     }
 }

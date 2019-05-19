@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4e54599a9900b8826b0800e94a4f2766",
+    "content-hash": "2f358eade11845e760c39d2c0e3bc492",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -1174,12 +1174,12 @@
             "version": "v2.5.10",
             "source": {
                 "type": "git",
-                "url": "https://github.com/doctrine/doctrine2.git",
+                "url": "https://github.com/doctrine/orm.git",
                 "reference": "c78afd51721804f4f76ff30d9b6f6159eb046161"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/c78afd51721804f4f76ff30d9b6f6159eb046161",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/c78afd51721804f4f76ff30d9b6f6159eb046161",
                 "reference": "c78afd51721804f4f76ff30d9b6f6159eb046161",
                 "shasum": ""
             },
@@ -1338,48 +1338,6 @@
                 "tag"
             ],
             "time": "2012-09-20T19:58:42+00:00"
-        },
-        {
-            "name": "fpn/tag-bundle",
-            "version": "dev-master",
-            "target-dir": "FPN/TagBundle",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/FabienPennequin/FPNTagBundle.git",
-                "reference": "2cc70ca1405abec9410352ab7243c809432ceff5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/FabienPennequin/FPNTagBundle/zipball/2cc70ca1405abec9410352ab7243c809432ceff5",
-                "reference": "2cc70ca1405abec9410352ab7243c809432ceff5",
-                "shasum": ""
-            },
-            "require": {
-                "fpn/doctrine-extensions-taggable": "v0.9.0",
-                "symfony/framework-bundle": ">=2.0"
-            },
-            "type": "symfony-bundle",
-            "autoload": {
-                "psr-0": {
-                    "FPN\\TagBundle": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Pennequin",
-                    "email": "fabien@pennequin.me"
-                }
-            ],
-            "description": "FPN Tag Bundle",
-            "keywords": [
-                "tag",
-                "tagging"
-            ],
-            "time": "2014-05-07 06:49:53"
         },
         {
             "name": "gedmo/doctrine-extensions",
@@ -1794,7 +1752,7 @@
                 "yandex",
                 "youtube"
             ],
-            "time": "2017-08-27 08:33:01"
+            "time": "2017-08-27T08:33:01+00:00"
         },
         {
             "name": "incenteev/composer-parameter-handler",
@@ -4033,7 +3991,7 @@
                 "translatable",
                 "tree"
             ],
-            "time": "2017-01-13 18:32:32"
+            "time": "2017-01-13T18:32:32+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -4157,6 +4115,7 @@
                 "compression",
                 "minification"
             ],
+            "abandoned": "symfony/webpack-encore-pack",
             "time": "2017-07-14T07:26:46+00:00"
         },
         {
@@ -5056,7 +5015,6 @@
     "stability-flags": {
         "twig/extensions": 20,
         "stof/doctrine-extensions-bundle": 20,
-        "fpn/tag-bundle": 20,
         "hwi/oauth-bundle": 20
     },
     "prefer-stable": false,

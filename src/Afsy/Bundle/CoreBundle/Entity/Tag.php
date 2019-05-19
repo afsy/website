@@ -2,12 +2,10 @@
 
 namespace Afsy\Bundle\CoreBundle\Entity;
 
-use FPN\TagBundle\Entity\Tag as BaseTag;
+use DoctrineExtensions\Taggable\Entity\Tag as BaseTag;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Afsy\Bundle\CoreBundle\Entity\Tag
- *
  * @ORM\Table()
  * @ORM\Entity(repositoryClass="Afsy\Bundle\CoreBundle\Entity\TagRepository")
  */
@@ -26,4 +24,31 @@ class Tag extends BaseTag
      * @ORM\OneToMany(targetEntity="Tagging", mappedBy="tag", fetch="EAGER")
      **/
     protected $tagging;
+
+    protected $slug;
+
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * Returns tag slug
+     *
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * Sets tag slug
+     *
+     * @return string
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+    }
 }

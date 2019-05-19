@@ -19,7 +19,6 @@ class AppKernel extends Kernel
 
             # various stuff
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
-            new FPN\TagBundle\FPNTagBundle(),
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
             new Knp\Bundle\PaginatorBundle\KnpPaginatorBundle(),
 

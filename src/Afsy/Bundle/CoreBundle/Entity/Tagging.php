@@ -2,7 +2,7 @@
 
 namespace Afsy\Bundle\CoreBundle\Entity;
 
-use \FPN\TagBundle\Entity\Tagging as BaseTagging;
+use DoctrineExtensions\Taggable\Entity\Tagging as BaseTagging;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
