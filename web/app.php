@@ -1,11 +1,12 @@
 <?php
 
+use Afsy\Kernel;
 use Symfony\Component\HttpFoundation\Request;
 
 /** @var \Composer\Autoload\ClassLoader $loader */
-$loader = require __DIR__.'/../app/autoload.php';
+$loader = require __DIR__.'/../vendor/autoload.php';
 
-$kernel = new AppKernel('prod', false);
+$kernel = new Kernel('prod', false);
 $kernel->loadClassCache();
 //$kernel = new AppCache($kernel);
 

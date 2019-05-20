@@ -1,0 +1,122 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: security.yml }
+    - { resource: services.yml }
+
+framework:
+    #esi:             ~
+    translator:      { fallback: "%locale%" }
+    secret:          "%secret%"
+    router:
+        resource: "%kernel.project_dir%/config/routing.yml"
+        strict_requirements: "%kernel.debug%"
+    form:            true
+    csrf_protection: true
+    validation:      { enable_annotations: true }
+    templating:
+        engines: ['twig']
+    assets:
+        version: 3
+    default_locale:  "%locale%"
+    trusted_hosts: ['^(.+\.)?afsy.fr$']
+    session:
+        # http://symfony.com/doc/current/reference/configuration/framework.html#handler-id
+        handler_id:  session.handler.native_file
+        save_path:   "%kernel.project_dir%/var/sessions/%kernel.environment%"
+
+# Twig Configuration
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+
+# Assetic Configuration
+assetic:
+    debug:          "%kernel.debug%"
+    use_controller: false
+    #java: /usr/bin/java
+    filters:
+        yui_js:
+            jar: "%kernel.project_dir%/bin/yuicompressor-2.4.7.jar"
+        cssrewrite: ~
+        yui_css:
+            jar: "%kernel.project_dir%/bin/yuicompressor-2.4.7.jar"
+        #closure:
+        #    jar: "%kernel.project_dir%/Resources/java/compiler.jar"
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        driver:   "%database_driver%"
+        host:     "%database_host%"
+        port:     "%database_port%"
+        dbname:   "%database_name%"
+        user:     "%database_user%"
+        password: "%database_password%"
+        charset:  UTF8
+
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        auto_mapping: true
+        mappings:
+            Afsy:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'Afsy\Entity'
+                alias: App
+
+# Swiftmailer Configuration
+swiftmailer:
+    transport: "%mailer_transport%"
+    host:      "%mailer_host%"
+    username:  "%mailer_user%"
+    password:  "%mailer_password%"
+    spool:     { type: memory }
+
+services:
+    twig.extension.intl:
+       class: Twig_Extensions_Extension_Intl
+       tags:
+           - { name: twig.extension }
+    afsy.extension.extract:
+        class: Afsy\Twig\AfsyExtractExtension
+        tags:
+            - { name: twig.extension }
+    tag_manager:
+        class: Afsy\Tag\TagManager
+        arguments: ['Afsy\Entity\Tag']
+
+stof_doctrine_extensions:
+    orm:
+        default:
+            sluggable: true
+            tree: true
+            loggable: true
+
+hwi_oauth:
+    # name of the firewall in which this bundle is active, this setting MUST be set
+    firewall_names: [secured_area]
+    #http_client:
+    #    verify_peer:   false
+    resource_owners:
+        sensio_connect:
+            type:                sensio_connect
+            client_id:           "%sensio_connect.client_id%"
+            client_secret:       "%sensio_connect.client_secret%"
+            scope:               "SCOPE_EMAIL SCOPE_LOCATION SCOPE_PUBLIC"
+            user_response_class: 'Afsy\Bundle\AdminBundle\OAuth\Response\SensioConnectUserResponse'
+
+knp_paginator:
+    page_range: 5                      # default page range used in pagination control
+    template:
+        pagination: Blog/sliding.html.twig     # sliding pagination controls template
+
+sonata_block:
+    default_contexts: [cms]
+    blocks:
+        sonata.admin.block.admin_list:
+            contexts:   [admin]
+
+        sonata.block.service.text:
+        sonata.block.service.action:
+        sonata.block.service.rss:

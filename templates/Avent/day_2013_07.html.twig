@@ -1,0 +1,580 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 07 - Symfony et les frameworks JavaScript MVC" %}
+
+{% block article_content %}
+<h1>Symfony et les frameworks JavaScript MVC</h1>
+
+<p>
+    Tout fidèle lecteur se précipite sur son ordinateur dès potron-minet pour
+    découvrir l'article qui se cache derrière la case du jour, et dont il
+    interrompra le déroulé prévu du speaker pour lui poser toutes les questions
+    qui lui passent par la tête.
+</p>
+
+<p>
+    Aujourd'hui, pour compléter l'article de la veille de Xavier sur les API
+    REST, je vous propose de parler un peu de l'intégration d'un MVC côté client
+    sur un site à base de Symfony2.
+</p>
+
+<h2>L'intégration de mes WC ?!?</h2>
+
+<p>
+    <abbr title="Model View Controller" lang="en">MVC</abbr> ! Ce qui signifie
+    <strong>Model / View / Controller</strong>. Symfony2, comme bien d'autres
+    frameworks, s'appuie sur ce principe. Mais en quoi consiste-t-il ? L'idée
+    principale est de séparer le modèle de données, qui contient entre autres
+    les règles métiers, du rendu final (Interface Utilisateur, format XMl ou
+    JSON, ...), avec une couche intermédiaire de contrôle, qui, en fonction des
+    données d'entrées, appelle le Modèle et la Vue correspondante.
+</p>
+
+<p>Avec Symfony2, on a par exemple :</p>
+
+<ul>
+    <li>
+        <strong>Model</strong> : géré par <strong>Doctrine</strong> pour l'accès
+        à la base de données.
+    </li>
+    <li>
+        <strong>View</strong> : <strong>Twig</strong> pour du rendu HTML, mais
+        aussi des <strong>sérialiseurs</strong> pour les APIs JSON et XML.
+    </li>
+    <li>
+        <strong>Controller</strong> : Contrôleur de Symfony2.
+    </li>
+</ul>
+
+<h2>Symfony2 est déjà MVC, que m'apporte un MVC côté client ?</h2>
+
+<p>
+    N'avez-vous jamais été étonné de la rapidité des changements de page sur
+    Facebook lorsqu'on ouvre une photo, ou bien des temps de chargement sur
+    Twitter ou Github ? C'est parce qu'ils utilisent un MVC côté client que
+    l'expérience utilisateur est aussi agréable (d'un point de vue technique,
+    après du point de vue fonctionnel, c'est un autre troll...).
+</p>
+
+<p>
+    En déportant les couches MVC du côté client, on obtient donc une API comme
+    <em>Modèle</em> (la plupart du temps une API REST), un <em>Contrôleur</em>
+    et une <em>Vue</em> écrits en JS (par simplicité je n'aborderai pas
+    Dart).
+</p>
+
+<p>
+    Ainsi, une fois la première page chargée, les transferts avec le serveur
+    sont moins coûteux (quelques kilo-octets de données JSON, contre quelques
+    centaines pour une page html générée côté serveur). Le 56k étant presque
+    révolu, ce n'est pas ici que nous gagnons le plus. En effet, on ne
+    rafraîchit que la partie désirée de la page, et on évite ainsi d'avoir à
+    recharger toute la page (événements Javascript, librairies JS, ...).
+</p>
+
+<p>Et là, on gagne beaucoup !</p>
+
+<p>
+    De plus, il a pu être aisé de précharger les ressources suivantes, et là on
+    frôle l'instantané !
+</p>
+
+<h2>Ça a l'air cool, mais je fais déjà de l'Ajax sur mon site !</h2>
+
+<p>
+    Quand on parle d'Ajax, en général, c'est avec un impact limité. Par exemple,
+    changement dans la pagination d'une liste, affichage du contenu d'une
+    pop-in.
+</p>
+
+<p>
+    Un framework MVC côté client permet de généraliser cette pratique sur toutes
+    les parties et toutes les pages du site. A un point que plus aucun lien ne
+    déclenchera l'appel des pages vers lesquels ils pointent. Par ailleurs,
+    comme tous les frameworks, il simplifie le développement. En l'occurrence
+    tout le processus de mise à jour de la page et le routage sont gérés par le
+    framework.
+</p>
+
+<h2>Mais si je mets tout en JS, pourquoi conserver Symfony2 ?</h2>
+
+<p>
+    Comme dit plus haut le <em>Modèle</em> côté Javascript est très souvent
+    couplé à une API REST.
+</p>
+
+<p>Cette API peut donc être écrite en Symfony2.</p>
+
+<h2>Bon Ok. Concrètement, ça donne quoi ?</h2>
+
+<p>
+    Vous pouvez choisir votre framework à partir du projet
+    <a href="https://github.com/tastejs/todomvc/tree/gh-pages/architecture-examples">TodoMVC</a>.
+</p>
+
+<p>
+    Prenons l'exemple de <a href="http://todomvc.com/architecture-examples/backbone/">Backbone</a>.
+</p>
+
+<p>
+    Comme il s'agit d'un exemple, il n'y a pas d'enregistrement côté serveur,
+    mais en <code>LocalStorage</code>. Ceci dit, il y a déjà plusieurs
+    interactions : ajouter un élément, le supprimer, le modifier et le marquer
+    comme terminé. Puis vous pouvez filtrer les actifs ou terminés, ou ne pas
+    filtrer.
+</p>
+
+<h2>
+    Eh mais attends, j'ai fait joujou avec, tu parlais de routage, et il n'y a
+    que le hash qui change ?
+</h2>
+
+<p>
+    Alors oui, il n'y a que le hash qui change, mais dans cet exemple !
+    Maintenant que nous avons un exemple fonctionnel, on va l'améliorer pour en
+    faire une application Symfony2 afin de comprendre les interactions.
+</p>
+
+<p>D'abord, récupérons un projet Symfony2 et TodoMVC :</p>
+
+<pre class="shell"><code>$ composer create-project symfony/framework-standard-edition
+$ git clone https://github.com/tastejs/todomvc.git
+$ cp -r todomvc/architecture-examples/backbone/* framework-standard-edition/web
+$ mkdir framework-standard-edition/src/Acme/DemoBundle/Resources/views/Todo
+$ mv framework-standard-edition/web/index.html framework-standard-edition/src/Acme/DemoBundle/Resources/views/Todo/index.html.twig
+</code></pre>
+
+<p>On crée un <em>TodoController</em> :</p>
+
+<pre class="language-php"><code>// src/Acme/DemoBundle/Controller/TodoController.php
+&lt;?php
+
+namespace Acme\DemoBundle\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
+class TodoController extends Controller
+{
+    public function indexAction()
+    {
+        return $this-&gt;render('AcmeDemoBundle:Todo:index.html.twig');
+    }
+}
+</code></pre>
+
+<p>Puis le routage :</p>
+
+<pre class="language-yaml"><code># src/Acme/DemoBundle/Resources/config/routing.yml;
+index:
+    path:     /
+    defaults: { _controller: AcmeDemoBundle:Todo:index }
+</code></pre>
+
+<p>et</p>
+
+<pre class="language-yaml"><code># app/config/routing.yml
+_acme_demo:
+    resource: "@AcmeDemoBundle/Resources/config/routing.yml"
+</code></pre>
+
+<p>
+    Dans la classe <em>AppKernel.php</em>, activez le bundle
+    <code>AcmeDemoBundle</code> :
+</p>
+
+<pre class="language-php"><code>&lt;?php
+
+use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Config\Loader\LoaderInterface;
+
+class AppKernel extends Kernel
+{
+    public function registerBundles()
+    {
+        $bundles = array(
+            new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            new Symfony\Bundle\SecurityBundle\SecurityBundle(),
+            new Symfony\Bundle\TwigBundle\TwigBundle(),
+            new Symfony\Bundle\MonologBundle\MonologBundle(),
+            new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
+            new Symfony\Bundle\AsseticBundle\AsseticBundle(),
+            new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
+            new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
+            new Yucca\PrerenderBundle\YuccaPrerenderBundle(),
+            new Acme\DemoBundle\AcmeDemoBundle(),
+        );
+
+        if (in_array($this-&gt;getEnvironment(), array('dev', 'test'))) {
+            $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
+            $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
+            $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
+        }
+
+        return $bundles;
+    }
+}
+</code></pre>
+
+<p>
+    Maintenant, nous devons avoir une liste de tâche fonctionnelle. Allez sur
+    votre site :
+</p>
+
+<p>
+    <img src="{{ asset('bundles/afsyfront/images/avent/07-backbone-todo.png') }}" alt="Backbone todo" />
+</p>
+
+<p>La liste vous semble un peu vide ? Remplissons là par défaut :</p>
+
+<pre class="js"><code>// web/js/collections/todos.js
+//....
+(function(){
+// Create our global collection of **Todos**.
+app.todos = new Todos();
+app.todos.fetch();
+
+if (0 === app.todos.length) {
+  var t1 = {
+      title: 'Créer la section calendrier de l\'avent sur le site de l\'AFSY',
+      order: app.todos.nextOrder(),
+      completed: true
+  };
+  app.todos.create(t1);
+
+  var t2 = {
+      title: 'Faire un appel à candidature',
+      order: app.todos.nextOrder(),
+      completed: true
+  };
+  app.todos.create(t2);
+
+  var t3 = {
+      title: 'Rédiger un article sur Prerender.io',
+      order: app.todos.nextOrder(),
+      completed: false
+  };
+  app.todos.create(t3);
+}
+})();
+</code></pre>
+
+<p>
+    Ce fichier contient la collection des tâches. Ainsi dès que l'application
+    sera exécutée, si la liste des tâches est vide, on en crée trois par
+    défaut.
+</p>
+
+<p>
+    Maintenant, en jouant avec les filtres, en complétant des tâches ou en les
+    supprimant, vous pouvez voir la rapidité d'exécution d'un MVC côté client
+    versus côté serveur.
+</p>
+
+<h2>
+    Euh ok, mais vu que c'est généré côté client, ils en disent quoi les
+    robots ?
+</h2>
+
+<p>
+    Ahh bah voilà ! On y est. Pour un intranet ou un extranet, pas de souci de
+    référencement. Mais quand on est en front office, la question du
+    référencement s'impose.
+</p>
+
+<p>
+    Quand on regarde la source de la page, elle reste désespérément vide de
+    tâches à réaliser. Et bien voici notre première tâche : faire que le HTML
+    rendu aux robots corresponde à ce que voit un humain.
+</p>
+
+<p>
+    Pour exécuter du javascript côté serveur, il n'y a pas 36 solutions. Nous
+    allons utiliser NodeJS, couplé à PhantomJS. Le projet
+    <a href="http://prerender.io">Prerender.io</a> s'occupe de tout pour
+    nous.
+</p>
+
+<p>Déployons donc Prerender :</p>
+
+<pre class="shell"><code>$ git clone https://github.com/collectiveip/prerender.git
+$ cd prerender
+$ npm install
+$ node index.js
+</code></pre>
+
+<p>
+    Et hop, nous avons un serveur local qui écoute sur le port
+    <code>3000</code>. On va s'en assurer en regardant la page à l'adresse
+    <code>http://localhost:3000/</code>.
+</p>
+
+<p>
+    Pour voir le retour de Prerender, il suffit de compléter avec l'adresse à
+    afficher (et non, il n'y a pas de faute de frappe) :
+    <code>http://localhost:3000/http://essai-backbone/</code>.
+</p>
+
+<p>
+    Ok, ce n'est pas très joli sans le CSS, mais on a bien nos tâches
+    d'inscrites. Mais ça on l'avait déjà avant. L'essentiel est dans - Lactel -
+    la source de la page : on a effectivement nos tâches dedans.
+</p>
+
+<h2>C'est top, merci, je vais pouvoir lancer mon application !</h2>
+
+<p>Pas si vite !</p>
+
+<p>
+    Oui dans les sources on a bien nos tâches, mais on n'a plus de balises
+    <code>&lt;script&gt;</code>. En effet, il n'est pas souhaitable que du JS
+    soit exécuté par le crawler des moteurs de recherche. Car c'est en partie
+    pour eux qu'on a préparé cela, ne l'oublions pas. En conséquence il faut
+    servir une page différente aux moteurs de recherche et aux utilisateurs.
+</p>
+
+<h2>Du cloaking ? Mais Google va se fâcher tout rouge !</h2>
+
+<p>
+    Ou pas ! Google connait ces problématiques et est à l'origine d'une
+    <a href="https://developers.google.com/webmasters/ajax-crawling/docs/getting-started">proposition de crawling pour les pages chargées en Ajax</a>.
+</p>
+
+<p>
+    Les routes <code>#/active</code> et <code>#/completed</code> doivent être
+    transformées respectivement en <code>#!/active</code> et
+    <code>#!/completed</code>. Ce point d'exclamation indique aux moteurs de
+    recherche (en tout cas, à ceux qui supportent cette proposition) que ce qui
+    suit est une route crawlable de notre application. Du coup, ils
+    réinterprètent l'url et n'appellent pas la même page.
+    <a href="http://essai-backbone/#!/completed">http://essai-backbone/#!/completed</a>
+    est transformée en
+    <a href="http://essai-backbone/?&#95;escaped&#95;fragment&#95;=/completed">http://essai-backbone/?&#95;escaped&#95;fragment&#95;=/completed</a>
+</p>
+
+<h2>
+    Ca me semble compliqué de mettre le routage dans un paramètre GET et tout ce
+    que cela implique.
+</h2>
+
+<p>
+    Ce n'est en fait qu'un détail d'implémentation. En effet, en Symfony2, le
+    routage est enregistré dans la variable globale
+    <code>$_SERVER['PATH_INFO']</code>. Il y a donc peu de différence entre le
+    routage Symfony et le routage pour les robots placé dans la variable
+    <code>$_GET['escaped_fragment']</code>.
+</p>
+<p>
+    Il faut juste savoir que deux routes peuvent coexister : celle en Symfony2
+    qui est la route « par défaut » et qui n'aura pour but final que de rendre
+    une page chargeant du JS, et celle à demander à Prerender dans certains
+    cas : et c'est là que votre serviteur intervient.
+</p>
+<p>
+    Ce sujet m'a intéressé parce que j'ai justement été confronté à ces
+    problèmes, et que malgré toute la littérature existante, ni Voltaire ni
+    Montesquieu ne m'ont apporté de réponse ou de guide clair sur la marche à
+    suivre. Prerender s'occupant du rendu, il nous faut faire le lien entre
+    l'application Symfony2 et Prerender au moins dans les cas suivants :
+</p>
+
+<ul>
+    <li>Moteurs de recherche utilisant <code>_escaped_fragment_</code></li>
+    <li>
+        Robots quelconque identifié par sa signature
+        (en-tête <code>User-Agent</code>)
+    </li>
+    <li>Pour des urls autorisées (« white-list »)</li>
+    <li>Et pourquoi pas tout le temps sauf pour une liste noire ?</li>
+</ul>
+
+<p>
+    Le tout en évitant certaines extensions. En effet, on n'aura pas de
+    javascript à exécuter dans un fichier CSS (oui ça a existé dans IE, mais
+    bon)...
+</p>
+
+<p>Il faut ajouter le bundle :</p>
+
+<pre class="shell"><code>$ php composer.phar require "yucca/prerender-bundle" "0.1.*@dev"
+</code></pre>
+
+<p>Puis enregistrer le bundle dans l'application :</p>
+
+<pre class="language-php"><code>// app/AppKernel.php
+public function registerBundles()
+{
+    return array(
+        // ...
+        new Yucca\PrerenderBundle\YuccaPrerenderBundle(),
+    );
+}
+</code></pre>
+
+<p>Et enfin modifier la configuration :</p>
+
+<pre class="language-yaml"><code>#app/config/config.yml
+yucca_prerender:
+    backend_url: http://localhost:3000
+</code></pre>
+
+<p>
+    <em>Ne pas oublier de vider le cache :)</em>
+</p>
+
+<p>
+    Du coup, plaçons nous en tant que Google (en tant que robot, pas en tant que
+    société multimilliardaire, même si vous aimeriez) et voyons ce qu'il se
+    passe si on tente d'appeler <code>http://essai-backbone/#!/completed</code>.
+</p>
+<p>
+    Le robot, en voyant cela, va retenir la jolie URL avec le hashbang. Mais son
+    contenu va être récupéré en appelant
+    <code>http://essai-backbone/?&#95;escaped&#95;fragment&#95;=/completed</code>.
+</p>
+
+<p>
+    Regardons la source de cette adresse : on y voit clairement les tâches, le
+    Middleware a donc fait son travail. Cependant on remarque que la tâche
+    « Rédiger un article sur Prerender.io » est présente, alors que non
+    terminée.
+</p>
+
+<p>
+    En regardant la sortie console de Prerender, on comprend que l'url
+    <code>http://essai-backbone/?&#95;escaped&#95;fragment&#95;=/completed</code>
+    a été retransformée en <code>http://essai-backbone/#!/completed</code> qui
+    peut être gérée par Backbone côté serveur. Enfin pas tout à fait, puisqu'il
+    y a le point d'exclamation (<code>!</code>) qui vient changer la route de
+    base.
+</p>
+
+<pre class="js"><code>//web/js/routers/router.js
+routes: {
+'!\/\*filter': 'setFilter'
+},
+</code></pre>
+
+<p>
+    Après un petit <kbd>Ctrl</kbd> + <kbd>F5</kbd>, vous me sautez au cou et
+    m'étranglez de joie. Non je déconne un simple coup à boire me suffira !
+</p>
+
+<h2>
+    HTML5 propose pushState, je pourrais l'utiliser plutôt que le hashbang ?
+</h2>
+
+<p>
+    Bien sûr ! Backbone le gère très bien. Dans le fichier
+    <code>web/js/routers/router.js</code>, il suffit de remettre l'ancienne
+    route (<code>'*filter': 'setFilter'</code>) et modifier la dernière
+    ligne :
+</p>
+
+<pre class="js"><code>Backbone.history.start({ pushState: true })
+</code></pre>
+
+<p>
+    On peut donc avoir comme url <code>http://essai-backbone/completed</code>.
+</p>
+
+<p>Mais il faut rajouter les nouvelles routes dans Symfony2 :</p>
+
+<pre class="language-yaml"><code># src/Acme/DemoBundle/Resources/config/routing.yml;
+index:
+    path:     /
+    defaults: { _controller: AcmeDemoBundle:Todo:index }
+
+completed:
+    path:     /completed
+    defaults: { _controller: AcmeDemoBundle:Todo:index }
+
+active:
+    pattern:  /active
+    defaults: { _controller: AcmeDemoBundle:Todo:index }
+</code></pre>
+
+<p>
+    On supprime le cache, et on y va. On affiche la source et là, c'est le
+    drame : la liste est vide et Prerender ne reçoit plus d'appel. En effet,
+    nous ne sommes devenus qu'un simple humain demandant une page web. Il faut
+    donc dire aux robots que cette URL n'est pas crawlable à cause d'Ajax. Du
+    coup, il faut inclure une balise méta dans la page :
+</p>
+
+<pre class="html"><code>&lt;!-- src/Acme/DemoBundle/Resources/views/Todo/index.html.twig --&gt;
+&lt;meta name="fragment" content="!"&gt;
+</code></pre>
+
+<p>
+    Une fois cette balise incluse, Google saura que le contenu de cette page
+    doit être récupéré de la même manière que précédemment avec
+    <code>_escaped_fragment_</code>.
+</p>
+
+<p>
+    Mais Facebook lui sera identifié par sa signature (<code>User-Agent</code>)
+    et par défaut Prerender s'occupera du rendu de la page. Faîtes l'essai sur
+    Chrome.
+</p>
+
+<ol>
+    <li>Ouvrez les outils du développeur (<kbd>F12</kbd>),</li>
+    <li>Cliquez sur l'engrenage des réglages en bas à droite,</li>
+    <li>
+        Cliquez « <span lang="en">Overrides</span> » sur le côté gauche du
+        panneau,
+    </li>
+    <li>
+        Cochez « <span lang="en">Enable</span> » et
+        <code>User Agent</code>.
+    </li>
+    <li>Choisissez « <span lang="en">Other...</span> »,</li>
+    <li>Inscrivez <code>facebookexternalhit</code> dans le champ input,</li>
+    <li>
+        Rafraichissez la page tout en gardant les outils du développeur
+        ouverts.
+    </li>
+</ol>
+
+<h2>Ok, donc concrètement, qu'est-ce que je peux faire avec ton Bundle ?</h2>
+
+<p>
+    <code>YuccaPrerenderBundle</code> n'est qu'un middleware entre les robots et
+    Prerender. Comme on l'a vu, il y a quelques façons de le configurer.
+</p>
+
+<p>
+    Et c'est tout. Mais couplé à Prerender, ce bundle vous évite les nuits
+    blanches consacrées au référencement de votre site. Mais attention,
+    aujourd'hui je n'ai pas assez de recul pour connaître le réel impact des MVC
+    JS sur le référencement.
+</p>
+
+<h2>Merci</h2>
+
+<p>De rien !</p>
+
+<p>
+    Ah, et j'oubliais : vous pouvez naturellement
+    <a href="https://github.com/rjanot/YuccaPrerenderBundle">le forker</a> et
+    proposer des <em lang="en">pull requests</em>. J'essaie au maximum de suivre
+    le développement des autres middlewares (node, rail, ZF2 à ce jour). Mais si
+    vous avez l'idée qui fait toute la différence... bienvenue !
+</p>
+{% endblock %}
+
+{% block article_avatar %}
+<img src="{{ asset('bundles/afsyfront/images/avent/remi-janot.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url 'https://github.com/rjanot' %}">{% block article_author 'Rémi Janot' %}</a>
+</h2>
+
+<p>
+    Rémi Janot est Lead Developer Cloud chez <a href="http://www.ysance.com">Ysance</a>.
+</p>
+{% endblock %}

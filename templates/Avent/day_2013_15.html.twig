@@ -1,0 +1,467 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 15 - Étendre Behat pour y mettre son métier" %}
+
+{% block article_content %}
+            <h1>Etendre Behat pour y mettre son métier</h1>
+
+<p>Behat est un outil de BDD qu'on ne présente plus : http://behat.org</p>
+
+<p>Grâce à cet outil et à des extensions telles que <a href="http://mink.behat.org/">Mink</a>, il est possible d'écrire un scénario de test très simple, compréhensible par un humain :</p>
+
+<pre class="no-highlight"><code>Quand je vais sur "/contact"
+Et que je remplis :
+    | Nom     | Alexandre Salomé   |
+    | Sujet   | Prise de contact   |
+    | Message | Message de contact |
+Et je clique sur "Envoyer"
+
+Alors je vois "Votre message a été envoyé"
+</code></pre>
+
+<p>On implémente ensuite ces phrases avec des méthodes PHP, pour exécuter le test :</p>
+
+<pre class="language-php"><code>/**
+ * @When /^je clique sur "(.*)"$/
+ */
+public function iClickOn($text)
+{
+    $button = $this-&gt;browser-&gt;findClickable($text);
+    $button-&gt;click();
+}
+</code></pre>
+
+<p>Autant le concept est assez simple et très efficace, autant le choix de ces phrases n'est pas simple.</p>
+
+<h2>Le choix des phrases</h2>
+
+<p>Bien souvent, en PHP, on développe des sites Web. Et qui dit sites Web dit navigateur Internet.</p>
+
+<p>Behat s'interface avec une librairie appelée <a href="http://mink.behat.org/">Mink</a>, permettant de manipuler un navigateur Web de manière naturelle :</p>
+
+<ul>
+<li>Je vais sur "URL"</li>
+<li>Je remplis le formulaire</li>
+<li>Je clique sur "Texte"</li>
+<li>Je vois "Texte"</li>
+<li>Je ne vois pas "Texte"</li>
+</ul>
+
+<p>Grâce à ces 5 phrases, vous pouvez déjà tester une très grande partie de l'Internet. Par exemple, si vous voulez vérifier que votre site n'affiche pas une page blanche :</p>
+
+<pre class="no-highlight"><code>Quand je vais sur "http://afsy.fr"
+Alors je vois "Symfony"
+</code></pre>
+
+<p>Et si vous voulez faire un test pour vérifier que votre site apparaît bien les dix premiers résultats de Google :</p>
+
+<pre class="no-highlight"><code>Quand je vais sur "http://google.fr"
+Et que je remplis :
+    | q | Afsy |
+Et je clique sur "Recherche Google"
+Alors je vois "Association Francophone des utilisateurs de Symfony"
+</code></pre>
+
+<p>Lorsqu'on utilise Behat, il est parfois difficile d'arbitrer si une nouvelle phrase doit être créée ou non.</p>
+
+<p>Pour vous donner un ordre d'idée, il est possible de tester une application comme <a href="http://gitonomy.com">Gitonomy</a> (un serveur Git) avec 38 phrases réparties comme ceci :</p>
+
+<ul>
+<li>14 phrases pour le métier</li>
+<li>8 phrases pour la navigation dans l'application</li>
+<li>11 phrases pour le navigateur Web</li>
+<li>5 phrases pour les assertions d'e-mail</li>
+</ul>
+
+<p>La suite de test de Gitonomy a exactement 534 étapes, ce qui veut dire qu'en moyenne, une phrase est utilisée environ 15 fois. Bien sûr ça n'est pas une règle absolue, mais globalement, les méthodes implémentées doivent être réutilisées de nombreuses fois.</p>
+
+<h2>Utiliser plusieurs contextes</h2>
+
+<p>Quand on travaille avec Behat, il est intéressant de séparer en plusieurs classes les phrases de contexte. Dans l'exemple ci-dessus, on voit bien une séparation en 4 domaines différents. Concrètement, dans Gitonomy, ce sont bien 4 classes PHP différentes pour chacun de ces domaines :</p>
+
+<ul>
+<li>Le métier : <code>ApiContext</code> (<a href="https://github.com/gitonomy/gitonomy/blob/master/src/Gitonomy/QA/Context/ApiContext.php">voir le fichier</a>)</li>
+<li>La navigation dans l'application : <code>GitonomyNavigationContext</code> (<a href="https://github.com/gitonomy/gitonomy/blob/master/src/Gitonomy/QA/Context/GitonomyNavigationContext.php">voir le fichier</a>)</li>
+<li>Les e-mails avec Mailcatcher : <code>MailCatcherContext</code> (<a href="https://github.com/alexandresalome/mailcatcher/blob/master/Behat/MailCatcherContext.php">voir le fichier</a>)</li>
+<li>Le navigateur Web avec WebDriver : <code>WebDriverContext</code> (<a href="https://github.com/alexandresalome/php-webdriver/blob/master/src/WebDriver/Behat/WebDriverContext.php">voir le fichier</a>)</li>
+</ul>
+
+<p>Finalement, pour réunir ensemble ces contextes dans un seul contexte :</p>
+
+<pre><code class="language-php"># fichier: features/bootstrap/FeatureContext.php
+
+use Alex\MailCatcher\Behat\MailCatcherContext;
+use Behat\Behat\Context\BehatContext;
+use Gitonomy\QA\Context\ApiContext;
+use Gitonomy\QA\Context\GitonomyNavigationContext;
+use WebDriver\Behat\WebDriverContext;
+
+class FeatureContext extends BehatContext
+{
+    public function __construct(array $parameters)
+    {
+        $this-&gt;useContext('api', new ApiContext());
+        $this-&gt;useContext('gitonomy_navigation', new GitonomyNavigationContext());
+        $this-&gt;useContext('webdriver', new WebDriverContext());
+        $this-&gt;useContext('mailcatcher', new MailCatcherContext());
+    }
+}
+</code></pre>
+
+<p>Chaque contexte est ici nommé, pour être retrouvé ultérieurement. Par exemple, si vous êtes dans le contexte <code>ApiContext</code> et que vous souhaitez accéder à <code>WebDriverContext</code>, vous pouvez faire :</p>
+
+<pre class="language-php"><code>class ApiContext extends BehatContext
+{
+    private function doSomething()
+    {
+        $otherContext = $this-&gt;getMainContext()-&gt;getSubContext('webdriver');
+
+        // la méthode ci-dessous est définie dans WebDriverContext
+        $otherContext-&gt;iClickOn('someText');
+    }
+}
+</code></pre>
+
+<p>Cette astuce vous permettra d'appeler des méthodes déjà implémentée dans d'autres contextes sans dupliquer le code.</p>
+
+<h2>Créer une extension</h2>
+
+<p>Lorsqu'on souhaite sortir des cas d'école avec Behat, on a rapidement besoin d'injecter ses dépendances dans le contexte. Par exemple, si on souhaite accéder à un fichier <code>fixtures.yml</code> situé à la racine du projet, il faut injecter le chemin complet vers le fichier dans le contexte.</p>
+
+<h3>Contextes et dépendances</h3>
+
+<p>Behat dispose en interne d'un conteneur de services. Malheureusement, les contextes de notre application ne sont pas des services du conteneur. La méthode utilisée pour injecter les dépendances dans nos contextes est celle des <em>Initializers</em> : ce sont des services qui vont pouvoir itérer sur tous les contexte. L'interface d'un <em>Initializer</em> est la suivante :</p>
+
+<pre class="language-php"><code>namespace Behat\Behat\Context\Initializer;
+
+interface InitializerInterface
+{
+    /**
+     * Checks if initializer supports provided context.
+     *
+     * @return Boolean
+     */
+    public function supports(ContextInterface $context);
+
+    /**
+     * Initializes provided context.
+     */
+    public function initialize(ContextInterface $context);
+}
+</code></pre>
+
+<p>Pour pouvoir injecter nos dépendances dans nos contextes, nous allons tout d'abord modifier notre classe de contexte pour pouvoir y injecter notre valeur :</p>
+
+<pre class="language-php"><code>class FeatureContext extends BehatContext
+{
+    private $fixturesPath;
+
+    public function setFixturesPath($fixturesPath)
+    {
+        $this-&gt;fixturesPath = $fixturesPath;
+    }
+}
+</code></pre>
+
+<p>Il ne reste plus qu'à faire en sorte que cette méthode soit appelée avec la bonne valeur. Pour cela, on crée l'<em>Initializer</em> associé :</p>
+
+<pre class="language-php"><code>namespace Acme\Behat\AcmeExtension\Context;
+
+use Behat\Behat\Context\Initializer\InitializerInterface;
+use Behat\Behat\Context\ContextInterface;
+
+class FixturesInitializer implements InitializerInterface
+{
+    private $fixturesPath;
+
+    public function __construct($fixturesPath)
+    {
+        $this-&gt;fixturesPath = $fixturesPath;
+    }
+
+    public function supports(ContextInterface $context)
+    {
+        return $context instanceof \FeatureContext;
+    }
+
+    public function initialize(ContextInterface $context)
+    {
+        $context-&gt;setFixturesPath($this-&gt;fixturesPath);
+    }
+}
+</code></pre>
+
+<p>Il ne nous reste plus qu'à le déclarer auprès de Behat. Pour cela, la création d'une extension est obligatoire.</p>
+
+<h3>Créer une extension</h3>
+
+<p>Pour pouvoir utiliser le conteneur de services, on crée une extension. Cette extension prend la forme d'une classe PHP, qu'on définit comme ceci :</p>
+
+<pre class="language-php"><code># src/Acme/Behat/AcmeExtension/Extension.php
+namespace Acme\Behat\AcmeExtension;
+
+use Behat\Behat\Extension\Extension as BaseExtension;
+
+class Extension extends BaseExtension
+{
+    function load(array $config, ContainerBuilder $container)
+    {
+        $container-&gt;setParameter('acme.fixtures_path', $config['fixtures']);
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/config'));
+        $loader-&gt;load('services.xml');
+    }
+
+    function getConfig(ArrayNodeDefinition $builder)
+    {
+        $builder
+            -&gt;children()
+                -&gt;scalarNode('fixtures')-&gt;isRequired()-&gt;end()
+            -&gt;end()
+        ;
+    }
+}
+</code></pre>
+
+<p>Dans un dossier <code>config</code>, situé avec le fichier <code>Extension.php</code>, on crée un fichier <code>services.xml</code> définissant un service :</p>
+
+<pre><code class="language-xml">&lt;!-- src/Acme/Behat/AcmeExtension/config/services.xml --&gt;
+&lt;?xml version="1.0" ?&gt;
+&lt;container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"&gt;
+
+    &lt;services&gt;
+
+        &lt;service id="fixtures_initializer" class="Acme\Behat\AcmeExtension\Context\FixturesInitializer"&gt;
+            &lt;argument&gt;%acme.fixtures_path%&lt;/argument&gt;
+            &lt;tag name="behat.context.initializer" /&gt;
+        &lt;/service&gt;
+    &lt;/services&gt;
+&lt;/container&gt;
+</code></pre>
+
+<p>Il ne nous reste plus qu'à l'activer dans <code>behat.yml</code> :</p>
+
+<pre class="language-yaml"><code>default:
+    extensions:
+        Acme\Behat\AcmeExtension\Extension:
+            fixtures: fixtures.yml
+</code></pre>
+
+<h2>Cas pratiques</h2>
+
+<p>Maintenant que nous avons vu les principes d'extension de Behat, mettons le en pratique !</p>
+
+<h3>Accéder à son application Symfony</h3>
+
+<p>Dans cet exercice, nous souhaitons accéder à Doctrine, à Twig et à tous les autres services présents dans notre conteneur de service.</p>
+
+<p><strong>Étape n°1 : Créer le service KernelProxy</strong></p>
+
+<p>Nous créons dans un premier temps un service permettant d'accéder à notre application Symfony :</p>
+
+<pre class="language-php"><code>namespace Acme\Behat\KernelExtension;
+
+class KernelProxy
+{
+    protected $appDir;
+    protected $env;
+    protected $debug;
+
+    public function __construct($appDir, $env = 'prod', $debug = true)
+    {
+        $this-&gt;appDir = $appDir;
+        $this-&gt;env    = $env;
+        $this-&gt;debug  = $debug;
+    }
+
+    public function run(\Closure $callback)
+    {
+        require_once $this-&gt;appDir.'/AppKernel.php';
+
+        $exception = null;
+        $app = new \AppKernel($this-&gt;env, $this-&gt;debug);
+        $app-&gt;boot();
+        try {
+            $result = $callback($app-&gt;getContainer());
+        } catch (\Exception $e) {
+            $exception = $e;
+        }
+
+        $app-&gt;shutdown();
+
+        if ($exception) {
+            throw $exception;
+        }
+
+        return $result;
+    }
+}
+</code></pre>
+
+<p><strong>Étape n°2 : Injecter le KernelProxy dans nos contextes</strong></p>
+
+<p>On crée ensuite une interface pour les classes de contexte souhaitant accéder au proxy : <code>KernelProxyAwareInterface</code> :</p>
+
+<pre class="language-php"><code>namespace Acme\Behat\KernelExtension;
+
+interface KernelProxyAwareInterface
+{
+    public function setKernelProxy(KernelProxy $kernelProxy);
+}
+</code></pre>
+
+<p>Dans notre classe de contexte, on implémente cette interface :</p>
+
+<pre class="language-php"><code>use Acme\Behat\KernelExtension\KernelAwareInterface;
+use Behat\Behat\Context\BehatContext;
+
+class FeatureContext extends BehatContext implements KernelAwareInterface
+{
+    private $kernelProxy;
+
+    public function setKernelProxy(KernelProxyInterface $kernelProxy)
+    {
+        $this-&gt;kernelProxy = $kernelProxy;
+    }
+
+    /**
+     * @Given /^user "(.*)" does not exist$/
+     */
+    public function userDoesNotExist($username)
+    {
+        $this-&gt;kernelProxy-&gt;run(function ($container) use ($username) {
+            $em = $container-&gt;get('doctrine')-&gt;getManager();
+            $user = $em-&gt;find('User', $username);
+            if ($user) {
+                $em-&gt;remove($user);
+                $em-&gt;flush();
+            }
+        })
+    }
+}
+</code></pre>
+
+<p>Maintenant, on crée le fichier de service pour déclarer le <em>KernelProxy</em> comme service :</p>
+
+<pre><code class="language-xml">&lt;!-- src/Acme/Behat/KernelExtension/config/services.xml --&gt;
+&lt;?xml version="1.0" ?&gt;
+&lt;container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"&gt;
+
+    &lt;services&gt;
+
+        &lt;service id="acme.kernel_proxy" class="Acme\Behat\KernelExtension\KernelProxy"&gt;
+            &lt;argument&gt;%acme.app_dir%&lt;/argument&gt;
+        &lt;/service&gt;
+
+        &lt;service id="acme.kernel_proxy_initializer" class="Acme\Behat\KernelExtension\Context\KernelProxyInitializer"&gt;
+            &lt;argument type="service" id="acme.kernel_proxy" /&gt;
+            &lt;tag name="behat.context.initializer" /&gt;
+        &lt;/service&gt;
+    &lt;/services&gt;
+&lt;/container&gt;
+</code></pre>
+
+<p>On crée notre extension Behat :</p>
+
+<pre class="language-php"><code># src/Acme/Behat/KernelExtension/Extension.php
+namespace Acme\Behat\KernelExtension;
+
+use Behat\Behat\Extension\Extension as BaseExtension;
+
+class Extension extends BaseExtension
+{
+    function load(array $config, ContainerBuilder $container)
+    {
+        $container-&gt;setParameter('acme.app_dir', $config['app_dir']);
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/config'));
+        $loader-&gt;load('services.xml');
+    }
+
+    function getConfig(ArrayNodeDefinition $builder)
+    {
+        $builder
+            -&gt;children()
+                -&gt;scalarNode('app_dir')-&gt;defaultValue('app')-&gt;end()
+            -&gt;end()
+        ;
+    }
+}
+</code></pre>
+
+<p>Finalement, dans notre fichier <code>behat.yml</code> :</p>
+
+<pre class="language-yaml"><code>default:
+    extensions:
+        Acme\Behat\KernelExtension\Extension: ~
+</code></pre>
+
+<h2>Mes extensions Behat</h2>
+
+<p>Depuis maintenant 2 ans, j'utilise Behat dans tous mes projets Web, car c'est à mes yeux une des meilleures manière de valider fonctionnellement une application.</p>
+
+<p>J'ai pu durant ce temps développer des extensions Behat pour 2 aspects récurrents.</p>
+
+<p>Permettez-moi de vous les présenter ci-dessous.</p>
+
+<h3>Selenium &amp; WebDriver</h3>
+
+<p>Comme beaucoup de monde, j'ai commencé à utiliser Mink pour manipuler un navigateur Web. Néanmoins, à force de l'utiliser, certains comportements ne me convenaient pas :</p>
+
+<ul>
+<li>Distinction entre liens et boutons (je clique sur XXX, je suis le lien XXX)</li>
+<li>Ciblage des éléments limité (sélection par texte uniquement dans certaines phrases)</li>
+<li>Complexité de l'implémentation (Contexte, Session, Driver ...)</li>
+<li>I should see "XXX" n'attend pas quelques secondes pour voir si le texte apparaît au bout de quelques secondes.</li>
+</ul>
+
+<p>Bref pour ces raisons et d'autres, et aussi pour gagner en flexibilité, j'ai préféré réimplémenter cette partie de manière plus simple.</p>
+
+<p>Ainsi, j'ai créé l'extension WebDriver pour Selenium, permettant de profiter d'une liaison plus forte avec WebDriver (car aucune abstraction de navigateur).</p>
+
+<p>Plus de détails sur la page de <a href="https://github.com/alexandresalome/php-webdriver/blob/master/doc/behat.rst">l'extension WebDriver pour Behat</a>.</p>
+
+<h3>Vérifier les e-mails</h3>
+
+<p>Finalement, pour vérifier les envois d'e-mail, on utilise un outil appelé <a href="http://mailcatcher.me">Mailcatcher</a>. Cet outil permet de créer un serveur SMTP bouchon et d'accéder aux mails par API ou par interface Web.</p>
+
+<p>J'ai développé une librairie pour l'occasion et fait une extension Behat permettant de tester les mails envoyés. En reprenant l'exemple du début, on peut ainsi écrire (en anglais) :</p>
+
+<pre class="no-highlight"><code>When I am on "/contact"
+And I fill:
+    | Name    | My name |
+    | Subject | Subject of the message |
+    | Message | Content of the message |
+And I click on "Send"
+Then I should see "Your message is sent"
+When I open mail to "contact@afsy.fr"
+Then I should see "Content of the message" in mail
+</code></pre>
+
+<p>Tous les détails sur <a href="https://github.com/alexandresalome/mailcatcher#behat-extension">cette page</a>.</p>
+
+<h2>Conclusion</h2>
+
+<p>Maintenant, nous pouvons créer de nouvelles étapes et amener dans celles-ci toutes sortes de dépendances.</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/alexandre-salome.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://alexandre-salome.fr/{% endblock %}" target="_blank">{% block article_author %}Alexandre Salomé{% endblock %}</a>
+</h2>
+<p>
+    Alexandre est consultant Symfony2 chez SensioLabs.
+</p>
+<p>
+    Vous pouvez le retrouver sur twitter:
+    <a href="https://twitter.com/alexandresalome">@alexandresalome</a>.
+</p>
+{% endblock %}

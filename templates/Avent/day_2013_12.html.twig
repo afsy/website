@@ -1,0 +1,336 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 12 - Et si on mettait un peu de Symfony dans Javascript ?" %}
+
+{% block article_content %}
+<h1>Et si on mettait un peu de Symfony dans Javascript ?</h1>
+
+<p>
+    Ces derniers temps, j'ai du faire pas mal de front. J'ai donc travaillé avec
+    <a href="http://marionettejs.com/">Marionette.js</a> et
+    <abbr title="compagnie">Cie.</abbr>
+</p>
+
+<p>
+    Bien que mon application JavaScript soit indépendante (cliente qui consomme
+    des services), elle fait partie de mon application Symfony. Il est donc
+    dommage de ne pas exploiter dans mon application JavaScript ce qui est
+    présent dans mon application Symfony.
+</p>
+
+<p>Dans cet article je vais vous présenter ce qu'il est possible de faire.</p>
+
+<p>
+    Personnellement, j'aime bien JavaScript, mais je n'aime pas en faire. Si
+    pour toi c'est pareil, tape dans tes mains \o/
+</p>
+
+<h2>Routage Symfony en JavaScript</h2>
+
+<p>
+    Dans notre JavaScript on a souvent besoin d'utiliser nos URLs, par exemple
+    pour faire des appels en Ajax. Il y a un bundle qui permet d'avoir notre
+    configuration de routage Symfony en Javascript !
+</p>
+
+<p>
+    Il s'agit du meilleur <code>FOSJsRoutingBundle</code>
+    (<code>friendsofsymfony/jsrouting-bundle</code>).
+</p>
+
+<p>
+    Tout d'abord, on ajoute l'option <code>expose</code> à l'annotation
+    <code>Route</code> dans notre contrôleur :
+</p>
+
+<pre class="language-php"><code>&lt;?php
+
+/**
+ * @Route("/meth-cookers/{slug}", name="meth_cooker", options={"expose"=true})
+ */
+</code></pre>
+
+<p>
+    Ensuite on exporte les routes avec la commande
+    <code>fos:js-routing:dump</code> :
+</p>
+
+<pre class="no-highlight"><code>$ php app/console fos:js-routing:dump
+</code></pre>
+
+<p>
+    La commande crée un fichier JavaScript <code>js/fos_js_routes.js</code>
+    qu'il faut ajouter à nos <span lang="en">assets</span>, sans oublier
+    <code>bundles/fosjsrouting/js/router.js</code>, mais c'est dans la doc du
+    bundle ;)
+</p>
+
+<p>Enfin nous pouvons passer à l'utilisation dans JavaScript :</p>
+
+<pre class="language-javascript"><code>url = Routing.generate('meth_cookers', { slug: 'walter-white' });
+</code></pre>
+
+<p>
+    La variable <code>url</code> prend alors pour valeur
+    <code>/meth-cookers/walter-white</code>.
+</p>
+
+<p>
+    Les routes sont donc définies uniquement dans Symfony, mais utilisables dans
+    Symfony <strong>ET</strong> dans Javascript.
+</p>
+
+<h2>Templates avec Twig JS</h2>
+
+<p>
+    <em>Johannes</em> avait présenté <strong>Twig JS</strong> lors du
+    <strong><em>Symfony Live</em></strong> il y a deux ans et à vrai dire je
+    n'étais pas vraiment convaincu. Mais c'est tellement simple à mettre en
+    place et à maintenir qu'en fait j'adore l'utiliser. Il y a d'autres
+    solutions de Twig en JS, mais je préfère celle de <em>Johannes</em> qui
+    permet d'avoir plusieurs templates dans un même fichier JavaScript (car les
+    templates sont compilés), et qui, lors de cette compilation, permettent de
+    faire certaines choses.
+</p>
+
+<p>Différences avec Twig PHP :</p>
+
+<ul>
+    <li>On ne peut y passer que des objets JSON,</li>
+    <li>Seulement quelques fonctions et les filtres,</li>
+    <li>Twig JS compile des fichiers JavaScript à partir des templates.</li>
+</ul>
+
+<p>
+    Bon, tout d'abord il faut le bundle ! C'est <strong>JMSTwigJsBundle</strong>
+    (<strong><em>jms/twig-js-bundle</em></strong>).
+</p>
+
+<p>
+    Ensuite on crée ses templates comme d'habitude sauf qu'on ajoute le tag
+    <code>twig_js</code> en début de fichier qui va permettre de définir un nom
+    de template. Par exemple :
+</p>
+
+{% raw %}
+<pre class="language-twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
+&lt;h1&gt;Los Pollos Hermanos meth lab&lt;/h1&gt;
+&lt;p&gt;Surface: {{ lab.surface }}&lt;/p&gt;
+</code></pre>
+{% endraw %}
+
+<p>
+    Puis on ajoute le fichier <code>twig.js</code> et nos templates dans les
+    assets (easy) :
+</p>
+
+{% raw %}
+<pre class="language-twig"><code>{% javascripts %}
+    '../vendor/jms/twig-js/twig.js'
+    '../app/Resources/templates/LosPollosHermanos/Office.twig'
+    '../app/Resources/templates/LosPollosHermanos/Lab.twig'
+    output='js/templates.js' filter="twig_js"
+%}
+    &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
+{% endjavascripts %}
+</code></pre>
+{% endraw %}
+
+<p>Enfin, on fait le rendu de notre template :</p>
+
+<pre class="no-highlight"><code>Twig.render(this.template, {'lab': {'surface': 20 }});
+</code></pre>
+
+<h2>Utilisation des variables Assetic</h2>
+
+<p>
+    Assetic permet de faire quelque chose de très sympa que j'ai découvert en
+    lisant l'article de Johannes Schmitt intitulé
+    « <a href="http://jmsyst.com/blog/asset-variables-in-assetic" lang="en">Asset Variables in Assetic</a> ».
+</p>
+
+<p>
+    Pour résumer, il est possible de charger et de générer des fichiers
+    JavaScript différent selon l'environnement (<code>env</code>) ou selon la
+    locale (<code>locale</code>) de l'utilisateur.
+</p>
+
+<p>
+    Exemple avec <code>locale [en, fr]</code> pour regrouper en un fichier
+    JavaScript l'ensemble de mes fichiers de locale de mes bibliothèques :
+</p>
+
+{% raw %}
+<pre class="language-twig"><code>{% javascripts %}
+    '../app/Resources/components/lib-foo/{locale}.js'
+    '../app/Resources/components/lib-bar/{locale}.js'
+    output='js/lang.{locale}.js' vars=['locale']
+%}
+    &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
+{% endjavascripts %}
+</code></pre>
+{% endraw %}
+
+<p>
+    Ainsi on obtient <code>js/lang.fr.js</code> (lib-foo/fr.js + lib-bar/fr.js)
+    et <code>js/lang.en.js</code> (lib-foo/en.js + lib-bar/en.js). Les
+    utilisateurs n'auront que le JavaScript correspondant à leur locale.
+</p>
+
+<p>
+    Mais il y a mieux ! Il s'agit de générer des templates avec Twig JS traduits
+    en fonction de la <code>locale</code> !
+</p>
+
+<p>
+    En effet, le filtre <code>trans</code> et la locale permettent de
+    traduire des chaines de caractères lors de la compilation en utilisant les
+    traductions de Symfony !
+</p>
+
+<p>
+    Reprenons notre exemple de Twig JS mais en y ajoutant la <code>locale [en, fr]</code>.
+</p>
+
+<p>
+    On met à jour le template en utilisant le filtre <code>trans</code> pour
+    traduire nos clés :
+</p>
+
+{% raw %}
+<pre class="language-twig"><code>{% twig_js name="LosPollosHermanos_Lab" %}
+&lt;h1&gt;{{ "los_pollos.meth_lab"|trans }}&lt;/h1&gt;
+&lt;p&gt;{{ "los_pollos.surface"|trans }}: {{ lab.surface }}&lt;/p&gt;
+</code></pre>
+{% endraw %}
+
+<p>
+    On met à jour nos assets dans la vue principale :
+</p>
+
+{% raw %}
+<pre class="language-twig"><code>{% javascripts
+    '../app/Resources/template/LosPollosHermanos/Office.twig'
+    '../app/Resources/template/LosPollosHermanos/Lab.twig'
+    output='js/templates.{locale}.js' filter="twig_js" vars=['locale']
+%}
+    &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
+{% endjavascripts %}
+</code></pre>
+{% endraw %}
+
+<p>
+    Ainsi on obtient <code>js/templates.fr.js</code> et
+    <code>js/templates.en.js</code> dont le contenu est différent selon la
+    <code>locale</code>. Les utilisateurs n'auront que les templates compilés
+    correspondant à leur locale.
+</p>
+
+<p>
+    <strong>Attention</strong> : Cette traduction n'est effectuée que lors de la
+    compilation du template. Il n'est pas possible de traduire à la volée à
+    l'exécution de l'instruction <code>Twig.render()</code>. En fait, ça le
+    sera peut être pour Noël ;)
+</p>
+
+<h2>Date formatée avec la locale</h2>
+
+<p>
+    Pour formater une date, j'ai choisi d'utiliser <strong>Moment.js</strong>
+    que l'on peut installer avec <strong>bower</strong>.
+</p>
+
+<p>
+    Là, c'est le moment (notez le jeu de mot...) d'utiliser ce que nous avons
+    étudié précédemment afin de l'ajouter à nos assets :
+</p>
+
+{% raw %}
+<pre class="language-twig"><code>{% javascripts
+    '../app/Resources/components/moment/min/moment.min.js'
+    '../app/Resources/components/moment/min/lang/{locale}.js'
+    output='js/date.{locale}.js' vars=['locale']
+%}
+    &lt;script type="text/javascript" src="{{ asset_url }}"&gt;&lt;/script&gt;
+{% endjavascripts %}
+</code></pre>
+{% endraw %}
+
+<p>
+    Maintenant il faut créer un filtre dans Twig JS pour qu'on puisse l'utiliser
+    dans les templates :
+</p>
+
+<pre class="language-javascript"><code>Twig.setFilter('date', function(format) {
+    return moment(date).format(format);
+});
+</code></pre>
+
+<p>Facile non ? L'utilisation l'est encore plus :</p>
+
+{% raw %}
+<pre class="no-highlight"><code>{{ meth.delivery.scheduledDate|date('LL') }}
+</code></pre>
+{% endraw %}
+
+<h2><abbr title="Internationalisation" lang="en">I18N : traductions Symfony en JS</h2>
+
+<p>
+    <em>William Durand</em> a écrit un bundle pour ça :
+    <strong>BazingaExposeTranslationBundle</strong>
+    (<strong><em>willdurand/expose-translation-bundle</em></strong>) !
+</p>
+
+<p>
+    Par exemple, si le fichier
+    <code>app/Resources/translations/messages.fr.yml</code> contient la
+    traduction suivante :
+</p>
+
+<pre class="no-highlight"><code>los_pollos.welcome: "Bienvenue à Los Pollos %name%, vous aimez le poulet ?"
+</code></pre>
+
+<p>
+    On peut alors l'utiliser dans notre JavaScript avec l'instruction
+    <code>Translator.get()</code> :
+</p>
+
+<pre class="no-highlight"><code>Translator.get('los_pollos.welcome', { "name" : "Jesse Pinkman" });
+</code></pre>
+
+<p>
+    Pour obtenir <code>Bienvenue à Los Pollos Jesse Pinkman, vous aimez le poulet ?</code>.
+</p>
+
+<h2>Conclusion</h2>
+
+<p>
+    C'est une aberration de faire les choses en double (une fois dans Symfony,
+    puis une autre dans JavaScript) et grâce à ces bundles, on peut faire du
+    JavaScript un peu plus sereinement en s'appuyant sur ce qu'on a déjà fait
+    dans Symfony.
+</p>
+
+<p>Merci à plus !</p>
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/jeremy-romey.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url %}https://connect.sensiolabs.com/profile/jeremyFreeAgent{% endblock %}" target="_blank">{% block article_author %}Jérémy Romey{% endblock %}</a>
+    </h2>
+    <p>
+        Jérémy (<abbr title="as known as" lang="en">aka</abbr> <a href="https://connect.sensiolabs.com/profile/jeremyFreeAgent" target="_blank">jeremyFreeAgent</a>)
+        est amoureux de Symfony depuis qu'il l'a essayé avec la version
+        1.2.7 et depuis il passe son temps à en faire la promo partout où il
+        passe. Symfony lui a aussi donné envie de contribuer à des projets Open
+        Source. Jérémy participe à l'organisation des sfPots Marseille et il a
+        oublié de prendre ses billets pour Varsovie !
+    </p>
+{% endblock %}

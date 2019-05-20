@@ -1,0 +1,41 @@
+services:
+    afsy.oauth.author.provider:
+        class: Afsy\OAuth\Provider\AuthorEntityProvider
+        arguments: ['@doctrine.orm.entity_manager']
+
+    afsy.tag.tag_manager:
+        class: Afsy\Tag\TagManager
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - 'Afsy\Entity\Tag'
+            - 'Afsy\Entity\Tagging'
+
+    sonata.admin.article:
+        class: Afsy\Admin\ArticleAdmin
+        tags:
+            - { name: 'sonata.admin', manager_type: orm, label: 'Article', group: 'Content' }
+        arguments:
+            - 'Afsy\Entity\Article'
+            - 'Afsy\Entity\Article'
+            - 'SonataAdminBundle:CRUD'
+        calls:
+            - method : setTranslationDomain
+              arguments: ['AfsyAdminBundle']
+            - method: setTranslationDomain
+              arguments: ['@afsy.tag.tag_manager']
+
+    sonata.admin.author:
+        class: Afsy\Admin\AuthorAdmin
+        tags:
+            - { name: "sonata.admin", manager_type: orm, label: 'Author', group: 'People' }
+        arguments:
+            - 'Afsy\Entity\Author'
+            - 'Afsy\Entity\Author'
+            - 'SonataAdminBundle:CRUD'
+
+    afsy.listeners.markdown_parser:
+        class: Afsy\Listeners\MarkdownParserListener
+        arguments: ['@markdown.parser']
+        tags:
+            - { name: doctrine.event_listener, event: prePersist }
+            - { name: doctrine.event_listener, event: preUpdate }

@@ -1,0 +1,372 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 13 - Créer une application cross-platform avec Symfony Flex, Webpack Encore et Phonegap" %}
+
+{% block article_content %}
+    <style type="text/css">
+        em {
+            font-family: sans-serif;
+        }
+
+        .tree-image {
+            float: left;
+            width: 90%;
+            max-width: 220px;
+            margin: 15px 25px 15px 0;
+        }
+
+        @media (max-width: 375px) {
+            .tree-image {
+                float: none;
+                clear: both;
+                margin: 15px auto;
+            }
+        }
+
+        .server-image {
+            margin: 25px auto;
+            width: 90%;
+            max-width: 700px;
+        }
+    </style>
+
+    <h1 id="créer-une-application-cross-platform-avec-symfony-flex-webpack-encore-et-phonegap">
+        Créer une application cross-platform avec Symfony Flex, Webpack Encore et Phonegap
+    </h1>
+
+    <p>
+        De l’avis de très nombreux utilisateurs de Symfony dans le monde, la dernière version du framework
+        (<a href="https://symfony.com/4">Symfony 4</a>) est de loin la plus avancée.
+        Sortie le 30 novembre 2017, elle introduit des changements profonds de paradigme dans la façon de créer
+        des applications Symfony, en permettant notamment au framework de mieux s’intégrer à son écosystème
+        (Docker, Single-Page applications, Hébergement Cloud, etc.). Ces changements seront l’occasion de nombreux
+        articles, aussi bien sur le blog officiel que dans la communauté en général.
+    </p>
+
+    <p>
+        Nous nous concentrerons dans cet article sur deux fonctionnalités introduites récemment dans le
+        framework : <a href="https://symfony.com/doc/current/setup/flex.html">Symfony Flex</a>,
+        qui généralise l’utilisation du framework à d’autres contextes que l’affichage de pages Web, et
+        <a href="https://symfony.com/doc/current/frontend.html">Symfony Webpack Encore</a>
+        qui permet de développer aisément en Javascript côté client. En alliant ceux-ci à Phonegap, nous allons
+        découvrir une façon intéressante de développer des applications mobiles rapidement et aisément maintenables.
+    </p>
+
+    <h2 id="présentation-du-projet">
+        Présentation du projet
+    </h2>
+
+    <p>
+        À titre personnel, j’ai développé à la fin de l’année 2015 une application mobile d’information à
+        propos des horaires de bus de la ville dans laquelle j’habite (Compiègne,
+        <a href="https://compibus.fr">https://compibus.fr</a>). À ses débuts, cette application n’affichait que
+        les horaires des prochains bus à un arrêt recherché par l’utilisateur. Elle s’est depuis enrichie de
+        nouvelles fonctionnalités, mais je souhaiterais aborder ici la manière dont j’ai re-développé la base
+        de l’application avec Symfony Flex, Webpack Encore et Phonegap.
+    </p>
+
+    <h2 id="le-serveur-symfony-flex-et-nginx">
+        Le serveur : Symfony Flex et nginx
+    </h2>
+
+    <p>
+        Là où l’édition Standard de Symfony était taillée pour les applications Web (un dossier
+        <code>web</code>, des contrôleurs, des vues, etc.), Symfony Flex est beaucoup plus versatile et
+        s’applique à de nombreux types des projets PHP, du projet Web au daemon en passant par le CRON et
+        le consumer RabbitMQ.
+    </p>
+
+    <p>
+        Une caractéristique particulière des horaires de transport en commun est qu’ils sont tout à fait
+        publics : ils n’ont pas de restriction d’accès, quiconque peut les lire.
+    </p>
+
+    <p>
+        Cette caractéristique importante permet d’utiliser Symfony non pas pour développer une API directement,
+        mais pour développer un outil en ligne de commande : au lieu d’exposer directement Symfony au Web,
+        Symfony est utilisé comme framework de daemon PHP tenant à jour des fichiers JSON, eux-mêmes servis
+        par nginx.
+    </p>
+
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/13/server.png') }}"
+         alt="Organisation du serveur"
+         class="server-image" />
+
+    <p>
+        Cette structuration a de nombreux avantages :
+    </p>
+
+    <ul>
+        <li>
+            les performances sont naturellement optimales, car les fichiers sont servis directement par nginx
+        </li>
+        <li>
+            toute la logique métier se trouve dans un daemon : si il s’arrête pour cause d’erreur ou si il est
+            nécessaire de l’arrêter pour en déployer une nouvelle version, l’application est toujours utilisable car
+            nginx sert toujours les fichiers JSON
+        </li>
+        <li>
+            aucun dialogue n’est nécessaire entre PHP et nginx : la mise à l’échelle horizontale de nginx est
+            beaucoup plus facile à réaliser, il n’est pas nécessaire d’associer une instance de PHP à chaque
+            nouvelle instance de nginx.
+        </li>
+    </ul>
+
+    <p>
+        Symfony Flex s’adapte particulièrement bien à ce genre d’utilisation plus exotique : en ne requérant
+        aucun composant lié au Web, il est possible de créer un outil parfaitement adapté à un usage en ligne
+        de commande, et ce tout en se basant sur des standards et des librairies de qualité.
+    </p>
+
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/13/tree-symfony-flex.png') }}"
+         alt="Structure de fichiers de l'application Symfony Flex"
+         class="tree-image" />
+
+    <p>
+        Notez qu’il n’y a pas de dossier <code>public</code> ni de contrôleurs dans l’application décrite ci-contre.
+    </p>
+
+    <p>
+        Pour créer cette structure de fichiers, il m’a suffit de lancer quelques commandes et d’implémenter la
+        logique métier d’import des données depuis l’API de l’opérateur du réseau de bus de Compiègne.
+    </p>
+
+    <pre><code class="language-bash"># Créer le projet
+composer create-project symfony/skeleton afsy &amp;&amp; cd afsy
+
+# Monolog et son bundle
+composer req logger
+
+# Doctrine, Doctrine Migrations et Doctrine Fixtures
+composer req orm migrations orm-fixtures
+
+# SensioFrameworkExtraBundle
+composer req annotations
+
+# MakerBundle, pour créer plus rapidement la structure de fichiers
+composer req maker --dev
+
+# PHPUnit et le bridge Symfony, pour les tests
+composer req phpunit --dev</code></pre>
+
+    <p>
+        Une fois ma commande de daemon développée, j’ai ajouté un container Docker de production pour la lancer.
+        Une boucle infinie dans cette commande permet alors l’écoute de l’API de l’opérateur.
+    </p>
+
+    <h2 id="le-client-webpack-encore-phonegap-et-typescript">
+        Le client : Webpack Encore, Phonegap et Typescript
+    </h2>
+
+    <p>
+        Une fois le daemon créé, tenant des fichiers JSON à jour, il faut s’attaquer à la partie cliente :
+        l’application mobile.
+    </p>
+
+    <p>
+        Différentes approches existent pour développer des applications mobiles :
+    </p>
+
+    <ul>
+        <li>
+            utiliser les plateformes natives (Java pour Android, Swift pour iOS, etc.), en ne partageant pas de code
+        </li>
+        <li>
+            utiliser un outil comme React Native afin de partager du code mais d’avoir un affichage différent pour
+            chaque plateforme
+        </li>
+        <li>
+            utiliser un outil comme Cordova/Phonegap pour partager l’extrême majorité du code entre les différentes
+            plateformes
+        </li>
+    </ul>
+
+    <p>
+        Dans le cas de Compibus, j’ai utilisé Cordova/Phonegap, afin de partager le plus de code possible
+        entre les plateformes. Un autre effet de l’utilisation de cet outil est la possibilité de créer une
+        version Web en utilisant le même code que la version mobile, ce qui est particulièrement utile dans le
+        cas d’une application de transport en commun.
+    </p>
+
+    <p>
+        Utiliser Phonegap implique de développer une Single-Page Application en HTML/CSS/Javascript. Or,
+        depuis maintenant quelques mois, une librairie Symfony répond parfaitement à ce besoin : Symfony
+        Webpack Encore.
+    </p>
+
+    <p>
+        Webpack Encore est une librairie Javascript créée et gérée par l’équipe de Symfony, notamment par
+        Ryan Weaver. Cette librairie a pour objectif de simplifier l’utilisation et la configuration de
+        Webpack, connu pour être un outil complexe qui dispose d’une grande configuration.
+    </p>
+
+    <p>
+        L’objectif de Webpack est de “préparer” votre code à être exécuté en production, en lui appliquant
+        différents traitements. Il résout les “import” en Javascript afin d’agréger tous vos fichiers sources
+        en un nombre limité de fichiers transférables facilement à travers le réseau. Il est aussi capable de
+        minifier vos fichiers, de les transformer dans une version plus vieille de Javascript pour qu’ils
+        puissent être utilisés par de vieux navigateurs, etc.
+    </p>
+
+    <p>
+        En utilisant Webpack Encore, vous allez pouvoir en quelques lignes de code utiliser Typescript, React JSX,
+        SASS et autres outils dont vous avez probablement déjà entendu parler.
+    </p>
+
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/13/tree-webpack-encore.png') }}"
+         alt="Structure de fichiers de l'application Symfony Webpack Encore"
+         class="tree-image" />
+
+    <p>
+        L’intérêt de Webpack et Webpack Encore réside notamment dans le fait qu’ils permettent au développeur
+        d’utiliser toutes les nouveautés de Javascript sans avoir peur de manquer de compatibilité avec les
+        anciennes versions du langage. Cela est particulièrement important dans le contexte de Phonegap, car
+        ce dernier utilise le navigateur Web natif du téléphone pour afficher l’application, ce qui peut amener
+        à un support très hétéroclite des nouvelles fonctionnalités de Javascript.
+    </p>
+
+    <p>
+        Dans Compibus, j’ai fait le choix d’utiliser Typescript parce que ce langage dispose d’outils avancés
+        de Programmation Orientée Objet, permettant par exemple la mise en place d’injection de dépendances
+        à la manière de Symfony. J’ai aussi choisi d’utiliser React et Redux comme framework Javascript que
+        j’apprécie particulièrement, ainsi que SASS pour éviter la redondance de CSS.
+    </p>
+
+    <p>
+        Pour créer cette structure de fichiers, il m’a suffit de lancer quelques commandes, de créer le fichier de
+        configuration pour Webpack et d’implémenter la logique cliente d’interaction avec les fichiers JSON
+        générés par l’application Symfony.
+    </p>
+
+    <pre><code class="language-bash"># Créer le projet et installer Webpack Encore
+yarn init
+yarn add @symfony/webpack-encore --dev
+
+
+# Typescript
+yarn add --dev typescript ts-loader
+
+
+# SASS
+yarn add --dev sass-loader node-sass
+
+
+# PostCSS
+yarn add --dev postcss-loader autoprefixer
+
+
+# React et les types Typescript pour React
+yarn add --dev react react-dom prop-types babel-preset-react @types/react @types/react-dom</code></pre>
+
+    <hr>
+
+    <p>
+        Mon fichier <code>webpack.config.js</code>, permettant de configurer Webpack, ressemble alors à ceci :
+    </p>
+
+    <pre><code class="language-javascript">const Encore = require('@symfony/webpack-encore');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const availableTargets = ['browser', 'phonegap'];
+
+let target = 'browser';
+if (typeof process.env.TARGET !== 'undefined' &amp;&amp; availableTargets.indexOf(process.env.TARGET) &gt; -1) {
+    target = process.env.TARGET;
+}
+
+console.log('Building '+target+' distribution...');
+console.log('');
+
+Encore
+    .setOutputPath('build/'+target)
+    .setPublicPath('/')
+    .cleanupOutputBeforeBuild()
+    .addEntry('app', './src/loader.tsx')
+    .enableSassLoader()
+    .enableTypeScriptLoader()
+    .enablePostCssLoader((options) =&gt; {
+        options.config = {
+            path: 'postcss.config.js'
+        };
+    })
+    .enableReactPreset()
+    .enableVersioning(Encore.isProduction())
+    .enableSourceMaps(!Encore.isProduction())
+    .addPlugin(new HtmlWebpackPlugin({
+        template: Encore.isProduction() ? 'src/Template/index.'+target+'.ejs' : 'src/Template/index.dev.ejs',
+        alwaysWriteToDisk: true
+    }))
+    .addPlugin(new HtmlWebpackHarddiskPlugin())
+    .addPlugin(new CopyWebpackPlugin([
+        {
+            from: 'res/'+target,
+            to: '',
+        },
+    ]))
+;
+
+let config = Encore.getWebpackConfig();
+config.output.publicPath = '';
+
+module.exports = config;</code></pre>
+
+    <p>
+        Grâce à Webpack Encore, il est très simple d’utiliser des outils avancés de développement
+        front-end. Notez l’utilisation dans la configuration du versionning (le nom des fichiers
+        inclut un hash md5 pour permettre une stratégie de cache HTTP aggressive).
+    </p>
+
+    <p>
+        Il est aussi intéressant de remarquer qu’en utilisant une variable d’environnement, il est
+        possible de changer de cible à fabriquer (<code>browser</code> ou <code>phonegap</code>), et
+        donc de choisir le template adapté : <code class="language-bash">TARGET=phonegap yarn encore prod</code>.
+    </p>
+
+    <h1 id="conclusion">
+        Conclusion
+    </h1>
+
+    <p>
+        J’ai souhaité écrire cet article pour une raison importante : j’ai toujours pensé qu’il existait une
+        certaine forme de balance entre les frameworks basés sur le développement rapide (RAD, basé sur les
+        conventions, cherchant à l’efficacité en priorité) et ceux basés sur une approche plus standard (SOLID,
+        basé sur la configuration, cherchant à la maintenabilité en priorité). On pourrait par exemple opposer
+        ainsi Ruby on Rails et Spring, qui ont deux approches différentes dans leur objectif en tant que framework.
+    </p>
+
+    <p>
+        Jusqu’à présent, je voyais la même différence entre Laravel et Symfony : Laravel est beaucoup plus basé
+        sur les idées de Ruby on Rails, là où Symfony est beaucoup plus basé sur les idées de Spring.
+    </p>
+
+    <p>
+        J’ai cependant le sentiment que Symfony, avec Symfony Flex, est en train de combler cette différence.
+        En gardant son esprit basé sur la configuration, une grande qualité de développement et la solidité
+        de son architecture interne, Symfony 4 propose une nouvelle approche au développement rapide
+        d’applications (Symfony Flex, les nouveautés du composant DI, Webpack Encore, etc.). C’était d’ailleurs
+        un objectif de cet article que de montrer comment il est désormais possible de très rapidement mettre
+        en place les bases de toute application, Web ou non, tout en restant dans un contexte de suivi des bonnes
+        pratiques de la programmation orientée objet.
+    </p>
+
+    <p>
+        Cela augure de très belles choses pour la communauté Symfony et pour le monde de PHP en général !
+    </p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/titouan-galopin.jpg') }}" alt="Samuel Roze" />
+{% endblock %}
+
+{% block article_bio %}
+<h2><a href="{% block author_url %}https://twitter.com/titouangalopin?lang=fr{% endblock %}" target="_blank">{% block article_author %}Titouan Galopin{% endblock %}</a></h2>
+<p>
+    Responsable produit de <a href="https://insight.sensiolabs.com">SensioLabsInsight</a><br />
+    Ancien responsable produit de la plateforme Open-Source <a href="https://github.com/EnMarche/en-marche.fr">en-marche.fr</a><br />
+    Fondateur de <a href="https://compibus.fr">compibus.fr</a>
+</p>
+{% endblock %}

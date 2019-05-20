@@ -1,0 +1,459 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 10 - Les Méta-données Doctrine" %}
+
+{% block article_content %}
+<h1>Méta-données Doctrine</h1>
+
+<h2>Préambule</h2>
+
+<p>Dans cet article, nous parlerons des méta-données Doctrine, comment elles sont utilisées et comment les étendre.</p>
+
+<p>Si vous ne l'avez pas encore fait, lisez <a href="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/">la documentation de Doctrine</a> pour comprendre son fonctionnement et son utilisation.</p>
+
+<h3>Un modèle objet robuste</h3>
+
+<p>Quand on utilise Doctrine, les classes représentent les tables de la base de données. On les appelles <strong>les entités</strong>. Ces entités, contrairement aux autres objets, peuvent être persistées par Doctrine en bases de données. Grâce à cela, il est possible plus tard de re-récupérer cette <strong>entité</strong> depuis la base de données.</p>
+
+<p>Ces <strong>entités</strong>, qui ne sont rien de plus que des objets PHP, définissent <strong>des propriétés</strong> et <strong>des méthodes</strong>.</p>
+
+<p>Il existe deux contextes différents lors du développement d'une classe PHP :</p>
+
+<ol>
+<li><p><strong>La définition</strong> : on crée une classe <em>Blog</em>. On déclare ses propriétés et ses méthodes; nous somme dans le fichier <code>Blog.php</code> et nous pouvons accéder aux propriétés privées de l'objet;</p></li>
+<li><p><strong>L'utilisation</strong> : Depuis un contrôleur, un service ou une autre entité du modèle, on appelle des méthodes sur les objets. On ne peut pas accéder directement à ses propriétés;</p></li>
+</ol>
+
+<h4>Définition du modèle</h4>
+
+<pre class="language-php"><code>use Doctrine\Common\Collections\ArrayCollection;
+
+class Blog
+{
+    private $id;
+    private $title;
+    private $categories = new ArrayCollection();
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this-&gt;id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this-&gt;title;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCategories()
+    {
+        return $this-&gt;categories;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHighlightedCategories()
+    {
+        return $this-&gt;categories-&gt;filter(function ($category) {
+            return $category-&gt;isHighlighted();
+        });
+    }
+
+    /**
+     * @return array
+     */
+    public function getPosts()
+    {
+        $posts = array();
+        foreach ($this-&gt;categories as $category) {
+            $posts = array_merge($posts, $category-&gt;getPosts());
+        }
+
+        return $posts;
+    }
+}
+</code></pre>
+
+<h4>Utilisation du modèle</h4>
+
+<p>A l'utilisation, nous ne manipulons pas directement les propriétés de l'objet. Nous passons systématiquement par des méthodes sur les objets, ce qui permet d'assurer la consistence de l'entité.</p>
+
+<pre class="language-php"><code>$blog-&gt;getName();
+$blog-&gt;getCategories();
+$blog-&gt;getHighlightedCategories();
+
+foreach ($blog-&gt;getPosts() as $post) {
+    $post-&gt;isVisible();
+    $post-&gt;hasTag('foo');
+    $post-&gt;addTag('foo');
+}
+</code></pre>
+
+<p>Grâce à cela, on peut modifier la définition des entités sans toucher à leur utilisation.</p>
+
+<h4>Générer ses entités</h4>
+
+<p>Doctrine vous fournit des outils permettant à partir d'une configuration Doctrine de générer les entités et les méthodes associées. Après avoir généré ces méthodes, il est de votre devoir de retirer les méthodes que vous n'allez pas utiliser, comme par exemple <code>setId</code>. Si vous n'avez pas prévu d'utiliser une méthode, autant la supprimer.</p>
+
+<p>L'intérêt des classes en POO est de pouvoir définir un comportement sur un ensemble de données. Si on s'en tient aux méthodes générées par défaut (get/set), alors la classe n'a pas plus d'intérêt qu'un tableau.</p>
+
+<p>En supprimant les méthodes non-utilisées, vous <strong>renforcez votre modèle objet</strong> : le nombre de points d'entrée dans la classe est réduit.</p>
+
+<h2>Utilisation de Doctrine</h2>
+
+<p>Une fois nos entités créées, on indique à Doctrine quelles propriétés persister, les associations et autres méta-données. Dans le cas d'un blog, on définit le mapping suivant :</p>
+
+<pre class="language-yaml"><code>Blog:
+    fields:
+        title: { type: string, length: 128 }
+    oneToMany:
+        categories:
+            targetEntity: Category
+            mappedBy: blog
+Category:
+    fields:
+        title: { type: string, length: 128 }
+    oneToMany:
+        posts:
+            targetEntity: Post
+            inversedBy: category
+    manyToOne:
+        blog:
+            targetEntity: Blog
+            inversedBy: categories
+Posts:
+    fields:
+        title: { type: string, length: 128 }
+        content: { type: text }
+    manyToOne:
+        category:
+            targetEntity: Category
+            inversedBy: posts
+</code></pre>
+
+<p>Grâce à cela, nous disons à Doctrine comment sauvegarder nos entités en base de données. Doctrine va donc lire les propriétés de votre entité et mettre à jour la base de données.</p>
+
+<p>Ainsi, d'une requête à l'autre, vous pouvez conserver les entités et leur état.</p>
+
+<h2>Architecture Doctrine</h2>
+
+<p>Pour fonctionner, Doctrine ORM utilise un ensemble de composants (10 différents). Les principaux composants sont les suivants :</p>
+
+<ul>
+<li><strong>Annotations</strong> : framework d'annotations pour méthodes et classes;</li>
+<li><strong>Common</strong> : ensemble de librairies communes pour les composants Doctrine : gestion d'événements, introspection, ObjectManager;</li>
+<li><strong>DBAL</strong> : manipulation de la base de données;</li>
+</ul>
+
+<p>Il est ainsi possible d'utiliser facilement ces composants sans utiliser l'ORM et les méta-données. La <a href="http://www.doctrine-project.org/projects.html">page des projets Doctrine</a> vous renseignera davantage sur eux.</p>
+
+<p>En interne, l'ORM Doctrine est composé d'une multitude de sous-parties :</p>
+
+<ul>
+<li><strong>UnitOfWork</strong> : détection des modifications sur les entités et écrit durablement ces modifications dans le bon ordre vers la base de données;
+
+<ul>
+<li><strong>Hydrator</strong> : transformation des résultats SQL en objets, tableaux et scalaires;</li>
+<li><strong>EntityPersister</strong> : assure la liaison objets-base de données;</li>
+</ul></li>
+<li><strong>Query</strong> : exécution de requête;</li>
+<li><strong>EventDispatcher</strong> : permet de suivre les événements d'un EntityManager;</li>
+</ul>
+
+<p>Les méta-données sont donc au coeur de Doctrine pour coordonner ces différentes unités.</p>
+
+<p>La classe principalement utilisée avec Doctrine est la classe <em>EntityManager</em>. Cette classe fournit des méthodes "haut-niveau" :</p>
+
+<pre class="language-php"><code>$post = new Post();
+$post
+    -&gt;setTitle('Title of the post')
+    -&gt;setContent('Content of the post')
+    -&gt;addTag('foo')
+    -&gt;addTag('bar')
+;
+
+$em-&gt;persist(post); // insère un nouvel objet
+$em-&gt;remove(post); // supprime un objet de la base de données
+
+$em-&gt;refresh(post); // rafraîchit un objet
+
+$em-&gt;flush();
+
+post = $em-&gt;find('Post', 32); // recherche par classe et ID
+
+</code></pre>
+
+<p>Chacun des appels à ces méthodes va travailler avec la <em>UnitOfWork</em> présente au sein de la classe <em>EntityManager</em>. Cette UnitOfWork va ensuite lire les méta-données pour savoir quelles propriétés persister, leur type, etc.</p>
+
+<h3>Performance et cache de méta-données</h3>
+
+<p>Les annotations sont très sémantiques et peu verbeuses, et en va de même pour le XML et le YAML. Cependant, pour avoir un fonctionnement efficace, on ne peut pas se permettre de relire à chaque requête les fichiers de configuration pour obtenir ces informations et résoudre les options implicites.</p>
+
+<p>Pour cette raison, une mise en cache est indispensable. Ainsi, quelque soit la complexité de la résolution des méta-données (annotations, XML, YAML), le résultat est mis en cache sous forme sérialisée, assurant ainsi une performance optimale à l'utilisation.</p>
+
+<p>Beaucoup des propriétés dans la classe <em>ClassMetadata</em> sont d'ailleurs publiques, afin d'éviter des appels de méthode.</p>
+
+<p>Dans une <strong>application Symfony2</strong>, il est important de vérifier les paramètres dans <code>app/config/config_prod.yml</code> :</p>
+
+<pre class="language-yaml"><code>doctrine:
+    orm:
+        metadata_cache_driver: apc # memcache, redis ...
+</code></pre>
+
+<p>Une fois configuré, vérifiez grâce à la commande suivante vos paramètres de production :</p>
+
+<pre class="shell"><code>$ php app/console doctrine:ensure-production-settings --env=prod --no-debug
+Environment is correctly configured for production.
+</code></pre>
+
+<h3>Composition des méta-données</h3>
+
+<p>Doctrine enregistre votre configuration dans des objets <strong>ClassMetadata</strong>. Ces objets comportent toutes les informations à propos de la persistence de la classe. Ces objets sont hautement performants, car utilisés partout dans Doctrine.</p>
+
+<p>Les principales propriétés sont les suivantes :</p>
+
+<ul>
+<li><code>$name</code> : classe de l'entité</li>
+<li><code>$idenfifier</code> : tableau avec les noms de champs composant la clé primaire de l'entité</li>
+<li><code>$fieldMappings</code> : configuration des champs en base de données</li>
+<li><code>$associationMappings</code> : configuration des relations</li>
+</ul>
+
+<p>Pour un détail exhaustif des propriétés de la classe, <a href="https://github.com/doctrine/doctrine2/blob/v2.4.1/lib/Doctrine/ORM/Mapping/ClassMetadataInfo.php">consultez sa définition</a>.</p>
+
+<h3>Driver des méta-données</h3>
+
+<p>Il est possible de configurer la persistence de différentes manières : XML, Yaml, PHP, annotations... Pour chacune de ces manières, Doctrine fournit un <em>Driver</em> permettant de charger cette configuration :</p>
+
+<ul>
+<li><strong>Annotations</strong> : <code>Doctrine\ORM\Mapping\Driver\AnnotationDriver</code></li>
+<li><strong>XML</strong> : <code>Doctrine\ORM\Mapping\Driver\XmlDriver</code></li>
+<li><strong>Yaml</strong> : <code>Doctrine\ORM\Mapping\Driver\YamlDriver</code></li>
+</ul>
+
+<p>L'interface du <em>Driver</em> est la suivante :</p>
+
+<pre class="language-php"><code>namespace Doctrine\Common\Persistence\Mapping\Driver;
+
+interface MappingDriver
+{
+    public function loadMetadataForClass($className, ClassMetadata $metadata);
+    public function getAllClassNames();
+    public function isTransient($className);
+}
+</code></pre>
+
+<p>Comme vous pouvez le voir, l'interface est assez synthétique et va à l'essentiel : comment charger les méta-données d'une classe. Pour créer un nouveau moyen de charger les méta-données Doctrine, implémentez cette interface et injectez le dans Doctrine.</p>
+
+<p>Même si ce chargement est coûteux, une fois exécuté, le résultat sera mis en cache.</p>
+
+<h2>Cas pratiques</h2>
+
+<p>Toute cette théorie peut sembler abstraite, aussi tâchons de les mettre en pratique à travers des exemples concrets.</p>
+
+<h3>Un MappingDriver personnalisé</h3>
+
+<p>Supposons que nous souhaitons créer un <em>Driver</em> minimaliste pour charger nos méta-données d'entités. Dans cet exemple, nous resterons simple, mais il est tout à fait possible de charger ses données depuis un fichier JSON ou tout autre source.</p>
+
+<p>Dans notre exemple, nous appellerons une méthode statique <code>loadMetadata()</code> sur l'entité :</p>
+
+<pre class="language-php"><code>use Doctrine\Common\Persistence\Driver\MappingDriver;
+
+class MyDriver implements MappingDriver
+{
+    private $classNames = array('Blog', 'Post', 'Category');
+
+    public function loadMetadataForClass($className, ClassMetadata $metadata)
+    {
+        $className::loadMetadatas($metadata);
+    }
+
+    public function getAllClassNames()
+    {
+        return $this-&gt;classNames;
+    }
+
+    public function isTransient($className)
+    {
+        return in_array($className, $this-&gt;classNames);
+    }
+}
+</code></pre>
+
+<p>Finalement dans notre entité :</p>
+
+<pre class="language-php"><code>class Blog
+{
+    public static function loadMetadatas(ClassMetadata $metadata)
+    {
+        $metadata
+            -&gt;mapField(array('fieldName' =&gt; 'title', 'type' =&gt; 'string', 'length' =&gt; 128))
+        ;
+    }
+}
+</code></pre>
+
+<p>Il ne nous reste plus qu'à injecter notre <em>Driver</em> dans notre <em>EntityManager</em> :</p>
+
+<pre class="language-php"><code>use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+
+$dbParams = array();
+
+$config = Setup::createConfiguration(false, null, $cache);
+$config-&gt;setMetadataDriverImpl(new MyDriver());
+
+$em = EntityManager::create($dbParams, $config);
+</code></pre>
+
+<p>Pour le paramètre <code>$dbParams</code>, référez-vous à la [documentation des options de configuration de Doctrine](see http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/configuration.html).</p>
+
+<h3>Valider la structure d'une base de données</h3>
+
+<p>Maintenant, nous souhaitons vérifier que des conventions soient bien respectées dans l'application, à savoir :</p>
+
+<ul>
+<li>Vérifier que les clés primaires sont sur un seul champ (id) et de type integer</li>
+<li>Vérifier que les clés étrangères sont suffixées par <code>_id</code></li>
+</ul>
+
+<p>Pour cela, nous allons utiliser l'événement <em>postClassMetadata</em> et inspecter les méta-données de la classe :</p>
+
+<pre><code class="language-php"><br />use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\Persistence\Event\LoadClassMetadataEventArgs;
+use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadata;
+
+class StructureSubscriber implements EventSubscriber
+{
+    public function getSubscribedEvents()
+    {
+        return array(
+            Events::loadClassMetadata
+        );
+    }
+
+    public function loadClassMetadata(LoadClassMetadataEventArgs $args)
+    {
+        $metadata = $args-&gt;getClassMetadata();
+
+        $ids = $metadata-&gt;getIdentifierColumnNames();
+        if (count($ids) &gt; 1) {
+            throw new \RuntimeException(sprintf(
+                'Entity "%s" is configured with a composite primary key: %s',
+                $metadata-&gt;getName(),
+                implode(', ', $ids)
+            ));
+        }
+
+        if ($ids[0] !== 'id') {
+            throw new \RuntimeException(sprintf(
+                'Expected entity "%s" to have a primary key named "id", got "%s".',
+                $metadata-&gt;getName(),
+                $ids[0]
+            ));
+        }
+
+        foreach ($metadata-&gt;getAssociationMappings() as $mapping) {
+            if ($mapping['type'] === ClassMetadata::MANY_TO_ONE) {
+                $columnName = $mapping['joinColumns'][0]['name'];
+                if (!preg_match('/_id$/', $columnName)) {
+                    throw new \RuntimeException(sprintf(
+                        'Join column does not end with "_id". Got "%s".',
+                        $columnName
+                    ));
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>Il ne reste plus qu'à l'injecter via l'<em>EventSubscriber</em> :</p>
+
+<pre class="language-php"><code>use Doctrine\Common\EventManager;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Setup;
+use Subscriber\StructureSubscriber;
+
+$config = Setup::createConfiguration(true);
+$config-&gt;setMetadataDriverImpl(new Doctrine\BlogDriver());
+$conn = array('driver' =&gt; 'pdo_sqlite','path' =&gt; __DIR__ . '/db.sqlite');
+
+$eventManager = new EventManager();
+$eventManager-&gt;addEventSubscriber(new StructureSubscriber());
+
+return EntityManager::create($conn, $config, $eventManager);
+</code></pre>
+
+<h3>Préfixe de table</h3>
+
+<p>Dans ce dernier exemple, on veut préfixer toutes les tables du projet par une clé donnée.</p>
+
+<p>L'exemple ci-dessous fait beaucoup de lignes, néanmoins la logique est assez simple :</p>
+
+<pre class="language-php"><code>namespace Subscriber;
+
+use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\Persistence\Event\LoadClassMetadataEventArgs;
+use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadata;
+
+class TablePrefixSubscriber implements EventSubscriber
+{
+    private $prefix = 'acme_';
+
+    public function getSubscribedEvents()
+    {
+        return array(
+            Events::loadClassMetadata
+        );
+    }
+
+    public function loadClassMetadata(LoadClassMetadataEventArgs $args)
+    {
+        $metadata = $args-&gt;getClassMetadata();
+        $metadata-&gt;setTableName($this-&gt;prefix.$metadata-&gt;getTableName());
+    }
+}
+</code></pre>
+
+<h2>Conclusion</h2>
+
+<p>Désormais, on connaît le rôle et le fonctionnement des méta-données de Doctrine. Nous avons pu voir que ces données sont au coeur du fonctionnement de l'ORM.</p>
+
+<p>Nous avons également pu voir que le XML, le YAML et les annotations n'étaient pas les seuls moyens de configurer nos entités. Il est même possible de charger ces données depuis n'importe où, grâce à l'interface du <em>Driver</em>. Nous avons également vu l'événement <em>loadClassMetadata</em>, qui va lui permettre de "hooker" et faire des vérifications ou des modifications au moment du chargement de ces méta-données.</p>
+
+<p>L'intérêt de venir étendre Doctrine est qu'on peut ajouter des fonctionnalités dont profitent toutes les entités du modèle : préfixe de table et validation de structure dans cet article.</p>
+
+<p>Grâce à cela, vous pourrez personnaliser Doctrine pour en faire un ORM complet avec vos règles métier en plus.</p>
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/alexandre-salome.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://alexandre-salome.fr/{% endblock %}" target="_blank">{% block article_author %}Alexandre Salomé{% endblock %}</a>
+</h2>
+<p>
+    Alexandre est consultant Symfony2 chez SensioLabs.
+</p>
+<p>
+    Vous pouvez le retrouver sur twitter:
+    <a href="https://twitter.com/alexandresalome">@alexandresalome</a>.
+</p>
+{% endblock %}

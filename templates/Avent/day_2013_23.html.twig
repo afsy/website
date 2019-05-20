@@ -1,0 +1,538 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 23 - Sensibilisation au DDD" %}
+
+{% block article_content %}
+<h1>Et si on remettait le business au centre de nos applications&nbsp;?</h1>
+
+<h2>Sommaire</h2>
+
+<ul>
+    <li><a href="#preambule">Préambule</a></li>
+    <li><a href="#dette-technique">Minimiser sa dette technique</a></li>
+    <li><a href="#fil-rouge">Le fil rouge en exemple</a></li>
+    <li><a href="#demonstration">Démonstration</a></li>
+    <li>
+        <a href="#solutions">Solutions avec le DDD</a>
+        <ul>
+            <li><a href="#specification">Spécification</a></li>
+            <li><a href="#cqrs">CQRS</a></li>
+            <li><a href="#event-sourcing">Event Sourcing</a></li>
+        </ul>
+    </li>
+    <li><a href="#demo">L'application fil rouge</a></li>
+    <li><a href="#bibliographie">Bibliographie</a></li>
+</ul>
+
+<h2 id="preambule">Préambule</h2>
+
+<p>La puissance et l'utilité de Symfony ne sont plus à démontrer, c'est devenu un framework reconnu dans le monde professionnel. Il nous permet ainsi de répondre à beaucoup de <strong>problématiques techniques</strong> plus ou moins facilement, mais de manière assez élégante en général.</p>
+
+<p>Revers de la médaille, on passe souvent plus de temps à écrire des lignes propres au framework. On se <strong>concentre beaucoup trop sur la technique</strong>.</p>
+
+<p>Vous allez me dire qu'avec Symfony2 on écrit maintenant beaucoup plus de code métier pur php qu'on injecte alors en service. Oui ! Mais souvent ce sont des services "utilitaires" qui viennent là encore <strong>répondre à une problématique technique</strong>. En fait on écrit trop souvent du code <strong>pour</strong> notre framework / plateforme technique.</p>
+
+<p>Aujourd'hui si vous devez développer une nouvelle application web, par quoi allez-vous commencer ? Installer Symfony pardi ! Et pourtant vous avez <strong>une problématique business à résoudre</strong> derrière votre application. Pourquoi alors commencer par la technique ?</p>
+
+<h2 id="dette-technique">Minimiser sa dette technique</h2>
+
+<p>On pense souvent qu'utiliser un framework <em>maitrisé</em> est suffisant, que les gardes fous placés dedans nous forcent suffisament à embrasser les bonnes pratiques pour ne pas trop se prendre la tête sur l'architecture de notre code métier.</p>
+
+<p>Et pourtant l'endroit qui acquiert au fil du temps la plus grande dette technique c'est le coeur même de vos applications : <strong>la partie métier</strong>. Le MVC est un classique, mais on s'aperçoit qu'il ne résoud pas tout. Autant Symfony gère très bien le V et le C autant le M est majoritairement à votre charge.</p>
+
+<p>Est-ce que vous êtes capable d'extraire facilement votre partie métier de votre app Symfony ?</p>
+
+<p>Pourtant votre framework devrait être un <strong>détail</strong> d'implémentation. Ce n'est pas lui votre application, c'est votre outil, ne le subissez pas !</p>
+
+<h2 id="fil-rouge">Le fil rouge en exemple</h2>
+
+<p>Afin d'illustrer un peu tout ce que je vais essayer de pointer du doigt, nous allons nous mettre en tête de construire une application qui se concentrera principalement sur des enjeux business/métier.<br />
+Imaginons développer une application qui a en charge un établissement de jeu de cartes : Poker, Blackjack, Tarot, ...</p>
+
+<p>L'interface sera minime mais sera réalisée en mode web pour ressembler au plus près à nos applications classiques.</p>
+
+<h2 id="demonstration">Démonstration</h2>
+
+<p>Créons notre premier contrôleur dans notre bundle pour créer nos parties de cartes :</p>
+
+<pre><code class="language-php">&lt;?php
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+
+use Afsy\Bundle\CardBundle\Entity\Game;
+
+class GameController extends Controller
+{
+    public function newAction(Request request)
+    {
+        $game = new Game();
+        $form = $this->createFormBuilder($game)
+            ->add('nbPlayers', 'text')
+            ->add('gameType', 'choice')
+            ->add('create', 'submit')
+            ->getForm()
+        ;
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $game = $form->getData();
+            $em = $this->get('doctrine')->getManager();
+            $em->persist($game);
+            $em->flush();
+        }
+
+        return $this->render('AwUnoBundle:Game:new.html.twig', array(
+            'form' => $form->createView()
+        ));
+    }
+}
+</code></pre>
+
+<p>Code assez classique que certains doivent avoir dans leurs applications. Qu'est-ce que vous y changeriez ?</p>
+
+<blockquote>
+  <p>"Il faut créer le formulaire dans une classe à part !"</p>
+</blockquote>
+
+<p>Oui ca serait plus sympa <strong>techniquement</strong>. Mais en soit en quoi ça va nous aider dans nos problématiques métier ?</p>
+
+<blockquote>
+  <p>"Il faut jamais faire de persist/flush dans notre contrôleur ! Créons un service qui s'en occupe."</p>
+</blockquote>
+
+<p>Ok c'est un début.</p>
+
+<pre><code class="language-php">&lt;?php
+
+class GameManager
+{
+    protected $em;
+
+    public function __construct($em)
+    {
+        $this->em = $em;
+    }
+
+    public function save($game)
+    {
+        return $this
+            ->persist($game)
+            ->flush()
+        ;
+    }
+
+    public function persist($game)
+    {
+        $this->em->persist($game);
+
+        return $this;
+    }
+
+    public function flush()
+    {
+        $this->em->flush();
+
+        return $this;
+    }
+}
+</code></pre>
+
+<p>Et modifions notre contrôleur en conséquence :</p>
+
+<pre class="language-php"><code>&lt;?php
+/***/
+if ($form-&gt;isValid()) {
+    $game = $form-&gt;getData();
+    $manager = $this-&gt;get('game.manager');
+    $manager-&gt;save($game);
+}
+/***/
+</code></pre>
+
+<p>Ok on abstrait notre couche de persistence par ... une nouvelle couche. Ça se tient, notre <em>bête</em> contrôlleur n'a pas à connaître le moyen de sauvegarder notre donnée. En effet, d'un <strong>point de vue technique</strong> il n'a pas à le savoir. On a donc résolu une <strong>nouvelle problématique technique</strong>.</p>
+
+<p>Mais si on ajoute maintenant une problématique business ?</p>
+
+<p>Admettons qu'on veuille au moins 3 participants dans une partie de Blackjack et 4 dans une partie de Poker et Tarot.</p>
+
+<p>Comment répondre à cette problématique ?<br />
+Ca ressemble à une règle de validation qui prend en compte 2 attributs. Symfony propose un bon système de validation et un callback validator, ca semble la bonne solution !</p>
+
+<pre class="language-yaml"><code># src/Afsy/Bundle/CardBundle/Resources/config/validation.yml
+Afsy\Bundle\CardBundle\Entity\Game:
+    constraints:
+        - Callback: validateNbPlayers
+</code></pre>
+
+<pre><code class="language-php">&lt;?php
+use Symfony\Component\Validator\ExecutionContextInterface;
+
+class Game
+{
+    /***/
+    public function validateNbPlayers(ExecutionContextInterface $context)
+    {
+        $message = null;
+
+        if ('blackjack' === $this->gameType && 3 > $this->nbPlayers) {
+            $message =  'Au moins 3 joueurs pour jouer au UNO';
+        } elseif ('poker' === $this->gameType && 4 > $this->nbPlayers) {
+            $message = 'Au moins 4 joueurs pour jouer au poker';
+        } elseif ('tarot' === $this->gameType && 4 > $this->nbPlayers) {
+            $message = 'Au moins 4 joueurs pour jouer au tarot';
+        }
+
+        if (null !== $message) {
+            $context->addViolationAt(
+                'nbPlayers',
+                $message,
+                array(),
+                null
+            );
+        }
+    }
+    /***/
+}
+</code></pre>
+
+<p>Ok bien vu ! On a réussi à utiliser la technique pour résoudre une problématique métier !… Et c'est là où les ennuis commencent en général car on n'est toujours pas préparé à ce qui va suivre.</p>
+
+<p>Maintenant, j'ai envie qu'entre 20h et 23h, pour ne pas monopoliser des tables de jeux trop à blanc, on ne puisse créer des parties qu'avec au moins 6 participants pour chacun des jeux.</p>
+
+<p>Ah mince ! Va falloir changer notre méthode de validation.</p>
+
+<pre><code>&lt;?php
+    /***/
+    $now = new \DateTime;
+    $start = clone $now;
+    $start->setTime(20, 0, 0);
+    $to = clone $now;
+    $to->setTime(23, 0, 0);
+
+    if (($start <= $now && $now <= $to) && 6 > $this->nbPlayers) {
+        $message = 'Au moins 6 joueurs pour jouer entre 20h et 23h';
+    } else {
+        if ('uno' === $this->gameType && 3 > $this->nbPlayers) {
+            $message =  'Au moins 3 joueurs pour jouer au UNO';
+        } elseif ('poker' === $this->gameType && 4 > $this->nbPlayers) {
+            $message = 'Au moins 4 joueurs pour jouer au poker';
+        } elseif ('tarot' === $this->gameType && 4 > $this->nbPlayers) {
+            $message = 'Au moins 4 joueurs pour jouer au tarot';
+        }
+    }
+    /***/
+?>
+</code></pre>
+
+<p>Ok, problème résolu. Bon pas simple à tester mais ce n'est pas grave, on verra ça plus tard…<br />
+Mais les admins en backoffice aimeraient pouvoir créer des parties de poker à 3 tout le temps en fait.<br />
+Utilisons les groupes de validation ?</p>
+
+<p>Mais maintenant, on aimerait que quand il y a au moins 10 participants, un éclairage particulier soit mis en place sur la table. Ok c'est un simple <code>if</code> en fait. Mais à quel endroit ajouter cette vérification et déclencher l'allumage ?</p>
+
+<ul>
+<li>Dans notre contrôleur ?</li>
+<li>Dans notre manager ?</li>
+<li>Dans notre validateur ?</li>
+</ul>
+
+<p><strong>STOOOOP !</strong></p>
+
+<p>Et si on commençait à réfléchir plus loin que 2 coups ? Descendre votre code dans une classe appelée depuis votre contrôleur (notre GameManager ici) n'est pas un pattern en fait.</p>
+
+<p>Et si l'on partait du postulat que oui forcément <strong>les règles métiers vont très vite évoluer</strong> comme dans toute application et qu'on s'armait en conséquence pour pouvoir capitaliser sur notre métier, le rendre le plus <strong>explicite et évolutif</strong> possible ?<br />
+Et surtout le <strong>rendre indépendant</strong> de tout framework ?</p>
+
+<p>Vous pensez déjà que ça va être compliqué, que compliqué rime avec difficile à maintenir. Et si je vous disais qu'en fait c'est plus simple. Il suffit, comme tout le reste, d'<strong>adopter le bon design</strong> !</p>
+
+<h2 id="solutions">Solutions avec le DDD</h2>
+
+<p>Dans notre démonstration on voit bien que notre méthode <code>validateNbPlayers</code> devient :</p>
+
+<ul>
+<li>difficile à lire ;</li>
+<li>difficile à tester ;</li>
+<li>difficile à faire évoluer.</li>
+</ul>
+
+<p>On pourrait la sortir dans une classe à part pour l'exploser un peu, Symfony le permet. Mais du coup, le seul lien entre cette validation et notre entité serait Symfony. Est-ce vraiment normal ?</p>
+
+<p>Attention, je ne dis pas que les outils de Symfony ne sont pas adaptés. Je dis juste qu'<strong>on ne les utilise toujours pas dans les bonnes conditions</strong>.</p>
+
+<p>Rassurez-vous le développement objet a 30 ans, <strong>ces problématiques ont déjà été rencontrées par d'autres</strong>. La solution est en fait d'appliquer, comme vous le faites pour vos problématiques techniques, des patterns pour votre partie métier. Ces différents concepts sont réunis sous le DDD : Domain Driven Design.</p>
+
+<p>L'objectif est de remettre <strong>le métier au coeur de vos préoccupations</strong>, l'implémentation technique n'étant alors que secondaire. L'approche est intéressante car en structurant notre partie métier, on en vient souvent à simplifier notre partie technique qui en devient limpide.</p>
+
+<p>Dans notre exemple notre domaine est donc les jeux de cartes. On ne veut pas que l'implémentation que ce soit du stockage, du routing ou de la vue ne viennent changer la façon dont on va concevoir toute la logique business.</p>
+
+<p>Regardons quelques exemples en détail qui pourraient nous aider à organiser et structurer notre partie métier.</p>
+
+<p>Attention, je ne vais pas rentrer dans le détail de chaque pattern présenté. L'idée est plus de <strong>sensibiliser et montrer rapidement leur intérêt</strong> pour vos applications. Par contre, vous trouverez à la fin la bibliographie sur laquelle je me suis appuyé pour mettre tout ça en place ainsi que l'application fil rouge réalisée pour les besoins de l'article.</p>
+
+<h3 id="specification">Spécification</h3>
+
+<p>Ce pattern est le plus simple à mettre en place. Vous l'avez peut-être même déjà utilisé sans vous en rendre compte. Et pourtant il va nous aider à organiser notre métier avec une <strong>sémantique</strong> qui va guider tous les développeurs de l'application.</p>
+
+<pre class="language-php"><code>&lt;?php
+class PokerNbPlayersSpecification
+{
+    public function isSatisfiedBy($game)
+    {
+        return ('poker' === $game-&gt;gameType &amp;&amp; 3 &lt;= $game-&gt;nbPlayers);
+    }
+}
+</code></pre>
+
+<p>Une vraie classe métier ! Une sémantique guidée par le métier, un code indépendant, testable facilement. Que demande le peuple ?</p>
+
+<blockquote>
+  <p>"Comment on s'en sert pardi !"</p>
+</blockquote>
+
+<pre><code class="language-php">&lt;?php
+    /***/
+    public function validateNbPlayers(ExecutionContextInterface $context)
+    {
+        $pokerSpecification = new PokerNbPlayersSpecification();
+
+        if (!$pokerSpecification->isSatisfiedBy($this)) {
+            $message = 'Au moins 3 joueurs pour jouer au Poker';
+        }
+        //...
+    }
+    /***/
+</code></pre>
+
+<p>Évidemment, on peut maintenant facilement combiner toutes sortes de spécifications (AND, OR, XOR,...) et surtout utiliser une librairie plutôt que de refaire toujours les mêmes choses tel que <a href="https://github.com/bobthecow/Ruler">Ruler</a> ou <a href="https://github.com/hoaproject/Ruler">Hoa\Ruler</a>.</p>
+
+<p>Mais le concept est là ! Comme Hugo l'expliquait dans <a href="http://afsy.fr/avent/2013/02-principes-stupid-solid-poo">son article sur STUPID/SOLID</a>, le nommage est difficile mais indispensable. Et selon le DDD, <strong>plus vous l'orientez métier, et plus il vous sera utile</strong>.</p>
+
+<h3 id="cqrs">CQRS</h3>
+
+<p><strong>C</strong>ommand and <strong>Q</strong>uery <strong>R</strong>esponsibility <strong>S</strong>egregation.</p>
+
+<p>Un autre grand concept du DDD, qui se résume à <strong>séparer vos opérations de lecture et d'écriture</strong> avec pour objectif de rendre chacune d'elle <strong>plus simple et plus évolutive</strong>. Et encore une fois, la sémantique va bien nous y aider.</p>
+
+<p>Dans votre application classique 3-tiers, vous communiquez avec votre base de données de la même façon pour la lire que pour écrire dedans. Au final, on oriente tout en fonction de nos données, de la façon dont on va les stocker... Encore une fois, on privilégie la technique.</p>
+
+<p>Pourtant quand on y pense, pour la grande majorité de nos applications, on passe genre <strong>80% à lire ?</strong> 90% ? Et pourtant au fil du temps ce sont <strong>nos requêtes de lectures qui deviennent complexes</strong>.</p>
+
+<blockquote>
+  <p>En quoi ça nous aide avec nos problématiques métiers ?</p>
+</blockquote>
+
+<p>Si on reprend notre contrôleur initial, si on enlève le nom de notre action. Comment sait-on de quoi on parle ?</p>
+
+<p>La partie <code>Command</code> prend ainsi tout son intérêt. Depuis vos contrôleurs vous allez donner des ordres à votre application de la manière la plus précise possible : "Je veux créer une nouvelle partie de Poker avec 4 joueurs".</p>
+
+<pre><code class="language-php">&lt;?php
+// Je veux créer une nouvelle partie
+class StartGameCommand
+{
+    // de Blackjack/Poker/Tarot
+    public $gameType;
+
+    // Avec 4/5/6/N joueurs
+    public $nbPlayers;
+}
+</code></pre>
+
+<p>Tadam ! Et oui toujours rien de compliqué mais descriptif.</p>
+
+<p>On associe souvent un handler à une commande, qui va être un peu le service chargé de savoir quoi en faire.</p>
+
+<pre><code class="language-php">&lt;?php
+
+class StartGameCommandHandler
+{
+    public function handle($command)
+    {
+        $game = new Game();
+        $game->start($command->gameType, $command->nbPlayers);
+    }
+}
+</code></pre>
+
+<p>Rien de plus encore une fois. On notera l'introduction de la nouvelle méthode <code>start</code> sur notre modèle qu'on verra plus bas.<br />
+On a maintenant un service capable d'<strong>encapsuler le traitement métier</strong> lié à la création d'une partie. Si à la création d'une partie, vous avez besoin de créer une autre entité ou autre <strong>nécessaire</strong> à la création, c'est par ici !</p>
+
+<p>Par convention dans ce pattern, on utilise un Bus pour enregistrer tous nos handlers de commandes et ainsi n'avoir qu'un seul service à utiliser. Je vous en passe l'implémentation qui ne nous intéresse pas. Voici par contre notre contrôleur maintenant :</p>
+
+<pre><code class="language-php">&lt;?php
+class GameController extends Controller
+{
+    public function newAction(Request $request)
+    {
+        $startGame = new StartGameCommand();
+        $form = $this->createFormBuilder($startGame)
+            ->add('nbPlayers', 'text')
+            ->add('gameType', 'choice')
+            ->add('create', 'submit')
+            ->getForm()
+        ;
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $startGame = $form->getData();
+            // Notre bus va se charger d'executer notre handler adéquat en fonction de l'event passé
+            $this->get('command.bus')->execute($startGame);
+        }
+
+        return $this->render('AwUnoBundle:Game:new.html.twig', array(
+            'form' => $form->createView()
+        ));
+    }
+}
+</code></pre>
+
+<p>Pas de révolution, mais <strong>2 grosses améliorations</strong> :</p>
+
+<ul>
+<li>On ne travaille plus directement avec nos entités via notre formulaire. Plus besoin de setter/getter.<br />
+Et c'est souvent plus simple car on n'a pas besoin de faire des pirouettes dans notre formulaire. Notre command est notre objet <strong>dédié à notre action et pas à notre état</strong> !</li>
+<li>On voit maintenant qu'on parle d'une création de partie sans avoir le nom du contrôleur et l'action. Sous entendu que ce code à un autre endroit a tout autant de sens.</li>
+</ul>
+
+<p>Revenons maintenant à notre model et sa nouvelle méthode:</p>
+
+<pre><code class="language-php">&lt;?php
+
+class Game extends DomainEventProvider
+{
+    protected $id;
+
+    protected $gameType;
+
+    protected $nbPlayers;
+
+    protected $started = false;
+
+    public function start($gameType, $nbPlayers)
+    {
+        $this->gameType = $gameType;
+        $this->nbPlayers = $nbPlayers;
+        $this->raise(new GameStartedEvent($gameType, $nbPlayers));
+    }
+}
+
+class DomainEventProvider
+{
+    private $events;
+
+    protected function raise($event)
+    {
+        $this->events[] = $event;
+    }
+
+    public function getEventsSubmitted()
+    {
+        return $this->events;
+    }
+}
+</code></pre>
+
+<p>Plutôt que de faire <em>bêtement</em> des set, on utilise une vraie sémantique dans notre méthode qui décrit ce qu'elle fait. On peut faire ça plus facilement car notre modèle ici est dédié à l'écriture !</p>
+
+<p>Et bien sûr le petit détail, l'appel à la méthode <code>raise</code> qui nous permettra de stocker dans notre modèle les changements d'états. On pourra alors les relire à la fin et les répercuter sur notre modèle de lecture mais aussi sur n'importe quel listener.</p>
+
+<p>Ainsi on résoud par la même occasion notre fameuse problématique d'éclairage ! Il nous suffira de nous brancher sur l'event <code>GameStartedEvent</code> et de vérifier si on a 10 joueurs ou pas.</p>
+
+<h3 id="event-sourcing">EventSourcing</h3>
+
+<p>Souvent utilisé en même temps que le CQRS, l'Event Sourcing est basé sur le principe de stocker les <em>flux</em> plutôt que les <em>stocks</em> de vos données. On va ainsi stocker l'action que nous avons créer une partie avec l'id 123 plutôt que de stocker la partie en elle même.</p>
+
+<p>Oui étrange de prime abord. Et pourtant très puissant.</p>
+
+<p>Aujourd'hui si j'enregistre en bdd un joueur du nom de "Joueur 1", que celui-ci change ensuite de nom en "Joueur 2", je perds son nom original. Dommage non quand on sait que les données sont le coeur de tout système informatique !</p>
+
+<p>A l'inverse si je stock l'action de créer un joueur avec le nom "Joueur 1" puis que je stocke l'action du joueur de changer de nom en "Joueur 2", et bien mon état final sera le même et pourtant j'ai stocké quelque part une information supplémentaire sur mon joeur. L'event sourcing c'est ça !</p>
+
+<p>Rien de compliqué techniquement en plus. On pourrait écrire nos actions/events dans un simple fichier texte. On pourrait alors pour cette partie considérer utiliser un stockage bien différent de notre bdd relationnelle classique.</p>
+
+<blockquote>
+  <p>Et pour les afficher ?</p>
+</blockquote>
+
+<p>Il suffit de garder une "vue" de l'état de nos données synchronées avec notre flux d'actions. Et si demain on veut changer notre vue, rien de plus simple du coup, vu qu'elle n'est plus qu'un état, totalement décorellé de notre stockage !</p>
+
+<h3>Et plus encore</h3>
+
+<p>Le DDD regroupe beaucoup d'autres concepts dont certains vous sont familiers si vous utilisez Doctrine : Repository par exemple.</p>
+
+<p>Rien n'est figé d'ailleurs, aucune règle n'est universelle et applicable dans tous les cas. C'est aussi notre job de faire la part des choses. Mais quand certains concepts nous facilitent la vie, embrassent totalement la programmation objet, pourquoi s'en priver ?</p>
+
+<h2 id="exemple">L'application fil rouge</h2>
+
+<p>Pour illustrer la totalité des concepts introduits voici une petite sandbox Symfony que j'ai développé :<br />
+<a href="https://github.com/tyx/cqrs-php-sandbox">https://github.com/tyx/cqrs-php-sandbox</a></p>
+
+<p>Elle utilise la seule implémentation sérieuse de CQRS/EventSourcing en PHP de Benjamin Eberlei :<br />
+<a href="https://github.com/beberlei/litecqrs-php">https://github.com/beberlei/litecqrs-php</a></p>
+
+<p>Pour l'instant seul le jeu blackjack est développé. On pourrait certainement discuter sur plusieurs détails d'implémentation. Mais l'objectif n'est pas de donner une réponse universelle, je suis bien loin de détenir la véritié ;)<br />
+Mais de montrer qu'aujourd'hui le DDD n'est plus un simple fantasme, il peut être utilisé au coeur de nos applications Symfony.</p>
+
+<h2 id="bibliographie">Bibliographie</h2>
+
+<p>Voici la listes des différentes présentations, vidéos et articles de blog qui m'ont servi de support pour écrire cet article. Je me permet de les lister car les ressources sont encore trop rares sur le sujet.</p>
+
+<h3>DDD</h3>
+
+<ul>
+<li>[fr] [blog] <a href="http://www.croes.org/gerald/blog/domain-driven-design-ddd-pour-les-intimes/866/">http://www.croes.org/gerald/blog/domain-driven-design-ddd-pour-les-intimes/866/</a></li>
+<li>[fr] [blog] <a href="http://blog.octo.com/domain-driven-design-des-armes-pour-affronter-la-complexite/">http://blog.octo.com/domain-driven-design-des-armes-pour-affronter-la-complexite/</a></li>
+<li>[fr] [blog] <a href="http://www.infoq.com/fr/articles/seven-modelling-smells">http://www.infoq.com/fr/articles/seven-modelling-smells</a></li>
+<li>[en] [slides] <a href="https://speakerdeck.com/richardmiller/avoiding-the-mud">https://speakerdeck.com/richardmiller/avoiding-the-mud</a></li>
+<li>[en] [slides] <a href="https://speakerdeck.com/mathiasverraes/unbreakable-domain-models-dpc13">https://speakerdeck.com/mathiasverraes/unbreakable-domain-models-dpc13</a></li>
+<li>[en] [slides] <a href="https://speakerdeck.com/jacegu/my-domain-is-mine-and-i-dont-share-it">https://speakerdeck.com/jacegu/my-domain-is-mine-and-i-dont-share-it</a></li>
+</ul>
+
+<h3>DDD avec Doctrine2</h3>
+
+<ul>
+<li>[en] [slides] <a href="https://speakerdeck.com/rosstuck/extending-doctrine-2-for-your-domain-model">https://speakerdeck.com/rosstuck/extending-doctrine-2-for-your-domain-model</a></li>
+<li>[en] [slides] <a href="http://qafoo.com/talks/13_12_symfonycon_domain_events.pdf">http://qafoo.com/talks/13_12_symfonycon_domain_events.pdf</a></li>
+</ul>
+
+<h3>Spécification</h3>
+
+<ul>
+<li>[fr] [blog] <a href="http://blog.lepine.pro/php/gerer-des-regles-metiers-complexes-etou-changeantes">http://blog.lepine.pro/php/gerer-des-regles-metiers-complexes-etou-changeantes</a></li>
+<li>[fr] [blog] <a href="http://blog.xebia.fr/2009/12/29/le-pattern-specification-pour-la-gestion-de-vos-regles-metier/">http://blog.xebia.fr/2009/12/29/le-pattern-specification-pour-la-gestion-de-vos-regles-metier/</a></li>
+</ul>
+
+<h3>CQRS / Event Sourcing</h3>
+
+<ul>
+<li>[fr] [video] <a href="http://parleys.com/play/51b7f063e4b01033a7e4b764">http://parleys.com/play/51b7f063e4b01033a7e4b764</a></li>
+<li>[en] [blog] <a href="http://vadimcomanescu.wordpress.com/2012/06/26/cqrs-domain-events-and-ddd-review/">http://vadimcomanescu.wordpress.com/2012/06/26/cqrs-domain-events-and-ddd-review/</a></li>
+<li>[en] [blog] <a href="http://msdn.microsoft.com/en-us/library/jj554200.aspx">http://msdn.microsoft.com/en-us/library/jj554200.aspx</a></li>
+<li>[en] [blog] <a href="http://www.codeproject.com/Articles/555855/Introduction-to-CQRS">http://www.codeproject.com/Articles/555855/Introduction-to-CQRS</a></li>
+<li>[en] [blog] <a href="http://coding-insomnia.com/2012/05/28/a-trip-to-cqrs-intro/">http://coding-insomnia.com/2012/05/28/a-trip-to-cqrs-intro/</a></li>
+</ul>
+
+<h3>Exemple d'implémentation de CQRS</h3>
+
+<ul>
+<li>Ruby : <a href="https://github.com/cavalle/banksimplistic">https://github.com/cavalle/banksimplistic</a></li>
+<li>Fsharp : <a href="https://github.com/thinkbeforecoding/FsUno">https://github.com/thinkbeforecoding/FsUno</a></li>
+</ul>
+{% endblock article_content %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/timothee-barray.jpg') }}" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url 'https://connect.sensiolabs.com/profile/tyx' %}">{% block article_author 'Timothée Barray' %}</a>
+</h2>
+<p>
+Découvrant symfony 1.1 chez Kelkoo/Yahoo en 2008, il en est devenu un grand fan et n'a depuis eu de cesse d'orienter ses emplois autour de cette techno qu'elle est bien. Aujourd'hui chez <a href="http://verylastroom.com">VeryLastRoom</a>, il se passionne pour toutes les abréviations bizarres : ETL, DDD, CQRS, ... <br />
+Signe particulier : Il star plus vite que son ombre sur github.
+</p>
+{% endblock %}

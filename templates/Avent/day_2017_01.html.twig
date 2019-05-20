@@ -1,0 +1,395 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 1 - EasyAdminBundle : l'arrière-guichet easy peasy" %}
+
+{% block article_content %}
+    <h1>EasyAdminBundle : l'arrière-guichet easy peasy</h1>
+    <p>
+        Le back office (ou arrière-guichet✌️) est cette zone secrète de notre site, astucieusement dissimulée sous l'url <code>/admin</code>. Une fois la porte poussée s'ouvre alors un monde de formulaires, de processus et de règles de gestion, excitant ! Non pas trop.
+    </p>
+    <p>
+        Pour que cette porte ne soit pas semblable à celle de Rodin, jetons-nous corps et âmes dans le bundle EasyAdmin afin que votre back office soit aussi cool qu'un speakeasy ! 🍻
+    </p>
+    <h2>Hello EasyAdminBundle 👋</h2>
+    <p>
+        <a href="https://github.com/javiereguiluz/EasyAdminBundle" target="_blank">EasyAdmin</a> est un bundle permettant de mettre en place un back-office d'administration. Il est assez jeune au regard de Symfony, janvier 2015 marque <a target="_blank" href="https://github.com/javiereguiluz/EasyAdminBundle/releases/tag/v1.0.0">sa première release</a>.
+    </p>
+    <p>C'est aujourd'hui le bundle d'admin mis en avant par Symfony :</p>
+    <ul>
+        <li><a target="_blank" href="https://symfony.com/doc/current/bundles/EasyAdminBundle/index.html">Documentation</a> disponible sur la doc officielle de Symfony ;</li>
+        <li>Bundle par défaut sur <a target="_blank" href="https://github.com/symfony/recipes/blob/master/javiereguiluz/easyadmin-bundle/1.17/manifest.json#L8">l'alias "admin"</a> avec Flex (Symfony 4).</li>
+    </ul>
+    <p>
+        Il mise sur la simplicité : il ne vous faudra que quelques lignes de code pour avoir une interface d'administration de vos entités (gestion CRUD, recherche, pagination, template responsive) clé en main.
+    </p>
+    <p>
+        Cette simplicité n'est pas dû au hasard : c'est une vraie volonté insufflée par <a target="_blank" href="https://github.com/javiereguiluz">@javiereguiluz</a>, créateur du bundle et accessoirement membre de la Core Team Symfony. Javier pèse soigneusement l'intérêt des évolutions proposées et n'hésite pas à les refuser si elles sortent d'un cas d'utilisation général.
+    </p>
+    <h2>Sonata ou EasyAdmin ? 🤔</h2>
+    <p>
+        Pendant longtemps Sonata Admin a été le bundle de référence au sein des projets Symfony, à juste titre car il était le plus complet et documenté de l'écosystème. Cependant Sonata Admin est complexe, il comporte de nombreuses dépendances rendant les mises à jour laborieuses. Sur ma dernière migration (admin peu complexe) de Sonata vers EasyAdmin, le gain de code a été assez significatif :
+    </p>
+    <p>
+        <img src="{{ asset('bundles/afsyfront/images/avent/2017/01/banner-pr.png') }}" alt="PR EasyAdminBundle" />
+    </p>
+    <p>
+        Avec en prime une cure d'amincissement de bundles :
+    </p>
+    <pre class="language-git"><code>+  new EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle(),
+
+-  new Sonata\CoreBundle\SonataCoreBundle(),
+-  new Sonata\BlockBundle\SonataBlockBundle(),
+-  new Sonata\AdminBundle\SonataAdminBundle(),
+-  new Sonata\DoctrineORMAdminBundle\SonataDoctrineORMAdminBundle(),
+-  new Knp\Bundle\MenuBundle\KnpMenuBundle(),
+-  new App\AdminBundle\AdminBundle(),</code></pre>
+    <p>
+        La courbe d'apprentissage de Sonata Admin est également assez élevée : difficile d'être autonome sans avoir sa documentation sous la main, le bundle a une logique propre et demande une bonne expérience pour être à l'aise dessus. N'étant pas expert Sonata, je me suis trop souvent retrouvé en train de batailler pour implémenter une feature pourtant simple.
+    </p>
+    <p>
+        À l'inverse, EasyAdmin repose sur des concepts standards de Symfony, et c'est pour moi l'un de ses principaux atouts : pour ajouter une fonctionnalité (CMS, gestion de média…), il suffit de créer un contrôleur et passer sur du code Symfony standard.
+    </p>
+    <p>
+        Ceci dit, EasyAdmin apporte moins de fonctionnalités que Sonata, il ne gère pas la sécurité (filtre selon les rôles), ni une gestion des médias et gère moins bien les relations complexes entre entités. Mais c'est le postulat d'EasyAdmin qui se veut le MVP du back office et offre une grande flexibilité pour développer des fonctionnalités plus complexes.
+    </p>
+    <p>
+        À l'utilisation, il existe une grosse différence au niveau de la configuration des bundles :
+    </p>
+    <ul>
+        <li>Sonata privilégie une configuration par classes/services assez verbeuse;</li>
+        <li>EasyAdmin offre une configuration par fichier YAML, verbeuse aussi mais plus simple et <em>human-friendly</em>.</li>
+    </ul>
+    <h2>EasyAdminBundle, Symfony 4 et Flex ✨</h2>
+    <p>
+        Vous l'avez peut-être vu passer : la 4ème version de Symfony a été publiée hier ! L'occasion parfaite pour voir ensemble l'intégration du bundle avec Symfony 4. Je n'entrerai pas dans le détail des nouveautés : d'autres articles du calendrier s'en chargeront dans les jours à venir.
+    </p>
+    <p>⚠️ Dans cet article, les exemples et configs sont donnés au format Symfony 4, la structure a sensiblement changé !</p>
+    <h3>Installation de Symfony 4</h3>
+    <p>
+        Commencez par récupérer la base de votre projet Symfony grâce au <a target="_blank" href="https://github.com/symfony/skeleton">nouveau dépôt skeleton</a> :
+    </p>
+    <pre class="language-bash"><code>composer create-project symfony/skeleton beerfactory</code></pre>
+    <h3>Ajout d'EasyAdminBundle</h3>
+    <p>Ajoutez-y votre bundle d'admin préféré (spoil : EasyAdminBundle) grâce aux recettes apportée par Flex :</p>
+    <pre class="language-bash"><code>composer req admin</code></pre>
+
+    <p>Flex a automatiquement ajouté EasyAdminBundle (configuré sur l'alias admin) et créé les fichiers de configuration nécessaires :</p>
+    <ul>
+        <li>config/packages/routes/easy_admin.yaml</li>
+        <li>config/packages/easy_admin.yaml :</li>
+    </ul>
+    <pre class="language-yaml"><code># easy_admin:
+#    entities:
+#        # List the entity class name you want to manage
+#        - App\Entity\Product
+#        - App\Entity\Category
+#        - App\Entity\User</code></pre>
+    <p>C'est dans ce fichier que vous allez renseigner les entités gérées par EasyAdmin.</p>
+    <h3>Ajout des entités</h3>
+    <p>Récupérez <a target="_blank" href="http://symfony.com/blog/introducing-the-symfony-maker-bundle">le bundle Maker</a>  pour pouvoir générer vos entités (bye bye SensioGeneratorBundle 💋) :</p>
+    <pre class="language-bash"><code>composer req maker</code></pre>
+    <p>Créez votre entité :</p>
+    <pre class="language-bash"><code>bin/console make:entity Beer</code></pre>
+    <p>Renseignez son namespace complet dans le fichier de config <code>config/packages/easy_admin.yaml</code>, afin de l'activer dans EasyAdmin :</p>
+    <pre class="language-bash"><code>easy_admin:
+    entities:
+        - App\Entity\Beer
+</code></pre>
+    <h3>Branchement de la base de données</h3>
+    <p>On dit également bye bye au <code>parameters.yml</code> dans Symfony 4 💋, on utilise désormais les variables d'environnement, plus standards. Modifiez la variable <code>DATABASE_URL</code> avec les infos de votre base de données dans votre fichier <code>.env</code> (situé à la racine du projet), puis créez votre base de données :</p>
+    <pre class="language-bash"><code>bin/console doctrine:database:create --if-not-exists
+bin/console doctrine:schema:update --force
+</code></pre>
+    <p>Il ne vous reste plus qu'à lancer le serveur et à vous rendre sur <a href="http://127.0.0.1:8000/admin">http://127.0.0.1:8000/admin</a> ✨</p>
+    <pre class="language-bash"><code>php -S 127.0.0.1:8000 -t public</code></pre>
+    <p>
+        <img src="{{ asset('bundles/afsyfront/images/avent/2017/01/screen-easyadmin-1.png') }}" alt="EasyAdminBundle screen" />
+    </p>
+    <p>Hello EasyAdminBundle, easy peasy ! 🏄</p>
+    <h3>Affiner son admin</h3>
+    <p>
+        Par défaut, EasyAdminBundle offre une configuration CRUD assez basique, vous allez devoir l'affiner pour répondre au mieux à votre besoin métier. Voici les types de développement que vous allez rencontrer :
+        <ul>
+            <li>La phase simple qui consiste à modifier la config YAML pour affiner l'affichage (champs, actions, menu, design…);</li>
+            <li>La phase plus complexe pour ajouter de la logique personnalisée (en étendant <a target="_blank" href="https://symfony.com/doc/current/bundles/EasyAdminBundle/book/complex-dynamic-backends.html#customization-based-on-overriding-the-default-admincontroller">le contrôleur d'EasyAdminBundle</a> ou se brancher sur <a href="https://symfony.com/doc/current/bundles/EasyAdminBundle/book/complex-dynamic-backends.html#customization-based-on-symfony-events">les événements</a>)</li>
+        </ul>
+    </p>
+    <p>Plutôt qu'expliquer étape par étape la configuration du bundle (<a target="_blank" href="https://symfony.com/doc/current/bundles/EasyAdminBundle/index.html">la documentation</a> du bundle est très complète), je vais vous donner quelques astuces liées à EasyAdminBundle qui je l'espère vous seront utiles une fois les bases assimilées.</p>
+    <h2>12 tips sur EasyAdminBundle 🍭</h2>
+
+    <h3>1 - Bien gérer sa configuration d'admin</h3>
+
+    <p>Comme évoqué précédemment, la configuration du bundle repose essentiellement sur des fichiers YAML. Afin de retrouver vos petits, évitez de tout mettre dans le fichier <code>config/package/easy_admin.yaml</code> : il deviendra vite énorme et les conflits git seront récurrents.</p>
+
+    <p>Créez plutôt un dossier <code>admin</code> avec des sous fichiers :</p>
+
+    <pre class="language-bash"><code>config/
+    ├── package/
+    │   ├── easy_admin.yaml
+    │   ├── admin/
+    │       ├── menu.yaml
+    │       ├── config.yaml
+    │       ├── entities/
+    │           ├── beer.yaml
+    │           └── category.yaml</code></pre>
+
+    <p>puis importez le tout depuis <code>easy_admin.yaml</code> : </p>
+
+    <pre class="language-yaml"><code>imports:
+        # Depuis Symfony 2.8
+        - { resource: admin/ }</code></pre>
+
+    <h3>2 - Utiliser des constantes en YAML</h3>
+
+    <p>Avec une administration complexe, vous allez sûrement devoir appeler des constantes PHP depuis votre YAML, c'est possible depuis <a href="https://symfony.com/blog/new-in-symfony-3-2-php-constants-in-yaml-files">la version 3.2 de Symfony</a> :</p>
+
+    <pre class="language-yaml"><code>!php/const AppBundle\Entity\Beer::ONLINE_STATE</code></pre>
+
+    <h3>3 - Utiliser des filtres DQL</h3>
+
+    <p>Vous pourriez avoir besoin de séparer une entité en plusieurs sous-entités reflétant mieux votre métier. Dans mon cas, je veux séparer les bières organiques (naturelles, sans ajout d'ingrédients superflus) des autres, je peux utiliser l'option <code>dql_filter</code> dans laquelle je peux mettre une expression DQL :</p>
+
+    <pre class="language-yaml"><code>easy_admin:
+        entities:
+            Beer:
+                class: App\Entity\Beer
+                list:
+                    dql_filter: "entity.isOrganic = false"
+                    fields:
+                        - { property: 'name' }
+                        - { property: 'description' }
+                        - { property: 'labelThumbnail' }
+            OrganicBeer:
+                class: App\Entity\Beer
+                list:
+                    dql_filter: "entity.isOrganic = true"
+                    fields:
+                        - { property: 'name' }
+                        - { property: 'description' }
+                        - { property: 'labelThumbnail' }</code></pre>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/01/screen-easyadmin-2.png') }}" alt="EasyAdminBundle screen" /></p>
+
+    <p>Vous pouvez aussi injecter vos variables d'environnement :</p>
+
+    <pre class="language-yaml"><code>dql_filter: "entity.roles LIKE '%%env(ROLE_ADMIN)%%'"</code></pre>
+
+    <p>
+        Dans cet exemple, on liste les utilisateurs avec le rôle %ROLE_ADMIN% (on utilise LIKE ainsi que les % en début et fin pour rechercher dans le tableau sérialisé).
+    </p>
+
+    <h3>4 - Mutualiser sa configuration YAML</h3>
+    <p>Dans l'exemple précédent nous avons dupliqué la configuration pour la liste, elle est ici assez concise, mais cela peut devenir problématique sur des configurations plus complexes. Ainsi, vous pouvez utiliser les ancres YAML <code>&amp;</code> et <code>*</code> pour mutualiser :</p>
+
+<pre class="language-yaml"><code>easy_admin:
+    entities:
+        Beer:
+            class: App\Entity\Beer
+            list:
+                dql_filter: "entity.isOrganic = false"
+                fields: &beerListFields
+                    - { property: 'name' }
+                    - { property: 'description' }
+                    - { property: 'labelThumbnail' }
+        OrganicBeer:
+            class: App\Entity\Beer
+            list:
+                dql_filter: "entity.isOrganic = true"
+                fields: *beerListFields
+</code></pre>
+
+    <p>C'est mieux ! Mais si l'on veut ajouter un champ uniquement pour les bières organiques ? Nous pouvons utiliser l'opérateur <code><</code> :</p>
+<pre class="language-yaml"><code>easy_admin:
+    entities:
+        Beer:
+            class: App\Entity\Beer
+            list:
+                dql_filter: "entity.isOrganic = false"
+                fields: &beerListFields
+                    - { property: 'name' }
+                    - { property: 'description' }
+                    - { property: 'labelThumbnail' }
+        OrganicBeer:
+            class: App\Entity\Beer
+            list:
+                dql_filter: "entity.isOrganic = true"
+                fields:
+                    <<: *beerListFields
+                    <<: { property: 'abv' } # alcohol by volume
+    </code></pre>
+    <p>Vous voilà YAML master ✌️</p>
+    <h3>5 - Activer le toggle pour des propriétés non booléennes</h3>
+    <p>Vous l'avez remarqué, EasyAdmin affiche un élégant switch dans la liste lorsque la propriété affichée est une booléenne. Mais que faire si vous avez une propriété non booléenne <code>status</code> qui peut avoir comme état <code>ONLINE</code> et <code>OFFLINE</code> ? L'astuce est de passer par une propriété virtuelle dans votre entité :</p>
+    <pre class="language-php"><code>public function getIsOnline()
+{
+    return $this-&gt;status === self::ONLINE_STATUS;
+}
+
+public function setIsOnline($isOnline)
+{
+    $this-&gt;setStatus($isOnline ? self::ONLINE_STATUS : self::OFFLINE_STATUS);
+}
+</code></pre>
+
+    <p>puis dans votre config utilisez le type <code>toggle</code> sur votre propriété virtuelle :</p>
+    <pre class="language-yaml"><code>- { property: 'isOnline', type: 'toggle' }</code></pre>
+
+    <h3>6 - Bien gérer son menu</h3>
+    <p>Le menu est le point central de votre admin : soignez-le ! Vous pouvez le rendre clair en utilisant des séparateurs, des sous-menus et des icônes (http://fontawesome.io/icons/) :</p>
+    <pre class="language-yaml"><code># config/packages/admin/menu.yaml
+
+easy_admin:
+    design:
+        menu:
+            - label: 'Manager'
+            - label: 'Beers'
+              icon: 'beer'
+              children:
+                  - { entity: 'Beer', icon: 'thermometer-2', label: 'Classic beers'}
+                  - { entity: 'OrganicBeer', icon: 'leaf', label: 'Organic beers'}
+            - { entity: 'Category', icon: 'th-list', label: 'Categories' }
+            - label: 'Env: %env(APP_ENV)%'
+</code></pre>
+
+    <p>Vous pouvez aussi afficher vos variables d'environnement avec <code>%env(APP_ENV)%</code> dans vos labels.</p>
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/01/screen-easyadmin-3.png') }}" alt="EasyAdminBundle screen" /></p>
+
+    <h3>7 - Utiliser le markup du thème AdminLTE</h3>
+    <p>EasyAdminBundle utilise <a target="_blank" href="https://adminlte.io/themes/AdminLTE">le thème AdminLTE</a> en coulisse, vous pouvez donc utiliser la majorité du markup des widgets présent dans la démo, le css étant déjà embarqué dans EasyAdmin. Cela peut être utile pour vos pages personnalisées au sein de votre admin.</p>
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/01/screen-easyadmin-4.png') }}" alt="EasyAdminBundle screen" /></p>
+    <h3>8 - Ajouter un dashboard</h3>
+    <p>Par défaut, la page d'accueil est la première entité configurée : généralement nous avons besoin d'un dashboard servant de page d'accueil. Vous pouvez en ajouter une en créant un contrôleur étendant celui d'EasyAdmin : </p>
+    <pre class="language-bash"><code>bin/console make:controller AdminController</code></pre>
+    <pre class="language-php"><code>namespace App\Controller;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AdminController as BaseAdminController;
+
+class AdminController extends BaseAdminController
+{
+    /**
+     * @Route("/dashboard", name="admin_dashboard")
+     */
+    public function dashboard()
+    {
+        return $this-&gt;render('admin/dashboard.html.twig');
+    }
+}
+</code></pre>
+
+    <p>Créez le template étendant celui d'EasyAdmin : </p>
+    <pre class="language-twig"><code>{% raw %}% extends '@EasyAdmin/default/layout.html.twig' %}
+
+{% block main %}
+    Dashboard
+{% endblock %}
+{% endraw %}</code></pre>
+
+    <p>Modifiez votre route dans <code>config/routes/easy_admin.yaml</code> pour passer par votre contrôleur:</p>
+
+    <pre><code class="language-yaml">easy_admin_bundle:
+    resource: 'Controller/AdminController.php'
+    prefix: /admin
+    type: annotation</code></pre>
+
+    <p>Enfin, ajoutez à votre menu le dashboard avec la propriété <code>default: true</code></p>
+    <pre><code class="language-yaml">easy_admin:
+    design:
+        menu:
+            - label: Dashboard
+              icon: dashboard
+              route: admin_dashboard
+              default: true
+</code></pre>
+
+    <p>Il ne vous manque plus qu'à le construire (pensez au widget du thème AdminLTE). Généralement, vous procéderez toujours de cette manière pour ajouter des sections personnalisées dans votre admin.</p>
+    <h3>9 - Surcharger le template d'un champ</h3>
+    <p>Un besoin récurrent est d'avoir un template personnalisé pour un champ (au niveau de la vue liste). Dans notre exemple, nous voulons afficher l'indice <a target="_blank" href="https://fr.wikipedia.org/wiki/International_Bitterness_Unit">IBU</a> (International Bitterness Unit) de nos bières sous forme de barre de pourcentage. </p>
+    <p>Commencez par créer un template dans <code>templates/EasyAdmin/Beer/fields/ibu.html.twig</code> : </p>
+
+    <pre><code class="language-twig">{% raw %}&lt;div class="progress-group"&gt;
+    &lt;span class="progress-text"&gt;IBU&lt;/span&gt;
+    &lt;span class="progress-number"&gt;&lt;b&gt;{{ value }}&lt;/b&gt;/120&lt;/span&gt;
+
+    &lt;div class="progress sm"&gt;
+        &lt;div class="progress-bar progress-bar-aqua" style="width: {{ (100 * value / 120) }}%"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+{% endraw %}</code></pre>
+
+    <p>Au sein du template, vous pouvez accéder à la valeur courante grâce à <code>value</code> et à l'entité avec <code>item</code>. Comme évoqué précédemment le markup de la barre de progression vient d'AdminLTE : pas besoin d'ajouter du CSS !</p>
+    <p>Enfin, indiquez quel template doit utiliser EasyAdmin dans la config de votre entité Beer :</p>
+    <pre><code class="language-yaml">- { property: 'ibu', template: 'EasyAdmin/Beer/fields/ibu.html.twig' }</code></pre>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/01/screen-easyadmin-5.png') }}" alt="EasyAdminBundle screen" /></p>
+
+    <h3>10 - Surcharger le template d'édition d'une entité</h3>
+    <p>Il existe 3 écrans principaux dans EasyAdmin : <code>view</code>, <code>edit</code> et <code>list</code>. Vous pouvez les surcharger en créant un template avec le nom de l'action dans le répertoire portant le nom de l'entité. Pour surcharger le template d'édition d'une bière, nous allons donc créer le fichier <code>templates/easy_admin/Beer/edit.html.twig</code> :</p>
+    <pre><code class="language-twig">{% raw %}{% extends '@EasyAdmin/default/edit.html.twig' %}
+
+{% block main %}
+
+    {# Ajouter votre logique ici #}
+
+    {% block entity_form %}
+        {{ form(form) }}
+    {% endblock entity_form %}
+{% endblock %}
+{% endraw %}</code></pre>
+
+    <p>De manière générale, vous pouvez surcharger tous les templates du bundle <a target="_blank" href="https://github.com/javiereguiluz/EasyAdminBundle/tree/master/src/Resources/views/default">listés ici</a> (paginator, menu, etc…).</p>
+    <h3>11 - Filtrer les actions selon les rôles utilisateurs</h3>
+    <p>Comme évoqué en début d'article, EasyAdmin ne permet pas de filtrer des actions en fonction des rôles de l'utilisateur courant. Je ne vais pas détailler comment l'implémenter mais plutôt vous rediriger vers cet article l'expliquant très bien : </p>
+    <p><a href="https://leanpub.com/practicalsymfony3/read#leanpub-auto-adding-simple-access-control-to-easyadminbundle" target="_blank">https://leanpub.com/practicalsymfony3/read#leanpub-auto-adding-simple-access-control-to-easyadminbundle</a></p>
+
+    <h3>12 - Étendre la recherche</h3>
+
+    <p>EasyAdmin fait une recherche "full text" dans toutes les propriétés de votre entité mais il ne prend pas en compte les relations. Dans mon cas, j'ai une entité <code>Beer</code> liée à une entité <code>Category</code>, par défaut, il est impossible de remonter une bière en faisant une recherche sur le nom de catégorie.</p>
+    <p>Pour y remédier, vous pouvez modifier la requête DQL afin d'ajouter des champs. Dans votre <code>AdminController</code> (cf. tips 8), surchargez la méthode <code>createSearchQueryBuilder()</code> :</p>
+    <pre><code class="language-php">protected function createSearchQueryBuilder($entityClass, $searchQuery, array $searchableFields, $sortField = null, $sortDirection = null, $dqlFilter = null)
+{
+    // Récupération du query builder parent
+    $qb = parent::createSearchQueryBuilder($entityClass, $searchQuery, $searchableFields, $sortField, $sortDirection, $dqlFilter);
+
+    // Si entité Beer, prise en charge du nom de la catégorie
+    if ($entityClass === Beer::class) {
+        $qb-&gt;innerJoin('entity.category', 'c')
+            -&gt;orWhere('LOWER(c.name) LIKE :category_name')
+            -&gt;setParameter('category_name', '%'.$searchQuery.'%')
+        ;
+    }
+
+    return $qb;
+}
+</code></pre>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/01/screen-easyadmin-6.png') }}" alt="EasyAdminBundle screen" /></p>
+
+    <h2>Pour conclure 💋</h2>
+    <p>Au premier regard, EasyAdminBundle semble être limité pour développer des back offices complexes : il offre par défaut des fonctionnalités réduites au regard de Sonata. </p>
+    <p>En réalité, il est très facile de développer et d'intégrer des fonctionnalités avancées au sein d'EasyAdminBundle. Ce dernier s'apparente à une belle pierre d'argile facilement façonnable permettant d'intégrer au mieux ses processus métiers. Chez JoliCode, nous l'utilisons désormais sur de nombreux projets, nous n'avons pas eu de mal à intégrer un CMS complexe. N'hésitez pas à sauter le pas !  </p>
+    <p>EasyAdmin est un bundle qui évolue assez vite avec des releases fréquentes. Voici quelques fonctionnalités qui verront sûrement le jour dans les prochaines releases :</p>
+    <ul>
+        <li>Recherche par filtres</li>
+        <li>Actions de masse</li>
+        <li>Export en CSV, JSON, Excel et PDF</li>
+        <li>Meilleur gestion de la sécurité </li>
+    </ul>
+
+    <p>Vous pouvez retrouver le suivi de ces fonctionnalités dans <a target="_blank" href="https://github.com/javiereguiluz/EasyAdminBundle/projects/1">la board "Future Features" du projet GitHub</a>. Encore une fois, je ne peux que vous recommander de lire <a href="https://symfony.com/doc/current/bundles/EasyAdminBundle/index.html">la documentation</a> 🤓 pour connaitre chaque recoin du bundle. </p>
+
+    <p>À vos arrières-guichets ! 🚀🚀</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/baptiste-adrien.png') }}" alt="Baptiste adrien" />
+{% endblock %}
+
+{% block article_bio %}
+<h2><a href="{% block author_url %}https://twitter.com/shinework{% endblock %}" target="_blank">{% block article_author %}Baptiste Adrien{% endblock %}</a></h2>
+<p>
+    Web développeur chez JoliCode ❤️
+</p>
+{% endblock %}

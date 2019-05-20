@@ -6,12 +6,11 @@
 
 # sf2
 web/bundles/
-app/bootstrap.php.cache
-app/cache/*
-app/logs/*
+var/cache/*
+var/log/*
 build/
 vendor
-app/config/parameters.yml
+config/parameters.yml
 web/css/compiled
 web/js/compiled
 composer.phar

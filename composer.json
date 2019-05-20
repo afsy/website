@@ -2,10 +2,8 @@
     "name": "afsy/site",
     "description": "Site internet de l'AFSY",
     "autoload": {
-        "psr-4": { "": "src/" },
-        "classmap": [ "app/AppKernel.php", "app/AppCache.php" ]
+        "psr-4": { "Afsy\\": "src/" }
     },
-    "comment": "right version of hwi oauth bundle should be 0.6, not released ATM",
     "require": {
         "php": ">=5.3.3",
         "symfony/symfony": "3.4",
@@ -27,22 +25,21 @@
         "doctrine/doctrine-fixtures-bundle": "^2.3",
 
         "knplabs/knp-paginator-bundle": "^2.5.3",
-        "hwi/oauth-bundle": "dev-master",
+        "hwi/oauth-bundle": "^0.6.3",
         "knplabs/knp-menu-bundle": "^2.1",
 
         "incenteev/composer-parameter-handler": "^2.0",
         "sonata-project/admin-bundle": "^3.10",
         "sonata-project/doctrine-orm-admin-bundle": "^3.1",
         "knplabs/knp-markdown-bundle": "^1.5",
-        "symfony/polyfill-php70": "1.6"
+        "symfony/polyfill-php70": "1.6",
+        "php-http/httplug-bundle": "^1.15"
     },
     "scripts": {
         "symfony-scripts": [
             "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
         ],
         "post-install-cmd": [
@@ -60,7 +57,7 @@
         "symfony-tests-dir": "tests",
         "symfony-assets-install": "relative",
         "incenteev-parameters": {
-            "file": "app/config/parameters.yml"
+            "file": "config/parameters.yml"
         }
     }
 }

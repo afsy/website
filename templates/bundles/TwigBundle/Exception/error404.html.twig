@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block page_title %} - Erreur{% endblock %}
+
+{% block body %}
+    <div role="main" id="main">
+        <div class="wrapper">
+
+            <div id="error404">
+                <h2>Page introuvable</h2>
+
+                <p>
+                    Oups, il semblerait qu'on a égaré le document que vous demandez :-(
+                </p>
+
+                <p>
+                    En attendant qu'on la retrouve, peut-être cela vous intéresserait de retourner à <a href="{{ path('homepage') }}">notre page d'accueil</a> ?
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

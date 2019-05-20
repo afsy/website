@@ -1,0 +1,753 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 3 - Déployer un projet Symfony 4 avec Flex sur Heroku" %}
+
+{% block article_content %}
+    <h1 id="déployer-un-projet-symfony-flex-sur-heroku">Déployer un projet Symfony 4 avec Flex sur Heroku</h1>
+
+    <p>Nous allons aborder trois sujets ici :</p>
+
+    <ul>
+        <li>Qu'est-ce que Flex ?</li>
+        <li>Heroku, c'est quoi ?</li>
+        <li>Créons notre projet et déployons-le !</li>
+    </ul>
+
+    <p>Pour que vous le sachiez dès maintenant, si vous souhaitez consulter les sources du projet créé pour l'occasion de cet article, vous pouvez le voir <a href="https://github.com/Pierstoval/FlexAndHeroku">sur le dépôt Github associé</a>. Bonne lecture !</p>
+
+    <h2 id="quest-ce-que-flex">Qu'est-ce que Flex ?</h2>
+
+    <p>Flex, parfois appelé Symfony Flex, est un plugin Composer que vous pouvez installer dans tout projet PHP, et qui va permettre de standardiser la structure et la composition d'un projet.</p>
+
+    <p>D'autres articles existent à ce propos, notamment dans le cadre de ce calendrier de l'avent, et je ne vais donc pas trop m'étaler sur le sujet.</p>
+
+    <p>En quelques phrases, je peux vous dire que Flex :</p>
+
+    <ul>
+        <li>Permet d'utiliser certains alias pour installer un ou plusieurs packages (comme <code>cli</code> pour <code>symfony/console</code>, ou <code>orm</code> pour plusieurs packages relatifs à l'ORM Doctrine).</li>
+        <li>Permet d'automatiser la configuration par défaut d'un package via des "recettes" (<code>recipe</code>) pouvant être définies dans les repositories publics <a href="https://github.com/symfony/recipes-contrib">symfony/recipes-contrib</a> et <a href="https://github.com/symfony/recipes">symfony/recipes</a></li>
+        <li>Grâce à la nouvelle structure de Symfony 4 &amp; Flex, standardise totalement la structure d'un projet PHP ainsi que l'utilisation de variables d'environnement et de scripts composer automatisés.</li>
+    </ul>
+
+    <h2 id="heroku-cest-quoi">Heroku, c'est quoi ?</h2>
+
+    <p>C'est une plateforme permettant de faire du cloud-computing.</p>
+
+    <p>On peut l'utiliser pour héberger des bases de données, des applications (web, workers, etc.), et les orchestrer.</p>
+
+    <p>Sa configuration peut être faite via l'utilisation d'une ligne de commande, ou par un tableau de bord en ligne, les deux étant facilement accessibles.</p>
+
+    <h3 id="prix">Prix</h3>
+
+    <p>Heroku est payant mais propose un accès gratuit jusqu'à un certain nombre d'heures d'utilisation. Dans le cas d'une application web, celle-ci rentre dans un état de "sommeil" après 30 minutes d'activité, permettant d'économiser le temps disponible. La formule gratuite est par conséquent très pratique pour les prototypes ou les environnements d'intégration continue.</p>
+
+    <p>Pour le reste, le prix dépend des performances que vous souhaitez, des add-ons que vous utilisez, et surtout du temps d'utilisation.</p>
+
+    <p>Par exemple, un abonnement <code>Hobby</code> à $7 par mois vous coûtera seulement $3.50 si vous l'utilisez 15 jours et le désactivez ensuite. C'est très important à savoir, car la facture sera calculée en fonction du temps d'exécution de vos Dynos (voir plus loin).</p>
+
+    <h3 id="un-serveur-heroku">Un serveur Heroku</h3>
+
+    <p>Les machines utilisent une distribution nommée Cedar, qui est basée sur Ubuntu, et on peut configurer une application pour utiliser Cedar 14.04 ou Cedar 16.04 (les dernières LTS de Ubuntu).</p>
+
+    <p>Les applications sont exécutées dans des containers Linux appelés <strong>Dynos</strong>.</p>
+
+    <p>Il existe trois types de Dynos : <code>web</code>, <code>worker</code> et <code>one-off</code> et ils sont configurés par un fichier nommé <code>Procfile</code>.</p>
+
+    <ul>
+        <li>Les dynos <code>web</code> sont exécutés de façon persistante et sont configurés par votre <code>Procfile</code> et sont les seuls à recevoir les requêtes HTTP envoyées sur votre application.</li>
+        <li>Les dynos <code>worker</code> sont des scripts configurés dans votre <code>Procfile</code> et sont majoritairement utilisés pour des tâches de fond, comme des Queues.</li>
+        <li>Les dynos <code>one-off</code> sont des dynos temporaires que vous pouvez créer, par exemple en exécutant manuellement des scripts en ligne de commande avec <code>heroku run {script...}</code>. Ils sont utilisés également au déploiement d'une release (cela permet d'éviter qu'un déploiement de 10 minutes soit décompté de votre temps de gratuité…), mais aussi par le <code>Heroku Scheduler</code> pour orchestrer des tâches de fond (similaire à <code>crontab</code>).</li>
+    </ul>
+
+    <p>Que votre application soit de type <code>web</code>, <code>worker</code> ou autre, l'exécution sera toujours effectuée dans un Dyno.</p>
+
+    <h3 id="personnaliser-notre-serveur">Personnaliser notre serveur</h3>
+
+    <p>En tant qu'utilisateur, <strong>nous n'avons pas accès à la distribution</strong>. Nous ne pouvons donc pas modifier les packages de la machine.</p>
+
+    <p>En revanche, pour pallier cela, Heroku utilise un système de <strong>buildpacks</strong> et d'<strong>add-ons</strong> qui, eux, vont pouvoir exécuter des commandes dans la machine afin d'installer certains packages.</p>
+
+    <h4 id="les-buildpacks">Les buildpacks</h4>
+
+    <p>Les buildpacks comprennent un ensemble de scripts ayant plusieurs responsabilités :</p>
+
+    <ul>
+        <li>Détecter le "type" de votre application (Ruby, PHP, Javascript, etc.).</li>
+        <li>Compiler votre application en exécutant des scripts (installer des dépendances, etc.).</li>
+        <li>Mettre à jour votre configuration Heroku après l'installation, comme installer des add-ons ou changer le script par défaut exécuter sur un dyno.</li>
+    </ul>
+
+    <p>Par exemple, le buildpack <strong>PHP</strong> est détecté automatiquement si un fichier <code>composer.json</code> est présent à la racine de votre projet.</p>
+
+    <p>Il est également capable d'installer des extensions PHP si celles-ci sont présentes dans la section <code>require</code> de votre <code>composer.json</code>, comme <code>"require": { "ext-intl": "*" }</code> par exemple.</p>
+
+    <p>Les buildpacks sont indispensables à la configuration de base d'une application. À moins que vous n'exécutiez que des scripts en bash…</p>
+
+    <h4 id="les-add-ons">Les add-ons</h4>
+
+    <p>Les add-ons, eux, sont généralement là pour intégrer des services externes à votre projet, comme des bases de données, des rapports de logs, du profiling ou un système d'envoi de mails.</p>
+
+    <p>La plupart des add-ons sont payants mais offrent une option gratuite avec des services et performances limités.</p>
+
+    <p>Ils ont plusieurs avantages :</p>
+
+    <ul>
+        <li>Ils sont souvent capables d'ajouter automatiquement des variables d'environnement à votre configuration afin que vous puissiez l'utiliser dans votre projet. </li>
+        <li>Ils permettent de détacher l'application de ses services (par exemple, en mettant la BDD sur un serveur externe), ce qui facilite grandement la maintenance et nous permet de nous  passer complètement d'infogérance sur tous ces services. </li>
+        <li>Et comme avec d'autres services de <em>cloud computing</em> (comme <a href="https://sensio.cloud">SensioCloud</a>), cela se conjugue très bien avec les dernières bonnes pratiques de Symfony qui recommandent l'utilisation de variables d'environnement.</li>
+    </ul>
+
+    <p>De façon générale vous aurez quasiment toujours besoin d'addons, ne serait-ce pour la base de données et l'envoi de mails, et les offres gratuites sont largement suffisantes pour des projets simples et peu gourmands en ressources.</p>
+
+    <h2 id="création-dun-projet-symfony-4-avec-flex">Création d'un projet Symfony 4 avec Flex</h2>
+
+    <p>Allez, maintenant qu'on sait en quoi consistent les outils que nous allons utiliser, servons-nous-en !</p>
+
+    <p>Tout d'abord, on crée le projet quelque part sur notre machine :</p>
+
+    <pre><code class="language-sh">$ composer create-project symfony/skeleton:^4.0 my_project</code></pre>
+
+    <p>Le package <code>symfony/skeleton</code> ne contient qu'une seule chose : un fichier <code>composer.json</code> déterminant quelques dépendances pour créer un projet web avec Symfony, dont Flex.</p>
+
+    <p>Les dépendances principales qui nous permettent de faciliter tout ça sont les suivantes :</p>
+
+    <ul>
+        <li><code>symfony/flex</code> : Le plugin Composer dont on parlait au début de cet article.</li>
+        <li><code>symfony/lts</code> : Un simple package composer permettant de définir quelle version majeure de Symfony nous allons utiliser. Ce package définit simplement des conflits de version avec la version majeure supérieure.</li>
+        <li><code>symfony/framework-bundle</code> : Le package principal qui nous permet de créer un projet web avec Symfony.</li>
+    </ul>
+
+    <p>L'avantage, c'est que ce dernier package dispose d'une <a href="https://github.com/symfony/recipes/tree/master/symfony/framework-bundle/3.3">recette Flex</a> qui va initialiser tout un tas d'outils dans notre projet :</p>
+
+    <ul>
+        <li>La configuration par défaut du framework dans le dossier <code>config/</code>.</li>
+        <li>Un front-controller dans un dossier <code>public/</code>.</li>
+        <li>Un micro-kernel préconfiguré dans <code>src/Kernel.php</code>.</li>
+        <li>Des variables d'environnement et des fichiers <code>.env</code> et <code>.env.dist</code> pour configurer notre projet.</li>
+        <li>Un fichier <code>.gitignore</code> déjà prêt à l'usage.</li>
+        <li>Des scripts Composer pour vider le cache et installer les assets à chaque <code>composer install/update</code></li>
+    </ul>
+
+    <p>Et étant donné que <code>symfony/console</code> est désormais une dépendance de base de <code>symfony/skeleton</code>, Flex va également suivre la <a href="https://github.com/symfony/recipes/tree/master/symfony/console/3.3">recette</a> de ce package et installer un fichier <code>bin/console</code> comme nous l'adorons dans Symfony !</p>
+
+    <p>Toutes ces actions sont définies dans les différentes <strong>recettes</strong> des packages en question, et l'avantage c'est que grâce à Flex, si nous supprimons un package, tout ce qui a été préalablement installé et configuré par cette recette sera supprimé ! Plus besoin de se prendre la tête avec des suppressions manuelles si on désire supprimer un package !</p>
+
+    <h3 id="créer-un-environnement-git">Créer un environnement <code>git</code></h3>
+
+    <p>C'est aujourd'hui indispensable à tout projet !</p>
+
+    <pre><code class="language-sh">$ git init</code></pre>
+
+    <p>Nous utiliserons Git plus tard, mais il fallait au moins préparer le terrain.</p>
+
+    <h3 id="installons-le-serveur-web-de-symfony">Installons le serveur web de Symfony</h3>
+
+    <p>Pour tester notre projet nous allons utiliser le bundle <code>WebServerBundle</code> de Symfony, qui nous permet d'exécuter des commandes utilisant le serveur PHP intégré afin de pouvoir lancer notre projet en dev :</p>
+
+    <pre><code class="language-sh">$ composer require --dev server</code></pre>
+
+    <p><code>server</code> est simplement un alias du package <code>symfony/web-server-bundle</code>, encore une fois, merci Flex !</p>
+
+    <h3 id="créons-un-contrôleur-par-défaut">Créons un contrôleur par défaut</h3>
+
+    <p>Ce contrôleur sera nécessaire, car désormais il n'y a plus de contrôleur par défaut dans Symfony :</p>
+
+    <pre><code class="language-php">&lt;?php
+
+// src/Controller/DefaultController.php
+
+namespace App\Controller;
+
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class DefaultController
+{
+    /**
+     * @Route("/", name="homepage")
+     */
+    public function index(): Response
+    {
+        return new Response('It works! ☺');
+    }
+}</code></pre>
+
+    <p>Et n'oublions pas d'installer les annotations, pour que ça fonctionne :</p>
+
+    <pre><code class="language-sh">$ composer req annot
+Using version ^5.1 for sensio/framework-extra-bundle
+./composer.json has been updated
+Loading composer repositories with package information
+Updating dependencies (including require-dev)
+Package operations: 7 installs, 0 updates, 0 removals
+  - Installing doctrine/lexer (v1.0.1): Loading from cache
+  - Installing doctrine/inflector (v1.2.0): Loading from cache
+  - Installing doctrine/collections (v1.5.0): Loading from cache
+  - Installing doctrine/cache (v1.7.1): Loading from cache
+  - Installing doctrine/annotations (v1.5.0): Loading from cache
+  - Installing doctrine/common (v2.8.1): Loading from cache
+  - Installing sensio/framework-extra-bundle (v5.1.2): Loading from cache
+Writing lock file
+Generating autoload files
+Symfony operations: 2 recipes (3ac0e3828e0167b379d5284080768bc5)
+  - Configuring doctrine/annotations (>=1.0): From github.com/symfony/recipes:master
+  - Configuring sensio/framework-extra-bundle (>=4.0): From github.com/symfony/recipes:master
+Executing script cache:clear [OK]
+Executing script assets:install --symlink --relative public [OK]
+</code></pre>
+
+    <p>La recette de <code>doctrine/annotations</code> contient un fichier très utile :</p>
+
+    <pre><code class="language-yaml"># config/routes/annotations.yaml
+controllers:
+    resource: ../../src/Controller/
+    type: annotation</code></pre>
+
+    <p>Et hop ! Tous nos contrôleurs seront désormais automatiquement chargés via des annotations !</p>
+
+    <h3 id="testons-cette-configuration">Testons cette configuration</h3>
+
+    <p>On exécute la commande du <code>WebServerBundle</code> pour voir notre site :</p>
+
+    <pre><code class="language-sh">$ php bin/console server:run
+
+ [OK] Server listening on http://127.0.0.1:8000
+
+ // Quit the server with CONTROL-C.
+</code></pre>
+
+    <p>Cela nous donne une page de ce genre :</p>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/default_localhost_works.jpg') }}" alt="localhost default working project" title=""></p>
+
+    <p>Super ! Ça fonctionne, donc on peut partir du principe qu'on a un projet Symfony opérationnel !</p>
+
+    <h3 id="installation-de-la-ligne-de-commande-heroku">Installation de la ligne de commande Heroku</h3>
+
+    <p>Maintenant nous allons préparer le déploiement sur Heroku.</p>
+
+    <p>Dans un premier temps il faut télécharger l'application en ligne de commande fournie par Heroku : <a href="https://devcenter.heroku.com/articles/heroku-cli#download-and-install">https://devcenter.heroku.com/articles/heroku-cli#download-and-install</a></p>
+
+    <p>Une fois fait, on peut l'exécuter pour vérifier qu'elle est bien installée et fonctionnelle :</p>
+
+    <pre><code class="language-sh">$ heroku --version
+heroku-cli/6.14.36-15f8a25 (linux-x64) node-v8.7.0</code></pre>
+
+    <h3 id="se-connecter-avec-heroku">Se connecter avec Heroku</h3>
+
+    <p>Évidemment, il faut d'abord <a href="https://signup.heroku.com/">créer un compte sur Heroku</a>, et une fois fait, il faut indiquer à la CLI de Heroku quel compte nous utilisons :</p>
+
+    <pre><code class="language-sh">$ heroku login
+Enter your Heroku credentials:
+Email: me@domain.com
+Password: *************█
+Logged in as me@domain.com</code></pre>
+
+    <p>Cela va permettre à Heroku CLI de nous donner des détails sur nos projets, leur configuration, etc.</p>
+
+    <p>À partir de maintenant, <strong>toutes les commandes <code>heroku</code> seront exécutées depuis le dossier du projet</strong>.</p>
+
+    <h3 id="créer-le-projet-sur-heroku">Créer le projet sur Heroku</h3>
+
+    <p>Heroku permet de tout faire depuis la ligne de commande, alors profitons-en :</p>
+
+    <pre><code class="language-sh">$ heroku create
+Creating app... done, stark-escarpment-87840
+https://stark-escarpment-87840.herokuapp.com/ | https://git.heroku.com/stark-escarpment-87840.git</code></pre>
+
+    <p>Celui-ci nous donne l'URL finale du projet (utilisant le nom de domaine <code>herokuapp.com</code>) ainsi que l'URL de la remote <code>git</code> à utiliser.</p>
+
+    <h3 id="installer-le-buildpack">Installer le buildpack</h3>
+
+    <p>Nous allons installer le buildpack PHP pour être sûrs de pouvoir automatiser tout ce dont nous avons besoin :</p>
+
+    <pre><code class="language-sh">$ heroku buildpacks:set heroku/php
+Buildpack set. Next release on stark-escarpment-87840 will use heroku/php.
+Run git push heroku master to create a new release using this buildpack.</code></pre>
+
+    <p><strong>Note :</strong> En réalité nous n'avons pas vraiment besoin d'installer ce buildpack, puisqu'il est détecté automatiquement grâce à la présence d'un fichier <code>composer.json</code> à la racine de notre projet. Mais nous l'ajoutons manuellement histoire de faire les choses proprement.</p>
+
+    <p>Heroku nous propose de déployer mais nous ferons ça plus tard, quand le projet sera prêt :)</p>
+
+    <h3 id="rajouter-la-branche-heroku-en-tant-que-remote">Rajouter la branche Heroku en tant que <code>remote</code></h3>
+
+    <p>L'intérêt de cette remote est de pouvoir déployer avec un simple <code>git push</code>.</p>
+
+    <p>Et l'url vient de nous être donnée, alors un simple copier/coller suffit :</p>
+
+    <pre><code class="language-sh">$ git remote add heroku https://git.heroku.com/stark-escarpment-87840.git</code></pre>
+
+    <p><strong>Note :</strong> nommer la remote <code>heroku</code> permet à Heroku CLI de détecter automatiquement le projet en cours sans avoir à le spécifier en tant qu'argument à chaque commande.</p>
+
+    <h3 id="accéder-à-la-production">Accéder à la production</h3>
+
+    <p>Pour accéder directement à l'url de notre projet, on peut exécuter cette commande :</p>
+
+    <pre><code class="language-sh">$ heroku open</code></pre>
+
+    <p>Vous devriez voir quelque chose de ce genre :</p>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/heroku_default_home.jpg') }}" alt="heroku default home" title=""></p>
+
+    <p>Évidemment, pour l'instant il n'y a rien, mais au moins nous savons que Heroku a entendu nos demandes.</p>
+
+    <h3 id="ajout-des-variables-denvironnement">Ajout des variables d'environnement</h3>
+
+    <p>En premier lieu, il faut rajouter les variables d'environnement que Symfony nous dit de spécifier.</p>
+
+    <p>Les références sont dans <code>.env.dist</code>, et à chaque package que nous ajouterons, si des variables sont ajoutées, il faudra les rajouter manuellement à Heroku.</p>
+
+    <p>Pour l'instant, seules 2 variables sont demandées par Symfony :</p>
+
+    <pre><code class="language-sh">$ heroku config:set APP_ENV=prod APP_SECRET=Wh4t3v3r</code></pre>
+
+    <h3 id="préparons-notre-projet-pour-quil-soit-compatible-avec-heroku">Préparons notre projet pour qu'il soit compatible avec Heroku</h3>
+
+    <p>Nous allons maintenant configurer le projet pour l'envoyer sur Heroku.</p>
+
+    <p>Dans un premier temps, configurons Nginx.</p>
+
+    <h4 id="créer-une-configuration-nginx">Créer une configuration nginx</h4>
+
+    <p>Comme toute application web, nous avons besoin d'un serveur web : ça tombe bien, le buildpack PHP nous permet d'utiliser Apache ou Nginx directement !</p>
+
+    <p>Vous pouvez créer un fichier <code>heroku/nginx.conf</code> et y mettre ceci :</p>
+
+    <pre><code>
+# Try to serve file directly, fallback to rewrite.
+location / {
+    try_files $uri @rewriteapp;
+}
+
+# Rewrite all to index.php. This will trigger next location.
+location @rewriteapp {
+    rewrite ^(.*)$ /index.php/$1 last;
+}
+
+# Redirect everything to Heroku.
+# In development, replace this with your php-fpm/php-cgi proxy.
+location ~ ^/index\.php(/|$) {
+    try_files @heroku-fcgi @heroku-fcgi;
+    internal;
+}
+
+# Return 404 for all other php files not matching the front controller.
+# This prevents access to other php files you don't want to be accessible.
+location ~ \.php$ {
+    return 404;
+}
+</code></pre>
+
+    <p>Cette config fait plusieurs choses :</p>
+
+    <ul>
+        <li>Tente de délivrer le fichier demandé, s'il existe.</li>
+        <li>Sinon, renvoie l'intégralité de la requête HTTP au fichier <code>index.php</code>, qui sera délégué au processus FCGI configuré par Heroku (un processus <code>php-fpm</code>).</li>
+        <li>Si un autre fichier PHP est demandé, on renvoie une 404. Cela permet de faire en sorte qu'aucun fichier PHP ne soit directement exécuté et/ou visible.</li>
+    </ul>
+
+    <h4 id="créer-le-procfile">Créer le Procfile</h4>
+
+    <p>Le <code>Procfile</code> est un fichier qui décrit les différents dynos que vous allez posséder dans votre projet.</p>
+
+    <p>Chaque dyno sera comptabilisé dans le temps de consommation relatif à votre abonnement.</p>
+
+    <p>Ici nous n'avons besoin que d'un seul dyno, en l'occurence un dyno de type <code>web</code> (pour rappel, le nom du dyno est unique, donc nous ne pouvons avoir qu'un seul dyno nommé <code>web</code>).</p>
+
+    <p>Chaque ligne du fichier se compose de deux informations : le type de dyno et le script à exécuter.</p>
+
+    <p>Le script correspondra ici à celui documenté dans le buildpack PHP, en l'occurrence une instance nginx suivie du nom du dossier servant de point d'entrée au vhost.</p>
+
+    <p>Nous devons également rajouter la configuration de nginx précédemment créée, nécessaire pour utiliser Symfony (sinon, seule la page d'accueil sera utilisable !).</p>
+
+    <pre><code>web: vendor/bin/heroku-php-nginx -C heroku/nginx.conf public/</code></pre>
+
+    <p>Cela suffira à Heroku pour qu'il puisse exécuter notre code.</p>
+
+    <p>Il est possible de personnaliser également la configuration de php-fpm, ou même de complètement surcharger toute la configuration de nginx, mais c'est juste l'affaire d'un argument spécifiant le fichier utilisé, et nous n'en avons pas besoin pour l'instant.</p>
+
+    <p>Dans le doute, <a href="https://devcenter.heroku.com/articles/custom-php-settings">la documentation sur Heroku</a> vous sera utile pour savoir comment personnaliser vos paramètres.</p>
+
+    <h3 id="déployer-le-projet-sur-heroku">Déployer le projet sur Heroku</h3>
+
+    <p>Du coup, déployons notre projet !</p>
+
+    <pre><code class="language-sh">$ git add .
+$ git commit -m "Initial files"
+$ git push heroku master
+(...)
+remote: Compressing source files... done.
+remote: Building source:
+remote:
+remote: -----&gt; PHP app detected
+remote: -----&gt; Bootstrapping...
+remote: -----&gt; Installing platform packages...
+remote:        - php (7.1.11)
+remote:        - nginx (1.8.1)
+remote:        - apache (2.4.29)
+remote: -----&gt; Installing dependencies...
+remote:        Composer version 1.5.2 2017-09-11 16:59:25
+remote:        Loading composer repositories with package information
+remote:        Installing dependencies from lock file
+remote:        Package operations: 40 installs, 0 updates, 0 removals
+remote:        (...)
+remote:        Generating optimized autoload files
+remote:        (...)
+remote:        Executing script cache:clear [OK]
+remote:        Executing script assets:install --symlink --relative public [OK]
+remote:
+remote: -----&gt; Preparing runtime environment...
+remote: -----&gt; Checking for additional extensions to install...
+remote: -----&gt; Discovering process types
+remote:        Procfile declares types -&gt; web
+remote:
+remote: -----&gt; Compressing...
+remote:        Done: 16.7M
+remote: -----&gt; Launching...
+remote:        Released v13
+remote:        https://stark-escarpment-87840.herokuapp.com/ deployed to Heroku
+remote:
+remote: Verifying deploy... done.
+To https://git.heroku.com/stark-escarpment-87840.git</code></pre>
+
+    <p>Le projet est maintenant déployé, nous pouvons l'ouvrir et le tester :</p>
+
+    <pre><code class="language-sh">$ heroku open</code></pre>
+
+    <p>Et nous devrions voir ceci :</p>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/heroku_prod_works.jpg') }}" alt="heroku prod working" title=""></p>
+
+    <hr>
+
+    <p>Bon, maintenant que le projet est déployé, nous n'allons pas nous arrêter là, n'est-ce pas ?</p>
+
+    <p>Nos projets sont bien plus complexes et utilisent d'autres composants, alors continuons sur notre lancée.</p>
+
+    <h3 id="installer-une-base-de-données">Installer une base de données</h3>
+
+    <h4 id="préparer-le-projet-lui-même">Préparer le projet lui-même</h4>
+
+    <p>D'abord, installer Doctrine ORM :</p>
+
+    <pre><code class="language-sh">$ composer require orm-pack
+Using version ^1.0 for symfony/orm-pack
+(...)
+Symfony operations: 3 recipes (7d946f30d2601a4530d4c10790aefad1)
+  - Configuring doctrine/doctrine-cache-bundle (1.3.2): From auto-generated recipe
+  - Configuring doctrine/doctrine-bundle (1.6): From github.com/symfony/recipes:master
+  - Configuring doctrine/doctrine-migrations-bundle (1.2): From github.com/symfony/recipes:master
+(...)</code></pre>
+
+    <p>Les différentes recettes Flex vont rajouter ceci :</p>
+
+    <ul>
+        <li><code>DoctrineBundle</code> : <br>
+            <ul><li>La variable d'environnement <code>DATABASE_URL</code> à notre fichier <code>.env</code>.</li>
+                <li>La configuration par défaut du bundle, utilisant cette même variable d'environnement.</li></ul></li>
+        <li><code>DoctrineMigrationsBundle</code> : <br>
+            <ul><li>La configuration du bundle, permettant de stocker nos migrations dans <code>src/Migrations</code>.</li></ul></li>
+    </ul>
+
+    <p>Nous reviendrons plus tard sur les migrations.</p>
+
+    <h4 id="préparer-la-bdd-sur-heroku">Préparer la BDD sur Heroku</h4>
+
+    <p>Ensuite, il faut installer l'addon Heroku nécessaire à l'utilisation de notre base de données :</p>
+
+    <pre><code class="language-sh">$ heroku addons:create heroku-postgresql:hobby-dev
+Creating heroku-postgresql:hobby-dev on stark-escarpment-87840... free
+Database has been created and is available
+ ! This database is empty. If upgrading, you can transfer
+ ! data from another database with pg:copy
+Created postgresql-flexible-83322 as DATABASE_URL
+Use heroku addons:docs heroku-postgresql to view documentation</code></pre>
+
+    <p>Du coup, Heroku va utiliser un autre serveur (qui ne nous concerne pas) pour gérer la base de données, ce qui facilite grandement la gestion &amp; migration de l'application tout en laissant la BDD de son côté.</p>
+
+    <p><strong>Note :</strong> Par défaut j'utilise PostgreSQL ici, tout simplement parce qu'Heroku dispose de facilités d'utilisations et de monitoring avec ce SGBD, mais il existe aussi de très bons add-ons pour MySQL ou MariaDB, comme ClearDB ou JawsDB, qui sont eux aussi des services cloud externes, et qui peuvent être intégrés à Heroku tout comme <code>heroku-postgresql</code>.<br>
+        Il faut donc <strong>obligatoirement</strong> modifier nos fichiers <code>.env</code> et <code>.env.dist</code> pour changer le driver PDO de <code>mysql</code> (utilisé par défaut) à <code>pgsql</code>.</p>
+
+    <p>L'installation de l'addon aura automatiquement rajouté une variable d'environnement à la configuration du projet :</p>
+
+    <pre><code class="language-bash">$ heroku config
+=== stark-escarpment-87840 Config Vars
+APP_ENV:      prod
+APP_SECRET:   Wh4t3v3r
+DATABASE_URL: postgres://...  &lt;--- Cette variable vient d'être rajoutée par l'addon heroku-postgresql</code></pre>
+
+    <p><strong>Note :</strong> Les autres add-ons cités plus haut pour MySQL et MariaDB peuvent avoir une variable d'environnement avec un nom différent. Libre à vous de changer vos fichiers <code>.env</code>, votre configuration Doctrine ou votre configuration Heroku, afin de l'utiliser.</p>
+
+    <p>Il ne reste plus qu'à créer nos entités comme on le fait habituellement !</p>
+
+    <p>Par contre, pour le schéma, il est préférable de tout faire via des migrations.</p>
+
+    <p>Et en parlant de migrations… Comment les exécuter sur Heroku ?</p>
+
+    <h3 id="personnaliser-les-scripts-de-déploiement">Personnaliser les scripts de déploiement</h3>
+
+    <p>Avant de parler de nos migrations, voyons comment personnaliser nos déploiements.</p>
+
+    <p>Heroku se base sur les buildpacks pour déterminer les commandes à exécuter lors d'une release.</p>
+
+    <p>Vu que notre projet est majoritairement un projet PHP, le buildpack PHP permet de créer un script dans la section <code>scripts</code> de notre fichier <code>composer.json</code> : <code>compile</code>.</p>
+
+    <p>Ce script est exécuté au moment du déploiement, via <code>composer compile</code> (et Composer détecte automatiquement que cette commande n'existe pas nativement alors il tente de la récupérer dans <code>composer.json</code>).</p>
+
+    <p>L'avantage c'est que si ce script échoue, le déploiement n'a pas lieu !</p>
+
+    <p>On peut donc y mettre nos migrations.</p>
+
+    <h4 id="créer-notre-migration">Créer notre migration</h4>
+
+    <p>Créons notre base de données ainsi que la première migration nécessaire.</p>
+
+    <pre><code class="language-sh">$ php bin/console doctrine:database:create
+$ php bin/console doctrine:migrations:diff</code></pre>
+
+    <p><strong>Note :</strong> Cette commande fonctionne <strong>uniquement</strong> si vous avez une <strong>base de données entièrement vide</strong>.<br>
+        Dans le doute, si vous voulez être sûr que la migration créée est correcte, vous pouvez exécuter cette suite de <br>
+        commandes:</p>
+
+    <pre><code class="language-sh">$ php bin/console doctrine:database:drop --force
+$ php bin/console doctrine:database:create
+$ php bin/console doctrine:migrations:diff</code></pre>
+
+    <p>Et sinon, créez une migration avec la commande <code>doctrine:migrations:generate</code>, copiez un <em>dump</em> de votre base de données et collez-le directement dans le fichier de migration fraîchement créé.</p>
+
+    <p>Une fois fait, vous devriez avoir quelque chose de ce style :</p>
+
+    <pre><code class="language-php">&lt;?php declare(strict_types = 1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Migrations\AbstractMigration;
+use Doctrine\DBAL\Schema\Schema;
+
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+class Version20171106100053 extends AbstractMigration
+{
+    public function up(Schema $schema)
+    {
+        // this up() migration is auto-generated, please modify it to your needs
+        $this-&gt;abortIf($this-&gt;connection-&gt;getDatabasePlatform()-&gt;getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
+
+        $this-&gt;addSql('CREATE SEQUENCE Post_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
+        $this-&gt;addSql('CREATE TABLE Post (id INT NOT NULL, title VARCHAR(255) NOT NULL, content TEXT NOT NULL, PRIMARY KEY(id))');
+    }
+
+    public function down(Schema $schema)
+    {
+        // this down() migration is auto-generated, please modify it to your needs
+        $this-&gt;abortIf($this-&gt;connection-&gt;getDatabasePlatform()-&gt;getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
+
+        $this-&gt;addSql('CREATE SCHEMA public');
+        $this-&gt;addSql('DROP SEQUENCE Post_id_seq CASCADE');
+        $this-&gt;addSql('DROP TABLE Post');
+    }
+}</code></pre>
+
+    <p>Si vous avez bien votre migration, continuons !</p>
+
+    <h4 id="ajouter-les-migrations-à-notre-déploiement">Ajouter les migrations à notre déploiement</h4>
+
+    <p>Pour exécuter nos migrations, il suffit d'une seule commande :</p>
+
+    <pre><code class="language-sh">$ php bin/console doctrine:migrations:migrate
+
+                    Application Migrations
+
+WARNING! You are about to execute a database migration that could result in schema changes and data lost. Are you sure you wish to continue? (y/n)y
+Migrating up to 20171106100053 from 0
+
+  ++ migrating 20171106100053
+
+     -&gt; CREATE SEQUENCE Post_id_seq INCREMENT BY 1 MINVALUE 1 START 1
+     -&gt; CREATE TABLE Post (id INT NOT NULL, title VARCHAR(255) NOT NULL, content TEXT NOT NULL, PRIMARY KEY(id))
+
+  ++ migrated (2.7s)
+
+  ------------------------
+
+  ++ finished in 2.7s
+  ++ 1 migrations executed
+  ++ 2 sql queries
+</code></pre>
+
+    <p>En l'exécutant en local, tout fonctionne. Maintenant, il faut l'exécuter en production, et <strong>seulement au déploiement</strong>.</p>
+
+    <p>Rajoutons donc un script Composer pour ça, mais pas n'importe lequel : le script que le buildpack PHP déclenche au moment du déploiement (voir plus haut).</p>
+
+    <pre><code class="language-json">{
+    "scripts": {
+        "compile": [
+            "php bin/console doctrine:migrations:migrate"
+        ]
+    }
+}</code></pre>
+
+    <p>C'est tout !</p>
+
+    <p>À chaque déploiement cette commande sera exécutée dans le contexte de l'application. Et vu que tout le contexte hérite des variables d'environnement, même pas besoin de spécifier <code>--env=prod</code> comme on le faisait avant !</p>
+
+    <p>Et maintenant on déploie à nouveau :</p>
+
+    <pre><code class="language-sh">$ git add . &amp;&amp; git commit -m "Setup migrations"
+$ git push heroku master
+(...)
+remote: -----&gt; Running 'composer compile'...
+remote:        &gt; php bin/console doctrine:migrations:migrate
+remote:
+remote:                            Application Migrations
+remote:
+remote:
+remote:        Migrating up to 20171106100053 from 0
+remote:
+remote:          ++ migrating 20171106100053
+remote:
+remote:             -&gt; CREATE SEQUENCE Post_id_seq INCREMENT BY 1 MINVALUE 1 START 1
+remote:             -&gt; CREATE TABLE Post (id INT NOT NULL, title VARCHAR(255) NOT NULL, content TEXT NOT NULL, PRIMARY KEY(id))
+remote:
+remote:          ++ migrated (0.06s)
+remote:
+remote:          ------------------------
+remote:
+remote:          ++ finished in 0.06s
+remote:          ++ 1 migrations executed
+remote:          ++ 2 sql queries
+(...)</code></pre>
+
+    <p>Les migrations ont été exécutées sur la base de production gérée par Heroku, tout est ok !</p>
+
+    <h3 id="exécuter-des-cron-avec-heroku-et-symfony">Exécuter des <code>cron</code> avec Heroku et Symfony</h3>
+
+    <p>Tout d'abord, il nous faut une commande à exécuter, créons-en donc une simple:</p>
+
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Command;
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class SimpleMessageCommand extends Command
+{
+    protected static $defaultName = 'app:simple-message';
+
+    protected function configure()
+    {
+        $this-&gt;setDescription('Simply sends a message to stdout and stderr.');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $now = date('Y-m-d H:i:s');
+        $output-&gt;writeln("[$now] Stdout message");
+        fwrite(STDERR, "[$now] Stderr message");
+    }
+}</code></pre>
+
+    <p>L'idée c'est de pouvoir consulter les logs de Heroku pour voir ces messages.</p>
+
+    <p><strong>Pro tip:</strong> Depuis Symfony 3.4, on peut utiliser la propriété statique <code>Command::$defaultName</code>. Si notre commande est définie en tant que service, cela permettra à Symfony d'optimiser le chargement de la console et la compilation du container en n'instanciant pas la commande.</p>
+
+    <h4 id="installer-heroku-scheduler">Installer Heroku Scheduler</h4>
+
+    <p>Heroku Scheduler est l'add-on qui va nous permettre d'exécuter des tâches à des intervalles réguliers personnalisables.</p>
+
+    <p>Installons-le dans notre projet :</p>
+
+    <pre><code class="language-sh">$ heroku addons:create scheduler:standard
+Creating scheduler:standard on stark-escarpment-87840... free
+This add-on consumes dyno hours, which could impact your monthly bill. To learn more:
+http://devcenter.heroku.com/addons_with_dyno_hour_usage
+
+To manage scheduled jobs run:
+heroku addons:open scheduler
+
+Created scheduler-reticulated-65091
+Use heroku addons:docs scheduler to view documentation</code></pre>
+
+    <p>Et maintenant on va ouvrir cet add-on pour le personnaliser :</p>
+
+    <pre><code class="language-sh">$ heroku addons:open scheduler</code></pre>
+
+    <p>Vous devriez voir ceci :</p>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/scheduler_home.jpg') }}" alt="Scheduler home" title=""></p>
+
+    <p>Le bouton <code>Add new job</code> va nous permettre de faire exactement ce qu'il nous faut !</p>
+
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/03/scheduler_job.jpg') }}" alt="Scheduler job" title=""></p>
+
+    <p>Alors la fréquence est clairement moins flexible qu'une <em>vraie</em> tâche <code>cron</code>, mais pour les usages les plus simples, ça reste la meilleure solution. Sinon, il faudra un worker, ce qui est plus complexe à mettre en place (et est plus cher). </p>
+
+    <p>On peut en tout cas exécuter notre tâche :</p>
+
+    <ul>
+        <li>Une fois par jour à une heure/demi-heure donnée.</li>
+        <li>Toutes les heures, à la dizaine de minutes donnée.</li>
+        <li>Toutes les 10mn à partir du moment où la tâche est créée / mise à jour.</li>
+    </ul>
+
+    <p>Une fois votre commande configurée, vous pouvez attendre quelques minutes que celle-ci s'exécute.</p>
+
+    <p>Lorsque le temps est passé, vous pouvez voir les logs :</p>
+
+    <pre><code class="language-sh">$ heroku logs | grep scheduler
+2017-12-01T21:02:56.302995+00:00 heroku[scheduler.8108]: Starting process with command `php bin/console app:simple-message`
+2017-12-01T21:02:56.979408+00:00 heroku[scheduler.8108]: State changed from starting to up
+2017-12-01T21:02:58.362544+00:00 app[scheduler.8108]: [2017-12-01 21:02:58] Stdout message
+2017-12-01T21:02:58.482250+00:00 app[scheduler.8108]: [2017-12-01 21:02:58] Stderr message
+2017-12-01T21:02:58.486752+00:00 heroku[scheduler.8108]: Process exited with status 0
+2017-12-01T21:02:58.504268+00:00 heroku[scheduler.8108]: State changed from up to complete</code></pre>
+
+    <p>On voit bien nos messages <code>Stdout</code> et <code>Stderr</code> s'afficher !</p>
+
+    <p>Et voilà, nous avons une routine correctement configurée !</p>
+
+    <p><strong>Note :</strong> Attention au temps d'exécution de vos commandes, car celui-ci sera décompté du temps consommé de votre dyno, qui peut vous être facturé selon votre abonnement. Ceci dit, une commande qui dure 5 secondes, exécutée 144 fois par jour, cela fait 21600 secondes de consommées dans le mois. Ce n'est pas grand chose comparé aux 2592000 secondes pour un serveur web allumé 24h/24… </p>
+
+    <h3 id="améliorer-son-environnement-heroku">Améliorer son environnement Heroku</h3>
+
+    <p>Heroku étant plein d'addons, pour la plupart gratuits, je vous en recommande quelques-uns :</p>
+
+    <ul>
+        <li><a href="https://elements.heroku.com/addons/autobus">Autobus</a>, un système de backups pour votre base de données, très pratique et dont le plan gratuit est idéal pour les projets simples.</li>
+        <li><a href="https://elements.heroku.com/addons/blackfire">Blackfire</a> (beta), l'indémodable outil de profilage pour tous nos projets PHP !</li>
+        <li><a href="https://elements.heroku.com/addons/mailgun">Mailgun</a>, excellent outil d'envoi d'emails, qui peut être directement branché à Swiftmailer grâce à la variable d'environnement <code>MAILER_URL</code>, et dont le plan gratuit avec 400 mails par jour (soit 12000 par mois) est largement suffisant pour la plupart des projets (le plan suivant étant à 50000 mails par mois…).</li>
+        <li><a href="https://elements.heroku.com/addons/papertrail">Papertrail</a>, outil de monitoring des logs de tous vos dynos, très utile pour garder un œil sur vos erreurs PHP. Il peut vous envoyer un mail lorsqu'il y a des erreurs à intervalles réguliers, permet de créer des filtres pour les types d'erreurs, de commandes, etc.. Le gros avantage c'est que nous n'avons même pas besoin de configurer monolog autrement qu'en lui disant de tout envoyer vers <code>php://stderr</code> !</li>
+        <li><a href="https://devcenter.heroku.com/articles/deploy-hooks">Deploy Hooks</a>, un bon moyen d'envoyer une petite notification de succès d'un déploiement sur Slack, IRC, par email ou même avec une requête HTTP à n'importe quelle URL. </li>
+    </ul>
+
+    <h3 id="conclusion">Conclusion</h3>
+
+    <p>Heroku est un PaaS très simple à utiliser, mais surtout, il est excellent pour le test, car il suffit d'utilier des <a href="https://devcenter.heroku.com/articles/github-integration-review-apps">review apps</a> pour la preprod, et étant donné que la preprod n'est pas utilisée non-stop, on peut largement utiliser l'abonnement gratuit pour ça !</p>
+
+    <p>Pour l'upload et le stockage de fichiers, il vous faudra utiliser Amazon S3 et vous référer à la documentation en <a href="https://devcenter.heroku.com/articles/s3">suivant ce lien</a> et utiliser les références à S3 dans votre code.</p>
+
+    <hr>
+
+    <p>Chez <a href="https://www.studio-agate.com/fr/">Agate Éditions</a>, nous avons fait le choix d'utiliser Heroku pour notre projet, une application monolithique multi-domaines qui héberge des portails et des sites relatifs aux jeux de rôle du studio, notamment un gestionnaire de personnages et une application de cartographie interactive. C'est parfait pour nos besoins financiers et c'est stable au niveau performances, même avec un plan de base !</p>
+
+    <p>Merci de cette lecture ! Vous pouvez me retrouver un peu partout sur le web avec le pseudo <code>@pierstoval</code> !</p>
+
+    <p>🌑 🌘 🌗 🌖 🌕 🌔 🌓 🌒 🌑</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/alex-rock-ancelet.jpg') }}" alt="Alex Rock Ancelet" />
+{% endblock %}
+
+{% block article_bio %}
+<h3><a href="{% block author_url %}https://twitter.com/pierstoval{% endblock %}" target="_blank">{% block article_author %}Alex Rock Ancelet{% endblock %}</a></h3>
+<p>
+    Alex travaille en tant que formateur &amp; développeur chez SensioLabs, et est également lead tech pour le studio d'édition Agate.<br>
+    Il a commencé la programmation très jeune, mais ne l'a gardée que comme loisir, a appris seul sans études ni formation spécifique, mais a un goût prononcé pour le partage et la transmission de connaissances.
+</p>
+{% endblock %}

@@ -1,0 +1,266 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 2 - La nouvelle configuration par défaut de Symfony 4" %}
+
+{% block article_content %}
+    <h1 id="la-nouvelle-configuration-par-défaut-de-symfony-4">La nouvelle configuration par défaut de Symfony 4</h1>
+    <p>Un an de travail acharné de la communauté vient de s’achever. Symfony 4 est là ! Au menu, plein de nouvelles choses. Pour aujourd’hui, je vous propose de nous concentrer sur la configuration de vos applications. Qui dit configuration, dit injecteur de dépendances bien-sûr !</p>
+
+    <p>Commençons par installer un squelette Symfony 4 :</p>
+
+
+
+    <pre><code class="language-sh">composer create-project symfony/skeleton beerfactory</code></pre>
+
+    <p>La configuration de vos services s’effectue désormais dans le fichier <code>config/services.yaml</code>. Contrairement aux versions précédentes, ce fichier est réservé à la configuration de <em>vos</em> services, i.e. ceux dont l’implémentation réside dans votre dossier <code>src/</code>.</p>
+
+    <p>La configuration des fonctionnalités du framework ou des bundles tiers doit, elle, s’effectuer par autant de fichiers <code>config/packages/*.yaml</code>.</p>
+
+    <p>À quelques détails près, la configuration par défaut pour <em>vos</em> services <a href="https://github.com/symfony/recipes/blob/master/symfony/framework-bundle/3.3/config/services.yaml">est la suivante</a> :</p>
+
+
+
+    <pre><code class="language-yaml">services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\:
+        resource: '../src/*'</code></pre>
+
+    <p>Voyons le sens de ces directives une par une.</p>
+
+
+
+    <h2 id="définir-des-conventions-pour-automatiser-la-configuration">Définir des conventions pour automatiser la configuration</h2>
+
+    <p>Si vous êtes expert Symfony 2-3, vous avez pris l’habitude de faire du va-et-vient : chaque nouvelle implémentation de service ou chaque changement de signature PHP nécessite une modification équivalente en Yaml. Tout doit être explicite. Au détail près.</p>
+
+    <p>Avec Symfony 4, ce qui a fait la force du framework est toujours là : tout doit être explicite. Mais vous pouvez maintenant définir des <em>conventions</em>, plutôt que des détails. Une fois ces conventions en place, il suffit de les suivre pour ne plus avoir à configurer quoi que ce soit. Évidement, il y a toujours des cas particuliers. C’est à ce moment là seulement que vous devrez modifier votre Yaml : pour les choses qui ont la valeur de l’exception à la règle ; les marqueurs de différenciation de vos applications.</p>
+
+
+
+    <h3 id="chaque-classe-dans-src-est-potentiellement-un-service">Chaque classe dans <code>src/</code> est potentiellement un service</h3>
+
+    <p>C’est la première convention que vous pourrez adopter, et celle que définissent ces lignes :</p>
+
+
+
+    <pre><code class="language-yaml">    App\:
+        resource:'../src/*'</code></pre>
+
+    <p>Ceci exprime la convention suivante : pour chaque fichier dans <code>src/</code>, créer un service du même nom que la classe qui s’y trouve, récursivement. Cela permet de ne plus avoir à se soucier de trouver un nom à vos services - leur classe suffit. Et cela permet également de n’avoir rien à changer pour enregister un nouveau service. Le container sera automatiquement mis à jour dès que vous créerez une nouvelle classe, et elle sera disponible en tant que service.</p>
+
+    <p>Évidement, toutes les classes n’ont pas vocation à être utilisées ainsi. C’est ce que dit la seconde convention.</p>
+
+
+
+    <h3 id="chaque-service-inutilisé-doit-être-nettoyé">Chaque service inutilisé doit être nettoyé</h3>
+
+    <pre><code class="language-yaml">    _defaults:
+        public: false</code></pre>
+
+    <p>Lorsqu’un service est dit “privé”, on ne peut plus y accéder via l’appel <code>$container-&gt;get()</code>. La conséquence est qu’il est possible de le supprimer du container - ça ne fera aucune différence - ou bien de l’<em>inliner</em> s’il est requis par un autre service. Cette double optimisation existe depuis les débuts de Symfony 2. En l’activant par défaut, on tourne le mécanisme à notre avantage pour ne garder que les classes qui sont effectivement utilisées sous forme de service.</p>
+
+    <p>Le corrolaire architectural est une lapalissade : vous ne pouvez plus accéder à vos services via l’appel <code>$container-&gt;get()</code>. C’est une excellente chose : utiliser cette méthode est un anti-pattern qui masque vos dépendances, et qui par conséquent augmente significativement et instantanément votre dette technique.</p>
+
+    <p>Le rôle d’un framework est de favoriser les bonnes pratiques. C’est chose faite. Cette règle est tellement bénéfique en réalité qu’elle est activée par défaut depuis Symfony 4, et s’applique aussi bien à vos services qu’aux services du noyau et des bundles tiers. Vous pouvez donc supprimer cette ligne de votre fichier de configuration si le coeur vous en dit, le résultat sera le même.</p>
+
+    <p>Mais que signifie “être utilisé en tant que service” au fait ?</p>
+
+
+
+    <h3 id="chaque-classe-dérivant-de-command-est-une-commande-etc">Chaque classe dérivant de <code>Command</code> est une … commande, etc.</h3>
+
+
+
+    <pre><code class="language-yaml">    _defaults:
+        autoconfigure: true</code></pre>
+
+    <p>Le framework dispose d’une liste d’interfaces et de classes abstraites que vous pouvez implémenter pour par exemple créer une nouvelle commande pour la console, ou bien pour écouter les événements déclenchés lors du traitement d’une requête HTTP, etc.</p>
+
+    <p>Pour un bundle partagé - avec options de configuration et complexité liée à la réutilisation, ce ne sera pas toujours le cas ; mais de votre coté, si vous vous donnez la peine d’implémenter la classe de base <code>Command</code>, il y a de grandes chances que vous souhaitiez créer une commande.</p>
+
+    <p>L’auto-configuration est là pour ça. Lorsque cette option est activée, Symfony va regarder les types implémentés par chacun de <em>vos</em> services (classes et interfaces), et leur appliquer des tags automatiquement en fonction. Ainsi, si une de vos classes implémente <code>Command</code>, le service correspondant se verra attribuer le tag <code>console.command</code>.</p>
+
+    <p>À partir de ce moment, le service est enregistré dans le container - il ne pourra plus être supprimé par la règle précédente - et pourra par contre être <em>inliné</em> dans la liste des commandes disponibles.</p>
+
+    <p>En interne, les interfaces ou classes de base qui activent un comportement particulier sont définies grâce à l’appel <code>$container-&gt;registerForAutoconfiguration()</code>, fait <a href="https://github.com/symfony/symfony/blob/4.0/src/Symfony/Bundle/FrameworkBundle/DependencyInjection/FrameworkExtension.php#L267">dans le noyau</a> ou bien dans les bundles tiers.</p>
+
+
+
+    <h3 id="chaque-classe-nécessitant-un-loggerinterface-doit-recevoir-le-logger-par-défaut">Chaque classe nécessitant un <code>LoggerInterface</code> doit recevoir le logger par défaut</h3>
+
+
+
+    <pre><code class="language-yaml">    _defaults:
+        autowiring: true</code></pre>
+
+    <p>C’est le fameux <em>autowiring</em>. Cette directive dit à Symfony de regarder le constructeur et les éventuels “setters” de vos services, et d’y injecter <em>le</em> service correspondant au type requis par leurs arguments, lorsque c’est possible.</p>
+
+    <p>Se pose alors un problème de choix. <em>Le</em> service, mais lequel ? Lors de son introduction en version 2.8, la règle était de choisir le service, parmi tout ceux existants, qui implémentait le type requis. S’il en existait un et un seul pour un type donné, c’était l’élu. S’il en existait deux, une ambiguïté était levée sous forme d’exception.</p>
+
+    <p>Je dis “était” car ça n’est plus le cas. Vous trouverez encore des articles et peut-être même des collègues qui pensent que c’est ainsi. C’était de la magie noire. C’est obsolète.</p>
+
+    <p>Désormais, pour un type requis donné (par exemple <code>Psr\Log\LoggerInterface</code>), Symfony va injecter <em>le</em> service dont le <em>nom</em> est “Psr\Log\LoggerInterface”. Comme les noms sont uniques, il n’y a plus d’ambiguïté possible. Le type effectivement implémenté n’est tout simplement jamais considéré. Oui : cela signifie que vous pouvez nommer un service “Psr\Log\LoggerInterface”, et ne pas lui faire implémenter l’interface du même nom. Mais si vous faites ça, Symfony ne peut rien pour vous de toute façon. L’effet sera une erreur fatale à l’exécution pour cause de type incompatible - merci d’avoir joué.</p>
+
+    <p>Si la configuration est ainsi grandement simplifiée, il ne faut pas chercher à l’éclipser pour autant. S’il vous plait, ne créez pas des classes pour le plaisir de bénéficier de l’autowiring. Utilisez-le à bon escient : l’autowiring ne devrait pas influencer le design de vos classes. C’est toujours à la configuration de s’adapter au code, jamais l’inverse.</p>
+
+
+
+    <h3 id="vos-conventions-ne-regardent-que-vous">Vos conventions ne regardent que vous</h3>
+
+
+
+    <pre><code class="language-yaml">    _defaults:</code></pre>
+
+    <p>Cette directive permet de définir des conventions par défaut. Il est très important de retenir que sa portée est <em>locale</em> au fichier où elle est présente.</p>
+
+    <p>En aucun cas définir <code>autowire: true</code> ne va activer l’autowiring au sein des autres fichiers de configuration (pas même de ceux importés depuis ce fichier, le cas échéant).</p>
+
+
+
+    <h2 id="définir-vos-conventions-particulières">Définir vos conventions particulières</h2>
+
+    <p>Maintenant que vous savez comment fonctione l’autowiring, sachant par ailleurs que chaque classe dans <code>src/</code> va créer un service du même nom, vous savez qu’il est trivial de référencer vos services entre eux : il suffit de typer vos arguments pour récupérer le service du même nom que le type ajouté.</p>
+
+    <p>Rien ne vous choque ? Typer une concrétion (une “classe”) est une pratique déconseillée par le principe d’inversion de contrôle (le “I” de “SOLID”). À la place, la bonne pratique est de typer des abstractions (des interfaces en PHP).</p>
+
+    <p>Comment faire puisque seules les classes sont chargées en tant que services ?</p>
+
+    <p>Il suffit d’appliquer la règle de l’autowiring : créer un service du même nom que le type donné. Cela signifie généralement définir un alias :</p>
+
+
+
+    <pre><code class="language-yaml">services:
+    App\Wow\MaBelleInterface: '@App\Wow\MonBeauService'</code></pre>
+
+    <p>Nous venons de définir une nouvelle convention : pour chaque argument typant <code>MaBelleInterface</code>, le service <code>MonBeauService</code> sera injecté par défaut. Si pour un service particulier cela ne convenait pas, il faudra alors avoir recours à la configuration explicite classique.</p>
+
+    <p>Pour nous simplifier la vie un peu plus, si votre application définit une interface donnée dans <code>src/</code>, et qu'une et une seule implémentation de cette interface est trouvée dans <code>src/</code> toujours, alors l'alias sera créé automatiquement par le framework.</p>
+
+    <p>Il est également possible de définir partiellement un service, en laissant à l’autowiring le soin de compléter :</p>
+
+
+
+    <pre><code class="language-yaml">services:
+    App\Wow\MonBeauService:
+        arguments:
+            $defaultLocale: '%kernel.default_locale%'</code></pre>
+
+    <p>Cette configuration, bien que particulière à un service, permet de définir la valeur d’un argument du constructeur en le nommant. Les éventuels autres arguments peuvent être laissés à l’autowiring.</p>
+
+    <p>Si vous souhaitez généraliser cette règle et la transformer en convention, vous pouvez le faire ainsi :</p>
+
+
+
+    <pre><code class="language-yaml">services:
+    _defaults:
+        bind:
+            $defaultLocale: '%kernel.default_locale%'</code></pre>
+
+    <p>Désormais, pour tous les services définis dans le fichier courant, si un argument porte le nom <code>$defaultLocale</code>, sa valeur sera injectée comme spécifié.</p>
+
+    <p>Il est possible de référencer les arguments aussi bien par leur nom que par leur type :</p>
+
+
+
+    <pre><code class="language-yaml">services:
+    _defaults:
+        bind:
+            App\Wow\MaBelleInterface: '@App\Wow\MonBeauService'</code></pre>
+
+    <p>Cette convention injectera “MonBeauService” pour tous les arguments typant “MaBelleInterface”.</p>
+
+    <p>Quel différence avec l’alias précédement défini ? Sa portée ! Un alias est global. Il est capable de remplacer un service existant, même défini par le framework ou un bundle tiers. À l’inverse, un “binding” est local. Il ne s’applique que localement aux services du fichier de configuration actuel.</p>
+
+
+
+    <h2 id="auto-configuration-et-collections-de-services-typés">Auto-configuration et collections de services typés</h2>
+
+    <p>Si le framework ou les bundles peuvent lier tags et interfaces, cette possibilité ne leur est pas réservée :</p>
+
+
+
+    <pre><code class="language-yaml">services:
+    _instanceof:
+        App\Wow\MaBelleInterface:
+            tags: [wow]</code></pre>
+
+    <p>Ainsi, chaque service défini localement et implémentant ”MaBelleInterface” se verra attribuer le tag “wow”.</p>
+
+    <p>À quoi cela peut-il servir ? Un cas classique est de créer une collection de services (exemples typiques pour le framework : une collection de voteurs, de commandes, etc.).</p>
+
+    <p>Avant Symfony 4, pour récupérer la liste de tous les services taggués “wow”, il fallait créer une passe de compilation. Ça n’est plus nécessaire pour les cas simples :</p>
+
+
+
+    <pre><code class="language-yaml">services:
+    App\WowManager:
+        arguments:
+            $wowServices: !tagged wow</code></pre>
+
+    <p>Si vous combinez ces lignes avec les précédentes, nous venons d’injecter la liste de tous les services qui implémentent “MaBelleInterface” dans “WowManager”. Wow !</p>
+
+    <p>Techniquement, l’argument <code>$wowServices</code> doit être typé <code>iterable</code>. Il recevra un itérateur, et les services seront créés au fur et à mesure du parcours de cet itérateur.</p>
+
+
+
+    <h2 id="injecter-et-transformer-des-variables-denvironnement">Injecter et transformer des variables d’environnement</h2>
+
+    <p>Depuis la version 3.2, vous savez qu’il est possible de référencer des variables d’environnement :</p>
+
+
+
+    <pre><code class="language-yaml">parameters:
+    my_api_key: '%env(API_KEY)%'</code></pre>
+
+    <p>Le manifeste <a href="https://12factor.net/">12-factor</a> en fait la promotion. En pratique pour Symfony, référencer une variable d’environnement permet de rendre l’application reconfigurable à la volée : un changement de clef d’API par exemple sera pris en compte immédiatement, sans recompilation du container.</p>
+
+    <p>Pourtant, les variables d’environnement ne sont pas recommandées pour stocker des secrets. Elles fuitent trop facilement. À la place, il est préférable de mettre vos clefs confidentielles dans le système de fichier (éventuellement virtuel), et donc de lire ces fichiers pour accéder aux valeurs.</p>
+
+
+
+    <pre><code class="language-yaml">parameters:
+    my_api_key: '%env(file:API_KEY_FILE)%'</code></pre>
+
+    <p>Avec Symfony 4, il est possible de transformer des variables d’environnement. Les processeurs disponibles par défaut sont <code>file</code>, <code>json</code>, <code>base64</code>, <code>resolve</code>, <code>const</code>, <code>bool</code>, <code>float</code>, <code>int</code> et <code>string</code>. Il est possible de les chaîner :</p>
+
+    <p><code>%env(json:file:API_KEY_FILE)%</code> va lire le fichier spécifié par la variable <code>API_KEY_FILE</code> de l’environnement, puis appeler <code>json_decode()</code> sur son contenu.</p>
+
+    <p>À utiliser lorsque nécessaire, mais pas à toutes les sauces : les paramètres classiques sont toujours préconisés pour la configuration liée au comportement de l’application (par opposition à la configuration liée à l’infrastructure donc).</p>
+
+
+
+    <h2 id="et-les-performances-conclusion">Et les performances ? Conclusion</h2>
+
+    <p>Une caractéristique essentielle des applications Symfony est qu’elles sont compilées : la configuration une fois résolue génère une classe PHP, le container. C’est lui qui est ensuite utilisé en production, et recompilé automatiquement au besoin en dev.</p>
+
+    <p>Vous n’avez donc aucun soucis à vous faire pour les performances, la core-team a bossé d’arrache-pied pour l’améliorer encore et toujours. Je vous invite à consulter le blog symfony.com pour plus de détails à ce sujet.</p>
+
+    <p>Au delà de la configuration, l’injecteur de dépendances permet encore de belles choses. En vrac :</p>
+
+    <ul>
+        <li>injecter des services en argument des actions de vos controleurs</li>
+        <li>injecter des “service locators” dédiés via <code>ServiceSubscriberInterface</code></li>
+        <li>recycler vos services pour plusieurs requêtes HTTP de suite grâce au tag <code>kernel.reset</code></li>
+        <li>configurer vos services en PHP plutôt qu’en Yaml</li>
+        <li>etc.</li>
+    </ul>
+
+    <p>En espérant que tout cela vous plaira !</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('bundles/afsyfront/images/avent/nicolas_grekas.jpeg') }}" alt="Nicolas Grekas" />
+{% endblock %}
+
+{% block article_bio %}
+<h3><a href="{% block author_url %}https://twitter.com/nicolasgrekas{% endblock %}" target="_blank">{% block article_author %}Nicolas Grekas{% endblock %}</a></h3>
+<p>
+    Nicolas travaille chez SensioLabs, en tant que CTO de Blackfire.io, le profiler PHP qui simplifie et industrialise l'analyse des performances de vos applications. Développeur PHP engagé dans l'open-source depuis de nombreuses années, il est désormais membre de la core team de Symfony, entre autres contributeur des polyfills Symfony (ex patchwork/utf-8), des composants Debug, VarDumper, Cache, etc.
+</p>
+{% endblock %}
