@@ -16,19 +16,19 @@ echo "- clean cache"
 rm -rf var/cache/* var/logs/* web/record/*
 
 echo "- reinstall bundle assets"
-./app/console assets:install --symlink
+./bin/console assets:install --symlink
 
 echo "- drop database"
-./app/console doctrine:database:drop --force || true
+./bin/console doctrine:database:drop --force || true
 
 echo "- create database"
-./app/console doctrine:database:create
+./bin/console doctrine:database:create
 
 echo "- create schema"
-./app/console doctrine:schema:create
+./bin/console doctrine:schema:create
 
 echo "- load fixtures"
-./app/console doctrine:fixtures:load --append
+./bin/console doctrine:fixtures:load --append
 
 echo "- dump production assets"
 yarn encore dev

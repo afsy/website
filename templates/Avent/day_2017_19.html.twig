@@ -1,4 +1,4 @@
-{% extends 'Avent/day.html.twig' %}
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
 
 {% set year = 2017 %}
 
@@ -72,7 +72,7 @@
 
     <p>Ce qui génèrera l’image suivante :</p>
 
-    <img src="{{ asset('build/images/avent/2017/19/graph.png') }}" alt="Workflow packet example"/>
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/19/graph.png') }}" alt="Workflow packet example"/>
 
     <p><abbr title="Documentation">Doc</abbr> ? Qui a dit <abbr title="Documentation">doc</abbr> ?</p>
 
@@ -135,7 +135,7 @@ class PacketLostListener implements EventSubscriberInterface
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('build/images/avent/2017/19/cyril_souillard.jpeg') }}" alt="Cyril Souillard"/>
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/19/cyril_souillard.jpeg') }}" alt="Cyril Souillard"/>
 {% endblock %}
 
 {% block article_bio %}

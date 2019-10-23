@@ -1,4 +1,4 @@
-{% extends 'Avent/day.html.twig' %}
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
 
 {% set year = 2017 %}
 
@@ -22,7 +22,7 @@
         valider son implémentation dans une application Symfony 4.</p>
 
     <p>
-        <img src="{{ asset('build/images/avent/2017/20/elastic-symfony-love.png') }}"
+        <img src="{{ asset('bundles/afsyfront/images/avent/2017/20/elastic-symfony-love.png') }}"
              alt="Symfony et Elasticsearch = Love" />
     </p>
 
@@ -107,7 +107,7 @@ $ composer require maker
 $ composer require ruflin/elastica</code></pre>
 
     <p>
-        <img src="{{ asset('build/images/avent/2017/20/demo-symfony.png') }}" alt="Démo de Symfony 4" />
+        <img src="{{ asset('bundles/afsyfront/images/avent/2017/20/demo-symfony.png') }}" alt="Démo de Symfony 4" />
     </p>
 
     <p>Cette application expose une page de recherche fonctionnant avec une requête SQL
@@ -408,7 +408,7 @@ class ElasticReindexCommand extends Command
     <pre><code class="language-bash">$ ./bin/console elastic:reindex</code></pre>
     <p>Vous pouvez vous rendre dans Kibana et vérifier que tout est en ordre :</p>
 
-    <p><img src="{{ asset('build/images/avent/2017/20/kibana6-devtools.png') }}" alt='Kibana Dev Tools'/></p>
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/20/kibana6-devtools.png') }}" alt='Kibana Dev Tools'/></p>
 
     <p>Nos documents Elasticsearch ressemblent à cela :</p>
 
@@ -528,7 +528,7 @@ public function search(Request $request, Client $client): Response
         des repository Doctrine.</p>
     <p>Et voilà notre recherche branchée sur Elasticsearch :</p>
 
-    <p><img src="{{ asset('build/images/avent/2017/20/demo-search.gif') }}" alt='Démo recherche dans Symfony'/></p>
+    <p><img src="{{ asset('bundles/afsyfront/images/avent/2017/20/demo-search.gif') }}" alt='Démo recherche dans Symfony'/></p>
 
     <h2>L&#39;outillage et les améliorations nécessaires</h2>
     <p>Pour les besoins de l&#39;article notre <strong>Indexer</strong> est volontairement simplifié ; mais dans le monde
@@ -602,7 +602,7 @@ return $this-&gt;client-&gt;request(&#39;_aliases&#39;, Request::POST, $data);</
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('build/images/avent/damien-alexandre.png') }}" alt="Damien ALEXANDRE"/>
+    <img src="{{ asset('bundles/afsyfront/images/avent/damien-alexandre.png') }}" alt="Damien ALEXANDRE"/>
 {% endblock %}
 
 {% block article_bio %}

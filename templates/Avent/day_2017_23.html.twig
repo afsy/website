@@ -1,4 +1,4 @@
-{% extends 'Avent/day.html.twig' %}
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
 
 {% set year = 2017 %}
 
@@ -54,7 +54,7 @@
     <p style="text-align:center;">
         <figure>
 
-            <img src="{{ asset('build/images/avent/2017/23/23-archi-hexagonale.png') }}" alt="Architecture hexagonale" />
+            <img src="{{ asset('bundles/afsyfront/images/avent/2017/23/23-archi-hexagonale.png') }}" alt="Architecture hexagonale" />
             <figcaption style="text-align: center">
                 (source :
                 <a href="http://blog.xebia.fr/2016/03/16/perennisez-votre-metier-avec-larchitecture-hexagonale/">
@@ -148,7 +148,7 @@
     <h4 style="text-align: center;">Pour les <code>Repository</code> (lecture des données)</h4>
     <p style="text-align:center">
         <figure>
-            <img src="{{ asset('build/images/avent/2017/23/23-archi-hexagonale-repository.png') }}" alt="persister" />
+            <img src="{{ asset('bundles/afsyfront/images/avent/2017/23/23-archi-hexagonale-repository.png') }}" alt="persister" />
             <figcaption style="text-align: center">
                 (source : schéma dessiné par <a href="https://github.com/melicerte">@melicerte</a>)
             </figcaption>
@@ -158,7 +158,7 @@
     <h4 style="text-align: center;">Pour les <code>Persister</code> (écriture des données)</h4>
     <p style="text-align:center">
         <figure>
-            <img src="{{ asset('build/images/avent/2017/23/23-archi-hexagonale-persister.png') }}" alt="persister" />
+            <img src="{{ asset('bundles/afsyfront/images/avent/2017/23/23-archi-hexagonale-persister.png') }}" alt="persister" />
             <figcaption style="text-align: center">
                 (source : schéma dessiné par <a href="https://github.com/melicerte">@melicerte</a>)
             </figcaption>
@@ -370,7 +370,7 @@ class Article implements Repository\Article
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('build/images/avent/2017/23/23-celine-morin.jpg') }}" alt="Céline Morin" />
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/23/23-celine-morin.jpg') }}" alt="Céline Morin" />
 {% endblock %}
 
 {% block article_bio %}

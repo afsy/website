@@ -1,4 +1,4 @@
-{% extends 'Avent/day.html.twig' %}
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
 
 {% set year = 2017 %}
 
@@ -34,7 +34,7 @@
   </p>
 	<h3 id="demarrage-de-la-stack">Démarrage de la stack</h3>
 	<p>Commencez par créer le fichier docker-compose qui va nous permettre de lancer la stack complète :</p>
-
+  
   <pre><code class="language-none">touch docker-compose.yml</code></pre>
 
   <p>Le contenu de celui-ci doit ressembler à cela.</p>
@@ -109,7 +109,7 @@ services:
         soft: -1
         hard: -1
     mem_limit: 1g
-
+  
   graylog:
     image: graylog/graylog:2.3.2-1
     environment:
@@ -126,7 +126,7 @@ services:
       - 514:514/udp
       - 12201:12201
       - 12201:12201/udp</code></pre>
-
+	
   <p>Une fois fait, reste à démarrer l'ensemble de nos éléments :</p>
 
   <pre><code class="language-none">docker-compose up -d</code></pre>
@@ -284,7 +284,7 @@ monolog:
 {% endblock %}
 
 {% block article_avatar %}
-  <img src="{{ asset('build/images/avent/2017/22/matthieu-cramet.png') }}" alt="Matthieu Cramet" />
+  <img src="{{ asset('bundles/afsyfront/images/avent/2017/22/matthieu-cramet.png') }}" alt="Matthieu Cramet" />
 {% endblock %}
 
 {% block article_bio %}

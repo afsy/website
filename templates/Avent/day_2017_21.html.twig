@@ -1,4 +1,4 @@
-{% extends 'Avent/day.html.twig' %}
+{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
 
 {% set year = 2017 %}
 
@@ -232,7 +232,7 @@ return $this-&gt;render('default/index.html.twig', [
 
   <p>Ainsi que le contenu de la vue associée par le contenu suivant :</p>
 
-  <pre><code class="language-twig">{% verbatim %}{# app/Resources/views/default/index.html.twig #}
+  <pre><code class="language-twig">{% raw %}{# app/Resources/views/default/index.html.twig #}
 {% extends 'base.html.twig' %}
 {% block body %}
   &lt;div class=&quot;container&quot;&gt;
@@ -248,7 +248,7 @@ return $this-&gt;render('default/index.html.twig', [
   &lt;/script&gt;
   &lt;script type=&quot;text/javascript&quot; src=&quot;{{ asset('bundles/app/js/sf-websocket.js') }}&quot;&gt;&lt;/script&gt;
 {% endblock %}
-{% endverbatim %}</code></pre>
+{% endraw %}</code></pre>
 
   <p>
     Nous sommes maintenant fin prêts à mettre en place le JavaScript dans le fichier <code class="language-none">js/sf-websocket.js</code>.
@@ -331,7 +331,7 @@ $server = IoServer::factory(
   <p>Il ne nous reste plus qu’à consulter la page que nous venons de modifier pour voir le résultat suivant :</p>
 
   <figure class="centered-image">
-    <img src="{{ asset('build/images/avent/2017/21/premiers-tests.png') }}" alt="Premiers tests"/>
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/21/premiers-tests.png') }}" alt="Premiers tests"/>
     <figcaption>Premiers tests</figcaption>
   </figure>
 
@@ -509,11 +509,11 @@ private function sendMessageToChannel(ConnectionInterface $conn, $channel, $user
     pour y ajouter un formulaire d'envoi de message :
   </p>
 
-  <pre><code class="language-twig">{% verbatim %}{# app/Resources/views/default/index.html.twig #}
+  <pre><code class="language-twig">{% raw %}{# app/Resources/views/default/index.html.twig #}
 &lt;div id=&quot;ws-content-receiver&quot;&gt;&lt;/div&gt;
 &lt;input type=&quot;text&quot; id=&quot;ws-content-to-send&quot; /&gt;
 &lt;button id=&quot;ws-send-content&quot;&gt;Send&lt;/button&gt;
-{% endverbatim %}</code></pre>
+{% endraw %}</code></pre>
 
   <p>
     Le block <code class="language-css">#ws-content-receiver</code> a été vidé
@@ -653,14 +653,14 @@ _textInput.onkeyup = function(e) {
   </p>
 
   <figure class="centered-image">
-    <img src="{{ asset('build/images/avent/2017/21/afsy-prompt.png') }}" alt="Demande de l'identité de l'utilisateur"/>
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/21/afsy-prompt.png') }}" alt="Demande de l'identité de l'utilisateur"/>
     <figcaption>Demande de l'identité de l'utilisateur</figcaption>
   </figure>
 
   <p>Le navigateur nous demande bien notre identité au chargement de la page.</p>
 
   <figure class="centered-image">
-    <img src="{{ asset('build/images/avent/2017/21/test-json.png') }}"
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/21/test-json.png') }}"
          alt="Affichage du message au format JSON"/>
     <figcaption>Affichage du message au format JSON</figcaption>
   </figure>
@@ -672,7 +672,7 @@ _textInput.onkeyup = function(e) {
   </p>
 
   <figure class="centered-image">
-    <img src="{{ asset('build/images/avent/2017/21/tests-json-messages.png') }}"
+    <img src="{{ asset('bundles/afsyfront/images/avent/2017/21/tests-json-messages.png') }}"
          alt="Tests d'envoi de messages au au format JSON"/>
     <figcaption>Tests d'envoi de messages au au format JSON</figcaption>
   </figure>
@@ -687,7 +687,7 @@ _textInput.onkeyup = function(e) {
   </p>
 
   <figure class="centered-image">
-      <img src="{{ asset('build/images/avent/2017/21/main-content.png') }}"
+      <img src="{{ asset('bundles/afsyfront/images/avent/2017/21/main-content.png') }}"
          alt="Interface du chat pour le calendrier de l'avent"/>
     <figcaption>Interface du chat pour le calendrier de l'avent</figcaption>
   </figure>
@@ -700,7 +700,7 @@ _textInput.onkeyup = function(e) {
 {% endblock %}
 
 {% block article_avatar %}
-  <img src="{{ asset('build/images/avent/2017/21/clement-delmas.jpg') }}" alt="Clément Delmas" />
+  <img src="{{ asset('bundles/afsyfront/images/avent/2017/21/clement-delmas.jpg') }}" alt="Clément Delmas" />
 {% endblock %}
 
 {% block article_bio %}
