@@ -1,0 +1,299 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 22 - Formulaires Symfony2 et data-binding" %}
+
+{% block article_content %}
+{% verbatim %}
+<h1>Formulaires Symfony2 et data-binding</h1>
+
+<p>Aujourd'hui nous allons nous intéresser aux formulaires Symfony2, côté frontend et rendu, et montrer comment ils peuvent s'intégrer à des librairies javascript pour améliorer l'expérience utilisateur en évitant le spaghetti.Js.</p>
+
+<p>Prenons un exemple : Kevin arrive sur perenoelcorp.com pour y commander la dernière tablette de sa marque préférée* :</p>
+
+<p><img src="/build/images/avent/22-1-device-choice.png" alt="Choix appareil" /></p>
+
+<p>Evidemment, en ajoutant plus de modèles, le menu déroulant devient rapidement moins pratique ! Ne pourrait-on pas demander à Kévin de choisir la marque puis le modèle ?</p>
+
+<ul>
+<li>V1 : on fait ça tranquille en deux temps :
+
+<img src="/build/images/avent/22-2-static-version.png" alt="Choix marque statique" /></li>
+<li>V2 : un petit script JS avec appel AJAX pour récupérer le menu déroulant des appareils à chaque changement du menu déroulant des marques.
+
+<img src="/build/images/avent/22-3-ajax-version.png" alt="Choix marque ajax" /></li>
+<li>V2 bis : le même mais sans appel AJAX : on précharge les différentes possibilités en amont, puis on met à jour le second formulaire en fonction.</li>
+</ul>
+
+<p>Le data-binding et les outils existants vont nous permettre de mettre en pratique cette dernière idée de manière très simple.</p>
+
+<p>Le contexte est donc similaire à celui évoqué dans <a href="http://afsy.fr/avent/2013/16-symfony-et-angularjs-tips">l'article du jour 16</a> de Thibault et Maxime : nous allons voir comment adapter notre Symfony pour utiliser certaines fonctionnalités de frameworks javascript.</p>
+
+<h2>Le data-binding</h2>
+
+<p>Le data-binding va consister à associer des éléments de la vue -ici nos deux menus déroulants- à un modèle, de sorte que toute modification de l'un soit répercutée automatiquement sur l'autre.<br />
+Il s'agit donc de data-binding à double sens ("two way bindings"), par opposition au schema classique dans lequel les modifications du modèles seraient répercutées sur la vue, mais pas le contraire. Les frameworks gérant le data-binding à double sens implémenteront en général le design pattern "Observateur", les changements de certains éléments du DOM étant scrutés par l'application. (Mais comme nous le verrons en conclusion, ce n'est pas 100% le cas pour certains).</p>
+
+<p>Diverses librairies javascript spécifiques et la plupart des frameworks JS permettent de faire du data-binding : <a href="http://docs.angularjs.org/guide/databinding">angularjs</a>, <a href="http://knockoutjs.com/documentation/introduction.html">knockoutjs</a>, <a href="http://emberjs.com/guides/object-model/bindings/">emberjs</a>, <a href="http://backbonejs.org/">backbonejs</a> avec éventuellement en complément <a href="http://epoxyjs.org/">epoxyjs</a>, <a href="http://www.rivetsjs.com/">rivetjs</a>, et pas mal d'autres !</p>
+
+<p>Je ne les ai pas tous testés intensivement et le but de cet article n'est pas de faire une fastidieuse démo de chacun de ces outils. Nous allons nous intéresser à la manière dont on peut personnaliser ses formulaires Symfony2 pour les faire interagir très simplement avec l'une ou l'autre de ces librairies.</p>
+
+<h2>Comment personnaliser ses formulaires dans la vue</h2>
+
+<p>La documentation sur le sujet est assez abondante, notamment dans le cookbook, voici quelques articles utiles sur le sujet :</p>
+
+<ul>
+<li>Evidemment, commencer ici : <a href="http://symfony.com/doc/current/cookbook/form/form_customization.html#cookbook-form-theming-methods">http://symfony.com/doc/current/cookbook/form/form_customization.html#cookbook-form-theming-methods</a></li>
+<li>Pour personnaliser les variables du formulaire dans la vue : <a href="http://symfony.com/doc/current/reference/forms/twig_reference.html#more-about-form-variables">http://symfony.com/doc/current/reference/forms/twig_reference.html#more-about-form-variables</a></li>
+<li>Sur les formulaires eux-mêmes : <a href="http://symfony.com/doc/current/cookbook/form/create_custom_field_type.html">http://symfony.com/doc/current/cookbook/form/create_custom_field_type.html</a></li>
+</ul>
+
+<p>Je ne vais pas recopier la documentation ici, mais donner quelques éléments essentiels pour la suite.</p>
+
+<p>Le templating des formulaires se trouve dans le fichier <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bridge/Twig/Resources/views/Form/form_div_layout.html.twig">https://github.com/symfony/symfony/blob/master/src/Symfony/Bridge/Twig/Resources/views/Form/form_div_layout.html.twig</a>. Pour modifier par exemple le rendu des menus déroulants que nous avons définis plus haut, il faut surcharger le block "choice_widget" défini dans le fichier.</p>
+
+<h2>Application au data-binding</h2>
+
+<p>Nous pouvons enfin rentrer dans le vif du sujet et modifier nos formulaires pour lier le second menu déroulant de notre exemple au premier. Nous allons pour les exemples de code travailler ici essentiellement avec Knockout.js, mais les principes restent les mêmes pour les autres framework JS - sauf pour la syntaxe des exemples qui est bien-sûr à adapter !</p>
+
+<p>On retrouve le pattern MVVM (Model-View-ViewModel) évoqué au <a href="http://afsy.fr/avent/2013/16-symfony-et-angularjs-tips">jour 16</a> : en plus des éléments classique Modèle et Vue d'une application web statique, la partie "VueModèle" permet de gérer la logique d'affichage de la vue via un simple paramétrage du data-binding dans la vue.</p>
+
+<p>Partie Vue :</p>
+
+<pre class="language-twig"><code>{% block body %}
+    Bienvenue sur le site de commande au Père Noël
+    {{ form_start(form) }}
+&lt;div class="row"&gt;
+    {{ form_label(form.fanboy) }}
+        &lt;select data-bind="options: BrandList, optionsText: 'name', value: brand"&gt;
+        &lt;/select&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+    {{ form_label(form.tablet) }}
+    &lt;div data-bind="with: brand"&gt;
+        &lt;select data-bind="options: devices, optionsText: 'name', optionsValue: "id"&gt;
+        &lt;/select&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+{{ form_end(form) }}
+{% endblock body %}
+</code></pre>
+
+<p>Partie VueModèle</p>
+
+<pre class="js"><code>var BrandList = [
+    { "name":    "Apple","devices":   [
+            { "value": 1, "name": 'iPhone 4'},
+            { "value": 2, "name" : 'iPhone 5'},
+            { "value": 3, "name": 'iPad 2'},
+            { "value": 4, "name": 'iPad Air'}
+        ]
+    },
+    { "name":    "Google","devices":   [
+            { "value": 1, "name": 'Nexus 4'},
+            { "value": 2, "name" : 'Nexus 5'},
+            { "value": 3, "name": 'Nexus 7'},
+            { "value": 4, "name": 'Nexus 10'}
+        ]
+    }
+];
+
+var Device = function() {
+    this.brand = ko.observable();
+}
+
+ko.applyBindings(new Device());
+</code></pre>
+
+<p>A présent, la liste de choix du second menu déroulant est devenue dynamique et s'adapte au choix du premier : à chaque fois que l'on sélectionne une marque, l'observable brand est modifiée dans la VueModèle et la Vue mise à jour en conséquence :<br />
+<img src="/build/images/avent/22-4-apple-devices.png" alt="Apple sélectionné" /><br />
+<img src="/build/images/avent/22-5-google-devices.png" alt="Google sélectionné" /></p>
+
+<p>Nous avons donc :
+ <ul>
+  <li>Spécifié dans le second menu déroulant comment se fait le data-binding.</li>
+  <li>Déclaré les éléments du modèle./</li>
+  <li>Déclaré la marque comme Observable.</li>
+ </ul>
+
+<p>Cependant, pour la première étape, nous avons écrit le formulaire à la main. On ne profite du coup plus du formulaire Symfony2 que l'on avait pu définir avant d'ajouter le data-binding !</p>
+
+<p>C'est ici que nous allons devoir créer une template de formulaire personnalisée.</p>
+
+<p>Regardons le widget correspondant aux menus déroulants dans le form_div_layout (j'ai volontairement enlevé certains éléments non utilisés dans notre cas pour plus de lisibilité) :</p>
+
+<pre class="language-twig"><code>{% block choice_widget_collapsed %}
+{% spaceless %}
+    &lt;select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}&gt;
+        {% if empty_value is not none %}
+            &lt;option value=""{% if required and value is empty %} selected="selected"{% endif %}&gt;{{ empty_value|trans({}, translation_domain) }}&lt;/option&gt;
+        {% endif %}
+        {% set options = choices %}
+        {{ block('choice_widget_options') }}
+    &lt;/select&gt;
+{% endspaceless %}
+{% endblock choice_widget_collapsed %}
+
+{% block choice_widget_options %}
+{% spaceless %}
+    {% for group_label, choice in options %}
+        &lt;option value="{{ choice.value }}"{% if choice is selectedchoice(value) %} selected="selected"{% endif %}&gt;{{ choice.label|trans({}, translation_domain) }}&lt;/option&gt;
+    {% endfor %}
+{% endspaceless %}
+{% endblock choice_widget_options %}
+</code></pre>
+
+<p>Il suffit donc de modifier le cas échéant le contenu du block choice_widget_collapsed en ajoutant les éléments dont knockout a besoin :</p>
+
+<pre class="language-twig"><code>{% form_theme form _self %}
+
+{% block choice_widget_collapsed %}
+    {% spaceless %}
+        {% if data_bind %}
+            &lt;select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %} data-bind="{{ data_bind }}"&gt;
+            &lt;/select&gt;
+        {% else %}
+            &lt;select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}&gt;
+            {% if empty_value is not none %}
+                &lt;option value=""{% if required and value is empty %} selected="selected"{% endif %}&gt;{{ empty_value|trans({}, translation_domain) }}&lt;/option&gt;
+            {% endif %}
+        {% endif %}
+            {% set options = choices %}
+            {{ block('choice_widget_options') }}
+        &lt;/select&gt;
+    {% endspaceless %}
+{% endblock choice_widget_collapsed %}
+
+....
+
+{{ form_widget(form.tablet, {'data_bind': 'options: devices, optionsText: "name", optionsValue: "id"' }) }}
+
+...
+</code></pre>
+
+<p>Nous avons légèrement avancé : on profite du système de templating des formulaires Symfony, par exemple l'id est de nouveau générée automatiquement, on récupère les options du formulaire type "required", etc. De plus, cela permet d'utiliser le même formulaire dans plusieurs contextes, selon que l'on veut ou non utiliser le data-binding. Par contre, les données affichées dans le formulaire sont toujours écrites en dur dans le fichier JS...</p>
+
+<p>Nous allons donc les passer depuis Symfony :</p>
+
+<pre class="language-php"><code>//ChristmasController.php
+/**
+     * @Route("/chose-device", name="choseDevice")
+     * @Template()
+     */
+    public function choseTablet2Action()
+    {
+        $form = $this-&gt;createForm(new DeviceType());
+        $$brands = array(
+            array(
+                "name"      =&gt; "Apple",
+                "devices"   =&gt; array(
+                    array("id" =&gt; 1, "name"  =&gt; "iPhone 4"),
+                    ...
+                )
+            ),
+            array(
+                "name"      =&gt; "Google",
+                "devices"   =&gt; array(
+                    array("id" =&gt; 1, "name"  =&gt; "Nexus 4"),
+                    ...
+                )
+            ),
+        );
+
+        return array(
+            'form'      =&gt; $form-&gt;createView(),
+            'devices'   =&gt; json_encode($brands),
+        );
+    }
+</code></pre>
+
+<p>On récupère alors les données dans notre code js, et le tour est joué. Evidemment l'intérêt ici est très limité, on avait des données en dur en javascript et l'on passe à des données en dur en php. Cela prend par contre tout son sens lorsque les données deviennent dynamiques, typiquement lorsqu'on récupère des entités du modèle Symfony2.<br />
+Par exemple, créons des entités Brand et Device et utilisons des formulaires de type "entity".</p>
+
+<pre class="language-php"><code>//DeviceType.php
+$builder-&gt;add('device', 'entity', array(
+            'label'     =&gt; 'Quel appareil souhaites-tu te faire offrir par le Père Noël ?',
+            "class"     =&gt; 'AcmeDemoBundle:Device',
+            "property"  =&gt; 'name',
+        ));
+        $builder-&gt;add('fanboy', 'entity', array(
+            'label'     =&gt; 'Quelle est ta marque préférée ?',
+            'class'     =&gt; 'AcmeDemoBundle:Brand',
+            "property"  =&gt; 'name',
+        ));
+</code></pre>
+
+<p>Pas besoin de changer quoi que ce soit pour l'instant dans la template puisque le type "entity" hérite de "type". Par contre, les données envoyées en json sont maintenant celles du modèle.<br />
+Pour transmettre la même structure, il nous suffit d'implémenter \JSONSerializable :</p>
+
+<pre class="language-php"><code>//Brand.php
+...
+class Brand implements \JsonSerializable
+{
+...
+public function jsonSerialize()
+    {
+        return [
+            'id'        =&gt; $this-&gt;id,
+            'name'      =&gt; $this-&gt;name,
+            'devices'   =&gt; $this-&gt;devices-&gt;toArray(),
+        ];
+    }
+//Device.php
+...
+class Device implements \JsonSerializable
+{
+...
+public function jsonSerialize()
+    {
+        return [
+            'id'        =&gt; $this-&gt;id,
+            'name'      =&gt; $this-&gt;name,
+        ];
+    }
+...
+</code></pre>
+
+<p>et de même dans la classe Device. Il ne reste plus qu'à remplacer le tableau en dur $brands du controlleur par la liste des objets Brands trouvés en table :</p>
+
+<pre class="language-php"><code>//ChristmasController
+$brands = $this-&gt;getDoctrine()-&gt;getRepository('AcmeDemoBundle:Brand')-&gt;findAll();
+</code></pre>
+
+<h3>Et ensuite ?</h3>
+
+<p>Quelques éléments pour aller plus loin :</p>
+
+<ul>
+<li>Jusqu'ici, toute la configuration du data-binding est faite directement dans la template. Cela fonctionne, mais il serait plus simple d'avoir à simplement déclarer si l'on veut activer ou non le data-binding sur notre formulaire. Il suffit pour cela d'étendre le type de base (choice en l'occurrence), et tout peut être défini au niveau du formulaire.</li>
+<li>J'ai présenté la version basique de la sérialisation ici, en pratique, penser au JMSSerializerBundle ! Notamment les groupes qui permettent de contrôler ce que l'on veut sérialiser en fonction du contexte, pratique si vous avez besoin de faire du data-binding de la même entité dans plusieurs contexte différents, ou tout simplement pour ne pas contraindre la structure si vous avez besoin d'une version sérialisée de l'entité à un autre endroit.</li>
+</ul>
+
+<h2>En conclusion</h2>
+
+<p>Quelques remarques et liens pour conclure :</p>
+
+<ul>
+<li>Une présentation très instructive sur la comparaison entre emberjs, angularjs et knockoutjs : <a href="http://2013.jsconf.eu/speakers/marius-gundersen-a-comparison-of-the-twoway-binding-in-angularjs-emberjs-and-knockoutjs.html">http://2013.jsconf.eu/speakers/marius-gundersen-a-comparison-of-the-twoway-binding-in-angularjs-emberjs-and-knockoutjs.html</a>. En teaser une différence notable : contrairement aux deux autres, angular n'utilise pas vraiment le pattern Observateur, mais fait du dirty-checking, i.e. à chaque modification il doit vérifier si chacune des variables a été modifiée. D'où quelques lenteurs quand on modifie une seule des variables s'il y en a beaucoup d'autres ! Knockout et Ember ont eux aussi des faiblesses dans d'autres contexte, car la mise à jour des observables est plus lourde.</li>
+<li>Une série d'articles utiles sur knockout : <a href="http://www.jsmage.com/2013_09_01_archive.html">http://www.jsmage.com/2013_09_01_archive.html</a></li>
+<li>J'ai présenté ici des premiers exemples assez simples et isolés, dans une application réelle évidemment vous risquez d'avoir ce besoin sur un certain nombre de pages, et dans des contextes différents, attention donc à garder votre modèle knockout ou autre lisible et bien découpé, comme vous le faites déjà dans votre appli Symfony2 ;) </li>
+<li>Nous n'avons vu ici qu'une petite partie de ce que l'on peut faire en termes de data-binding, n'hésitez pas à jouer avec votre framework JS favori !</li>
+</ul>
+
+<p><sub>*note : les objets évoqués ne sont là qu'à titre d'exemple, l'auteur n'a aucun lien avec l'une ou l'autre des marques présentées ou aucune autre et gardera pour lui le modèle et la marque de son propre téléphone.</sub></p>
+{% endverbatim %}
+{%endblock article_content %}
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/pierrehenri-cumenge.png') }}" alt="Pierre-Henri Cumenge" />
+{% endblock %}
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://theodo.fr/{% endblock %}">{% block article_author %}Pierre-Henri Cumenge{% endblock %}</a>
+</h2>
+<p>Pierre-Henri est architecte chez <a href="http://www.theodo.fr/">Theodo</a>.</p>
+<p>
+    Sur Twitter :
+    <a href="https://twitter.com/cpierrehenri">@cpierrehenri</a>
+</p>
+{% endblock %}

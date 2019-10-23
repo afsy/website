@@ -1,0 +1,514 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 4 - Utilisez APYDataGridBundle pour des listings impeccables" %}
+
+{% block article_content %}
+<h1>Utilisez APYDataGridBundle pour des listings impeccables</h1>
+
+<h2>Introduction</h2>
+
+<p>APYDataGridBundle fait partie des utilitaires qui permettent de gagner du temps sur les projets de type <em>Application Web</em>.
+<br />Grâce à celui-ci, et à cet article, vous obtiendrez des listes, filtrables, triables, exportables, avec pagination et gestion des relations entre vos entités. Vous pourrez également gérer des actions sur chacune des lignes, ou mettre en place des traitements spécifiques sur chaque colonne. <br />Bref : vous allez normalement être en mesure de gérer tous les cas de figures auxquels vous pourriez être confrontés sur vos projets.</p>
+<p>Un grand merci à Yoann Petit, qui gère et maintient le Bundle, que l'on peut retrouver sur <a href="https://github.com/Abhoryo/APYDataGridBundle">Github</a>.</p>
+
+<p>Utiliser un framework tel que Symfony et l'écosystème de Bundle développés et mis à disposition par la communauté offre de nombreux avantages, dont celui non négligeable de faire gagner du temps sur les projets. C'est une des raisons pour lesquelles il ne faut pas hésiter à <a href="http://symfony.com/fr/doc/master/contributing/code/index.html">contribuer au code source de Symfony</a> ou de vos Bundles favoris.</p>
+
+<p>Il existe bien entendu tout un tas de solutions permettant de mettre en place des fonctionnalités identiques à APYDataGridBundle, allant de la plus simple à la plus complexe :</p>
+
+<ul>
+<li>Un bon vieux PHPMyAdmin pourra combler les cas les plus simples, surtout si le besoin est interne.</li>
+<li><a href="http://symfony.com/doc/current/bundles/SensioGeneratorBundle/commands/generate_doctrine_crud.html">SensioGeneratorBundle</a>, couplé à la possibilité de surcharger les templates utilisés lors de la génération, est un outil intéressant.</li>
+<li><a href="http://sonata-project.org/bundles/admin/master/doc/index.html">SonataAdminBundle</a> est un outil également puissant pour mettre en place des interfaces de gestion des entités.</li>
+<li><a href="http://bundles.kunstmaan.be/">KunstmaanAdminBundle</a> semble prometteur, mais je n'ai personnellement jamais réussi à le faire fonctionner.</li>
+</ul>
+
+<h2>Mise en place d'APYDataGridBundle</h2>
+
+<h3>Exemple concret : Calendrier de l'Avent</h3>
+
+<p>Pour illustrer cet article, nous nous placerons dans le contexte d'un listing d'articles. Pour cela, nous reposerons sur un modèle assez simple, composé d'articles, d'auteurs et de commentaires, dont les relations sont illustrées dans le schéma ci-dessous :</p>
+
+<p>
+    <img src="{{ asset('build/images/avent/2013/04/schema.png') }}" alt="" />
+</p>
+
+<p>Nous génèrerons ces entités à travers la commande Symfony <code>doctrine:generate:entity</code> dans un Bundle appelé <strong>ACSEOCalendrierBundle</strong>. Il est possible de choisir n'importe quel format de mapping (annotation, yml, xml) proposé.</p>
+
+<pre class="language-bash"><code>&gt; php app/console doctrine:generate:entity
+</code></pre>
+
+<h3>Installation du Bundle APYDataGrid</h3>
+
+<p>Pour disposer d'une fonctionnalité de génération en ligne de commande non encore disponible sur le Bundle d'origine (<a href="https://github.com/Abhoryo/APYDataGridBundle/pull/449">Pull Request</a> en cours), il convient de mettre à jour votre fichier <code>composer.json</code> avec les informations ci-dessous :</p>
+
+<pre class="language-json"><code>{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/acseo/APYDataGridBundle.git"
+        }
+    ],
+}
+</code></pre>
+
+<p>Puis :</p>
+
+<pre class="language-json"><code>{
+    "require": {
+        ...
+        "apy/datagrid-bundle": "dev-master"
+        ...
+    },
+}
+</code></pre>
+
+<p>Lancez l'installation du Bundle grâce à Composer :</p>
+
+<pre class="language-bash"><code>&gt; php composer.phar update
+</code></pre>
+
+<p>Pour finir, mettez à jour votre fichier <code>app/AppKernel.php</code>:</p>
+
+<pre class="language-php"><code>&lt;?php
+// app/AppKernel.php
+class AppKernel extends Kernel
+{
+    public function registerBundles()
+    {
+        $bundles = array(
+            //...
+            new APY\DataGridBundle\APYDataGridBundle(),
+            //...
+        );
+        // ...
+    }
+}
+</code></pre>
+
+<p>Ca y est, APYDataGrid est installé ! Maintenant, voyons ce que nous pouvons en faire.</p>
+
+<h2>Générer une grille</h2>
+
+<p>Maintenant que nous disposons de nos entités ainsi que d'APYDataGrid, il est temps de relier les deux. Pour nous faciliter la tâche, APYDataGrid dispose d'une commande permettant d'inspecter l'entité choisie pour générer un modèle de grille par défaut, qu'il nous suffira de personnaliser. Commençons par les articles.</p>
+
+<h3>Générer une grille par défaut :</h3>
+
+<p>Il suffit d'exécuter la commande suivante :</p>
+
+<pre class="no-highlight"><code>php app/console apydatagrid:generate:grid ACSEOCalendrierBundle:Article default
+</code></pre>
+
+<ul>
+<li><strong>Le premier argument</strong> (<code>ACSEOCalendrierBundle:Article</code>) permet de préciser l'entité sur laquelle nous travaillons.</li>
+<li><strong>Le deuxième argument</strong> (<code>default</code>) permet de nommer la grille. Cela pourra être utilisé pour créer des grilles reposant sur la même entité mais avec des paramétrages différents.</li>
+</ul>
+
+<p>Cette commande génère le fichier <code>ACSEOCalendrierBundle/Resources/grid/Article.default.grid.yml</code> avec le contenu suivant :</p>
+
+<pre class="language-yaml"><code>ACSEO\Bundle\CalendrierBundle\Entity\Article:
+    Source:
+        columns:
+            id: ~
+            title: ~
+            content: ~
+            publishedDate: ~
+            writer: ~
+            comments: ~
+        groupBy: ~
+        filterable: ~
+    Columns:
+        id:
+            filterable: true
+            visible: true
+            id: id
+            title: id
+        title:
+            filterable: true
+            visible: true
+            id: title
+            title: title
+        content:
+            filterable: true
+            visible: true
+            id: content
+            title: content
+        publishedDate:
+            filterable: true
+            visible: true
+            id: publishedDate
+            title: publishedDate
+        writer:
+            filterable: true
+            visible: true
+            id: writer
+            title: writer
+        comments:
+            filterable: true
+            visible: true
+            id: comments
+            title: comments
+
+</code></pre>
+
+<p>Par défaut, tous les champs sont définis comme visibles et triables. Les relations avec les entités (<code>Writer</code>, <code>Comments</code>) ne sont pas encore paramétrées. Nous verrons plus tard comment nous y prendre.</p>
+
+<h3>Affichage d'une grille.</h3>
+
+<p>Maintenant que ce fichier est généré, faisons en sorte d'afficher notre grille. Pour cela, nous devrons intervenir au niveau du contrôleur puis de la vue.</p>
+
+<h4>Contrôleur <code>ArticleController.php</code> :</h4>
+
+<pre class="language-php"><code>&lt;?php
+
+namespace ACSEO\Bundle\CalendrierBundle\Controller;
+
+use APY\DataGridBundle\Grid\Source\Entity;
+
+/**
+ * Article controller.
+ *
+ * @Route("/article")
+ */
+class ArticleController extends Controller
+{
+    /**
+     * Affiche la liste des Articles
+     *
+     * @Route("/", name="article")
+     * @Method("GET", "POST")
+     * @Template()
+     */
+    public function indexAction()
+    {
+        // Initialisation de la source de données
+        $source = new Entity('ACSEOArticleBundle:Article');
+
+        // Récupération du service Grid
+        $grid = $this-&gt;container-&gt;get('grid');
+
+        // Affectation de la source
+        $grid-&gt;setSource($source);
+
+        // Renvoie une réponse
+        return $grid-&gt;getGridResponse('ACSEOCalendrierBundle:Article:index.html.twig');
+    }
+</code></pre>
+
+<h4>Vue <code>Resources/views/Article/index.html.twig</code></h4>
+
+<p>Maintenant que notre contrôleur fait appel à APYDataGrid, il ne nous reste plus qu'à déclencher l'affichage au niveau de notre vue, auquel nous avons ajouté une petite mise en forme CSS proposée dans la <a href="https://github.com/Abhoryo/APYDataGridBundle/blob/master/Resources/doc/grid_configuration/working_example.css">documentation du Bundle</a>:</p>
+{% verbatim %}
+<pre><code class="language-twig">{# Resources/views/Article/index.html.twig #}
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    &lt;h1&gt;Liste des articles&lt;/h1&gt;
+
+    {{ grid_search(grid) }}
+    {{ grid(grid) }}
+
+{% endblock %}
+</code></pre>
+{% endverbatim %}
+<p>
+    <strong>Et voilà !</strong><br />
+    <img src="{{ asset('build/images/avent/2013/04/articles-list.png') }}" alt="liste des articles" />
+</p>
+
+<p>Vous avez sous les yeux un premier affichage de vos articles, sur lequel vous pouvez <strong>lister</strong>, <strong>trier</strong>, <strong>filter</strong> et utiliser la <strong>pagination</strong>. Bien entendu, l'affichage peut être optimisé, mais c'est un bon début.</p>
+
+<p>Au final, mettre en place un tel affichage nécessite peu de temps et de code :</p>
+
+<ol>
+<li>Définition de votre entité, par exemple avec <code>app/console doctrine:generate:entity</code>.</li>
+<li>Création de la grille à travers la commande <code>app/console apydatagrid:generate:grid</code>.</li>
+<li>Mise en place du contrôleur et de la vue (qui peut être générée en utilisant <code>SensioGeneratorBundle</code>) et la possibilité de <a href="http://symfony.com/doc/current/bundles/SensioGeneratorBundle/index.html">surchager les templates de base</a>.</li>
+</ol>
+
+<p>Vous pouvez bien sûr vous plonger dans la <a href="https://github.com/Abhoryo/APYDataGridBundle/blob/master/Resources/doc/summary.md">documentation</a> du Bundle qui présente beaucoup de fonctionnalités.</p>
+
+<p>La deuxième partie de l'article présente une utilisation plus avancée d'APYDataGrid.</p>
+
+<h2>Aller plus loin avec APYDataGrid</h2>
+
+<p>Avoir un affichage de base, c'est bien. Avoir un affichage optimisé avec plus de fonctionnalités, <strong>c'est mieux</strong>. Nous allons améliorer l'affichage de notre listing, étape par étape.</p>
+
+<h3>Modification de la grille, par paramétrage</h3>
+
+<p>De nombreuses choses sont possibles uniquement par paramétrage. Ainsi, nous allons pouvoir changer l'affichage, les filtres, le format des filtres et d'autres contenus uniquement en modifiant le fichier <code>Article.default.grid.yml</code>.</p>
+
+<pre class="language-yaml"><code>#ACSEO\Bundle\CalendrierBundle\Entity\Article:
+    Source:
+        columns:
+            id: ~
+            title: ~
+            content: ~
+            publishedDate: ~
+            # On active ici la liasion entre Article et Writer
+            writer.firstName: ~
+            writer.lastName: ~
+            writer.companyName: ~
+            comments: ~
+        groupBy: ~
+        filterable: ~
+    Columns:
+        id:
+            # On n'affiche pas l'id dans le tableau ni dans les filtres
+            filterable: false
+            visible: false
+            id: id
+            title: id
+        title:
+            filterable: true
+            visible: true
+            id: title
+            # Modification du libellé affiché dans les filtres et dans le tableu
+            title: Titre de l'article
+            # On désactive l'utilisation d'opérateurs sur le filtre de recherche
+            operatorsVisible: false
+        publishedDate:
+            filterable: false
+            visible: true
+            id: publishedDate
+            title: Date de publication
+        writer.firstName:
+            filterable: true
+            visible: true
+            id: writer.firstName
+            # Définition de la colonne : champ firstName de l'entité Writer
+            field: writer.firstName
+            source: true
+            title: Prénom de l'auteur
+            # Utilisation des filtres "like" ou "not like" pour la recherche
+            operators: ["like", "nlike"]
+        writer.lastName:
+            filterable: true
+            visible: true
+            id: writer.lastName
+            field: writer.lastName
+            source: true
+            title: Nom de l'auteur
+            operatorsVisible: false
+            # Utilisation d'un menu déroulant pour le filtre plutôt que d'un champ texte
+            filter: select
+        writer.companyName:
+            filterable: true
+            visible: true
+            id: writer.companyName
+            field: writer.companyName
+            source: true
+            title: Société
+            operatorsVisible: false
+            filter: select
+            # On autorise le filtre à travers des cases à cocher
+            selectMulti: true
+            selectExpanded: true
+</code></pre>
+
+<p>Moyennant un peu de CSS, l'affichage correspond désormais à l'écran ci-dessous :</p>
+
+<p>
+    <img src="{{ asset('build/images/avent/2013/04/nicer-articles-list.png') }}" alt="liste des articles plus jolie" />
+</p>
+
+<h3>Modification de la grille, via le contrôleur</h3>
+
+<p>Maintenant que nous avons une grille présentable, nous pouvons utiliser notre contrôleur pour manipuler encore plus notre grille. Nous pourrions par exemple:</p>
+
+<ul>
+<li>Fusionner les champs Prénom et Nom,</li>
+<li>Ajouter des boutons d'action permettant de voir ou de supprimer un article,</li>
+<li>Ajouter une colonne affichant le nombre de commentaires par article,</li>
+<li>Donner la possibilité d'effectuer un export CSV de notre liste.</li>
+</ul>
+
+<h3>Manipulation d'une colonne</h3>
+
+<p>Fusionner les champs Prénom et Nom revient à manipuler le contenu d'une colonne, en exploitant les données de la ligne à laquelle elle est rattachée.</p>
+
+<p>Pour cela, rien de plus simple, grâce à la fonction <code>manipulateRow()</code>:</p>
+
+<pre class="language-yaml"><code># déclaration de la colonne author dans Article.default.grid.yml
+ACSEO\Bundle\CalendrierBundle\Entity\Article:
+    Source:
+        columns:
+            #...
+            author: ~
+            #...
+    Columns:
+        #...
+        author:
+            filterable: false
+            visible: true
+            id: author
+            title: Auteur
+            operatorsVisible: false
+</code></pre>
+
+<pre class="language-php"><code>&lt;?php
+//src/ACSEO/Bundle/CalendrierBundle/Controller/ArticleController.php
+
+class ArticleController extends Controller
+{
+    //..
+    public function indexAction()
+    {
+        //..
+        // Manipulation des données pour renseigner la colonne Auteur
+        $source-&gt;manipulateRow(
+            function ($row) {
+                $row-&gt;setField('author', $row-&gt;getField('writer.firstName').' '.$row-&gt;getField('writer.lastName'));
+
+                return $row;
+            }
+        );
+        //..
+</code></pre>
+
+<p>Dans ce cas, la méthode <code>manipulateRow()</code> travaille sur des données disponibles dans chacune des lignes. Nous pourrions également implémenter une fonction <code>getFullName</code> au sein de l'entité <code>Writer</code> et appeler celle-ci grâce au code : <code>$row-&gt;getEntity()-&gt;getFullName()</code>.</p>
+
+<h3>Ajout de colonnes d'action</h3>
+
+<p>Nous pouvons ajouter très simplement, des boutons d'actions pour chacune des lignes via le contrôleur :</p>
+
+<pre class="language-php"><code>&lt;?php
+
+use APY\DataGridBundle\Grid\Action\RowAction;
+
+// ...
+class ArticleController extends Controller
+{
+    //..
+    public function indexAction()
+    {
+        //...
+        $rowAction = new RowAction("Voir l'article", 'article_show');
+        $grid-&gt;addRowAction($rowAction);
+
+        $rowAction = new RowAction("Supprimer l'article", 'article_delete', true, '_self');
+        $rowAction-&gt;setConfirmMessage('Etes vous sur de vouloir supprimer cet article ?');
+        $grid-&gt;addRowAction($rowAction);
+        //...
+</code></pre>
+
+<p>Le rendu devrait être identique au suivant à ce stade :</p>
+
+<p>
+    <img src="{{ asset('build/images/avent/2013/04/delete.png') }}" alt="suppression" />
+</p>
+
+<h3>Ajout d'une colonne virtuelle et modification de son rendu</h3>
+
+<p>Pour ajouter une colonne permettant d'afficher le nombre de commentaires, rien de plus simple. Nous en profiterons en plus pour faire afficher un commentaire conditionnel et ajouter des attributs sur nos lignes :</p>
+
+<pre class="language-php"><code>&lt;?php
+//..
+use APY\DataGridBundle\Grid\Column\BlankColumn;
+//..
+class ArticleController extends Controller
+{
+    //..
+    public function indexAction()
+    {
+        //..
+        $nbCommentsColumn = new BlankColumn(array(
+            'id' =&gt; 'nbComments',
+            'title' =&gt; 'Commentaires',
+        ));
+        $grid-&gt;addColumn($nbCommentsColumn, 8);
+
+        // Manipulation des données
+        $source-&gt;manipulateRow(
+            function ($row) {
+                $row-&gt;setField('author', $row-&gt;getField('writer.firstName').' '.$row-&gt;getField('writer.lastName'));
+
+                // Commentaire en fonction du nombre de commentaires
+                $nbComments = $row-&gt;getEntity()-&gt;getNbComments();
+                $comment = 'Amazing !';
+
+                if ($nbComments == 0) {
+                    $comment = '';
+                } elseif ($nbComments &lt; 100 ) {
+                    $comment = 'Not Bad !';
+                }
+                $row-&gt;setField('nbComments', sprintf('%u. %s', $nbComments, $comment));
+
+                // Ajout d'une couleur sur les lignes dont les articles ne sont pas publiés
+                $publishedDate = $row-&gt;getField('publishedDate');
+
+                if ($publishedDate &gt; new \Datetime()) {
+                    $row-&gt;setColor('#CCCCCC');
+                }
+
+                return $row;
+            }
+        );
+    //..
+</code></pre>
+
+<p>Grâce à cela, nous devrions avoir l'affichage ci-dessous :</p>
+
+<p>
+    <img src="{{ asset('build/images/avent/2013/04/comments.png') }}" alt="décompte des commentaires" />
+</p>
+
+<h3>Ajout de fonctions d'export</h3>
+
+<p>L'ajout d'un export de la liste, prenant en compte les filtres actifs, est un jeu d'enfant :</p>
+
+<pre class="language-php"><code>&lt;?php
+
+namespace ACSEO\Bundle\CalendrierBundle\Controller;
+//..
+use APY\DataGridBundle\Grid\Export\CSVExport;
+use APY\DataGridBundle\Grid\Export\ExcelExport;
+//..
+class ArticleController extends Controller
+{
+    //..
+    public function indexAction()
+    {
+        //..
+        $grid-&gt;addExport(new CSVExport('Exporter au format CSV'));
+        $grid-&gt;addExport(new ExcelExport('Exporter au format Excel'));
+</code></pre>
+
+<p>
+    On obient ensuite la sélection de l'export sur notre grille :<br />
+    <img src="{{ asset('build/images/avent/2013/04/export.png') }}" alt="export" />
+</p>
+
+<h2>Conclusion</h2>
+
+<p>À travers cet exemple, vous avez compris comment il était simple de mettre en place une solution satisfaisante de présentation de vos données sous forme de listing et à quel point <code>APYDataGridBundle</code> offrait une grande liberté dans la manipulation des données.</p>
+
+<p>Cet article ne donne qu'un aperçu de ce que le bundle peut proposer. N'hésitez pas à vous rendre sur le dépôt de code et sa <a href="https://github.com/Abhoryo/APYDataGridBundle/blob/master/Resources/doc/summary.md">documentation</a> pour aller plus loin dans l'utilisation de celui-ci.</p>
+
+<p>Vous pourrez retrouver les exemples utilisés dans cet article sur <a href="https://github.com/npotier/afsy-avent-apydatagridbundle">ce dépôt Github</a>. Fiez vous aux commits pour retrouver les différentes étapes présentées ci-dessus.</p>
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/nicolas-potier.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+<h2><a href="{% block author_url %}http://fr.linkedin.com/in/nicolaspotier{% endblock %}" target="_blank">{% block article_author %}Nicolas Potier{% endblock %}</a></h2>
+<p>
+	Diplômé de l'Ecole des Mines de Paris et d'HEC, Nicolas Potier est un amoureux du Web et des des possibilités sans limite qu'il propose.
+</p>
+<br />
+<p>
+    Après une première expérience dans le Conseil en Organisation, il fonde en 2009 la société <a href="http://www.acseo-conseil.fr" target="_blank">ACSEO</a>, dont le but est d'accompagner les entreprises allant de la startup aux sociétés du CAC40 dans la conception et la réalisation d'applications Web de qualité.
+</p>
+<br />
+<p>
+	Au sein de l'équipe, composée d'une dizaine de personnes, Nicolas intervient plus particulièrement sur les phases de conception et de réalisation d'applications Symfony.
+</p>
+<p>
+    Sur Twitter :
+    <a href="https://twitter.com/nicolaspotier">@nicolaspotier</a>
+</p>
+{% endblock %}

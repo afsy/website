@@ -1,0 +1,218 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 14 - Votre application est lente ? Pensez à optimiser Doctrine !" %}
+
+{% block article_content %}
+            <h1>Votre application est lente ? Pensez à optimiser Doctrine !</h1>
+
+<p>Depuis sa création il y a maintenant 4 ans, Doctrine 2 s'est imposé comme l'ORM standard sur toutes les applications Symfony2. Doctrine 2 est un outil très utile fournissant une couche d'abstraction pour la manipulation des bases de données relationnelles. Mais la clarté et la facilité de développement ont cependant un coût non négligeable. C'est pourquoi après le développement de certaines fonctionnalités, il est parfois nécessaire d'opérer une passe d'optimisation afin de gagner en performances.</p>
+
+<p>Il ne s'agit pas ici de vous faire tomber dans l'écueil de l' « optimisation prématurée », mais plutôt de vous sensibiliser à certaines pratiques qui peuvent améliorer grandement les performances de vos applications.</p>
+
+<h2>I. Identifier les parties à optimiser</h2>
+
+<p>Différents outils existent afin d'identifier les parties de votre application qui sont ralenties à cause de Doctrine et, qui par conséquent, nécessitent une optimisation.</p>
+
+<h3>1. Le profiler Symfony</h3>
+
+<p>Cet outils possède l'avantage d'être disponible de manière native dans toute installation de « Symfony2 Standard Edition ». Il présente un certain nombre de métriques très utiles pour évaluer la performance de Doctrine sur une page donnée. On y trouvera entre autres les métriques suivantes :</p>
+
+<ul>
+<li>Le temps total des requêtes SQL effectuées par Doctrine,</li>
+<li>Le nombre de requêtes SQL (avec un message d'alerte quand celui-ci semble trop élevé),</li>
+<li>La liste de toutes les requêtes SQL exécutées avec leur temps d'exécution (utile pour identifier les fuites de requêtes),</li>
+<li>La possibilité d'exécuter une requête <code>EXPLAIN</code> sur chaque requête afin d'identifier les lenteurs éventuelles (index manquant, etc...),</li>
+<li>Les éventuelles erreurs de mapping Doctrine.</li>
+</ul>
+
+<p><img src="{{ asset('build/images/avent/14-debug-toolbar.png') }}" alt="Debug toolbar" /></p>
+
+<p><img src="{{ asset('build/images/avent/14-profiler.png') }}" alt="Profiler" /></p>
+
+<h3>2. Les outils externes</h3>
+
+<p>En complément du profiler, il existe un certain nombre d'outils permettant de surveiller les performances d'une application dont New Relic qui possède l'avantage d'être conçu pour fonctionner en production. Il permet notamment d'identifier les pages les plus lentes, puis de voir quelle partie du code pose problème. Il est ensuite plus facile d'entreprendre une action corrective pour améliorer les performances.</p>
+
+<p>Des outils de profilage comme xdebug et xh-prof permettent également d'identifier les goulots d'étranglement en terme de performances.</p>
+
+<h2>II. Les bonnes pratiques</h2>
+
+<p>Il existe un ensemble de règles et de bonnes pratiques à garder en tête afin d'éviter 80% des problèmes de performance.</p>
+
+<h3>1. Utiliser modérément les accesseurs sur les relations</h3>
+
+<p>Doctrine 2 propose la possibilité de récupérer une entité en relation avec une autre entité grâce à un accesseur. C'est bien entendu très pratique mais il ne faut pas perdre de vue que, lors de l'utilisation d'un « getter », Doctrine effectue alors une requête SQL pour récupérer l'entité liée.</p>
+
+<p>Ce comportement devient notamment problématique dans les pages de listing. Prenons un exemple concret :</p>
+
+<p>Imaginons une page qui affiche une liste de commentaires sur un article d'un site e-commerce. Chaque commentaire est accompagné du nom de son auteur (« le message à été posté par ... »).</p>
+
+<p>La méthode la plus commune pour implémenter cette fonctionnalité serait :</p>
+
+{% verbatim %}
+<pre class="language-twig"><code>{% for message in messages %}
+&lt;div class="comment"&gt;
+    {{ message.text }}
+    &lt;small&gt;
+        Posted by {{ message.author.name }}
+    &lt;/small&gt;
+&lt;/div&gt;
+{% endfor %}
+</code></pre>
+{% endverbatim %}
+
+<p>Or, dans une page de listing comportant plusieurs centaines d'éléments, cela se traduira en autant de requêtes SQL vers la base de données. Ce grand nombre de requêtes pourra être évité en utilisant par exemple l'option <code>fetch="EAGER"</code> ou en passant par une méthode d'un « repository ».</p>
+
+<h3>2. Utiliser les indexes</h3>
+
+<p>Lors de la création d'une entité, il est recommandé de mettre en place des indexes SQL afin d'accélérer le temps de recherche sur les colonnes de la base de données.</p>
+
+<p>Voici le code correspondant dans Doctrine :</p>
+
+<pre class="language-php"><code>/**
+ * @Entity
+ * @Table(name="user",indexes={
+ *     @Index(name="email_idx", columns={"email"})
+ * })
+ */
+class User
+{
+    ...
+}
+</code></pre>
+
+<h3>3. Rester à l'affût des fuites de requête SQL</h3>
+
+<p>On parle de fuite de requêtes lorsque le nombre de requêtes sur une page n'est pas fixe. Ce genre de problème n'est pas nécessairement grave dans la mesure ou le nombre de requêtes reste borné, mais peut par contre poser problème si le nombre de requêtes augmente de façon incontrôlée.</p>
+
+<p>Il est à noter que le profiler Symfony2 affiche un avertissement quand le nombre de requêtes sur une page devient anormalement élevé.</p>
+
+<h2>III. Le cache</h2>
+
+<p>Doctrine possède un mécanisme puissant de cache permettant d'accélérer de manière non négligeable ses performances.</p>
+
+<p>Le cache peut être activé à 3 niveaux :</p>
+
+<ul>
+<li><em>Metadata cache</em> : Cela permet à Doctrine de ne pas avoir à lire les fichiers de configuration sur le disque afin de pouvoir récupérer les métadonnées d'une entité. Il est indispensable en production.</li>
+<li><em>Query cache</em> : Ce cache intervient lorsque Doctrine doit transformer une requête DQL en SQL. L'activation de ce cache fait gagner un temps considérable dans le cas où la même requête est exécutée un grand nombre de fois.</li>
+<li><em>Result cache</em> : Ce cache garde en mémoire le résultat des requêtes envoyées à la base de données afin de ne pas avoir à l'interroger une seconde fois par la suite.</li>
+</ul>
+
+<p>La configuration permettant d'activer le cache Doctrine dans Symfony2 est la suivante (pour memcache) :</p>
+
+<pre class="language-yaml"><code># app/config/config_prod.yml
+
+Doctrine:
+    orm:
+        entity_managers:
+            default:
+                metadata_cache_driver:
+                    type: memcache
+                    host: localhost
+                    port: 11211
+                    instance_class: Memcache
+                query_cache_driver:
+                    type: memcache
+                    host: localhost
+                    port: 11211
+                    instance_class: Memcache
+</code></pre>
+
+<p>Il existe aussi des implémentations pour <code>apc</code>.</p>
+
+<h2>IV. Récupération agressive des données : « <code>EAGER</code> fetch »</h2>
+
+<p>Dans certains cas, il peut être nécessaire de spécifier l'option <code>fetch="EAGER"</code> dans la configuration d'une relation Doctrine afin de diminuer le nombre de requêtes :</p>
+
+<pre class="language-php"><code>class User {
+    ...
+    /**
+     * @ManyToOne(targetEntity="Group", cascade={"all"}, fetch="EAGER")
+     */
+    private $group;
+    ...
+}
+</code></pre>
+
+<p>Cette option permet de demander à Doctrine d'aller récupérer automatiquement les entités correspondant à cette relation lors de l'appel aux méthodes <code>find</code>, <code>findOne</code>, <code>findOneBy</code>... des « repositories ».</p>
+
+<p>Cela fait notamment sens lors d'une relation du type « l'entité A possède l'entité B ».</p>
+
+<p>Cette option est néanmoins à utiliser avec précautions, notamment pour les relations comportant un grand nombre d'éléments.</p>
+
+<h2>V. Selectionner plusieurs entités dans une requête Doctrine</h2>
+
+<p>Il est possible de récupérer plusieurs entités différentes en une seule requête Doctrine. Cela peut d'ailleurs présenter un gain de temps très conséquent. Pour ce faire, il suffit d'utiliser la méthode <code>addSelect</code> de l'objet <code>QueryBuilder</code> :</p>
+
+<pre><code class="language-php">class UserRepository
+{
+    ...
+    public function findUsersWithGroups()
+    {
+        $qb = $this
+            -&gt;createQueryBuilder('user')
+            -&gt;addSelect('group')
+            -&gt;leftJoin('user.groups', 'group')
+            -&gt;where(...)
+        ;
+
+        return $qb-&gt;getQuery()-&gt;execute();
+    }
+    ...
+}
+
+</code></pre>
+
+<p>Dans cet exemple, lors de l'exécution de la requête, Doctrine récupérera une liste d'utilisateurs ainsi que leurs groupes associés. Ils pourront alors être appelés de manière classique grace à la méthode <code>getGroups</code> de la classe <code>User</code>.</p>
+
+<h2>VI. Aller plus loin, les requêtes natives</h2>
+
+<p>Il ne faut pas perdre de vue que, même s'ils permettent dans la majorité des cas d'améliorer les performances d'une application, les cas d'optimisation couverts dans cet article restent cependant relativement génériques.</p>
+
+<p>Dans des cas extrêmes, il sera parfois nécessaire de continuer plus en profondeur le travail d'optimisation en utilisant par exemple des requêtes SQL natives plutôt que de passer par le language DQL de Doctrine.</p>
+
+<p>Voici un exemple simple de l'utilisation d'une requête SQL native avec Doctrine.</p>
+
+<pre class="language-php"><code>// Get connection
+$conn = $entityManager-&gt;getConnection();
+
+// Get table name
+$meta = $entityManager-&gt;getClassMetadata(User::class);
+$tableName = $meta-&gt;getTableName();
+
+// Get random ids
+$sql = "SELECT id AS id FROM $tableName WHERE active = true ORDER BY RAND()";
+$statement = $conn-&gt;executeQuery($sql);
+$fetchedIds = array_map(function ($element) {
+    return $element['id'];
+}, $statement-&gt;fetchAll());
+
+return $fetchedIds;
+</code></pre>
+
+<p>On peut remarquer dans l'exemple ci-dessus que même si Doctrine n'est pas utilisé de manière traditionnelle, il est toujours possible de récupérer les métadonnées d'une entité afin de générer une requête SQL qui s'adaptera au mapping Doctrine 2.</p>
+
+<p>Vous trouverez plus d'informations sur les requêtes SQL natives sur la <a href="http://docs.Doctrine-project.org/en/latest/reference/native-sql.html">documentation officielle</a>.</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/matt2cant.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://matts2cant.com/{% endblock %}" target="_blank">{% block article_author %}Matthieu de Canteloube{% endblock %}</a>
+</h2>
+<p>
+    Matthieu de Canteloube est architecte chez <a target="_blank" href="http://www.theodo.fr">Theodo</a>
+    et développeur Symfony2 certifié. Il est également co-fondateur de Vimies, un réseau
+    social mobile de partage de vidéos.
+</p>
+<p>
+    Vous pouvez le retrouver sur twitter:
+    <a href="https://twitter.com/matts2cant">@matts2cant</a>.
+</p>
+{% endblock %}

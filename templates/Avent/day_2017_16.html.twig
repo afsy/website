@@ -1,0 +1,1023 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 16 - Des astuces sécurité avec Symfony" %}
+
+{% block article_content %}
+    {% verbatim %}
+
+    <style type="text/css">
+        em {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <h1 id="astuces-de-securite-avec-symfony">Astuces de sécurité avec Symfony</h1>
+
+    <h4 id="hello-world">Hello, World!</h4>
+
+    <p>
+        Ahh, la sécurité, enfin nous allons parler d’un truc que tout le monde déteste !
+    </p>
+
+    <ul>
+        <li>
+            Les patrons d’abord, car la sécurité coûte cher mais ne rapporte
+            rien. En plus, se faire péter sa base en 2017 c’est tendance.
+        </li>
+        <li>
+            Les équipes marketing ensuite, car on rajoute des contraintes qui peuvent
+            <em>abaisser le taux de conversion</em> des utilisateurs.
+        </li>
+        <li>
+            Les équipes tout court, car elles passent leur temps à passer de
+            Facebook à <abbr title="Two Factor Authentication" lang="en">2FA</abbr>
+            sur leur mobile, c’est long et fatigant.
+        </li>
+        <li>
+            Les utilisateurs aussi, car ils ne peuvent pas librement mettre le nom
+            de leur chien ou leur date de naissance comme mot de passe.
+        </li>
+        <li>
+            Les ops, qui doivent mettre à l'échelle les performances d’une belle
+            infrastructure microservice avec du handshake X.509 de partout.
+        </li>
+        <li>
+            Les développeurs, nous, bien entendu, car de toute façon nous n'avons
+            pas le temps ! Notre framework fait le boulot pour nous ! Et puis,
+            qui oserait donc s’attaquer à une application que même le marketing
+            n’arrive pas à afficher en 10<sup>ième</sup> page de Google ?
+        </li>
+    </ul>
+
+    <p>
+        Alors voilà, nous sommes à 10 jours de Noël, tes projets sont bouclés,
+        tu n’as plus envie de bosser avant les vacances, et tu es quand même là.
+        Pourquoi ne pas faire une petite revue sur les tendances et les erreurs
+        classiques de sécurité dans tes applications Web, histoire de passer le
+        temps de manière constructive ?
+    </p>
+
+    <p>C’est parti ! ✌️</p>
+
+    <h2 id="du-nouveau-dans-lowasp-top-10">
+        Du nouveau dans l’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr> Top 10 !
+    </h2>
+
+    <p>Et oui, l’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr> Top 10 a été mis à jour
+        cette année, quoi de neuf ?</p>
+
+    <table class="table" lang="en">
+        <thead>
+        <tr>
+            <th>Top 10 OWASP 2013</th>
+            <th>Top 10 OWASP 2017</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>A1-Injection</td>
+            <td>A1-Injection</td>
+        </tr>
+        <tr>
+            <td>A2-Broken Authentication and Session Management</td>
+            <td>A2-Broken Authentication and Session Management</td>
+        </tr>
+        <tr>
+            <td>A3-Cross-Site Scripting (<abbr title="Cross Site Scripting" lang="en">XSS</abbr>)</td>
+            <td>A3-Cross-Site Scripting (<abbr title="Cross Site Scripting" lang="en">XSS</abbr>)</td>
+        </tr>
+        <tr>
+            <td>A4-Insecure Direct Object References</td>
+            <td>A4-Broken Access Control</td>
+        </tr>
+        <tr>
+            <td>A5-Security Misconfiguration</td>
+            <td>A5-Security Misconfiguration</td>
+        </tr>
+        <tr>
+            <td>A6-Sensitive Data Exposure</td>
+            <td>A6-Sensitive Data Exposure</td>
+        </tr>
+        <tr>
+            <td>A7-Missing Function Level Access Control</td>
+            <td>A7-Insufficient Attack Protection</td>
+        </tr>
+        <tr>
+            <td>A8-Cross-Site Request Forgery (<abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>)</td>
+            <td>A8-Cross-Site Request Forgery (<abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>)</td>
+        </tr>
+        <tr>
+            <td>A9-Using Components with Known Vulnerabilities</td>
+            <td>A9-Using Components with Known Vulnerabilities</td>
+        </tr>
+        <tr>
+            <td>A10-Unvalidated Redirects and Forwards</td>
+            <td>A10-Underprotected APIs</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p><strong>A4 et A7 de 2013 deviennent A4 de 2017</strong></p>
+
+    <p>
+        Tout d’abord, dans les risques de 2013, A4 (j’accède à <code>/resource/{id}</code>
+        sans que <code>{id}</code> m’appartienne) et A7 (je valide mon formulaire
+        en JavaScript mais je le revalide pas côté serveur) ont été fusionnés dans
+        A4 de 2017.
+    </p>
+
+    <p><strong>A7 de 2017 est désormais « <em lang="en">Insufficient Attack Protection</em> »</strong></p>
+
+    <p>
+        L’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr>
+        pointe du doigt notre laxisme au niveau du traitement automatique des
+        attaques. Afin d’être complètement efficace, il nous faut automatiquement
+        détecter, surveiller, enregistrer et répondre.
+    </p>
+
+    <p>
+        Un exemple classique est une attaque sur le formulaire de connexion : on
+        peut détecter une attaque par le nombre de soumissions par adresse
+        <abbr title="Internet Protocol">IP</abbr> et par minute,
+        surveiller facilement sur un graphique les connexions réussies <abbr title="versus">vs</abbr>
+        échouées, et bloquer une <abbr title="Internet Protocol">IP</abbr>
+        si elle dépasse une certaine limite. Cela éviterait les attarques par
+        force brute, dictionnaire, réutilisation de mot de passe, et j’en passe.
+        Sauf si le <em lang="en">hacker</em> est très motivé, auquel cas il
+        viendra avec un grand nombre d’<abbr title="Internet Protocol">IP</abbr>s
+        et il faudra trouver d’autres solutions.
+    </p>
+
+    <p>A10 de 2017 devient « <em lang="en">Underprotected <abbr title="Application Programming Interface">API</abbr>s »</em>
+    </p>
+
+    <p>
+        Nos applications utilisent de plus en plus des <abbr title="Application Programming Interface">API</abbr>s
+        pour accéder au <span lang="en">backend</span>, cela permet aux interfaces
+        Web et mobile de récupérer les informations en un même point qui centralise
+        le code métier. L’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr>
+        attire notre attention sur le manque de protections sur celles-ci.
+    </p>
+
+    <p>
+        C’est assez simple à comprendre, nous avons moins l’occasion d’auditer nos
+        <abbr title="Application Programming Interface">API</abbr>s :
+    </p>
+
+    <ul>
+        <li>
+            On utilise un <abbr title="Software Development Kit">SDK</abbr> bien
+            adapté pour y accéder, mais quel comportement ont ces dernières quand
+            on les utilise mal ou directement ?
+        </li>
+        <li>
+            On ne voit pas facilement les données qui transitent entre l’application
+            et l’<abbr title="Application Programming Interface">API</abbr>.
+            Sont-elles toutes nécessaires et sont-elles toutes exposables ?
+        </li>
+    </ul>
+
+    <p>
+        Pour déboguer plus facilement, vous pouvez mettre votre client derrière
+        un proxy tel que <a href="https://www.charlesproxy.com/">Charles</a>.
+        Cet outil permet de consulter les requêtes qui transitent, de les modifier
+        et de les rejouer en restant déconnecté. C'est très instructif !
+    </p>
+
+    <p><strong>A10 de 2013 disparait</strong></p>
+
+    <p>
+        Les failles « <em lang="en">open redirects</em> », c'est-à-dire le fait
+        de rediriger l’utilisateur vers une <abbr title="Uniform Resource Locator" lang="en">URL</abbr>
+        arbitraire sans la valider, ne sont plus dans le top 10 des risques. Ce
+        n'est cependant pas une raison pour renvoyer une <code>RedirectResponse</code>
+        sur le <em lang="en">referrer</em> ♥️.
+    </p>
+
+    <h2 id="astuces-de-securite">Astuces de sécurité par le code</h2>
+
+    <p>
+        Maintenant, faisons un petit tour dans vos applications, à grands coups
+        de <code>grep</code>, afin de vérifier si elles contiennent quelques
+        erreurs de base ou au moins des choses suspectes. Je vous préviens, il
+        s’agit souvent de cas issus d’un besoin bien tordu… Par conséquent, la
+        solution proposée peut-être aussi alambiquée. Soyons pragmatique, et
+        faisons quelque chose de sécurisé.
+    </p>
+
+    <h3 id="xss"><abbr title="Cross Site Scripting" lang="en">XSS</abbr></h3>
+
+    <p>
+        Le principe de l’attaque consiste à injecter du code dans les pages afin
+        de le rendre exécutable par le navigateur. Par exemple, si l'on parvient
+        à placer un tag comme celui ci-dessous dans la page :
+    </p>
+
+    <pre><code class="html language-html">&lt;script src="evil.com/boom.js"/&gt;</code></pre>
+
+    <p>De là, tout devient possible :</p>
+
+    <ul>
+        <li>Récupérer le contenu de la page (peut-être utile si l’injection en front touche le backoffice),</li>
+        <li>Remplir des formulaires de la page même s’ils sont protégés avec un jeton <abbr
+                    title="Cross Site Request Forgery" lang="en">CSRF</abbr>,
+        </li>
+        <li>Récupérer le cookie de session si le drapeau <code>httponly</code> a été oublié,</li>
+        <li>Remplacer totalement la structure <abbr title="HyperText Markup Language" lang="en">HTML</abbr> de la page
+            par autre chose (<span lang="en">phishing</span> ou autre),
+        </li>
+        <li>etc.</li>
+    </ul>
+
+    <p>Utilisation du filtre <code>|raw</code> dans une vue Twig.</p>
+
+    <pre><code class="twig language-twig">{{ myVariable | raw }}</code></pre>
+
+    <ul>
+        <li>
+            ❌ Je peux contourner l’échappement car cette variable est créée sur
+            la base de constantes connues par le backend.
+        </li>
+        <li>
+            C’est sans compter sur l’évolution de votre code. Un jour, cette
+            variable sera peut-être remplie de manière arbitraire.
+        </li>
+        <li>
+            Pour plus de sécurité, remplacez <code>|raw</code> par <code>|purify</code>
+            qui échappera les tags les plus dangereux. Vous avez seulement besoin
+            du bundle <a href="https://github.com/Exercise/HTMLPurifierBundle">HTMLPurifierBundle</a>.
+            Notez aussi que vous pouvez utiliser <code>$container-&gt;get('exercise_html_purifier.default')-&gt;purify($var)</code>
+            depuis un test fonctionnel ou bien depuis un contrôleur.
+        </li>
+    </ul>
+
+    <p>
+        Restez tout de même prudent car le filtre <code>|purify</code> n’échappe
+        pas les balises <code>&lt;br&gt;</code> par défaut. Ainsi, dans certains
+        cas, votre application pourrait être sujette au hameçonnage si la valeur
+        filtrée par <code>|purify</code> provient des variables de la chaîne de
+        requête (<code>?var=value</code>).
+    </p>
+
+    <p>Affichage d'une variable Twig dans des tags <code>&lt;script&gt;</code>.</p>
+
+    <pre><code class="twig language-twig">&lt;script&gt;{{ myVariable | raw }}&lt;/script&gt;</code></pre>
+
+    <ul>
+        <li>
+            ❌ Utiliser <code>{{ myVariable }}</code> vous protège car Twig
+            échappe automatiquement le contenu de la variable.
+        </li>
+        <li>
+            Twig choisit la stratégie d’échappement sur la base de l’extension
+            du fichier. Par exemple, l'extension de fichier <code>.html.twig</code>
+            utilisera la stratégie <code>html</code>. Par conséquent, l'instruction
+            Twig <code>{{ myVariable }}</code> est identique aux instructions
+            <code>{{ myVariable | e }}</code> et <code>{{ myVariable | e('html') }}</code>.
+        </li>
+        <li>
+            Dans un fichier <code>.html.twig</code>, si vous devez afficher le
+            contenu d'une variable Twig à l'intérieur d'un tag <code>&lt;script type="text/javascript"&gt;</code>,
+            utilisez l'instruction <code>{{ myVariable | e('js') }}</code>. De la
+            même manière, pour rendre une variable dans une balise <code>&lt;style&gt;</code>,
+            choisissez l'instruction <code>{{ myVariable | e('css') }}</code>.
+        </li>
+    </ul>
+
+    <p>Autoriser un filtre personnalisé à générer du code HTML sûr.</p>
+
+    <pre><code class="php language-php">['is_safe' =&gt; ['html']</code></pre>
+
+    <ul>
+        <li>
+            ❌ Mon filtre <code>{{ userEntity|showUser }}</code> affiche une jolie
+            boîte contenant toutes les informations de l'utilisateur. Comme le
+            filtre génère un bloc de code <abbr title="HyperText Markup Language" lang="en">HTML</abbr>,
+            j’ai besoin d’utiliser l'option <code>['is_safe' =&gt; ['html']</code>
+            dans l'extension Twig qui définit le filtre.
+        </li>
+        <li>
+            Cela équivaut à utiliser <code>{{ userEntity|showUser|raw }}</code>.
+            Sans l’option <code>is_safe</code> dans l’extension Twig, le code
+            HTML généré serait automatiquement échappé par Twig. Si le filtre
+            affiche <code>userEntity.firstname</code>, il faut penser à
+            l’échapper manuellement.
+        </li>
+        <li>
+            Quand une extension devient trop complexe, je privilégie l’utilisation
+            des instructions <code>render()</code> ou <code>include()</code> de
+            Twig pour générer des blocs dynamiques HTML
+        </li>
+    </ul>
+
+    <pre><code class="twig language-twig">{{ render(controller('CommonBundle:User:userBox', {user:userEntity})) }}
+{{ include('CommonBundle:User:userBox.html.twig', {user:userEntity}) }}
+</code></pre>
+
+    <h3 id="csrf">La protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr></h3>
+
+    <p>
+        Le principe de l’attaque consiste à permettre à un <em lang="en">hacker</em>
+        d'exploiter la session active du navigateur (les cookies d'authentification)
+        d'un utilisateur afin de lui faire exécuter des actions / requêtes à son
+        insu. Le détournement de la session active du navigateur est très souvent
+        réalisée au moyen d'une injection <abbr title="Cross Site Scripting" lang="en">XSS</abbr>.
+    </p>
+
+    <p>
+        Par exemple, si un hacker détecte la présence d'un formulaire ou d'un
+        lien qui modifie une resource, et que celui-ci ne possède pas de jeton
+        de protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>,
+        alors il pourra forger une requête pour soumettre ce formulaire ou cliquer
+        ce lien. Si les <abbr title="Uniform Resource Locator" lang="en">URL</abbr>s
+        réalisent des actions critiques (création, voire modification ou suppression
+        de ressources), alors cela devient un risque majeur pour l'application et
+        ses données.
+    </p>
+
+    <p><strong>Modifier ou effacer une ressource par un simple lien.</strong></p>
+
+    <p>
+        Cette erreur est un grand classique des interfaces d'administration qui
+        listent des ressources dans un tableau, et dont chaque ligne possède un
+        lien « <em>Effacer</em>.
+    </p>
+
+    <ul>
+        <li>
+            ❌ Mes utilisateurs peuvent cliquer sur le lien <code>&lt;a href="{{ path('photo_remove') }}"&gt;Effacer la
+                photo&lt;/a&gt;</code>
+            afin d'effacer leur photo de profil.
+        </li>
+        <li>
+            Un <em lang="en">hacker</em> pourrait inviter un utilisateur sur une
+            page infectée qui le redirigerait directement vers le lien de
+            suppression de sa photo.
+        </li>
+        <li>
+            La bonne pratique pour sécuriser une telle action critique consiste
+            à utiliser un formulaire muni d'un jeton unique de protection
+            <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> et de
+            le transmettre avec une méthode POST. Cette technique protège ainsi
+            plus efficacement les actions critiques qui visent à modifier ou
+            supprimer une ressource du serveur.
+        </li>
+        <li>
+            Pour aller plus loin et rendre la tâche du <em lang="en">hacker</em>
+            encore plus compliquée, il est possible d'ajouter une page
+            intermédiaire de demande de confirmation de cette action au client.
+            Celui-ci devra soit cliquer sur un simple bouton pour confirmer
+            l'action, voire saisir une valeur complémentaire (son mot de passe,
+            un <em>captcha</em>, un code reçu par
+            <abbr title="Short Message Service" lang="en">SMS</abbr>, etc.).
+        </li>
+    </ul>
+
+    <p>
+        Si vous souhaitez vraiment utiliser un lien plutôt qu'un formulaire,
+        pas de problème, mais dans ce cas pensez toujours à lui ajouter un jeton
+        unique de protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> :
+    <p>
+
+    <pre><code class="twig language-twig">&lt;a href="{{ path('photo_remove', {csrf: csrf_token('photo')}) }}"&gt;Effacer ma photo&lt;/a&gt;</code></pre>
+
+    <p>Vous devrez ensuite contrôler la valeur de ce jeton depuis votre contrôleur.</p>
+
+    <pre><code class="language-php">if (!$this-&gt;isCsrfTokenValid('photo', $csrf)) {
+    throw $this-&gt;createAccessDeniedException('Désolé, votre session a expiré. Veuillez recommancer.');
+}
+</code></pre>
+
+    <p>Il est aussi très facile de générer ce jeton depuis un test d’intégration :</p>
+
+    <pre><code class="language-php">$csrf = $this-&gt;getContainer()-&gt;get('security.csrf.token_manager')-&gt;getToken('photo')-&gt;getValue();
+</code></pre>
+
+    <p><strong>Désactivation la protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> des
+            formulaires.</strong></p>
+
+    <p><strong><code>'csrf_protection' =&gt; false,</code> dans les options de formulaire.</strong></p>
+
+    <p>
+        Le <em lang="en">Bug Bounty Program</em> de <a href="https://blablacar.com">BlaBlaCar</a>
+        m’a fait découvrir des options de Symfony improbables…
+    </p>
+
+    <ul>
+        <li>
+            ❌ J’ai mon appli mobile qui poste les formulaires dans mon backend
+            Symfony de la même manière que le front Web. Du coup les jetons
+            <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> me
+            gênent !
+        </li>
+        <li>
+            ❌ Je mets en cache mes pages, du coup tout le monde se retrouve avec
+            le jeton d’un seul utilisateur !
+        </li>
+        <li>
+            Desactiver les jetons de protection
+            <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> dans
+            Symfony vous permet d’implémenter la protection d’une autre manière
+            si vous le souhaitez. Si vous detectez la présence d'une protection
+            <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> dans
+            votre projet, c'est plutôt mauvais signe !
+        </li>
+        <li>
+            Si votre application mobile poste des formulaires comme le front web,
+            il faudra en effet réimplémenter une protection
+            <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>. Dans
+            ce cas, renseignez-vous sur le bundle
+            <a href="https://github.com/dunglas/DunglasAngularCsrfBundle">DunglasAngularCsrfBundle</a>
+            qui utilise un <em lang="en">cookie</em>.
+        </li>
+        <li>
+            En ce qui concerne l'usage du cache
+            <abbr title="HyperText Transfer Protocol" lang="en">HTTP</abbr>,
+            <a href="https://symfony.com/doc/current/http_cache/form_csrf_caching.html">la documentation officielle</a>
+            de Symfony est plutôt complète sur le sujet.
+        </li>
+    </ul>
+
+    <p><strong>Désactivation du rendu automatique du reste d'un formulaire</strong></p>
+
+    <p>Utilisation de <code>'render_rest': false</code> dans une vue Twig</p>
+
+    <ul>
+        <li>
+            ❌ J’ai plusieurs formulaires et j’en utilise une partie ou une autre
+            en fonction du contexte, du coup je n’ai pas besoin des jetons de
+            protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>
+            partout.
+        </li>
+        <li>
+            Cette option est un paramètre des fonctions <code>form_rest()</code>
+            et <code>form_end()</code> qui permet d’ignorer les champs qui n’ont
+            pas été affichés explicitement. Dans ces cas là, le jeton de protection
+            <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> du
+            formulaire est généralement oublié.
+        </li>
+        <li>
+            Si plusieurs formulaires sont insérés dans la page, il vaut mieux
+            changer le nom du champ contenant le jeton avec l’option
+            <code>csrf_field_name</code> du formulaire. Nous aurons ainsi peut-être
+            cinq jetons <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>
+            dans la page, mais c’est mieux qu’aucun.
+        </li>
+    </ul>
+
+    <p>
+        <strong>
+            Cas de la protection <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr>
+            lors d’une connexion via un fournisseur OAuth (Facebook Connect, etc.)</strong>
+    </p>
+
+    <p>Petit rappel sur le fonctionnement de ce type d'authentification avec l'exemple de <em lang="en">Twitter</em>.
+    </p>
+
+    <ol>
+        <li>
+            L’utilisateur est redirigé vers Twitter avec pour paramètres de la
+            chaîne de requête un identifiant d'application OAuth cliente, une
+            <abbr title="Uniform Resource Locator" lang="en">URL</abbr> de
+            rappel, et un paramètre <code>state</code> (j’y reviendrai).
+        </li>
+        <li>
+            Quand l’utilisateur s’identifie sur Twitter et autorise votre
+            application, Twitter le redirige automatiquement vers
+            l’<abbr title="Uniform Resource Locator" lang="en">URL</abbr> de
+            rappel, en ajoutant deux paramètres à la chaîne de requête :
+            <code>code</code> et <code>state</code> (exactement le même que
+            celui envoyé dans la requête initiale).
+        </li>
+        <li>
+            Le backend de votre application envoie le code et son secret à
+            Twitter, qui en échange lui renvoie un jeton d’accès
+            (<em lang="en">access token</em>).
+        </li>
+        <li>
+            Le backend de votre application appelle ensuite la route de Twitter
+            qui permet d’obtenir des informations sur l’utilisateur à l’aide de
+            ce jeton d’accès.
+        </li>
+        <li>
+            Enfin, le backend de votre application utilise les informations de
+            l’utilisateur renvoyées par Twitter (typiquement son adresse e-mail)
+            pour le stocker dans votre propre base de données.
+        </li>
+    </ol>
+
+    <p>
+        La spécification d’OAuth nous permet de mettre un jeton
+        <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> dans le
+        paramètre <code>state</code> de la chaîne de requête lors de l'étape 1
+        afin qu'il soit retourné à l'étape 3. Que se passe-t-il si nous ne
+        l’utilisons pas ?
+    </p>
+
+    <ol>
+        <li>
+            Alice, la victime, est déjà connectée à son compte via le fournisseur
+            Twitter mais n’est pas connectée via Facebook.
+        </li>
+        <li>
+            Mallory se crée une page Web qui, côté serveur, se connecte sur votre
+            application, puis clique sur le bouton « <em>Se connecter via Facebook</em> »,
+            s’identifie sur Facebook et obtient un code d’autorisation pour son propre compte.
+        </li>
+        <li>
+            Mallory réussit à convaicre Alice de visiter sa page, qui renvoie
+            Alice vers l’<abbr title="Uniform Resource Locator" lang="en">URL</abbr>
+            de redirection de votre site avec le code d’autorisation forgé à
+            l’étape précédente.
+        </li>
+        <li>
+            Mallory peut désormais se connecter au compte d’Alice à l’aide de
+            son propre compte Facebook.
+        </li>
+    </ol>
+
+    <p>
+        Alors pensez-y, vous devez toujours ajouter un jeton de protection
+        <abbr title="Cross Site Request Forgery" lang="en">CSRF</abbr> dans le
+        paramètre <code>state</code> de la chaîne de requête, et le vérifier
+        lors du retour sur l’<abbr title="Uniform Resource Locator" lang="en">URL</abbr>
+        de redirection.
+    </p>
+
+    <p>
+        Si vous utilisez le bundle <em lang="en">HWIOAuthBundle</em>, vérifiez
+        bien que l’option <code>csrf: true</code> est activée sur tous les
+        fournisseurs que vous supportez.
+    </p>
+
+    <h3 id="les-injections-sql">Les injections <abbr title="Standard Query Language" lang="en">SQL</abbr></h3>
+
+    <p>
+        C’est un grand classique mais une bonne recherche dans votre code peut
+        vous révéler parfois bien des surprises…
+    </p>
+
+    <pre><code class="language-none"> grep -Ri 'delete ' src/|grep '%s'
+ grep -Ri 'insert ' src/|grep '%s'
+ grep -Ri 'update ' src/|grep '%s'
+ grep -Ri 'select ' src/|grep '%s'
+</code></pre>
+
+    <ul>
+        <li>
+            ❌ Je dois exécuter des requêtes SQL asynchrones pour ne pas dégrader
+            les performances du frontend pour une action dont l’utilisateur
+            n’attend pas une réponse immédiate. Du coup, je crée ma requête à
+            coups d'instructions <code>sprintf()</code> et <code>addslahes()</code>.
+            Puis je l’envoie à un <em lang="en">worker</em> qui l’exécute.
+        </li>
+        <li>
+            Les injections sont toujours le numéro 1 de
+            l’<abbr title="Open Web Application Security Project" lang="en">OWASP</abbr>
+            Top 10 depuis 2010, et sont à l’origine de
+            <a href="https://vigilante.pw/">gigantesques fuites</a> de bases de
+            données. Y compris dans vos scripts un peu « <em>crados</em> »,
+            prenez le temps de toujours bien écrire vos requêtes.
+        </li>
+        <li>
+            Utilisez les requêtes préparées bien entendu ! Envoyez au
+            <em lang="en">worker</em> une chaîne
+            <abbr title="JavaScript Object Notation" lang="en">JSON</abbr>
+            contenant la requête sous forme de requête préparée, et ses
+            paramètres associés.
+        </li>
+    </ul>
+
+    <pre><code class="language-json">[
+    "UPDATE user SET name = :name WHERE id = :id",
+    {
+        "name": "Bob",
+        "id": 42
+    }
+]
+</code></pre>
+
+    <h3 id="attaques-open-redirect">Attaques <em lang="en">Open Redirect</em></h3>
+
+    <p><strong>Rediriger après une connexion</strong></p>
+
+    <ul>
+        <li>
+            ❌ Lorsque mon utilisateur arrive sur une <em lang="en">landing page</em>
+            qui nécessite d’être authentifié, je le redirige vers
+            <code>https://connect.monsite.com/login?redirect=https://landing.monsite.com/</code>.
+        </li>
+        <li>
+            Si l’<abbr title="Uniform Resource Locator" lang="en">URL</abbr> de
+            redirection n’est pas vérifiée, il est possible d’injecter une autre
+            <abbr title="Uniform Resource Locator" lang="en">URL</abbr> comme
+            <code>https://connect.monsite.com/login?redirect=https://some.scam.com</code>.
+            Cela a pour conséquence de permettre au pirate d’hameçonner vos
+            utilisateurs relativement facilement avec par exemple une fausse
+            page de connexion qui affiche un message « <em>mot de passe incorrect</em>.
+            Ce faux message incitera l'utilisateur à resaisir ses identifiants
+            sur la fausse page de connexion afin de les enregistrer en base de
+            données pour les exploiter plus tard.
+        </li>
+        <li>
+            De manière générale, il faut mettre en liste blanche tous les
+            préfixes des sites sur lesquels vous pouvez rediriger l’utilisateur.
+        </li>
+    </ul>
+
+    <p>
+        <strong>
+            Liste blanche de préfixes
+            <abbr title="Uniform Resource Locator" lang="en">URL</abbr> peu
+            restrictive.
+        </strong>
+    </p>
+
+    <ul>
+        <li>
+            ❌ J’ai plusieurs <em lang="en">landing pages</em> comme
+            <a href="https://landing.monsite.com/foo/bar.php">https://landing.monsite.com/foo/bar.php</a>,
+            <a href="https://landing.monsite.com/hello/word.php">https://landing.monsite.com/hello/word.php</a>,
+            etc. Pour les sécuriser, je vérifie que l’<abbr title="Uniform Resource Locator" lang="en">URL</abbr>
+            passée en paramètre est correctement préfixée par
+            « <a href="https://landing.monsite.com">https://landing.monsite.com</a> ».
+        </li>
+        <li>
+            Ce n'est pourtant pas suffisant, car le pirate peut encore créer
+            l'<abbr title="Uniform Resource Locator" lang="en">URL</abbr>
+            <a href="https://landing.monsite.com.scam.com">https://landing.monsite.com.scam.com</a>
+            qui passera au travers.
+        </li>
+        <li>
+            Si vous avez une liste blanche de préfixes
+            d’<abbr title="Uniform Resource Locator" lang="en">URL</abbr>s,
+            pensez bien à les terminer par une barre oblique <code>/</code> afin
+            qu’il ne soit pas possible de rajouter des niveaux de sous-domaines.
+        </li>
+    </ul>
+
+    <p><strong>Rediriger l’utilisateur vers le <em>Referer</em></strong>.</p>
+
+    <ul>
+        <li>
+            ❌ Lorsque mon formulaire est valide, mon contrôleur Symfony enregistre
+            un message <em lang="en">flash</em> dans la session, puis renvoie
+            une réponse de redirection vers le <em>Referer</em> :
+            <code>new RedirectResponse($request-&gt;headers-&gt;get('Referer'));</code>.
+        </li>
+        <li>
+            Comme l'entête peut-être surchargé de manière arbitraire, il
+            convient de vérifier que ce qu’il contient est légitime.
+        </li>
+        <li>
+            Redirigez toujours vers le <em lang="en">Referer</em> après avoir
+            vérifié que l’<abbr title="Uniform Resource Locator" lang="en">URL</abbr>
+            qu’il contient fasse partie de votre application, ou implémente une
+            liste blanche d’<abbr title="Uniform Resource Locator" lang="en">URL</abbr>s
+            de confiance.
+        </li>
+    </ul>
+
+    <p>Exemple que vous pouvez ajouter à votre classe de base de contrôleur :</p>
+
+    <pre><code class="language-php">protected function getSafeRefererOr(Request $request, $fallback) {
+    if ($request-&gt;headers-&gt;has('referer')) {
+        $referer = $request-&gt;headers-&gt;get('referer');
+
+        // URL begins with '/' but not '//'
+        if (strlen($referer) &lt; 2 || ($referer[0] == '/' &amp;&amp; $referer[1] != '/')) {
+            return $referer;
+        }
+
+        // URL starts by the same host
+        $baseUrl = $request-&gt;getScheme() . '://' . $request-&gt;getHost() . (($request-&gt;getPort() != 80 &amp;&amp; $request-&gt;getPort() != 443) ? ':' . $request-&gt;getPort() : '') . '/';
+        if (strncmp($referer, $baseUrl, strlen($baseUrl)) === 0) {
+            return $referer;
+        }
+    }
+
+    // referer is not safe, we prefer returning fallback url
+    return $fallback;
+}
+</code></pre>
+
+    <h2 id="identification-via-un-certificat-x509-avec-symfony">
+        Identification via un certificat X.509 avec Symfony
+    </h2>
+
+    <p>
+        Pour terminer, je vous propose un guide complet histoire de traiter d’un
+        sujet un peu costaud pour des développeurs non-ops.
+    </p>
+
+    <p>
+        L'authentification par certificat X.509 est particulièrement adaptée
+        lorsqu'il s'agit de sécuriser le trafic entre deux applications. C'est
+        par exemple le cas dans une architecture micro-service. L'avantage de
+        ce type d'authentification c'est qu'elle ne partage pas un simple secret
+        entre les deux applications.
+    </p>
+    <p>
+        Le principe ? En un mot, le serveur possède un certificat d’authorité et
+        signe un certificat client dont l’adresse e-mail permettra d’identifier
+        l’utilisateur. Saviez-vous que Symfony supporte nativement cette forme
+        d’identification ?
+    </p>
+
+    <h3 id="certificats">Certificats</h3>
+
+    <p>
+        Pour commencer, votre application serveur doit s'exécuter sur
+        <abbr title="Secure Sockets Layer" lang="en">SSL</abbr>, que ce soit pour
+        un certificat signé du type <em lang="en">Let’s encrypt!</em>, <em>Comodo</em>,
+        etc. ou non signé.
+    </p>
+
+    <p>
+        Dans cette démonstration, je pars du principe que mon
+        <abbr title="Application Programming Interface" lang="en">API</abbr>
+        n’est pas exposée. Par conséquent, je commence par créer un certificat
+        auto-signé qui sera utilisé par Apache.
+    </p>
+
+    <pre><code class="language-sh">$ mkdir -p /etc/ssl/certs/my-api
+$ cd /etc/ssl/certs/my-api
+
+$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.crt
+(...)
+
+Country Name (2 letter code) [AU]:FR
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:Paris
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:My Api
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:
+Email Address []:server@my.api
+
+$ openssl dhparam -out dhparam.pem 2048
+</code></pre>
+
+    <p>Ensuite, je crée le certificat d’authorité :</p>
+
+    <pre><code class="language-sh">$ openssl genrsa -out ca.key 4096
+$ openssl req -new -x509 -days 365 -key ca.key -out ca.crt
+(...)
+
+Country Name (2 letter code) [AU]:FR
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:Paris
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:My Api
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:
+Email Address []:ca@my.api
+</code></pre>
+
+    <p>
+        Enfin je crée le cetificat client et je le fais signer par l’authorité.
+        Attention à bien choisir l’adresse e-mail ici car elle sera réutilisée
+        plus tard.
+    </p>
+
+
+    <pre><code class="language-sh">$ openssl genrsa -out client.key 4096
+$ openssl req -new -key client.key -out client.csr
+(...)
+
+Country Name (2 letter code) [AU]:FR
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:Paris
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:My Api
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:
+Email Address []:client@my.api
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+
+$ openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+$ cat client.crt client.key &gt; client.pem
+</code></pre>
+
+    <p>
+        Nous pouvons désormais configurer Apache2. Dans le fichier
+        <code>/etc/apache2/sites-available</code>, nous ajons le fichier
+        <code>000-localhost-ssl.conf</code> :
+    </p>
+
+    <pre><code class="language-apacheconf">&lt;Directory /var/www/my-api/web&gt;
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+            &lt;/Directory&gt;
+
+            &lt;IfModule mod_ssl.c&gt;
+	&lt;VirtualHost 127.0.0.1:443&gt;
+		ServerName 127.0.0.1
+		ServerAdmin your@email.com
+		DocumentRoot /var/www/my-api/web
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+		SSLCertificateFile /etc/ssl/certs/my-api/server.crt
+		SSLCertificateKeyFile /etc/ssl/certs/my-api/server.key
+		SSLOpenSSLConfCmd DHParameters "/etc/ssl/certs/my-api/dhparam.pem"
+		SSLCACertificateFile /etc/ssl/certs/my-api/ca.crt
+		SSLVerifyClient optional
+		SSLVerifyDepth 1
+		SSLOptions +StdEnvVars
+    &lt;/VirtualHost&gt;
+&lt;/IfModule&gt;
+</code></pre>
+
+    <p>
+        Vous pouvez désormais mettre <code>ca.key</code> de côté afin d’éviter
+        que d’autres clients soient signés sans votre autorisation. Vous pouvez
+        aussi mettre <code>client.csr</code> et <code>client.key</code> de côté
+        pour renouveler le certificat sans tout regénérer, et mettre
+        <code>client.pem</code> avec votre application client ce qui laisse
+        <code>ca.crt</code>, <code>dhparam.pem</code>, <code>server.crt</code>
+        et <code>server.key</code> dans le dosier
+        <code>/etc/ssl/certs/my-api</code>.
+    </p>
+
+    <p>Nous activons enfin le site et redémarrons Apache:</p>
+
+    <pre><code>
+$ cd /etc/apache2/sites-enabled
+$ ln -s ../sites-available/000-localhost-ssl.conf ./
+$ service apache2 restart
+</code></pre>
+
+
+    <h3 id="configuration-dans-symfony">Configuration dans Symfony</h3>
+
+    <p>
+        Dans cette démonstration, je pars du principe que je n’ai qu’un seul
+        client autorisé à utiliser l’API, mais rien ne vous empêche bien entendu
+        de créer un fournisseur d'utilisateur classique.
+    </p>
+
+    <p>Voici le contenu du fichier <code>app/config/security.yml</code> :</p>
+
+    <pre><code class="language-yaml">security:
+
+    providers:
+        client_certificate:
+            memory:
+                users:
+                    client@my.api:
+                        roles: ROLE_ADMIN
+    firewalls:
+        main:
+            pattern: ^/
+            stateless: true
+            x509:
+                provider: client_certificate
+
+    access_control:
+      - { path: ^/, roles: ROLE_ADMIN, requires_channel: https, ip: 127.0.0.1 }
+</code></pre>
+
+    <p>
+        C’est tout ! Dans la configuration du pare-feu, la clé <code>x509</code>
+        indique à Symfony que l’utilisateur est pré-authentifié par Apache, à la
+        fin du <em lang="en">handshake <abbr title="Secure Sockets Layer" lang="en">SSL</abbr></em>.
+        Symfony lit donc la variable <code>$_SERVER['SSL_CLIENT_S_DN_Email']</code>
+        et appelle directement votre fournisseur d'utilisateurs avec.
+    </p>
+
+    <h3 id="tests">Tests</h3>
+
+    <p>
+        Dans votre API, ajoutez le fichier <code>AppBundle\Controller\TestController.php</code>
+        avec le code suivant :
+    </p>
+
+
+    <pre><code class="language-php">
+&lt;?php
+
+namespace AppBundle\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+
+class TestController extends Controller
+{
+    /**
+     * @Route("/test", name="test")
+     * @Method({"GET"})
+     */
+    public function testAction(Request $request)
+    {
+        return new JsonResponse([
+            'status' =&gt; 'OK',
+            'data'   =&gt; sprintf('Hello, %s!', $request-&gt;request-&gt;get('name', 'world')),
+        ]);
+    }
+}
+</code></pre>
+
+    <p>Dans votre application cliente, mettez le code suivant :</p>
+
+    <pre><code class="language-php">
+&lt;?php
+
+require(__DIR__.'/vendor/autoload.php');
+
+use GuzzleHttp\Client;
+
+$client = new Client([
+    'base_uri' =&gt; 'https://127.0.0.1',
+    'cert'     =&gt; __DIR__.'/cert/client.pem',
+
+    // if your server certificate is self-signed...
+    'verify'   =&gt; false,
+]);
+
+var_dump(
+    json_decode($client-&gt;get('/test')-&gt;getBody()-&gt;getContents(), true)
+);
+</code></pre>
+
+    <p>
+        Symfony propose d’autres « <em lang="en">pre authenticated security firewalls</em> »,
+        notament pour Kerberos,
+        <a href="https://symfony.com/doc/current/security/pre_authenticated.html">référez-vous à la documentation</a>.
+        Pour en implémenter de nouveaux pour Okta, Uberproxy, etc., vous pouvez
+        au choix
+        <a href="https://symfony.com/doc/current/security/custom_authentication_provider.html">créer votre propre
+            fournisseur d'authentification</a>
+        (ce que fait X509 par exemple), ou bien utiliser Guard (ce qui me semble le plus rapide).
+    </p>
+
+    <h2 id="bonus">Bonus</h2>
+
+    <p>
+        Pour finir, et pour vous remercier d’avoir survécus jusqu’à la fin de
+        ce billet, voici quelques liens que je trouve utiles et que je souhaite
+        vous partager :
+    </p>
+
+    <ul>
+        <li>
+            <a href="https://www.vigilante.pw">https://www.vigilante.pw</a> et
+            <a href="http://haveibeenpwned.com">http://haveibeenpwned.com</a>
+            pour vous tenir informé des fuites de bases de données, première
+            source des
+            « <em><a href="https://github.com/ninsuo/slides/blob/master/2017%20Let%27s%20continue%20to%20hack!.pdf"
+                     lang="en">password reuse attacks</a></em> ».
+        </li>
+        <li>
+            <a href="https://haveibeenpwned.com/Passwords">https://haveibeenpwned.com/Passwords</a> et
+            <a href="https://github.com/danielmiessler/SecLists">https://github.com/danielmiessler/SecLists</a>
+            vous fournissent des bases de données de mots de passes les plus fréquemment utilisés.
+            Si votre application est sensible, vous pouvez interdire vos utilisateurs
+            d’employer l’un de ceux là.
+        </li>
+        <li>
+            <a href="https://howsecureismypassword.net">https://howsecureismypassword.net</a>
+            estime le temps qu’il faudra pour forcer votre mot de passe. Ça peut être bon à savoir !
+        </li>
+        <li>
+            <a href="https://onetimesecret.com">https://onetimesecret.com</a>
+            partage des clé API ou des mots de passes à vos collègues sans les
+            envoyer dans Slack ou par e-mail. Ne mettez que le mot de passe sans
+            aucun contexte bien entendu, sinon ça perd de son intérêt !
+        </li>
+        <li>
+            <a href="https://www.ssllabs.com/ssltest/analyze.html?d=twigfiddle.com">https://www.ssllabs.com/ssltest/analyze.html?d=twigfiddle.com</a>
+            vérifie si votre certificat est correctement installé.
+        </li>
+        <li>
+            <a href="https://www.dnsleaktest.com">https://www.dnsleaktest.com</a>
+            vérifie si votre <abbr title="Virtual Private Network" lang="en">VPN</abbr>
+            est correctement configuré. Cela peut être pratique si vous vous
+            baladez sur Tor.
+        </li>
+    </ul>
+
+{% endverbatim %}
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/ninsuo.png') }}" alt="Alain Tiemblo"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/ninsuo' %}" target="_blank">{% block article_author 'Alain Tiemblo' %}</a></h2>
+    <p>
+        Alain Tiemblo est un développeur backend, et s’occupe principalement de
+        la sécurité applicative chez BlaBlaCar depuis 2015. Vous pouvez voir ou
+        revoir ses conférences sécurité Web sur la chaîne Youtube de
+        l’<a href="https://afup.org">AFUP</a>,
+        <a href="https://www.youtube.com/watch?v=uQTRs0rwO2E">ici</a> et
+        <a href="https://www.youtube.com/watch?v=YRRUbsXHC80">là</a>.
+    </p>
+{% endblock %}

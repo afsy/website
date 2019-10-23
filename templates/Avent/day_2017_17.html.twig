@@ -1,0 +1,232 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2017 %}
+
+{% block article_title "Jour 17 - Bien démarrer avec Symfony et React" %}
+
+{% block article_content %}
+    {% verbatim %}
+
+    <style type="text/css">
+        em {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <h1 id="bien-demarrer-avec-symfony-et-react">Bien démarrer avec Symfony et React</h1>
+
+    <p>Il existe quelques ressources montrant comment associer Symfony et React dans un projet, et je souhaite aller plus en détails sur le démarrage d&#39;un projet de ce style ainsi que les différentes complications qu&#39;il est possible de rencontrer.</p>
+
+    <p>Je vous invite à aller lire comme première partie l&#39;article &quot;<a href='https://jolicode.com/blog/marier-react-et-symfony'>Marier React et Symfony</a>&quot; qui vous donnera une bonne introduction à React et des premières réponses concernant l&#39;internationalisation, la communication entre Twig et React ainsi que la mise en place du rendu serveur.</p>
+
+    <p>Vous trouverez  dans la suite des recommendations et bonnes pratiques qui viennent compléter l&#39;article pour une bonne intégration de React dans votre projet Symfony.</p>
+
+    <h2 id="webpack-encore">Webpack Encore</h2>
+
+    <p>Une bonne pratique de développement front est d&#39;utiliser un module bundler pour regrouper ses assets ainsi que rajouter des transformations à notre code. La communauté React s&#39;est orientée principalement vers <a href='https://webpack.js.org/'>Webpack</a> et c&#39;est aussi le cas de Symfony.</p>
+
+    <p>La configuration de ce dernier peut s&#39;avérer un peu verbeuse et obscure, il est donc possible d&#39;utiliser <a href='https://symfony.com/doc/current/frontend.html'>Webpack Encore</a> qui est une légère couche d&#39;abstraction avec de la configuration prédéfinie qui s&#39;associe parfaitement avec la configuration du framework.</p>
+
+    <p>Les principes de Encore sont les mêmes que pour Webpack : des points d&#39;entrées, un dossier de destinations, des loaders... Si vous connaissez déjà l&#39;outil vous ne serez pas perdu.</p>
+
+    <p>Pour notre application il est nécessaire d&#39;activer les presets React comme expliqué ici <a href='https://symfony.com/doc/current/frontend/encore/reactjs.html' target='_blank' >https://symfony.com/doc/current/frontend/encore/reactjs.html</a></p>
+
+    <h2 id="transformation-du-javascript">Transformation du JavaScript</h2>
+
+    <p>Grâce à Webpack Encore et sa configuration par défaut, nous pouvons utiliser la syntaxe <a href="https://babeljs.io/learn-es2015/">ES6</a> qui est le standard actuel de JavaScript. De plus en activant le preset React nous débloquons aussi la syntaxe JSX utilisée par les composants..</p>
+
+    <p>Le site web <a href='http://babeljs.io/' target='_blank' >babeljs.io</a> est très pratique pour se familiariser avec cette syntaxe, il est aussi possible d&#39;utiliser le <abbr title="Read–eval–print loop" lang="en">REPL</abbr> et d&#39;expérimenter avec le code généré.</p>
+
+    <pre><code class="php language-js">// Avant
+const helloWorldJsx = (
+  &lt;div&gt;
+    &lt;p&gt;Hello there !&lt;/p&gt;
+  &lt;/div&gt;
+);
+
+// Après
+var helloWorldJsx = React.createElement(
+  &quot;div&quot;,
+  null,
+  React.createElement(
+    &quot;p&quot;,
+    null,
+    &quot;Hello there !&quot;
+  )
+);</code></pre>
+
+    <h2 id="architecture">Architecture</h2>
+
+    <p>Il y a plusieurs approches selon si vous rajoutez React sur de l&#39;existant ou sur un projet de zéro.
+    En effet si c&#39;est dans une optique de migration il va être plus intéressant de démarrer par quelques composants simples tel qu&#39;un autocomplete ou un datepicker avant de refactoriser une interface de recherche complète.</p>
+
+    <h3 id="plusieurs-approches">Plusieurs approches</h3>
+
+    <p><strong>Amélioration ou migration de l&#39;existant</strong>: à privilégier lors de l&#39;intégration de React sur de l&#39;existant ou quand vous souhaitez garder le maximum d&#39;interface dans Twig. Démarrez par quelques éléments de l&#39;interface non critique pour se familiariser avec le paradigme des composants et de la communication entre ces derniers. Il est préférable d&#39;aborder une nouvelle technologie par itération plutôt que refactoriser tout le front et se retrouver coincé dans de mauvaises implémentations.</p>
+
+    <p><strong>Application JavasScript</strong>: Cette approche est à envisager lorsque vous partez de zéro et souhaitez avoir une application complètement JavaScript. Ainsi Symfony sera principalement utilisé comme serveur d&#39;API. Sur ce type d&#39;application il y aura des concepts beaucoup plus avancés tels que le routing côté client, l&#39;authentification ou encore le rendu serveur avec Node.js.</p>
+
+    <h3 id="communication-entre-symfony-et-react">Communication entre Symfony et React</h3>
+
+    <h4 id="php-vers-js">PHP vers JS</h4>
+
+    <p>Vous allez surement avoir besoin de passer des données venant de votre contrôleur à votre composant. L&#39;approche la plus simple étant d&#39;utiliser Twig comme passerelle pour vos données.
+    Soit en utilisant les data-attributes</p>
+
+    <pre><code class='language-twig' lang='twig'>{# layout.html.twig #}
+{% block body %}
+  &lt;div id=&quot;list&quot; data-items=&quot;{{ items|json_encode }}&quot;&gt;&lt;/div&gt;
+{% endblock %}</code></pre>
+
+    <p>ou en utilisant des helpers d&#39;initialisation de vos composants, exposés globalement</p>
+
+    <pre><code class='language-twig' lang='twig'>{% block JavaScripts %}
+&lt;script type=&quot;text/javascript&quot;&gt;
+  MyApp.initListComponent(&#39;todolist&#39;, {{(items|json_encode|raw)}})
+&lt;/script&gt;
+{% endblock %}</code></pre>
+
+    <p>J&#39;ai tendance à préférer la deuxième approche qui me permet de savoir quel composant est utilisé directement dans ce template Twig, celà évite aussi de polluer le DOM et économise un querySelector en plus pour récupérer les données.</p>
+
+    <p>Il est bien sur aussi possible de récupérer des données en exécutant une requête Ajax à Symfony. Par exemple sur un site avec un proxy de cache HTML, il est impossible d&#39;avoir des informations spécifique à l&#39;utilisateur dans le html généré par Twig. Une requête Ajax pour récupérer les informations de l&#39;utilisateur est donc envoyé au chargement de la page puis le résultat mis en cache dans le local storage. Nous verrons plus tard que ce mécanisme est facile à implémenter via Redux.</p>
+
+    <h4 id="js-vers-php">JS vers PHP</h4>
+
+    <p>Cela marche dans l&#39;autre sens, pour envoyer vos données à l&#39;applicatif PHP une simple requête HTTP suffit.</p>
+
+    <pre><code class='language-javascript' lang='javascript'>fetch(&#39;https://api.github.com/gists&#39;, {
+    method: &#39;post&#39;,
+    body: JSON.stringify(opts),
+    // Inclure les cookies dans la requête
+    credentials: &#39;include&#39;,
+    // Pour que vos contrôleurs Symfony considèrent la requête comme une requête Ajax
+    headers: {&#39;X-Requested-With&#39;: &#39;XMLHttpRequest&#39;}
+}).then(response =&gt; response.json())</code></pre>
+
+    <h3 id="bonnes-pratiques-react">Bonnes pratiques React</h3>
+
+    <p>Vous trouverez de nombreux articles concernant les bonnes pratiques, en voici une liste non exhaustive</p>
+
+    <p><a href='https://www.robinwieruch.de/tips-to-learn-react-redux/' target='_blank' >https://www.robinwieruch.de/tips-to-learn-react-redux/</a> (en particulier la partie &quot;On-boarding&quot; si votre équipe démarre)</p>
+
+    <p><a href='https://engineering.musefind.com/our-best-practices-for-writing-react-components-dec3eb5c3fc8' target='_blank' >https://engineering.musefind.com/our-best-practices-for-writing-react-components-dec3eb5c3fc8</a></p>
+
+    <h4 id="architecture-front-avec-redux">Architecture front avec Redux</h4>
+
+    <p>C&#39;est l&#39;architecture autour de React la plus populaire. Elle permet de centraliser les données tout en permettant un partage facile de celles-ci dans vos composants. On pourrait résumer simplement via cette formule :</p>
+
+    <pre><code class='language-javascript' lang='javascript'>(previousState, action) =&gt; newState</code></pre>
+
+    <p>Notre application va donc contenir un état (&quot;state&quot;, à ne pas confondre avec le state de vos composants) qui va évoluer via le traitement d&#39;action. Les actions peuvent être des actions utilisateurs tels que le clique sur un lien mais aussi des effets de bords comme par exemple l&#39;arrivée d&#39;une réponse à traiter.</p>
+
+    <p>Les termes à comprendre sont &quot;reducers&quot;, &quot;action&quot;, &quot;store&quot; et &quot;connect&quot;. Nous n&#39;allons pas détailler Redux ici, <a href='https://redux.js.org/'>la documentation officielle</a> est déjà une très bonne référence.</p>
+
+    <p>Un cas pratique dans Symfony est quand  vous disposez de plusieurs points de montages différents, par exemple un composant dans le header et un autre dans le footer, leur injecter le store Redux permet de communiquer facilement entre eux en partageant le même état.</p>
+
+    <p>Des middlewares peuvent apporter des fonctionnalités supplémentaires de manière très simple, comme par exemple <a href='https://github.com/rt2zz/redux-persist'>redux-persist</a> qui permet d&#39;ajouter la persistance du state dans le local storage automatiquement.</p>
+
+    <h4 id="higher-order components">Higher-Order components</h4>
+
+    <p>Vous entendrez souvent ces termes lorsqu&#39;on parle de composants containers. Dans Symfony nous avons l&#39;habitude de rajouter des fonctionnalités via l&#39;extension de classe PHP, dans React c&#39;est la composition qui est privilégiée et on va ainsi parler de Higher-Order components (HOC). Le principe est de créer une fonction qui prend en paramètre un composant et va retourner un autre composant avec les nouvelles fonctionnalités. Ce pattern est devenu tellement commun qu&#39;il est maintenant <a href='https://reactjs.org/docs/higher-order-components.html'>inclu dans la documentation officielle</a>.</p>
+
+    <p>Il existe d&#39;autres patterns et surtout des anti-patterns dans lesquels il est facile de tomber lors que l&#39;on démarre ! N&#39;hésitez pas à aller faire un tour sur le dépôt <a href='https://github.com/vasanthk/react-bits'>react-bits</a> qui en liste quelques un, même en ayant utilisé React depuis sa sortie on y trouve de nouvelles idées. </p>
+
+    <h4 id="trouver-les-bons-composants">Trouver les bons composants</h4>
+
+    <p>Dans l&#39;écosystème Symfony nous sommes habitués à chercher les bons outils via Packagist ou Github. Il en est de même pour JavaScript avec NPM qui va vous donner une liste classé par pertinence avec des statistiques sur les  téléchargements et la maintenance du projet. Exemple pour chercher un composant de sélection de date : <a href='https://www.npmjs.com/search?q=react%20datepicker&page=1&ranking=optimal' target='_blank' >https://www.npmjs.com/search?q=react%20datepicker&page=1&ranking=optimal</a></p>
+
+    <p>Il existe aussi des sites pré-sélectionnant des composants de qualité comme le site JS.coach : <a href='https://js.coach/?search=react+datepicker&collection=React'>https://js.coach/?search=react+datepicker&amp;collection=React</a></p>
+
+    <h4 id="rendu-cote-serveur">Rendu côté serveur</h4>
+
+    <p>L&#39;intérêt du rendu serveur est de réduire le temps d&#39;affichage de votre page en effectuant le rendu du HTML côté serveur. C&#39;est ce qui est fait dans vos templates PHP naturellement et qui va être plus complexe à mettre en place avec vos composants React.</p>
+
+    <p>En effet l&#39;environnement n&#39;est pas le même, comme expliqué dans l&#39;article de l&#39;introduction, il est possible d&#39;utiliser React avec le bundle <a href='https://github.com/Limenius/ReactBundle'>LimeniusReactBundle</a> dans Symfony. Il va vous apporter 2 manières de rendre vos composants, soit via <a href='https://github.com/phpv8/v8js'>V8js</a> ou NodeJS.</p>
+
+    <p>Ce bundle va vous exposer des fonctions pour rendre un composant avec ses props dans vos templates Twig. Attention cependant cette architecture reste complexe (V8JS dans Php ou communication socket sur un process node) et les erreurs rencontrées peuvent être obscure.</p>
+
+    <p>Celle que vous risquez de rencontrer le plus souvent est le légendaire &quot;window is not defined&quot;, en effet votre JavaScript n&#39;est pas exécuté dans le navigateur et cet objet global n&#39;existe pas, il faudra donc ruser si vous souhaitez importer du code qui nécessite cet objet. Si c&#39;est simplement un import il suffira de détecter si l&#39;objet window est défini, sinon nous possédons la fonction <code>componentDidMount</code>dans un composant React.</p>
+
+    <pre><code class='language-javascript' lang='javascript'>// Vérification simple avant l&#39;import d&#39;un module qui nécessite l&#39;objet window
+if (typeof window !== `undefined`) {
+  const module = require(&quot;module&quot;);
+}
+
+// Utilisation des fonctions lifecycles de React, componentDidMount n&#39;est appelé que sur le client
+export default class MyClass extends React.Component {
+    ...
+    componentDidMount() {
+        const MyWindowDependentLibrary = require( &#39;path/to/library&#39; );
+        MyWindowDependentLibrary.doWork();
+    }
+    ...
+}</code></pre>
+
+    <p>Le bundle cité plus haut se base sur <a href="https://github.com/shakacode/react_on_rails">React on Rails</a> qui est une intégration de React avec le framework Ruby on Rails. Il existe aussi une autre alternative un peu plus récente et moins couplé à l&#39;écosystème Ruby appelé <a href='https://github.com/airbnb/hypernova'>Hypernova</a>.</p>
+
+    <h4 id="une-application-js-independante-avec-rendu-server">Une application JS indépendante avec rendu serveur</h4>
+
+    <p>Si votre choix s&#39;est posé sur une application Symfony comme API et une application React découplée, vos composants vont récupérer leur données via des requêtes HTTP au lieu d&#39;avoir des données passées via Twig.</p>
+
+    <p>J&#39;apprécie plus particulièrement cette approche car il est plus facile de faire évoluer indépendamment le front et le back. Cependant il faudra se pencher sur le rendu serveur ainsi que le routing d&#39;une application NodeJS. Vous trouverez beaucoup, si ce n&#39;est trop d&#39;articles pour implémenter ceci. Avoir une intégration plus complète en mode single page app va vous permettre d&#39;avoir des optimisations tels que du <a href='https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/docs/guides/code-splitting.md'>code splitting par rapport au routeur</a>.</p>
+
+    <p>Il y a aussi de belles initiatives pour simplifier cette tâche comme le framework <a href='https://github.com/zeit/next.js/'>next.js</a>.</p>
+
+    <h3 id="tester-vos-composants">Tester vos composants</h3>
+
+    <p>Nous avons l&#39;habitude d&#39;effectuer des tests fonctionnels dans nos applications Symfony, pour vérifier nos réponses ainsi que la présence de certains éléments dans la page. Avec React et son approche composant nous pouvons avoir une approche plus unitaire pour le front.</p>
+
+    <p>Je recommande fortemment d&#39;utiliser <a href='https://facebook.github.io/jest/docs/en/tutorial-react.html#'>Jest</a> (aussi développé par Facebook) qui va nous apporter une API pour manipuler les props de nos composants ainsi qu&#39;une fonctionnalité de snapshot pour comparer des rendus.</p>
+
+    <blockquote><p>Exemple d&#39;un composant testé avec Jest</p>
+    </blockquote>
+
+    <pre><code class='language-javascript' lang='javascript'>// Link.test.js
+import React from &#39;react&#39;;
+import renderer from &#39;react-test-renderer&#39;;
+
+import Link from &#39;../Link&#39;;
+
+test(&#39;Link changes the class when hovered&#39;, () =&gt; {
+  const component = renderer.create(
+    &lt;Link page=&quot;http://www.facebook.com&quot;&gt;Facebook&lt;/Link&gt;,
+  );
+  let tree = component.toJSON();
+  expect(tree).toMatchSnapshot();
+
+  // manually trigger the callback
+  tree.props.onMouseEnter();
+  // re-rendering
+  tree = component.toJSON();
+  expect(tree).toMatchSnapshot();
+
+  // manually trigger the callback
+  tree.props.onMouseLeave();
+  // re-rendering
+  tree = component.toJSON();
+  expect(tree).toMatchSnapshot();
+}); </code></pre>
+
+    <p>On peut aller beaucoup plus loin en rajoutant des tests de l&#39;architecture Redux, encore une fois cette partie est elle aussi parfaitement expliquée dans <a href='https://redux.js.org/docs/recipes/WritingTests.html'>la documentation officielle</a>.</p>
+
+    <p>De la même manière qu&#39;avec Symfony et les services par exemples, si votre code devient difficile à tester c&#39;est qu&#39;il est trop couplé et possède trop de responsabilité. Par exemple un composant responsable à la fois de récupérer des données sur une API, rendre du contenu et le rendre triable va être très difficile à tester et réutiliser, il faut donc le découper en 3 différents composants.</p>
+
+    <h3 id="conclusion">Conclusion</h3>
+
+    <p>Suivre ces pratiques vous aidera à réaliser un projet de qualité avec du code réutilisable, testé et découplé. Il existe de nombreux starters kit avec React mais qui sont vraiment centré sur l&#39;écosystème JavaScript. L'&#39;exemple open source le plus avancé avec Symfony est celui de LimeniusReactbundle avec cette <a href='https://github.com/Limenius/symfony-react-sandbox'>sandbox</a> dans laquelle vous allez pouvoir trouver une implémentation avec Redux. Il existe aussi d&#39;autres intégrations React intéressante tels que le <a href='https://api-platform.com/docs/client-generator/react'>client generator d&#39;API-platform</a> pour créer rapidement un projet React avec une API.</p>
+
+    <p>À vos composants ! ⚛️ ⚛️️</p>
+
+{% endverbatim %}
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/thibault-lenclos.jpg') }}" alt="Thibault Lenclos"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/ThibZ' %}" target="_blank">{% block article_author 'Thibault Lenclos' %}</a></h2>
+    <p>
+        Développeur web et mobile chez Jolicode, Symfony 💛 React+native.
+    </p>
+{% endblock %}

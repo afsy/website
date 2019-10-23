@@ -1,0 +1,282 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 18 - Capifony et Capistrano sont dans un bateau" %}
+
+{% block article_content %}
+<h1>Capifony et Capistrano sont dans un bateau</h1>
+
+<p>Capifony est un outil destiné à l'industrialisation des déploiements d'applications sur des serveurs distants via SSH, ce n'est qu'une extension de Capistrano qui a été conçue initialement pour le déploiement d'applications Ruby. C'est donc pour cela que ce dernier est écrit en Ruby, langage qui se prête bien plus à ce genre de tâche que notre PHP...</p>
+
+<p>Capifony nous permet donc de gérer très facilement le déploiement d'applications Symfony.</p>
+
+<p>Je ne vais pas vous faire un énième article sur l’installation, la configuration et l’utilisation de Capifony, le site <a href="http://capifony.org/">capifony.org</a> est le point de départ et la source de la plupart des réponses à vos questions. Je vais juste essayer de vous montrer les pistes à prendre si vous avez besoin d'aller un peu loin avec Capifony et vous partager aussi certains retours d'expérience.</p>
+
+<h2>Le projet</h2>
+
+<p>Capifony n'est donc qu'une surcouche à Capistrano permettant la prise en compte des commandes spécifiques à Symfony et à PHP.<br />
+Ce projet a été initié par <a href="http://github.com/everzet">everzet</a> il y a 4 ans. Il est maintenu actuellement par <a href="https://github.com/willdurand">William Durand</a></p>
+
+<p>Il n'y a pas de secret, la meilleure façon de comprendre et d'apprendre ce qui se passe est de naviguer dans le code source. Le langage Ruby est assez facile à appréhender surtout que les concepts nécessaires restent assez basiques. Le point de départ est donc les répertoires où sont installées les sources de Capifony et Capistrano.<br />
+Sur OSX ça se passe ici : /Library/Ruby/Gems</p>
+
+<p><img src="{{ asset('build/images/avent/18-capifony-file-strcuture.png') }}" alt="Capifony file structure" /></p>
+
+<h3>Task</h3>
+
+<p>Les Tasks sont les bases de Capistrano, elles peuvent être lancées directement par la ligne de commande ou bien être appelées dans une autre tâche.</p>
+
+<pre><code class="language-ruby">desc "Lorem ipsum dolor sit amet, consectetur adipisicing elit."
+task :backup do
+    puts "In Example Backup Web-Server"
+    ...
+    run "#{try_sudo} sh -c 'cd #{latest_release} &amp;&amp; #{php_bin} #{symfony_vendors} #{cmd}'"
+    ...
+    run_locally "cd #{$temp_destination} &amp;&amp; #{mytool_bin} install #{options}"
+end
+</code></pre>
+
+<p>Pour exécuter cette tâche, il suffit de lancer la commande :</p>
+
+<pre class="no-highlight"><code>$ cap backup
+</code></pre>
+
+<h3>Task &amp; Namespace</h3>
+
+<p>Pour améliorer la visibilité et éviter les noms à rallonge, le regroupement de tâches se fait par Namespace sous la forme suivante.</p>
+
+<pre class="ruby"><code>namespace :web_server do
+  task :backup do
+    puts "In Example Backup Web-Server"
+  end
+end
+</code></pre>
+
+<p>Pour exécuter cette tâche, il suffit de lancer la commande</p>
+
+<pre class="no-highlight"><code>$ cap web_server:backup
+</code></pre>
+
+<p>Vous pouvez aussi utiliser plusieurs niveaux de namespace</p>
+
+<pre class="ruby"><code>namespace :web do
+    namespace :server do
+        task :backup do
+            puts "In Example Backup Web-Server"
+        end
+    end
+end
+</code></pre>
+
+<p>Pour exécuter cette tâche, il suffit de lancer la commande</p>
+
+<pre class="no-highlight"><code>$ cap web:server:backup
+</code></pre>
+
+<p>Je vous laisse approfondir le sujet sur le <a href="https://github.com/stefanooldeman/capistrano-handbook/wiki/Building-Blocks-Variables-&amp;-Tasks">wiki</a> du projet</p>
+
+<h3>Multistage</h3>
+
+<p>C'est une extension indispensable à toute installation de Capifony, elle permet la gestion de plusieurs environnements comme les classiques recette, preprod et prod.<br />
+Le principe est très simple : chaque environnement a son propre fichier où l'on peut surcharger des variables et des tâches.</p>
+
+<p><img src="{{ asset('build/images/avent/18-capifony-multistage.png') }}" alt="Capifony file structure" /></p>
+
+<p>Ensuite, il suffit de rajouter le nom de l'environement pour chaque commande</p>
+
+<pre class="no-highlight"><code>$ cap rec deploy
+$ cap prod deploy
+</code></pre>
+
+<p>Plus d'infos sur le site de <a href="http://capifony.org/cookbook/using-the-multistage-extension.html">capifony</a>.</p>
+
+<h2>Etendre Capifony</h2>
+
+<h3>Où est ce que je mets mon code ?</h3>
+
+<p>Partout et c'est un peu le souci! Vous pouvez le poser dans le fichier Capfile, le <code>app/config/deploy.rb</code> ou bien dans les fichiers spécifiques par environnement.</p>
+
+<p>Ensuite si vous souhaitez partager du code entre les projets et les postes de dev, il va falloir passer par une extension et il y en a beaucoup. Essayez la commande suivante :</p>
+
+<pre class="no-highlight"><code>$ gem search capistrano
+</code></pre>
+
+<h3>Surcharge d'une Task</h3>
+
+<p>Rien de plus simple, il suffit de la redéfinir pour la surcharger.</p>
+
+<pre class="ruby"><code>namespace :symfony do
+  namespace :project do
+    desc "We need our controllers on demo stage"
+    task :clear_controllers do ; end
+  end
+end
+</code></pre>
+
+<p>Voici ce que nous utilisions avant la mise en place de l'option permettant de piloter la suppression de controleur de dev.</p>
+
+<h3>Chainage Task</h3>
+
+<p>Vous pouvez changer les workflows de tâches définies en intercalant vos propres tâches à n'importe quelles étapes.<br />
+Vous disposez pour cela des méthodes <code>after</code> et <code>before</code>.</p>
+
+<pre class="ruby"><code>namespace :deploy do
+  # .. this is a default namespace with lots of its own tasks
+end
+
+namespace :notifier do
+  task :email_the_boss do
+    # Implement your plain ruby emailing code here with [`TMail`](http://tmail.rubyforge.org/)
+  end
+end
+
+after (:deploy, "notifier:email_the_boss")
+</code></pre>
+
+<p>L'utilisation la plus courante est le lancement de la tâche de <code>cleanup</code> après un <code>deploy</code></p>
+
+<pre class="ruby"><code>after :deploy, 'deploy:cleanup'
+</code></pre>
+
+<h2>Cas concrets et retours d'expérience</h2>
+
+<h3>Stratégie de déploiement</h3>
+
+<p>Dans la majorité des cas, les fichiers de configuration seront intégrés à votre projet Symfony et vous lancerez les commandes de déploiement à partir de votre poste de dev où est installé votre projet.</p>
+
+<p>Cependant nous avons eu l'occasion de prendre une autre approche pour un de nos clients ‘grand compte’. Nous avions une dizaine d'applications et les personnes qui étaient en charge des déploiements n'avaient pas les projets sur leur poste qui en plus était sous Windows...</p>
+
+<p>Nous avons donc mis en place un serveur dédié au déploiement sur lequel on devait se connecter en SSH. Toutes les configurations sont gérées au sein d'un même projet versionné.</p>
+
+<p>Cela permet aussi une gestion fine des autorisations déploiement avec les gestions des droits au niveau des fichiers de configuration. Il suffit de ne pas donner le droit de lecture au fichier de configuration de prod pour en bloquer le déploiement.</p>
+
+<h3>Utilisation d'une gateway</h3>
+
+<p>Il est possible dans le cas où les frontaux web ne disposent pas d'IP publique ou d'accès direct à internet pour des raisons de sécurité d'utiliser une "gateway", pour cela il faut définir les paramètres de connexion à celle-ci via la directive "gateway".</p>
+
+<p>Attention ce type de configuration nécessite :</p>
+
+<ul>
+<li>D'activer l'option "Forward agent".</li>
+<li>De mettre en place une authentification par clé à la fois sur la gateway mais également sur le serveur/VM où s'effectue le déploiement.</li>
+</ul>
+
+<p>Exemple:</p>
+
+<pre class="ruby"><code>ssh_options[:forward_agent] = true
+
+set :user,        "deploy"
+set :gateway,     "deploy@lb.elao.com"
+</code></pre>
+
+<h3>Pas de connexion internet</h3>
+
+<p>Dans le cas où même la solution de gateway SSH ci-dessus ne fonctionne pas et que donc ni le serveur cible ni la machine de deploiement ne dispose de connexion à internet.</p>
+
+<p>Dans ce cas 2 solutions s'offrent à vous :</p>
+
+<ul>
+<li>Faire un mirroir pour Composer avec <a href="https://github.com/composer/satis">Satis</a>, mais cela devient complexe à maintenir particulièrement pour des projets avec beaucoup de dependances.</li>
+<li>Packager (fichier zip) les vendors dans le depot GIT de votre projet mais pas super glop pour la taille de votre repo.</li>
+</ul>
+
+<h3>Définition des rôles et des hosts</h3>
+
+<pre class="ruby"><code>role(:app) { ['web1.elao.local', {:master =&gt; true, :user =&gt; 'deploy1'] }
+role(:app) { ['web2.elao.local', {:user =&gt; 'deploy2'] }
+
+role(:db) { ["db1.elao.local", {:master =&gt; true, :user =&gt; 'deploy1'}] }
+role(:db) { ["db2.elao.local", {:user =&gt; 'deploy2'}]
+</code></pre>
+
+<p>Diverses variables de configuration peuvent être affectées à des hosts spécifique en fonction des rôles définis.</p>
+
+<h3>Récupérer les hosts d'un rôle</h3>
+
+<p>Dans une configuration de multi hosts par rôle, nous avons des besoins d'exécuter des tâches sur chacun d'entre eux. Le code ci-dessous nous permet de générer le cache de nos applications symfony 1.x sur tous les frontaux web.</p>
+
+<pre class="ruby"><code>servers = find_servers(:roles =&gt; :app)
+servers.each_with_index do |server, idx|
+    idx = idx+1
+
+    logger.info("Processing Frontend App on #{server} ...")
+    run "wget -qnv --no-check-certificate -O - https://#{application}s#{idx}.elao.local/index.php/ping"
+
+    logger.info("Processing Backoffice App on #{server} ...")
+    run "wget -qnv --no-check-certificate -O - https://#{application}s#{idx}.elao.local/backoffice.php/ping"
+
+    logger.info("Processing RestApi App on #{server} ...")
+    run "wget -qnv --no-check-certificate -O - https://#{application}s#{idx}.elao.local/apiRest.php/ping"
+
+    logger.info("Processing SoapApi App on #{server} ...")
+    run "wget -qnv --no-check-certificate -O - https://#{application}s#{idx}.elao.local/apiSoap.php/ping"
+
+    logger.important("Symfony cache generated !")
+end
+</code></pre>
+
+<h3>Utilisation du logger</h3>
+
+<p>Je vous conseille fortement d'abuser du logger dans vos tâches perso, je ne vais pas m'attarder sur le sujet, le code ci-dessous parle de lui même.</p>
+
+<pre class="ruby"><code>logger.info("Processing frontend on #{server} ...")
+logger.important("Symfony cache generated !")
+logger.debug("...")
+logger.trace("...")
+</code></pre>
+
+<p>Vous avez aussi la possibilité de contrôler le niveau de log produit lors de l'exécution.</p>
+
+<pre class="ruby"><code>logger.level = Logger::MAX_LEVEL
+</code></pre>
+
+<h3>Exécuter des tasks uniquement sur le host master</h3>
+
+<p>Très pratique pour exécuter des tâches seulement sur le master dans le cadre d'une réplication MASTER > SLAVE</p>
+
+<pre class="ruby"><code>desc "Runnin migration"
+task :migrate, :roles =&gt; :db, :only =&gt; { :master =&gt; true } do
+    run_migration
+end
+</code></pre>
+
+<h2>Capifony &amp; Capistrano V3</h2>
+
+<p>Capistrano 3 est sortie cet été avec une refonte en profondeur du projet, les principaux changements sont :</p>
+
+<ul>
+<li>Abandon de leur propre DSL pour se reposer sur celui de Rake</li>
+<li>Le support de Multi Stage en natif (enfin !)</li>
+<li>Le passage Net::SSH à SSHKit pour la librairie SSH qui a permis beaucoup d'évolution sur les composants suivant : logging, formatting, SSH, connection management and pooling, parallelism, batch execution</li>
+<li>Mecurial, Subversion, et CVS Support ne sont plus supportés</li>
+</ul>
+
+<p>L'annonce détaillé de Capistrano 3 est disponible <a href="http://www.capistranorb.com/2013/06/01/release-announcement.html">ici</a>.</p>
+
+<p>Donc beaucoup de changement qui ont un impact fort sur Capifony, ce qui a déclenché cette belle <a href="https://github.com/everzet/capifony/pull/437">PR</a> sur le rewrite de Capifony pour sa version 3. C'est <a href="https://github.com/peterjmit">Peter Mitchell</a>, le nouveau lead developer du projet qui porte le sujet.</p>
+
+<p>A suivre donc...</p>
+
+<h2>Conclusion</h2>
+
+<p>J'espère que cet article va donner, aux utilisateurs actuels de Capifony, l'envie d'aller un peu plus loin sur le sujet et  permettre à ceux qui ne le connaissent pas de laisser lui donner sa chance.<br />
+N'hésitez à partager vos recipes Capistrano et autres retours d'expérience sur le sujet, je suis le premier preneur.</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/xavier_gorse.png') }} alt="Avatar Xavier Gorse" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://www.elao.com{% endblock %}">{% block article_author %}Xavier Gorse{% endblock %}</a>
+</h2>
+<p>
+   Web entrepreneur, co-fondateur de l’agence web <a href="http://www.elao.com/">ELAO</a>, Xavier Gorse est un ancien président de l’AFUP et conçoit sites et applications web depuis plus de 15 ans. Développement assuré depuis 2006 pour la plupart avec le framework Symfony.
+</p>
+
+<p>
+   Vous pouvez le retrouver sur twitter : <a href="https://twitter.com/xgorse">@xgorse</a>
+</p>
+{% endblock %}
