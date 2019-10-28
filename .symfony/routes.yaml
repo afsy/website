@@ -1,0 +1,2 @@
+"https://{all}/": { type: upstream, upstream: "website:http" }
+"http://{all}/": { type: redirect, to: "https://{all}/" }
