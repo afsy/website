@@ -12,3 +12,5 @@ hwi_oauth:
             client_secret:       "%env(string:SENSIO_CONNECT_CLIENT_SECRET)%"
             scope:               "SCOPE_EMAIL SCOPE_LOCATION SCOPE_PUBLIC"
             user_response_class: 'App\OAuth\Response\SensioConnectUserResponse'
+            options:
+                csrf: true
