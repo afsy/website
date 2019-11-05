@@ -45,9 +45,6 @@ class MarkdownParserListener
 
         if ($event->hasChangedField('markdownBody')) {
             $entity->setBody($this->markdown->transformMarkdown($entity->getMarkdownBody()));
-
-            $em = $event->getEntityManager();
-            $em->getUnitOfWork()->computeChangeSet($em->getClassMetadata(get_class($entity)), $entity);
         }
     }
 }
