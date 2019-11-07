@@ -1,0 +1,52 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+    FPN\TagBundle\Entity\TagManager:
+        alias: 'fpn_tag.tag_manager'
+
+    App\Admin\AuthorAdmin:
+        class: App\Admin\AuthorAdmin
+        arguments: [~, App\Entity\Author, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: People }
+
+    App\Admin\ArticleAdmin:
+        class: App\Admin\ArticleAdmin
+        arguments: [~, App\Entity\Article, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: Content }
+        calls:
+            - method: setTagManager
+              arguments:
+                  - '@App\Tag\TagManager'
+
+    App\Tag\TagManager:
+        arguments:
+          - '@doctrine.orm.entity_manager'
+          - '%fpn_tag.entity.tag.class%'
+          - '%fpn_tag.entity.tagging.class%'
+          - '@fpn_tag.slugifier'
+
+    App\Listener\MarkdownParserListener:
+        arguments: ['@markdown.parser']
+        tags:
+            - { name: doctrine.event_listener, event: prePersist }
+            - { name: doctrine.event_listener, event: preUpdate }

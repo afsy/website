@@ -1,0 +1,4 @@
+fpn_tag:
+  model:
+    tag_class:     App\Entity\Tag
+    tagging_class: App\Entity\Tagging

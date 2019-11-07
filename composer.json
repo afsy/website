@@ -1,66 +1,100 @@
 {
     "name": "afsy/site",
     "description": "Site internet de l'AFSY",
-    "autoload": {
-        "psr-4": { "": "src/" },
-        "classmap": [ "app/AppKernel.php", "app/AppCache.php" ]
-    },
-    "comment": "right version of hwi oauth bundle should be 0.6, not released ATM",
+    "type": "project",
+    "license": "proprietary",
     "require": {
-        "php": ">=5.3.3",
-        "symfony/symfony": "3.3.*",
-        "doctrine/orm": "^2.5",
-        "doctrine/doctrine-bundle": "^1.6",
-        "doctrine/doctrine-cache-bundle": "^1.2",
-        "twig/twig": "^1.0||^2.0",
-        "twig/extensions": "1.0.*@dev",
-        "symfony/assetic-bundle": "^2.8",
-        "symfony/swiftmailer-bundle": "^2.3.10",
-        "symfony/monolog-bundle": "^3.1.0",
-        "symfony/polyfill-apcu": "^1.0",
-        "sensio/distribution-bundle": "^5.0.19",
-        "sensio/framework-extra-bundle": "^3.0.2",
-        "stof/doctrine-extensions-bundle": "dev-master",
-        "fpn/tag-bundle": "dev-master",
-        "fpn/doctrine-extensions-taggable": "v0.9.0",
-
-        "doctrine/doctrine-migrations-bundle": "^1.2",
-        "doctrine/doctrine-fixtures-bundle": "^2.3",
-
-        "knplabs/knp-paginator-bundle": "^2.5.3",
+        "php": "^7.1.3",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "doctrine/doctrine-fixtures-bundle": "^3.2",
+        "fpn/doctrine-extensions-taggable": "^0.9.0",
+        "fpn/tag-bundle": "dev-patch-1",
         "hwi/oauth-bundle": "dev-master",
-        "knplabs/knp-menu-bundle": "^2.1",
-
-        "incenteev/composer-parameter-handler": "^2.0",
-        "sonata-project/admin-bundle": "^3.10",
-        "sonata-project/doctrine-orm-admin-bundle": "^3.1",
-        "knplabs/knp-markdown-bundle": "^1.5"
+        "knplabs/knp-markdown-bundle": "^1.7",
+        "knplabs/knp-paginator-bundle": "^4.0",
+        "sensio/framework-extra-bundle": "^5.5",
+        "sonata-project/admin-bundle": "^3.54",
+        "sonata-project/doctrine-orm-admin-bundle": "^3.10",
+        "stof/doctrine-extensions-bundle": "^1.3",
+        "symfony/asset": "4.3.*",
+        "symfony/console": "4.3.*",
+        "symfony/dotenv": "4.3.*",
+        "symfony/expression-language": "4.3.*",
+        "symfony/flex": "^1.3.1",
+        "symfony/form": "4.3.*",
+        "symfony/framework-bundle": "4.3.*",
+        "symfony/intl": "4.3.*",
+        "symfony/monolog-bundle": "^3.1",
+        "symfony/orm-pack": "*",
+        "symfony/process": "4.3.*",
+        "symfony/security-bundle": "4.3.*",
+        "symfony/serializer-pack": "*",
+        "symfony/swiftmailer-bundle": "^3.1",
+        "symfony/translation": "4.3.*",
+        "symfony/twig-bundle": "4.3.*",
+        "symfony/validator": "4.3.*",
+        "symfony/web-link": "4.3.*",
+        "symfony/webpack-encore-bundle": "^1.6",
+        "symfony/yaml": "4.3.*",
+        "twig/extensions": "^1.5"
+    },
+    "require-dev": {
+        "symfony/debug-pack": "*",
+        "symfony/maker-bundle": "^1.0",
+        "symfony/profiler-pack": "*",
+        "symfony/test-pack": "*",
+        "symfony/web-server-bundle": "4.3.*"
+    },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "replace": {
+        "paragonie/random_compat": "2.*",
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php71": "*",
+        "symfony/polyfill-php70": "*",
+        "symfony/polyfill-php56": "*"
     },
     "scripts": {
-        "symfony-scripts": [
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
-        ],
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
         "post-install-cmd": [
-            "@symfony-scripts"
+            "@auto-scripts"
         ],
         "post-update-cmd": [
-            "@symfony-scripts"
+            "@auto-scripts"
         ]
     },
+    "conflict": {
+        "symfony/symfony": "*"
+    },
     "extra": {
-        "symfony-app-dir": "app",
-        "symfony-bin-dir": "bin",
-        "symfony-var-dir": "app",
-        "symfony-web-dir": "web",
-        "symfony-tests-dir": "tests",
-        "symfony-assets-install": "relative",
-        "incenteev-parameters": {
-            "file": "app/config/parameters.yml"
+        "symfony": {
+            "allow-contrib": false,
+            "require": "4.3.*"
         }
-    }
+    },
+    "repositories": [
+        {
+            "url": "https://github.com/webhdx/FPNTagBundle",
+            "type": "vcs"
+        }
+    ]
 }

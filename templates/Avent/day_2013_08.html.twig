@@ -1,0 +1,310 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 8 - Utilisation avancée du composant Config de Symfony2" %}
+
+{% block article_content %}
+<h1>Utilisation avancée du composant Config de Symfony2</h1>
+
+<p>
+    Dans cet article, je vais vous présenter le composant Config de Symfony2 et
+    plus précisément la définition de l'arbre de configuration. Je vais vous
+    expliquer pourquoi il est important d'utiliser ce composant au travers d'un
+    petit exemple et comment tester sa configuration.
+</p>
+
+<p>
+    J'ai choisi de parler de ce composant car je le trouve mal documenté et il
+    manque cruellement d'exemples (surtout sur les points les plus difficiles à
+    comprendre). Mais lorsque l'on regarde ce que la communauté a fait avec ce
+    composant, on se rend compte que l'on peut faire beaucoup de choses avec
+    celui-ci.
+</p>
+
+<h2>À quoi sert ce composant ?</h2>
+
+<p>
+    Lorsque l'on crée un bundle ou une application et que l'on veut rendre
+    celui-ci paramétrable, utiliser ce composant est la façon la plus simple et
+    la plus propre de le faire. On peut très bien s'en passer, mais au risque de
+    se retrouver avec des dizaines de clés de configuration à la suite les unes
+    des autres, sans savoir lesquelles sont obligatoires, quelles sont les
+    valeurs possibles pour ces clés et à quel bundle celles-ci font
+    référence.
+</p>
+
+<p>
+    Ce composant permet de mieux structurer sa configuration, il permet de
+    regrouper les clés de configuration par bundle et de définir la liste des
+    paramètres disponibles. En plus de la structuration, il permet de valider
+    précisément chacun des paramètres, au niveau de leur type, de leur présence,
+    ainsi que des valeurs qu'ils peuvent prendre.
+</p>
+
+<h2>Un cas pratique</h2>
+
+<p>
+    Le plus simple pour comprendre comment fonctionne ce composant, c'est au
+    travers d'un exemple. Je vais donc vous présenter un cas que j'ai déjà eu à
+    traiter sur l'un de mes projets.
+</p>
+
+<blockquote>
+    <p>
+        Je veux créer un formulaire de contact et pouvoir paramétrer qui va
+        recevoir le message. Pour le moment, je veux être le seul à recevoir ce
+        message, mais dans le futur, il pourrait y avoir plusieurs
+        destinataires.
+    </p>
+<blockquote>
+
+<p>
+    A partir de cette phrase on peut voir immédiatement que l'on veut quelque
+    chose de très simple, en terme de structure, au niveau de notre fichier de
+    configuration yaml.
+</p>
+
+<pre class="language-yaml"><code># Pour une adresse de contact
+afsy_core:
+    contact: "mail@exemple.com"
+
+# Pour plusieurs adresses de contact
+afsy_core:
+    contact:
+        - "mail1@exemple.com"
+        - "mail2@exemple.com"
+</code></pre>
+
+<p>
+    La structure a beau être simple, on aura besoin d'utiliser trois concepts
+    avancés du composant Config :
+</p>
+
+<h3>Prototype</h3>
+
+<p>
+    La méthode <code>prototype</code> permet de gérer un nombre d'éléments
+    dynamiques. Il va nous servir pour le tableau d'adresses e-mails (de
+    <code>scalarNode</code>), mais on peut très bien l'utiliser pour gérer des
+    éléments structurés (<code>arrayNode</code>).
+</p>
+
+<h3>Validation</h3>
+
+<p>
+    Permet de valider la valeur d'un noeud. Je veux une liste d'adresses
+    e-mails, je bloque donc la validation si je reçois autre chose.
+</p>
+
+<h3>Normalisation</h3>
+
+<p>
+    La normalisation transforme une valeur en une autre. Dans mon code j'attends
+    un tableau, mais si je reçois une chaîne de caractères, je ne bloque pas, et
+    je convertis dans le bon format.
+</p>
+
+<h3>Le code</h3>
+
+<p>
+    En utilisant ces trois concepts, on va obtenir un code qui va ressembler
+    plus ou moins à ça :
+</p>
+
+<pre class="language-php"><code>&lt;?php
+
+namespace Afsy\CoreBundle\DependencyInjection;
+
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Validator\Validator;
+use Symfony\Component\Validator\Constraints\Email;
+
+class Configuration implements ConfigurationInterface
+{
+    public function getConfigTreeBuilder()
+    {
+        $treeBuilder = new TreeBuilder();
+        $rootNode = $treeBuilder-&gt;root('afsy_core');
+
+        $rootNode
+            -&gt;children()
+                -&gt;arrayNode('contact')
+                    -&gt;beforeNormalization()
+                        -&gt;ifString()
+                        -&gt;then(function ($value) {
+                            return array($value);
+                        })
+                    -&gt;end()
+                    -&gt;prototype('scalar')
+                    -&gt;validate()
+                        -&gt;ifTrue(function ($value) {
+                            return !filter_var($value, FILTER_VALIDATE_EMAIL);
+                        })
+                        -&gt;thenInvalid('%s is not a valid address email')
+                    -&gt;end()
+                -&gt;end()
+            -&gt;end()
+        -&gt;end();
+
+        return $treeBuilder;
+    }
+}
+</code></pre>
+
+<h2>Tester sa configuration</h2>
+
+<p>
+    Lorsque l'on commence à avoir une configuration complexe, il devient très
+    important de tester celle-ci pour être sûr que tout fonctionne comme
+    prévu.
+</p>
+
+<p>
+    Dans les différents bundles que j'ai pu regarder, on remarque deux approches
+    différentes pour tester la configuration d'un bundle :
+</p>
+
+<ol>
+    <li>
+        la première consiste à tester les modifications qui sont apportées au
+        conteneur lorsque l'on exécute l'extension,
+    </li>
+    <li>
+        et la deuxième consiste à fournir un tableau à la configuration pour
+        voir si il y a des erreurs.
+    </li>
+</ol>
+
+<p>
+    Je vais vous parler de la deuxième méthode car il s'agit, selon moi, de la
+    plus simple.
+</p>
+
+<p>
+    Si vous souhaitez plus d'informations sur la première version, n'hésitez pas
+    à regarder le fichier de test du bundle <a href="https://github.com/schmittjoh/JMSSecurityExtraBundle/blob/master/Tests/DependencyInjection/JMSSecurityExtraExtensionTest.php">JMSSecurityExtraBundle</a>.
+</p>
+
+<p>
+    Pour tester la configuration, j'utilise le composant <a href="https://github.com/matthiasnoback/SymfonyConfigTest">SymfonyConfigTest</a> crée par <a href="http://php-and-symfony.matthiasnoback.nl/">Matthias Noback</a>.
+</p>
+
+<p>
+    Je vais vous montrer comment tester le code que j'utilise plus haut en utilisant ce composant.
+</p>
+
+<pre class="language-php"><code>&lt;?php
+
+namespace Afsy\CoreBundle\Tests\DependencyInjection;
+
+use Matthias\SymfonyConfigTest\PhpUnit\AbstractConfigurationTestCase;
+use Afsy\CoreBundle\DependencyInjection\Configuration;
+
+class ConfigurationTest extends AbstractConfigurationTestCase
+{
+    protected function getConfiguration()
+    {
+        return new Configuration();
+    }
+
+    public function testValidateEmailAddress()
+    {
+        $this-&gt;assertConfigurationIsInvalid(
+            array(
+                array(
+                    'contact' =&gt; 'not an email address'
+                )
+            ),
+            "is not a valid address email"
+        );
+    }
+
+    public function testNormalization()
+    {
+        $this-&gt;assertProcessedConfigurationEquals(
+            array(
+                array(
+                    'contact' =&gt; 'test@exemple.com'
+                )
+            ),
+            array(
+                'contact' =&gt; array('test@exemple.com')
+            )
+        );
+    }
+
+    public function testPrototype()
+    {
+        $this-&gt;assertProcessedConfigurationEquals(
+            array(
+                array(
+                    'contact' =&gt; array('test@exemple.com')
+                )
+            ),
+            array(
+                'contact' =&gt; array('test@exemple.com')
+            )
+        );
+
+        $this-&gt;assertProcessedConfigurationEquals(
+            array(
+                array(
+                    'contact' =&gt; array(
+                        'test@exemple.com',
+                        'test2@exemple.com'
+                    )
+                )
+            ),
+            array(
+                'contact' =&gt; array(
+                    'test@exemple.com',
+                    'test2@exemple.com'
+                )
+            )
+        );
+    }
+}
+</code></pre>
+
+<h2>Aller plus loin ?</h2>
+
+<p>
+    Si vous souhaitez en savoir plus sur ce composant, il existe de nombreuses
+    ressources sur Internet en commençant par le livre
+    « <a href="https://leanpub.com/a-year-with-symfony">A Year With Symfony</a> »
+    ou le <a href="http://php-and-symfony.matthiasnoback.nl/">blog</a> de
+    Matthias Noback. Vous pouvez également vous inspirer des fichiers de
+    configuration des bundles existants, par exemple celui de <a href="https://github.com/sonata-project/SonataAdminBundle/blob/master/DependencyInjection/Configuration.php">Sonata</a> ou du <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/SecurityBundle/DependencyInjection/MainConfiguration.php">SecurityBundle</a>
+    de Symfony2.
+</p>
+
+<p>
+    Vous pouvez également utiliser ce composant en dehors de Symfony2, comme le
+    fait Behat, mais je n'ai pas trouvé de code suffisamment simple pour
+    l'intégrer dans cet article.
+</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/benjamin-leveque.png') }}" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://benjamin.leveque.me{% endblock %}" target="_blank">{% block article_author %}Benjamin Lévêque{% endblock %}</a>
+</h2>
+<p>
+    Benjamin Lévêque, Reponsable Technique et Développeur Symfony2 Certifié chez
+    Elao à Lyon.cJ'ai débuté le PHP en 2008, j'ai tout de suite été séduit par
+    les premières versions de symfony (1.0) et je n'ai jamais quitté ce
+    framework depuis.
+</p>
+<p>
+    Vous pouvez me retrouver à la majorité des évènements PHP de la région
+    lyonnaise, ainsi que sur Twitter
+    <a href="https://twitter.com/benji__07">@benji__07</a>
+    et sur github <a href="https://github.com/benji07">@benji07</a>.
+</p>
+{% endblock %}

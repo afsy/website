@@ -15,13 +15,12 @@ When your article is done and published, spread the world on social networks!
 If you want to test the current version (which requires php7) :
 
 ```bash
-$ docker run -d -p 8000:80 -v [YOUR_LOCAL_PROJECT_PATH]:/var/app --name afsy phpmentors/symfony-app:php71
-$ docker exec -it afsy /bin/bash
-root@c5130f5eef1f:~# cd /var/app
-root@c5130f5eef1f:~# ./composer.phar install
-```
+$ symfony php composer install
+$ symfony php bin/console do:s:u --force
+$ symfony php bin/console do:f:l
+$ symfony serve
 
-and `localhost:8000/app_dev.php` should work.
+```
 
 ## Howto update CSS styles
 ---------------------------------------------------

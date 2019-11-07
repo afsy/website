@@ -13,7 +13,7 @@ if [ ! -d vendor ]; then
 fi
 
 echo "- clean cache"
-rm -rf app/cache/* app/logs/* web/record/*
+rm -rf var/cache/* var/logs/* web/record/*
 
 echo "- reinstall bundle assets"
 ./bin/console assets:install --symlink
@@ -31,4 +31,4 @@ echo "- load fixtures"
 ./bin/console doctrine:fixtures:load --append
 
 echo "- dump production assets"
-./bin/console assetic:dump --env=prod --no-debug
+yarn encore dev

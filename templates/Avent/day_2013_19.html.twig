@@ -1,0 +1,242 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2013 %}
+
+{% block article_title "Jour 19 - Bien penser ses commandes Symfony2" %}
+
+{% block article_content %}
+<h1>Bien penser ses commandes Symfony2</h1>
+
+<h2>Qu'est-ce qu'une commande ?</h2>
+
+<p>Simple question rhétorique ? Pas tant que ça ! Sur Wikipedia il existe 2 définitions du mot <em>Commande</em> rien que dans le domaine de l'informatique. La première est celle d'un <a href="http://fr.wikipedia.org/wiki/Commande_&#40;patron_de_conception&#41;">design pattern</a> et la seconde nous est <a href="http://fr.wikipedia.org/wiki/Commande_informatique">plus familière</a>:</p>
+
+<blockquote>
+  <p>on entend par commande un <strong>mot</strong> qui décrit de manière <strong>mnémonique</strong> un <strong>nom de tâche</strong>, qu'il est possible de faire suivre par des <strong>paramètres</strong>.</p>
+</blockquote>
+
+<p>Notez bien les mots en gras et gardez-les bien à l'esprit, autant que ce qu'ils impliquent (on va y revenir).</p>
+
+<h2>Mais qui Commande ? Et par quel Moyen ?</h2>
+
+<p>Ok, remettons-nous dans le contexte au lieu de philosopher. Nous sommes clairement aux manettes de toute <strong>Commande</strong> donc faisons le maximum pour rendre leur utilisation agréable et efficace :)</p>
+
+<p>Question moyens, du côté de Symfony c'est noël avant l'heure, car depuis la version 2.3 le composant <a href="http://symfony.com/fr/doc/current/components/console/index.html">Console</a> a bénéficié de nombreuses améliorations.</p>
+
+<h2>C'est l'intention qui compte</h2>
+
+<p>Revendiquons notre statut de <strong>first class citizens</strong> pour chacune de nos commandes.</p>
+
+<h3>Mesurer les progrès</h3>
+
+<pre class="language-php"><code>$progress-&gt;setEmptyBarCharacter('.');
+$progress-&gt;setBarCharacter("\xf0\x9f\x8e\x84");
+$progress-&gt;setProgressCharacter("\xf0\x9f\x8e\x85");
+$progress-&gt;setFormat('&lt;info&gt;%current%&lt;/info&gt; &lt;info&gt;[&lt;/info&gt;%bar%&lt;info&gt;]&lt;/info&gt; &lt;comment&gt;Elapsed: %elapsed%&lt;/comment&gt;');
+</code></pre>
+
+<p>
+    <img src="{{ asset('build/images/avent/2013/19/progress-bar.png') }}" alt="Progress bar de noël" />
+</p>
+
+<h3>C'est le moment de passer à table !</h3>
+
+<pre class="language-php"><code>$table = $this-&gt;getHelperSet()-&gt;get('table');
+$christmasTreeEmoji = "\xf0\x9f\x8e\x84";
+$santaEmoji = "\xf0\x9f\x8e\x85";
+
+$table-&gt;setCrossingChar($christmasTreeEmoji);
+$table-&gt;setHorizontalBorderChar($christmasTreeEmoji);
+$table-&gt;setVerticalBorderChar($christmasTreeEmoji);
+
+$table-&gt;setHeaders(array('Person', 'Present'));
+
+$table-&gt;addRow(array('Oliver', 'Twist lessons'));
+$table-&gt;addRow(array('Hugo', 'Lin'));
+$table-&gt;addRow(array('Blanket', 'Neverland'));
+$table-&gt;addRow(array('Jean Marc', 'Cigar'));
+
+$table-&gt;render($output);
+
+$output-&gt;writeln("\n");
+$table-&gt;setLayout(TableHelper::LAYOUT_BORDERLESS);
+$table-&gt;setHorizontalBorderChar($santaEmoji);
+$table-&gt;render($output);
+
+$output-&gt;writeln("\n");
+$table-&gt;setLayout(TableHelper::LAYOUT_COMPACT);
+$table-&gt;render($output);
+</code></pre>
+
+<p>
+    <img src="{{ asset('build/images/avent/2013/19/gifts.png') }}" alt="Christmas gifts list" />
+</p>
+
+<h3>Des questions ?</h3>
+
+<p>Forcément... et nous avons le droit d'en poser à l'utilisateur de notre commande. Le <code>DialogHelper</code> est déjà disponible depuis Symfony 2.2 mais tournons-nous vers l'avenir... je vous invite à <a href="https://speakerdeck.com/fabpot/symfonycon-2013-lightning-talk-about-the-console-in-2-dot-5">lire les slides de la SymfonyCon de Fabien</a> au sujet du futur <code>QuestionHelper</code>.</p>
+
+<h2>Être de sortie... et bavard (ou pas)</h2>
+
+<h3>Profiter du logger</h3>
+
+<p>Depuis Symfony 2.4 le logger est parfaitement intégré dans les commandes, de sorte que, selon le niveau de verbosité passé en argument à la commande, si:</p>
+
+<ul>
+<li><code>OutputInterface::VERBOSITY_NORMAL</code> alors tous les logs de niveau WARNING et supérieur s'affichent,</li>
+<li><code>OutputInterface::VERBOSITY_VERBOSE</code> (-v) les logs de niveau NOTICE et supérieur s'affichent,</li>
+<li><code>OutputInterface::VERBOSITY_VERY_VERBOSE</code> (-vv) les logs de niveau INFO et supérieur s'affichent,</li>
+<li><code>OutputInterface::VERBOSITY_DEBUG</code> (-vvv) les logs de niveau DEBUG et supérieur s'affichent, en l'occurence tous les logs.</li>
+</ul>
+
+<p>Par exemple le code suivant:</p>
+
+<pre class="language-php"><code>$logger = $this-&gt;getContainer()-&gt;get('logger');
+
+$presents = array('presents' =&gt; array('cigar', 'lin', 'Twist Lessons', 'Neverland'));
+
+$logger-&gt;debug('This is a debug message', $present);
+$logger-&gt;info('This is an info message', $presents);
+$logger-&gt;notice('This is an notice message', $presents);
+$logger-&gt;warn('This is a warning message', $presents);
+$logger-&gt;err('This is an error message', $presents);
+$logger-&gt;crit('This is a critical message', $presents);
+$logger-&gt;alert('This is an alert message', $presents);
+$logger-&gt;emerg('This is an emergency message', $presents);
+</code></pre>
+
+<p>Produira en étant invoqué ainsi:</p>
+
+<pre class="no-highlight"><code>$ ./app/console namespace:command -vvv
+</code></pre>
+
+<p>La sortie suivante :<br />
+    <img src="{{ asset('build/images/avent/2013/19/logger.png') }}" alt="Exemple de sortie de commande utilisant le logger" />
+</p>
+
+<p><strong>Remarque</strong>: Si le formateur de logs proposé par défaut ne vous convient pas, vous pouvez bien entendu configurer Monolog pour utiliser le votre. C'est expliqué avec deux approches différentes <a href="http://symfony.com/blog/new-in-symfony-2-4-show-logs-in-console">ici</a> et <a href="http://php-and-symfony.matthiasnoback.nl/2013/07/symfony2-rich-console-command-output-using-aop/">ici</a>.</p>
+
+<h3>Sorties personnalisées en fonction du niveau de verbosité</h3>
+
+<p>Vous disposez désormais de 4 méthodes explicites. Un exemple vaut mieux que de longs discours:</p>
+
+<pre class="language-php"><code>if ($output-&gt;isVerbose()) {
+    // ...
+}
+
+if ($output-&gt;isQuiet()) {
+    // ...
+}
+
+if ($output-&gt;isVeryVerbose()) {
+    // ...
+}
+
+if ($output-&gt;isDebug()) {
+    // ...
+}
+</code></pre>
+
+<p><strong>Remarque</strong>: À priori vous n'aurez pas souvent besoin d'encadrer des blocs de code par ce genre de conditions au sein d'une commande. Si c'est le cas alors posez-vous la question de la quantité de code que votre commande contient. Tout comme un contrôleur, celle-ci a vocation à se servir de toute la logique métier écrite et la manipuler. Une commande doit donc faire peu de lignes de code.</p>
+
+<h2>La bien nommée</h2>
+
+<p>Nommer une commande est toujours un casse tête. Une simple invocation de la console Symfony nous le prouve et sème déjà la confusion dans nos esprits.</p>
+
+<p>La première bonne pratique, vu que les commandes sont organisées grâce à un système d'espace de nommage, consiste à regrouper toutes les commandes de notre application sous un namespace commun, par exemple <code>acme</code>.<br />
+Cela signifie aussi que vous pouvez faire le choix de créer une console dédiée à votre application et qui encapsule uniquement les commandes dont le namespace commence par <code>acme</code>. De cette manière votre commande s'appelle déjà acme et vous listez uniquement les commandes utiles à votre application, la valeur ajoutée en quelque sorte.</p>
+
+<p>Ignorons donc désormais ce préfixe <code>acme</code> pour nous concentrer sur la suite. La première chose à savoir en matière de nom de commande:</p>
+
+<p><strong>Il n'existe pas de règle universelle !</strong></p>
+
+<p>Cela dit... 2 pistes s'offrent à vous pour avoir une certaine cohérence. Vous pouvez mixer les deux (c'est le cas dans la console Symfony).</p>
+
+<h3>Action first</h3>
+
+<h4>Avec parcimonie</h4>
+
+<p>Cette approche part de l'intention comme c'est le cas de beaucoup de commandes UNIX (cut, grep, ls, cd, ...). C'est ainsi que dans la console Symfony nous avons <code>init:acl</code> et toutes les commandes <code>generate:*</code>. Au premier niveau de namespace elles doivent cependant rester peu nombreuses. Prenez pour exemple le ruban de commandes de vos applications graphiques: vous avez tous remarqué que toutes les entrées de menu étaient des noms pratiquement ("File", "View", "Help", ...), sauf généralement une qui est "Edit" ? :)</p>
+
+<h4>Sans être borné</h4>
+
+<p>Bien entendu si votre application manipule beaucoup de données de manière abstraite, vous faites partie de l'exception et personne ne vous en voudra d'avoir uniquement des verbes en premier car l'action prime sur la donnée manipulée.</p>
+
+<h3>Subject first</h3>
+
+<h4>Un vague lien de parenté ?</h4>
+
+<p>Ici le sujet est au cœur de nos préoccupations. Si nous avons un client dans notre application alors c'est très simple toutes les commandes liées à ce client doivent être dans le namespace <code>acme:customer:*</code>.</p>
+
+<p>Ce qui est très intéressant avec cette méthode de nommage, c'est que l'on peut adopter un mode de fonctionnement orienté ressource. Ça ne vous rappelle rien ?<br />
+Ha oui mais bien sûr, REST ! <strong>Si vos commandes sont un shell pour des API REST cette approche est particulièrement intéressante</strong>.</p>
+
+<h4>Des possibilités intéressantes offertes</h4>
+
+<p>Avec certes un peu de travail on peut facilement mettre en place une console consciente du contexte (ou plutôt du namespace), à la manière du shell des routeurs CISCO™ par exemple. Vous allez me dire "cisse quoi" ? Bon ok un exemple vous parlera plus:</p>
+
+<p>
+    <img src="{{ asset('build/images/avent/2013/19/cisco-like-shell.gif') }}" alt="Cisco like shell" />
+</p>
+
+<p>C'est très utile lorsqu'on commence à avoir un arbre de commandes fourni car tout est question de contexte: pourquoi s'encombrer l'esprit à lister une tonne de commandes qui n'ont rien à avoir avec notre intention initiale ?<br />
+Je suis persuadé que ce concept ferait adopter le mode shell de la console Symfony (<code>./app/console -s</code>) à beaucoup d'entre nous ;)</p>
+
+<h2>Rendons-nous service</h2>
+
+<p>Depuis Symfony 2.4 vous pouvez enregistrer vos commandes via l'injection de dépendance !<br />
+Il suffit de la déclarer en tant que service taggé. Le tag est <code>console.command</code>.</p>
+
+<h2>Heureux événements</h2>
+
+<p>Depuis Symfony 2.3 il existe désormais 3 événements sur lesquels nous pouvons nous brancher pour par exemple décorer notre sortie:</p>
+
+<ul>
+<li><code>ConsoleEvents::COMMAND</code></li>
+<li><code>ConsoleEvents::TERMINATE</code></li>
+<li><code>ConsoleEvents::EXCEPTION</code></li>
+</ul>
+
+<p>Vous pouvez vous brancher sur ces événements très facilement en suivant <a href="http://symfony.com/fr/doc/current/components/console/events.html">ce guide</a>.</p>
+
+<h2>The future is now!</h2>
+
+<p>Nous avons balayé les killer features des commandes Symfony ainsi que les bonnes pratiques. Mettez à profit ces fêtes de fin d'année pour les adopter si ce n'est pas déjà le cas.<br />
+Vu que Noël approche c'est le moment de faire votre liste. Qu'aimeriez-vous avoir dans vos commandes en 2014 ? Pas d'idées ? Aller j'ouvre la voie, je me pose moi-même quelques questions que j'aimerais partager avec vous.</p>
+
+<h3>Universal shell ?</h3>
+
+<p>Ne serait-il pas intéressant de toujours développer un set de commandes cohérentes adossé aux interfaces de nos projets web ? Nous le faisons tous plus ou moins, mais combien parmi nous peuvent se vanter de pouvoir contrôller aussi bien via un shell que via une interface web 100% du métier de notre projet applicatif ?</p>
+
+<h3>Découverte automatique de commandes ?</h3>
+
+<p>Cette question pourrait être liée à la précédente... imaginons que nous avons une API REST, comme on en voit partout de nos jours. À partir du moment où elle expose ses services (<a href="http://bitworking.org/news/193/Do-we-need-WADL">via WADL ?</a>, <a href="https://api.github.com/">Github Like ?</a>, <a href="http://fr.wikipedia.org/wiki/Enterprise_Service_Bus">un ESB ?</a>, ...), ne pourrions-nous pas construire une console capable de consommer ces services... et surtout qui à la manière du modèle de distribution web serait en permanence à jour puisque chaque nouvelle évolution est délivrée côté serveur uniquement ?</p>
+
+<h3>Une console dédiée, sans les commandes symfony ?</h3>
+
+<p>Aviez-vous déjà lu <a href="http://symfony.com/fr/doc/current/components/console/single_command_tool.html">cette recette</a> ? :)</p>
+
+<h3>Profiler ?</h3>
+
+<p>Jusqu'ici le profiler Symfony est réservé aux controleurs. Ne serait-il pas pratique de se brancher sur le profiler afin d'apprécier les performances des commandes que nous écrivons ?</p>
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/sebastien_houze.png') }} alt="Avatar Sébastien HOUZÉ" />
+{% endblock %}
+
+{% block article_bio %}
+<h2>
+    <a href="{% block author_url %}http://verylastroom.com{% endblock %}">{% block article_author %}Sébastien HOUZÉ{% endblock %}</a>
+</h2>
+<p>
+    CTO &amp; co-fondateur de <a href="http://verylastroom.com/">VeryLastRoom</a>,
+    Sébastien a eu l'occasion de se confronter à la fois aux systèmes avec l'administration
+    de centaines de serveurs mais aussi à des langages aussi variés que le C/C++, Java, Python, Erlang, Objective-C, ...
+    tout en restant un inconditionnel de PHP depuis 15 ans et de Symfony depuis 2007.
+</p>
+
+<p>
+   Vous pouvez le retrouver sur twitter : <a href="https://twitter.com/sebastienhouze">@sebastienhouze</a>
+</p>
+{% endblock %}

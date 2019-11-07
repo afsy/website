@@ -1,0 +1,16 @@
+parameters:
+    env(SENSIO_CONNECT_CLIENT_ID): 'xxx'
+    env(SENSIO_CONNECT_CLIENT_SECRET): 'xxx'
+
+hwi_oauth:
+    # name of the firewall in which this bundle is active, this setting MUST be set
+    firewall_names: [secured_area]
+    resource_owners:
+        sensio_connect:
+            type:                sensio_connect
+            client_id:           "%env(string:SENSIO_CONNECT_CLIENT_ID)%"
+            client_secret:       "%env(string:SENSIO_CONNECT_CLIENT_SECRET)%"
+            scope:               "SCOPE_EMAIL SCOPE_LOCATION SCOPE_PUBLIC"
+            user_response_class: 'App\OAuth\Response\SensioConnectUserResponse'
+            options:
+                csrf: true
