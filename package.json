@@ -14,7 +14,7 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "bootstrap": "3.3.7",
+        "bootstrap": "3.4.1",
         "jquery": "^3.4.1",
         "prismjs": "^1.17.1"
     }
