@@ -706,6 +706,12 @@
             "config/packages/twig_extensions.yaml"
         ]
     },
+    "twig/extra-bundle": {
+        "version": "3.x-dev"
+    },
+    "twig/markdown-extra": {
+        "version": "3.x-dev"
+    },
     "twig/twig": {
         "version": "v2.12.1"
     },

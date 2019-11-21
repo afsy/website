@@ -19,6 +19,10 @@ services:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
+    App\Controller\AventController:
+        tags: ['controller.service_arguments']
+        arguments: ['@twig', '%kernel.environment%']
+
     FPN\TagBundle\Entity\TagManager:
         alias: 'fpn_tag.tag_manager'
 

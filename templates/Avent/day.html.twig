@@ -64,20 +64,13 @@
 
     <div class="avent-article">
         <a href="{{ url('avent_day', {year: year, slug: slug}) ~ '#disqus_thread'}}" data-disqus-identifier="{{ 'avent-' ~  day ~ '-' ~ year }}">Commentaires</a>
-
-        {% block article_content %}
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-            <p>bla bla</p>
-        {% endblock %}
+        {% if year < 2019 %}
+            {% block article_content %}{% endblock %}
+        {% else %}
+            {% apply markdown_to_html %}
+                {% block article_content_md %}{% endblock %}
+            {% endapply %}
+        {% endif %}
     </div>
     <hr />
     <div class="avent-author-block">
