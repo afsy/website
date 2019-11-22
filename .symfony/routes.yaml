@@ -1,2 +1,8 @@
-"https://{all}/": { type: upstream, upstream: "website:http" }
-"http://{all}/": { type: redirect, to: "https://{all}/" }
+"http://{all}/":
+    type: redirect
+    # Redirect from HTTP to HTTPS
+    to: "https://{all}/"
+
+"https://{all}/":
+    type: upstream
+    upstream: "afsy:http"
