@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "ext-json": "*",
         "doctrine/doctrine-fixtures-bundle": "^3.2",
+        "erusev/parsedown": "^1.7",
         "doctrine/doctrine-migrations-bundle": "^2.1",
         "fpn/doctrine-extensions-taggable": "^0.9.0",
         "fpn/tag-bundle": "dev-patch-1",
@@ -42,11 +43,8 @@
         "symfony/webpack-encore-bundle": "^1.6",
         "symfony/yaml": "4.3.*",
         "twig/extensions": "^1.5",
-        "php-http/guzzle6-adapter": "^2.0.1",
-        "php-http/httplug-bundle": "^1.16.0",
         "twig/extra-bundle": "^2.12",
         "twig/markdown-extra": "^2.12"
-        "twig/extensions": "^1.5"
     },
     "require-dev": {
         "symfony/debug-pack": "*",

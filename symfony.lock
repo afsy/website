@@ -114,6 +114,9 @@
     "egulias/email-validator": {
         "version": "2.1.11"
     },
+    "erusev/parsedown": {
+        "version": "1.7.3"
+    },
     "fig/link-util": {
         "version": "1.0.0"
     },
