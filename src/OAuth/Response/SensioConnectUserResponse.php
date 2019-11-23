@@ -11,6 +11,6 @@ class SensioConnectUserResponse extends BaseResponse
      */
     public function getCity()
     {
-        return $this->getNodeValue('./vcard:locality', $this->response);
+        return $this->getNodeValue('./vcard:locality', $this->data);
     }
 }
