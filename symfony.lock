@@ -114,6 +114,9 @@
     "egulias/email-validator": {
         "version": "2.1.11"
     },
+    "erusev/parsedown": {
+        "version": "1.7.3"
+    },
     "fig/link-util": {
         "version": "1.0.0"
     },
@@ -705,6 +708,12 @@
         "files": [
             "config/packages/twig_extensions.yaml"
         ]
+    },
+    "twig/extra-bundle": {
+        "version": "3.x-dev"
+    },
+    "twig/markdown-extra": {
+        "version": "3.x-dev"
     },
     "twig/twig": {
         "version": "v2.12.1"
