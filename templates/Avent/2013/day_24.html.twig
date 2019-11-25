@@ -65,7 +65,7 @@ $process-&gt;run(OutputInterface::VERBOSITY_VERBOSE &lt; $output-&gt;getVerbosit
 
 <p>La sortie ressemble alors à quelque chose de ce genre :</p>
 
-<p><img src="/build/images/avent/24-debug-1.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-1.png') }}" alt="" /></p>
 
 <p>Plutôt que de copier/coller ce bout de code dans chaque projet, je vais proposer de l'intégrer à Symfony 2.5 via un nouveau helper <code>debug_formatter</code>.</p>
 
@@ -81,18 +81,18 @@ $output-&gt;writeln($process-&gt;getOutput());
 <pre class="language-bash"><code>$ ./app/console ... -vv
 </code></pre>
 
-<p><img src="/build/images/avent/24-debug-2.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-2.png') }}" alt="" /></p>
 
 <p>Pour obtenir le détail de la sortie standard et de la sortie d'erreur, utilisez <code>-vvv</code> :</p>
 
 <pre class="language-bash"><code>$ ./app/console ... -vvv
 </code></pre>
 
-<p><img src="/build/images/avent/24-debug-3.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-3.png') }}" alt="" /></p>
 
 <p>Et en cas de problème, les couleurs changent pour votre plus grand plaisir :</p>
 
-<p><img src="/build/images/avent/24-debug-4.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-4.png') }}" alt="" /></p>
 
 <p>Le helper vous laisse la main si vous souhaitez créer votre propre instance de <code>Process</code> :</p>
 
@@ -133,15 +133,15 @@ $client-&gt;get('http://example.com/')-&gt;send();
 
 <p>va maintenant pouvoir être debuggé avec les mêmes outils que nous venons de voir. Essayez de lancer votre commande avec <code>-vv</code> :</p>
 
-<p><img src="/build/images/avent/24-debug-5.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-5.png') }}" alt="" /></p>
 
-<p><img src="/build/images/avent/24-debug-6.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-6.png') }}" alt="" /></p>
 
 <p>Avez-vous remarqué la bande de couleur sur la gauche de l'affichage ? Ce n'est pas qu'un effet de style, cela permet également de différencier un appel principal des appels secondaires :</p>
 
-<p><img src="/build/images/avent/24-debug-7.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-7.png') }}" alt="" /></p>
 
-<p><img src="/build/images/avent/24-debug-8.png" alt="" /></p>
+<p><img src="{{ asset('/build/images/avent/24-debug-8.png') }}" alt="" /></p>
 
 <p>Vous aimez ? Ce n'est que la partie visible de ces nouveaux helpers. Si vous souhaitez utiliser le <code>debug_formatter</code> pour vos propres besoins, rien de plus simple :</p>
 

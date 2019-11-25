@@ -40,7 +40,7 @@ Aujourd'hui, nous vous proposons de reprendre cette architecture mais "depuis le
 Dans notre cas, nous utiliserons AngularJS.</p>
 
 <p>
-    <img src="/build/images/avent/2013/16/AngularJS-large.png" alt="Logo de AngularJs" />
+    <img src="{{ asset('/build/images/avent/2013/16/AngularJS-large.png') }}" alt="Logo de AngularJs" />
 </p>
 
 <p><strong><a href="http://angularjs.org/">AngularJs</a></strong> est un framework Javascript MVC opensource soutenu par Google.<br />
@@ -336,7 +336,7 @@ app.filter('trans', function () {
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('build/images/avent/thibault-maxime.png') }} alt="Avatar Thibault et Maxime" />
+    <img src="{{ asset('build/images/avent/thibault-maxime.png') }}" alt="Avatar Thibault et Maxime" />
 {% endblock %}
 
 {% block article_bio %}

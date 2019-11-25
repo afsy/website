@@ -5,24 +5,23 @@
 {% block article_title "Jour 22 - Formulaires Symfony2 et data-binding" %}
 
 {% block article_content %}
-{% verbatim %}
 <h1>Formulaires Symfony2 et data-binding</h1>
 
 <p>Aujourd'hui nous allons nous intéresser aux formulaires Symfony2, côté frontend et rendu, et montrer comment ils peuvent s'intégrer à des librairies javascript pour améliorer l'expérience utilisateur en évitant le spaghetti.Js.</p>
 
 <p>Prenons un exemple : Kevin arrive sur perenoelcorp.com pour y commander la dernière tablette de sa marque préférée* :</p>
 
-<p><img src="/build/images/avent/22-1-device-choice.png" alt="Choix appareil" /></p>
+<p><img src="{{ asset('/build/images/avent/22-1-device-choice.png') }}" alt="Choix appareil" /></p>
 
 <p>Evidemment, en ajoutant plus de modèles, le menu déroulant devient rapidement moins pratique ! Ne pourrait-on pas demander à Kévin de choisir la marque puis le modèle ?</p>
 
 <ul>
 <li>V1 : on fait ça tranquille en deux temps :
 
-<img src="/build/images/avent/22-2-static-version.png" alt="Choix marque statique" /></li>
+<img src="{{ asset('/build/images/avent/22-2-static-version.png') }}" alt="Choix marque statique" /></li>
 <li>V2 : un petit script JS avec appel AJAX pour récupérer le menu déroulant des appareils à chaque changement du menu déroulant des marques.
 
-<img src="/build/images/avent/22-3-ajax-version.png" alt="Choix marque ajax" /></li>
+<img src="{{ asset('/build/images/avent/22-3-ajax-version.png') }}" alt="Choix marque ajax" /></li>
 <li>V2 bis : le même mais sans appel AJAX : on précharge les différentes possibilités en amont, puis on met à jour le second formulaire en fonction.</li>
 </ul>
 
@@ -61,6 +60,7 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
 
 <p>Partie Vue :</p>
 
+{% verbatim %}
 <pre class="language-twig"><code>{% block body %}
     Bienvenue sur le site de commande au Père Noël
     {{ form_start(form) }}
@@ -79,6 +79,7 @@ Il s'agit donc de data-binding à double sens ("two way bindings"), par oppositi
 {{ form_end(form) }}
 {% endblock body %}
 </code></pre>
+{% endverbatim %}
 
 <p>Partie VueModèle</p>
 
@@ -107,8 +108,8 @@ ko.applyBindings(new Device());
 </code></pre>
 
 <p>A présent, la liste de choix du second menu déroulant est devenue dynamique et s'adapte au choix du premier : à chaque fois que l'on sélectionne une marque, l'observable brand est modifiée dans la VueModèle et la Vue mise à jour en conséquence :<br />
-<img src="/build/images/avent/22-4-apple-devices.png" alt="Apple sélectionné" /><br />
-<img src="/build/images/avent/22-5-google-devices.png" alt="Google sélectionné" /></p>
+<img src="{{ asset('/build/images/avent/22-4-apple-devices.png') }}" alt="Apple sélectionné" /><br />
+<img src="{{ asset('/build/images/avent/22-5-google-devices.png') }}" alt="Google sélectionné" /></p>
 
 <p>Nous avons donc :
  <ul>
@@ -122,7 +123,7 @@ ko.applyBindings(new Device());
 <p>C'est ici que nous allons devoir créer une template de formulaire personnalisée.</p>
 
 <p>Regardons le widget correspondant aux menus déroulants dans le form_div_layout (j'ai volontairement enlevé certains éléments non utilisés dans notre cas pour plus de lisibilité) :</p>
-
+{% verbatim %}
 <pre class="language-twig"><code>{% block choice_widget_collapsed %}
 {% spaceless %}
     &lt;select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}&gt;
@@ -143,7 +144,6 @@ ko.applyBindings(new Device());
 {% endspaceless %}
 {% endblock choice_widget_options %}
 </code></pre>
-
 <p>Il suffit donc de modifier le cas échéant le contenu du block choice_widget_collapsed en ajoutant les éléments dont knockout a besoin :</p>
 
 <pre class="language-twig"><code>{% form_theme form _self %}
@@ -171,7 +171,7 @@ ko.applyBindings(new Device());
 
 ...
 </code></pre>
-
+{% endverbatim %}
 <p>Nous avons légèrement avancé : on profite du système de templating des formulaires Symfony, par exemple l'id est de nouveau générée automatiquement, on récupère les options du formulaire type "required", etc. De plus, cela permet d'utiliser le même formulaire dans plusieurs contextes, selon que l'on veut ou non utiliser le data-binding. Par contre, les données affichées dans le formulaire sont toujours écrites en dur dans le fichier JS...</p>
 
 <p>Nous allons donc les passer depuis Symfony :</p>
@@ -282,7 +282,7 @@ $brands = $this-&gt;getDoctrine()-&gt;getRepository('AcmeDemoBundle:Brand')-&gt;
 </ul>
 
 <p><sub>*note : les objets évoqués ne sont là qu'à titre d'exemple, l'auteur n'a aucun lien avec l'une ou l'autre des marques présentées ou aucune autre et gardera pour lui le modèle et la marque de son propre téléphone.</sub></p>
-{% endverbatim %}
+
 {%endblock article_content %}
 {% block article_avatar %}
     <img src="{{ asset('build/images/avent/pierrehenri-cumenge.png') }}" alt="Pierre-Henri Cumenge" />
