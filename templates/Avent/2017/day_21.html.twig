@@ -1,4 +1,4 @@
-{% extends 'AfsyFrontBundle:Avent:day.html.twig' %}
+{% extends 'Avent/day.html.twig' %}
 
 {% set year = 2017 %}
 
@@ -232,7 +232,7 @@ return $this-&gt;render('default/index.html.twig', [
 
   <p>Ainsi que le contenu de la vue associée par le contenu suivant :</p>
 
-  <pre><code class="language-twig">{% raw %}{# app/Resources/views/default/index.html.twig #}
+  <pre><code class="language-twig">{% verbatim %}{# app/Resources/views/default/index.html.twig #}
 {% extends 'base.html.twig' %}
 {% block body %}
   &lt;div class=&quot;container&quot;&gt;
@@ -248,7 +248,7 @@ return $this-&gt;render('default/index.html.twig', [
   &lt;/script&gt;
   &lt;script type=&quot;text/javascript&quot; src=&quot;{{ asset('bundles/app/js/sf-websocket.js') }}&quot;&gt;&lt;/script&gt;
 {% endblock %}
-{% endraw %}</code></pre>
+{% endverbatim %}</code></pre>
 
   <p>
     Nous sommes maintenant fin prêts à mettre en place le JavaScript dans le fichier <code class="language-none">js/sf-websocket.js</code>.
@@ -509,11 +509,11 @@ private function sendMessageToChannel(ConnectionInterface $conn, $channel, $user
     pour y ajouter un formulaire d'envoi de message :
   </p>
 
-  <pre><code class="language-twig">{% raw %}{# app/Resources/views/default/index.html.twig #}
+  <pre><code class="language-twig">{% verbatim %}{# app/Resources/views/default/index.html.twig #}
 &lt;div id=&quot;ws-content-receiver&quot;&gt;&lt;/div&gt;
 &lt;input type=&quot;text&quot; id=&quot;ws-content-to-send&quot; /&gt;
 &lt;button id=&quot;ws-send-content&quot;&gt;Send&lt;/button&gt;
-{% endraw %}</code></pre>
+{% endverbatim %}</code></pre>
 
   <p>
     Le block <code class="language-css">#ws-content-receiver</code> a été vidé
