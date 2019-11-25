@@ -12,14 +12,14 @@ When your article is done and published, spread the world on social networks!
 
 ## Install and run
 
-If you want to test the current version (which requires php7) :
+If you want to test the current version (which requires php 7.3) :
 
 ```bash
-$ symfony php composer install
-$ symfony php bin/console do:s:u --force
-$ symfony php bin/console do:f:l
+$ composer install
+$ docker-compose up -d
+$ symfony php bin/console doctrine:migrations:load
+$ symfony php bin/console doctrine:fixtures:load
 $ symfony serve
-
 ```
 
 ## Howto update CSS styles
