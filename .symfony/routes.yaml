@@ -6,3 +6,11 @@
 "https://{all}/":
     type: upstream
     upstream: "afsy:http"
+
+"https://www.{all}/":
+    type: redirect
+    to: "https://{all}/"
+
+"http://www.{all}/":
+    type: redirect
+    to: "https://{all}/"
