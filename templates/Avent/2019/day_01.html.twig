@@ -2,194 +2,122 @@
 
 {% set year = 2019 %}
 
-{% block article_title "Jour 01 - test " %}
+{% block article_title "Jour 01 - 10 astuces incroyables sur Symfony" %}
 
 {% block article_content_md %}
-
----
-__Advertisement :)__
-
-- __[pica](https://nodeca.github.io/pica/demo/)__ - high quality and fast image
-resize in browser.
-- __[babelfish](https://github.com/nodeca/babelfish/)__ - developer friendly
-i18n with plurals support and easy syntax.
-
-You will like those projects!
-
----
-
-# h1 Heading 8-)
-## h2 Heading
-### h3 Heading
-#### h4 Heading
-##### h5 Heading
-###### h6 Heading
+10 astuces incroyables sur Symfony
+=================================
 
 
-## Horizontal Rules
+Derrière ce titre accrocheur se cache en réalité l'introduction de notre calendrier de l'avent. Il s'agit d'un projet
+communautaire qui a pour but de fournir un article par jour sur notre site jusqu'au 24 décembre ! Bienvenue donc dans
+notre petite aventure, ou plutôt cette course aux articles de 24 jours qui fera suer plus d'un de nos membres. Nous
+espérons que notre travail intéressera, fera découvrir des subtilités et/ou outils.
 
-___
+Mais avant de commencer, connaissez-vous vraiment l'AFSY ? C'est l'occasion de poser sur papier qui nous sommes et
+quelle est notre démarche.
+1. L'AFSY c'est moi, c'est nous, c'est vous, c'est tous ceux qui décident de participer à nos actions/activités;
+2. L'AFSY c'est la promotion des bonnes pratiques autour de Symfony et PHP ou simplement des retours d'expériences sur
+   des technos exotiques et pourquoi pas la promotion de votre dernier bundle Symfony via divers canaux: meetup, slack...
+3. L'AFSY c'est surtout l'organisation d'un pot tous les mois (le [SfPot](https://www.meetup.com/fr-FR/afsy-sfpot/))
+   principalement à Paris, mais pas que !
+4. L'AFSY c'est une [association de faits](https://www.associations.gouv.fr/1080-association-non-declaree.html), nous
+   n'avons pas de statuts (et donc pas de compte bancaire), mais nous existons bel et bien;
+5. L'AFSY c'est la maintenance d'un [site internet](https://github.com/afsy/website), historiquement hébergé par
+   Synalabs (merci pour toutes ces années !), et depuis peu par SymfonyCloud (merci également !);
+6. L'AFSY c'est aussi plusieurs canaux [Slack](http://slack.afsy.fr) sympathiques :
+    - `#entraide` pour éviter la dépression quand on a des bugs ou des questions d'archi
+    - `#boire-manger-paris` pour être au courant des petits apéros à l'improviste
+    - `#my-little-opensource` pour présenter un projet open source sur lequel vous travaillez
+    - `#javascript`, `#trolling` ou `#niort` pour l'humour
 
----
+Tout cela ne raconte pas toute l'histoire de l'AFSY mais vous en donne une belle perspective. Rentrons maintenant dans le
+vif du sujet. Chose promise, chose due. Voici vos 10 astuces « incroyables ».
 
-***
+## Astuce 1 : Remerciez facilement les projets open source que vous utilisez
 
+Ajoutez le package symfony/thanks pour ajouter la commande `thanks` à composer et ajouter des étoiles aux dépôts des
+projets que vous utilisez. La commande `composer found` permet de facilement trouver le moyen de financer les projets
+que vous utilisez.
 
-## Typographic replacements
-
-Enable typographer option to see result.
-
-(c) (C) (r) (R) (tm) (TM) (p) (P) +-
-
-test.. test... test..... test?..... test!....
-
-!!!!!! ???? ,,  -- ---
-
-"Smartypants, double quotes" and 'single quotes'
-
-
-## Emphasis
-
-**This is bold text**
-
-__This is bold text__
-
-*This is italic text*
-
-_This is italic text_
-
-~~Strikethrough~~
-
-
-## Blockquotes
-
-
-> Blockquotes can also be nested...
->> ...by using additional greater-than signs right next to each other...
-> > > ...or with spaces between arrows.
-
-
-## Lists
-
-Unordered
-
-+ Create a list by starting a line with `+`, `-`, or `*`
-+ Sub-lists are made by indenting 2 spaces:
-- Marker character change forces new list start:
-* Ac tristique libero volutpat at
-+ Facilisis in pretium nisl aliquet
-- Nulla volutpat aliquam velit
-+ Very easy!
-
-Ordered
-
-1. Lorem ipsum dolor sit amet
-2. Consectetur adipiscing elit
-3. Integer molestie lorem at massa
-
-
-1. You can use sequential numbers...
-1. ...or keep all the numbers as `1.`
-
-Start numbering with offset:
-
-57. foo
-1. bar
-
-
-## Code
-
-Inline `code`
-
-Indented code
-
-// Some comments
-line 1 of code
-line 2 of code
-line 3 of code
-
-
-Block code "fences"
-
-```
-Sample text here...
+```bash
+composer require --dev symfony/thanks
+composer thanks
+composer found
 ```
 
-Syntax highlighting
+## Astuce 2 : Utiliser le serveur de dump
 
-``` js
-var foo = function (bar) {
-return bar++;
-};
+La commande suivante vous permet d'avoir vos dump en ligne de commande dans un terminal séparé. Pratique si vous avez
+une architecture un peu complexe, ou simplement une API où vous ne voyez pas l'output. Sachez que vous pouvez
+également retrouver ces dumps dans l'interface du web profiler (si vous ne l'utilisez pas dans une commande).
 
-console.log(foo(5));
+```
+bin/console server:dump
 ```
 
-## Tables
+![Capture d'écran du serveur var dumper]({{ asset('build/images/avent/2019/1/var_dumper.png') }})
 
-| Option | Description |
-| ------ | ----------- |
-| data   | path to data files to supply the data that will be passed into templates. |
-| engine | engine to be used for processing templates. Handlebars is the default. |
-| ext    | extension to be used for dest files. |
+## Astuce 3 : utilisez le serveur du symfony-cli
 
-Right aligned columns
+Vous pouvez utiliser l'outil `symfony` (le même qui sert à démarrer un projet!) pour lancer votre projet en local.
+Peut-être que la plupart d'entre vous utilise docker, mais sachez que grâce à cet outil vous allez gagner significativement
+en performances. Et rien ne vous empêche d'utiliser docker en même temps pour vous services tiers (type BDD).
 
-| Option | Description |
-| ------:| -----------:|
-| data   | path to data files to supply the data that will be passed into templates. |
-| engine | engine to be used for processing templates. Handlebars is the default. |
-| ext    | extension to be used for dest files. |
+Voici une liste non exhaustive des fonctionnalités de l'outil:
+- Lance une version donnée de PHP (en la spécifiant dans le fichier `.php-version`) avec une configuration donnée (php.ini)
+- Propose l'installation locale de certificats https valide
+- Affiche les logs de votre application dans le terminal pour voir rapidement un problème
+- Une intégration avec docker pour ouvrir les services directement depuis votre terminal
 
 
-## Links
-
-[link text](http://dev.nodeca.com)
-
-[link with title](http://nodeca.github.io/pica/demo/ "title text!")
-
-Autoconverted link https://github.com/nodeca/pica (enable linkify to see)
+[Lisez la documentation pour en apprendre plus à ce sujet !](https://symfony.com/doc/current/setup/symfony_server.html)
 
 
-## Images
-
-![Minion](https://octodex.github.com/images/minion.png)
-![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg "The Stormtroopocat")
-
-Like links, Images also have a footnote style syntax
-
-![Alt text][id]
-
-With a reference later in the document defining the URL location:
-
-[id]: https://octodex.github.com/images/dojocat.jpg  "The Dojocat"
+## Astuce 4
 
 
-## Plugins
-
-The killer feature of `markdown-it` is very effective support of
-[syntax plugins](https://www.npmjs.org/browse/keyword/markdown-it-plugin).
+## Astuce 5
 
 
-### [Emojies](https://github.com/markdown-it/markdown-it-emoji)
-
-> Classic markup: :wink: :crush: :cry: :tear: :laughing: :yum:
->
-> Shortcuts (emoticons): :-) :-( 8-) ;)
-
-see [how to change output](https://github.com/markdown-it/markdown-it-emoji#change-output) with twemoji.
+## Astuce 6
 
 
-### [Subscript](https://github.com/markdown-it/markdown-it-sub) / [Superscript](https://github.com/markdown-it/markdown-it-sup)
+## Astuce 7
 
-- 19^th^
-- H~2~O
 
+## Astuce 8
+
+
+## Astuce 9
+
+
+## Astuce 10
+
+Le saviez vous, la plupart des systèmes d'exploitation ont une commande `uuid`, pratique pour écrire un test qui utilise
+des uuids.
+
+Et si vous voulez utiliser les uuids mais que vous n'avez pas l'extension PHP activée, pas d'inquiétude. Utilisez le
+polyfill disponible dans Symfony:
+
+```bash
+composer require symfony/polyfill-uuid
+```
+
+```php
+$uuid = uuid_create(UUID_TYPE_RANDOM);
+// $uuid = '79a0f84a-2f15-4ea9-bb2c-49e645845100'
+
+$isValid = uuid_is_valid($uuid);
+// $isValid = true
+```
+
+Si [l'extension PECL](https://pecl.php.net/package/uuid) est installée, alors elle sera utilisée.
 
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('build/images/avent/2017/19/cyril_souillard.jpeg') }}"
+    <img src="{{ asset('/build/images/avent/2019/1/afsy.png') }}"
          alt="Cyril Souillard"/>
 {% endblock %}
 
