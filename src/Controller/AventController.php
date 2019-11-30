@@ -79,7 +79,7 @@ class AventController extends AbstractController
             '01-easyadminbundle-l-arriere-guichet-easy-peasy' => 'Avent/2017/day_01.html.twig',
         ),
         2019 => array(
-            '01-test' => 'Avent/2019/day_01.html.twig',
+            '01-10-astuces-incroyables-sur-symfony' => 'Avent/2019/day_01.html.twig',
         )
     );
 

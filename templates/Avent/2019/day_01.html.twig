@@ -2,202 +2,278 @@
 
 {% set year = 2019 %}
 
-{% block article_title "Jour 01 - test " %}
+{% block article_title "Jour 01 - 10 astuces incroyables sur Symfony" %}
 
 {% block article_content_md %}
+10 astuces incroyables sur Symfony
+=================================
 
----
-__Advertisement :)__
+Derrière ce titre accrocheur se cache en réalité l'introduction de notre calendrier de l'avent. Il s'agit d'un projet
+communautaire qui a pour but de publier un article par jour sur notre site jusqu'au 24 décembre ! Bienvenue donc dans
+notre petite aventure, ou plutôt cette course aux articles de 24 jours qui fera suer plus d'un de nos membres. Nous
+espérons que notre travail intéressera, fera découvrir des subtilités et/ou outils.
 
-- __[pica](https://nodeca.github.io/pica/demo/)__ - high quality and fast image
-resize in browser.
-- __[babelfish](https://github.com/nodeca/babelfish/)__ - developer friendly
-i18n with plurals support and easy syntax.
+Mais avant de commencer, connaissez-vous vraiment l'AFSY ? C'est l'occasion de poser sur papier qui nous sommes et
+quelle est notre démarche.
+1. L'AFSY c'est moi, c'est nous, c'est vous, c'est tous ceux qui décident de participer à nos actions/activités;
+2. L'AFSY c'est la promotion des bonnes pratiques autour de Symfony et PHP ou simplement des retours d'expériences sur
+   des technologies exotiques et pourquoi pas la promotion de votre dernier bundle Symfony via divers canaux : meetup, slack...
+3. L'AFSY c'est surtout l'organisation d'un pot tous les mois (le [SfPot](https://www.meetup.com/fr-FR/afsy-sfpot/))
+   principalement à Paris, mais pas que !
+4. L'AFSY c'est une [association de fait](https://www.associations.gouv.fr/1080-association-non-declaree.html), nous
+   n'avons pas de statuts (et donc pas de compte bancaire), mais nous existons bel et bien;
+5. L'AFSY c'est la maintenance d'un [site internet](https://github.com/afsy/website), historiquement hébergé par
+   Synalabs (merci pour toutes ces années !), et depuis peu par SymfonyCloud (merci également !);
+6. L'AFSY c'est aussi plusieurs canaux [Slack](http://slack.afsy.fr) sympathiques :
+    - `#entraide` pour éviter la dépression quand on a des bugs ou des questions d'architecture
+    - `#boire-manger-paris` pour être au courant des petits apéros à l'improviste
+    - `#my-little-opensource` pour présenter un projet open source sur lequel vous travaillez
+    - `#javascript`, `#trolling` ou `#niort` pour l'humour
 
-You will like those projects!
+Tout cela ne raconte pas toute l'histoire de l'AFSY mais vous en donne une belle perspective. Rentrons maintenant dans le
+vif du sujet. Chose promise, chose due. Voici vos 10 astuces « incroyables ».
 
----
+## Astuce 1 : Remerciez facilement les projets open source que vous utilisez
 
-# h1 Heading 8-)
-## h2 Heading
-### h3 Heading
-#### h4 Heading
-##### h5 Heading
-###### h6 Heading
+Ajoutez le package symfony/thanks pour ajouter la commande `thanks` à composer et ajouter des étoiles aux dépôts des
+projets que vous utilisez. La commande `composer found` permet de facilement trouver le moyen de financer les projets
+que vous utilisez.
 
-
-## Horizontal Rules
-
-___
-
----
-
-***
-
-
-## Typographic replacements
-
-Enable typographer option to see result.
-
-(c) (C) (r) (R) (tm) (TM) (p) (P) +-
-
-test.. test... test..... test?..... test!....
-
-!!!!!! ???? ,,  -- ---
-
-"Smartypants, double quotes" and 'single quotes'
-
-
-## Emphasis
-
-**This is bold text**
-
-__This is bold text__
-
-*This is italic text*
-
-_This is italic text_
-
-~~Strikethrough~~
-
-
-## Blockquotes
-
-
-> Blockquotes can also be nested...
->> ...by using additional greater-than signs right next to each other...
-> > > ...or with spaces between arrows.
-
-
-## Lists
-
-Unordered
-
-+ Create a list by starting a line with `+`, `-`, or `*`
-+ Sub-lists are made by indenting 2 spaces:
-- Marker character change forces new list start:
-* Ac tristique libero volutpat at
-+ Facilisis in pretium nisl aliquet
-- Nulla volutpat aliquam velit
-+ Very easy!
-
-Ordered
-
-1. Lorem ipsum dolor sit amet
-2. Consectetur adipiscing elit
-3. Integer molestie lorem at massa
-
-
-1. You can use sequential numbers...
-1. ...or keep all the numbers as `1.`
-
-Start numbering with offset:
-
-57. foo
-1. bar
-
-
-## Code
-
-Inline `code`
-
-Indented code
-
-// Some comments
-line 1 of code
-line 2 of code
-line 3 of code
-
-
-Block code "fences"
-
-```
-Sample text here...
+```bash
+composer require --dev symfony/thanks
+composer thanks
+composer found
 ```
 
-Syntax highlighting
+## Astuce 2 : Utiliser le serveur de dump
 
-``` js
-var foo = function (bar) {
-return bar++;
-};
+La commande suivante vous permet d'avoir vos dump en ligne de commande dans un terminal séparé. Pratique si vous avez
+une architecture un peu complexe, ou simplement une API où vous ne voyez pas l'output. Sachez que vous pouvez
+également retrouver ces dumps dans l'interface du web profiler (si vous ne l'utilisez pas dans une commande).
 
-console.log(foo(5));
+```
+bin/console server:dump
 ```
 
-## Tables
+![Capture d'écran du serveur var dumper]({{ asset('build/images/avent/2019/1/var_dumper.png') }})
 
-| Option | Description |
-| ------ | ----------- |
-| data   | path to data files to supply the data that will be passed into templates. |
-| engine | engine to be used for processing templates. Handlebars is the default. |
-| ext    | extension to be used for dest files. |
+## Astuce 3 : utilisez le serveur du symfony-cli
 
-Right aligned columns
+Vous pouvez utiliser l'outil `symfony` (le même qui sert à démarrer un projet!) pour lancer votre projet en local.
+Peut-être que la plupart d'entre vous utilise docker, mais sachez que grâce à cet outil vous allez gagner significativement
+en performances. Et rien ne vous empêche d'utiliser docker en même temps pour vos services tiers (type BDD).
 
-| Option | Description |
-| ------:| -----------:|
-| data   | path to data files to supply the data that will be passed into templates. |
-| engine | engine to be used for processing templates. Handlebars is the default. |
-| ext    | extension to be used for dest files. |
+Voici une liste non exhaustive des fonctionnalités de l'outil:
+- Lance une version donnée de PHP (en la spécifiant dans le fichier `.php-version`) avec une configuration donnée (php.ini)
+- Propose l'installation locale de certificats https valide
+- Affiche les logs de votre application dans le terminal pour voir rapidement un problème
+- Une intégration avec docker pour ouvrir les services directement depuis votre terminal
 
 
-## Links
-
-[link text](http://dev.nodeca.com)
-
-[link with title](http://nodeca.github.io/pica/demo/ "title text!")
-
-Autoconverted link https://github.com/nodeca/pica (enable linkify to see)
+[Lisez la documentation pour en apprendre plus à ce sujet !](https://symfony.com/doc/current/setup/symfony_server.html)
 
 
-## Images
+## Astuce 4 : Symfony et les URLs externes
+Votre site contient des liens vers des sites externes ? Vous utilisez des assets stockés sur un CDN ? Rien ne vous empêche
+d’utiliser quand même les composants Symfony ! Vous pouvez par exemple ajouter à votre `routes.yaml` la route suivante :
 
-![Minion](https://octodex.github.com/images/minion.png)
-![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg "The Stormtroopocat")
+```yaml
+google_search:
+    path: /search
+    host: www.google.com
+```
+Puis dans votre Twig par exemple, ajouter ce lien:
 
-Like links, Images also have a footnote style syntax
+{% verbatim %}
+```twig
+<a href="{{ url('google_search', {q: 'Symfony'}) }}">Symfony</a>
+```
+{% endverbatim %}
 
-![Alt text][id]
+Vous pouvez ainsi profiter pleinement des fonctionnalités du générateur d’URL, ajouter facilement des paramètres,
+utiliser la configuration pour pointer sur un domaine différent en dev et en prod, etc.
+De la même manière, vous pouvez utiliser Symfony pour pointer sur des assets en dehors de votre projet. Par exemple
+avec la configuration suivante :
 
-With a reference later in the document defining the URL location:
+```yaml
+framework:
+    assets:
+        packages:
+            symfony:
+                version: ~
+                base_urls: 'https://symfony.com/images'
+```
+Vous pourrez ensuite intégrer les images du site Symfony dans vos vues, en utilisant le 2è argument de `asset()` :
 
-[id]: https://octodex.github.com/images/dojocat.jpg  "The Dojocat"
-
-
-## Plugins
-
-The killer feature of `markdown-it` is very effective support of
-[syntax plugins](https://www.npmjs.org/browse/keyword/markdown-it-plugin).
-
-
-### [Emojies](https://github.com/markdown-it/markdown-it-emoji)
-
-> Classic markup: :wink: :crush: :cry: :tear: :laughing: :yum:
->
-> Shortcuts (emoticons): :-) :-( 8-) ;)
-
-see [how to change output](https://github.com/markdown-it/markdown-it-emoji#change-output) with twemoji.
+{% verbatim %}
+```html
+<img src="{{ asset('opengraph/symfony.png', 'symfony') }}">
+```
+{% endverbatim %}
 
 
-### [Subscript](https://github.com/markdown-it/markdown-it-sub) / [Superscript](https://github.com/markdown-it/markdown-it-sup)
+## Astuce 5 : Utilisez les DQL plutôt que les QueryBuilder
 
-- 19^th^
-- H~2~O
+La documentation de Doctrine a été [mise à jour](https://github.com/doctrine/orm/pull/7880) afin d'être plus clair sur
+ce fait: l'utilisation des DQL, c'est plus simple. Ne vous complexifiez pas la vie avec l'utilisation de QueryBuilder
+lorsque vous n'en avez pas besoin. Le QueryBuilder génère de toute façon du DQL.
 
+N'hésitez pas à utiliser les nowdoc qui ont été réellement améliorées dans PHP 7.3 ! (vous pouvez maintenant [les
+indenter](https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes) !)
+
+
+## Astuce 6 : Utilisez les middleware de doctrine avec messenger
+
+Si vous avez décidé d'utiliser Messenger, vous allez probablement modifier des données dans vos messages handler. Et
+si ceux-ci sont asynchrones vous pouvez avoir plusieurs erreurs:
+- La connexion SQL qui se termine (les connexions aux bases de données ont souvent un timeout)
+- Exécuter votre worker dans une transaction
+- Votre entity manager contient des informations obsolètes
+
+A chaque problème sa solution, le DoctrineBridge vous propose plusieurs middleware disponible que vous pouvez ajouter
+facilement dans la configuration de votre application.
+
+```yaml
+# config/packages/messenger.yaml
+framework:
+    messenger:
+        buses:
+            command_bus:
+                middleware:
+                    # A chaque fois qu'un message est traité, la connexion est "pinguée"
+                    # en cas d'erreur une nouvelle connexion est ouverte
+                    - doctrine_ping_connection
+
+                    # La connexion est ouverte avant votre handler, ef fermée
+                    # tout de suite après au lieu de la conserver ouverte pour toujours
+                    - doctrine_close_connection
+
+                    # Enveloppe votre handler dans une seule transaction Doctrine
+                    # votre handler n'a pas besoin d'appeler flush et une erreur
+                    # provoquera un rollback automatiquement.
+                    - doctrine_transaction
+
+                    # Nettoie l'entity manager avant de l'envoyer à votre handler
+                    - doctrine_clear_entity_manager
+```
+
+
+## Astuce 7 : Utilisez les options du serializer
+
+Le serializer de Symfony vous propose de spécifier un contexte. Vous l'utilisez probablement pour définir des groupes
+de sérialisation. Mais saviez-vous que l'on peut également spécifier [beaucoup d'autres options](https://github.com/symfony/symfony/blob/master/src/Symfony/Component/Serializer/Normalizer/AbstractNormalizer.php#L35-L112) ?
+En voici quelques unes :
+
+* `circular_reference_limit` est le nombre de fois qu'un objet peut être trouvé recursivement avant de lancer une erreur
+  par défaut, sa valeur est de 1;
+* `default_constructor_arguments` permet de définir les paramètres par défauts pour un objet à construire si ceux-ci
+  ne sont pas fournis dans les données en entrée, cela évitera au deserializer de lancer une exception disant qu'il
+  ne peut pas construire votre objet;
+* `callbacks` pour une petite sérialisation rapide qui n'est pas globale à toute l'application, au lieu de définir un
+  normalizer global, il peut être pratique d'utiliser une simple callback.
+
+## Astuce 8 : custom loader pour les variables d'environement
+
+Depuis Symfony 4.4 nous avons la possibilité de faire un chargement de variable d'environment custom. Pour cela il suffit
+d'implémenter l'interface `EnvVarLoaderInterface` dans un service.
+
+Cela permet par exemple d'implémenter très facilement une configuration avec consul:
+
+```yaml
+# config/services.yaml
+bind:
+    string $name: '%env(name)%'
+```
+
+```php
+namespace App\Env;
+
+use Symfony\Component\DependencyInjection\EnvVarLoaderInterface;
+
+class ConsulEnvVarLoader implements EnvVarLoaderInterface
+{
+    public function loadEnvVars(): array
+    {
+        $response = file_get_contents('http://127.0.0.1:8500/v1/kv/website-config');
+
+        $consulValue = json_decode($response, true)[0]['Value'];
+        $decoded = json_decode(base64_decode($consulValue), true);
+
+        // Shape:
+        // array:1 [▼
+        //     "name" => "my super website"
+        // ]
+
+        return $decoded;
+    }
+}
+```
+
+```bash
+./consul  kv put website-config '{"name": "Symfony read this var from consul"}'
+```
+
+[Source](https://github.com/symfony/symfony/pull/34295#issuecomment-551899027)
+
+## Astuce 9 : arrêtez d'utiliser useResultCache dans les nouvelles versions de Doctrine
+
+Un des changements récents qui peut vous impacter dans Doctrine est le choix de déprécier `useResultCache` au profit des
+méthodes `enableResultCache` et `disableResultCache` qui simplifient légèrement l'écriture de votre code. Pensez à
+changer dès aujourd'hui pour vous préparer aux futures versions de Doctrine !
+
+```php
+// 👌  Simple et clair dans Doctrine 2:
+
+$res = $entityManager
+    ->createQuery($dql)
+    ->useResultCache($cache_enabled, $ttl)
+    ->getResult();
+
+#####
+
+// ✨👌✨  Plus simple et plus clair avec Doctrine 2 et 3 :
+// la bonne pratique est de remplacer le système de cache
+// de manière globale
+
+$res = $entityManager
+    ->createQuery($dql)
+    ->enableResultCache($ttl)
+    ->getResult();
+```
+
+## Astuce 10 : soyez un pro de l'uuid !
+
+Le saviez vous, la plupart des systèmes d'exploitation ont une commande `uuid`, pratique pour écrire un test qui utilise
+des uuids.
+
+Et si vous voulez utiliser les uuids mais que vous n'avez pas l'extension PHP activée, pas d'inquiétude. Utilisez le
+polyfill disponible dans Symfony:
+
+```bash
+composer require symfony/polyfill-uuid
+```
+
+```php
+$uuid = uuid_create(UUID_TYPE_RANDOM);
+// $uuid = '79a0f84a-2f15-4ea9-bb2c-49e645845100'
+
+$isValid = uuid_is_valid($uuid);
+// $isValid = true
+```
+
+Si [l'extension PECL](https://pecl.php.net/package/uuid) est installée, alors elle sera utilisée.
 
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('build/images/avent/2017/19/cyril_souillard.jpeg') }}"
-         alt="Cyril Souillard"/>
+    <img src="{{ asset('/build/images/avent/2019/1/afsy.png') }}"
+         alt="Association Française des utilisateurs de SYmfony"/>
 {% endblock %}
 
 {% block article_bio %}
-    <h2><a href="{% block author_url 'https://twitter.com/CyrilSouillard' %}"
-           target="_blank">{% block article_author 'Cyril Souillard' %}</a></h2>
+    <h2><a href="{% block author_url 'https://twitter.com/assoafsy' %}"
+           target="_blank">{% block article_author 'AFSY' %}</a></h2>
     <p>
-        <abbr title="Chief Technical Officer" lang="en">CTO</abbr> chez <a href="https://www.mylittlebox.fr/"
-                                                                           target="_blank">MyLittleBox</a>.
+        Association Française des utilisateurs de Symfony
     </p>
 {% endblock %}

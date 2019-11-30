@@ -67,9 +67,7 @@
         {% if year < 2019 %}
             {% block article_content %}{% endblock %}
         {% else %}
-            {% apply markdown_to_html %}
-                {% block article_content_md %}{% endblock %}
-            {% endapply %}
+            {% apply markdown_to_html %}{% block article_content_md %}{% endblock %}{% endapply %}
         {% endif %}
     </div>
     <hr />
