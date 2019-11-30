@@ -9,3 +9,9 @@ services:
     Twig\Extensions\DateExtension: null
     Twig\Extensions\IntlExtension: null
     #Twig\Extensions\TextExtension: null
+
+    twig.runtime.markdown:
+        class: Twig\Extra\Markdown\MarkdownRuntime
+        arguments:
+            $converter: '@App\Markdown\CustomErusevMarkdown'
+        tags: ['twig.runtime']
