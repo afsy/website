@@ -133,6 +133,27 @@ img {
     src: url('../fonts/Muli-Regular-webfont.ttf') format('truetype'), url('../fonts/Muli-Regular-webfont.ttf') format('opentype'), url('../fonts/Muli-Regular-webfont.eot') format('embedded-opentype'), url('../fonts/Muli-Regular-webfont.svg') format('svg')
 }
 
+@font-face {
+    font-family: "Muli";
+    src: url('../fonts/Muli-Italic-webfont.ttf') format('truetype'), url('../fonts/Muli-Italic-webfont.ttf') format('opentype'), url('../fonts/Muli-Italic-webfont.eot') format('embedded-opentype'), url('../fonts/Muli-Italic-webfont.svg') format('svg');
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Muli";
+    src: url('../fonts/Muli-Light-webfont.ttf') format('truetype'), url('../fonts/Muli-Light-webfont.ttf') format('opentype'), url('../fonts/Muli-Light-webfont.eot') format('embedded-opentype'), url('../fonts/Muli-Light-webfont.svg') format('svg');
+    font-style: normal;
+    font-weight: 200;
+}
+
+@font-face {
+    font-family: "Muli";
+    src: url('../fonts/Muli-LightItalic-webfont.ttf') format('truetype'), url('../fonts/Muli-LightItalic-webfont.ttf') format('opentype'), url('../fonts/Muli-LightItalic-webfont.eot') format('embedded-opentype'), url('../fonts/Muli-LightItalic-webfont.svg') format('svg');
+    font-style: italic;
+    font-weight: 200;
+}
+
+
 .white {
     color: #fff
 }
@@ -197,6 +218,10 @@ ul.large li {
 
 .text-center {
     text-align: center
+}
+
+.font-weight-light {
+    font-weight: 200;
 }
 
 .inline, .list-horizontal li {

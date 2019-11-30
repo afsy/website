@@ -8,3 +8,24 @@
 #avent-2019 .calendar_date p span {
     background: #ad0000;
 }
+
+#avent-2019 .avent-article {
+    padding-left: .3rem;
+    padding-right: .3rem;
+}
+
+#avent-2019 .avent-article p,
+#avent-2019 .avent-article li {
+    text-align: justify;
+}
+
+#avent-2019 .avent-article p img {
+    margin: 2em auto 0;
+}
+
+#avent-2019 .avent-article .avent-image-legend {
+    margin: .5em auto 2em;
+    text-align: center;
+    font-style: italic;
+    color: #999;
+}
