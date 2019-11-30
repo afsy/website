@@ -8,7 +8,6 @@
 10 astuces incroyables sur Symfony
 =================================
 
-
 Derrière ce titre accrocheur se cache en réalité l'introduction de notre calendrier de l'avent. Il s'agit d'un projet
 communautaire qui a pour but de publier un article par jour sur notre site jusqu'au 24 décembre ! Bienvenue donc dans
 notre petite aventure, ou plutôt cette course aux articles de 24 jours qui fera suer plus d'un de nos membres. Nous
@@ -62,7 +61,7 @@ bin/console server:dump
 
 Vous pouvez utiliser l'outil `symfony` (le même qui sert à démarrer un projet!) pour lancer votre projet en local.
 Peut-être que la plupart d'entre vous utilise docker, mais sachez que grâce à cet outil vous allez gagner significativement
-en performances. Et rien ne vous empêche d'utiliser docker en même temps pour vous services tiers (type BDD).
+en performances. Et rien ne vous empêche d'utiliser docker en même temps pour vos services tiers (type BDD).
 
 Voici une liste non exhaustive des fonctionnalités de l'outil:
 - Lance une version donnée de PHP (en la spécifiant dans le fichier `.php-version`) avec une configuration donnée (php.ini)
@@ -74,14 +73,50 @@ Voici une liste non exhaustive des fonctionnalités de l'outil:
 [Lisez la documentation pour en apprendre plus à ce sujet !](https://symfony.com/doc/current/setup/symfony_server.html)
 
 
-## Astuce 4
+## Astuce 4 : Symfony et les URLs externes
+Votre site contient des liens vers des sites externes ? Vous utilisez des assets stockés sur un CDN ? Rien ne vous empêche
+d’utiliser quand même les composants Symfony ! Vous pouvez par exemple ajouter à votre `routes.yaml` la route suivante :
+
+```yaml
+google_search:
+    path: /search
+    host: www.google.com
+```
+Puis dans votre Twig par exemple, ajouter ce lien:
+
+{% verbatim %}
+```twig
+<a href="{{ url('google_search', {q: 'Symfony'}) }}">Symfony</a>
+```
+{% endverbatim %}
+
+Vous pouvez ainsi profiter pleinement des fonctionnalités du générateur d’URL, ajouter facilement des paramètres,
+utiliser la configuration pour pointer sur un domaine différent en dev et en prod, etc.
+De la même manière, vous pouvez utiliser Symfony pour pointer sur des assets en dehors de votre projet. Par exemple
+avec la configuration suivante :
+
+```yaml
+framework:
+    assets:
+        packages:
+            symfony:
+                version: ~
+                base_urls: 'https://symfony.com/images'
+```
+Vous pourrez ensuite intégrer les images du site Symfony dans vos vues, en utilisant le 2è argument de `asset()` :
+
+{% verbatim %}
+```html
+<img src="{{ asset('opengraph/symfony.png', 'symfony') }}">
+```
+{% endverbatim %}
 
 
 ## Astuce 5 : Utilisez les DQL plutôt que les QueryBuilder
 
 La documentation de Doctrine a été [mise à jour](https://github.com/doctrine/orm/pull/7880) afin d'être plus clair sur
-ce fait: l'utilisation des DQL c'est plus simple. Ne vous complexifiez pas la vie avec l'utilisation de QueryBuilder
-lorsque vous n'en avez pas besoin. Le QueryBuilder génère de toutes façon du DQL.
+ce fait: l'utilisation des DQL, c'est plus simple. Ne vous complexifiez pas la vie avec l'utilisation de QueryBuilder
+lorsque vous n'en avez pas besoin. Le QueryBuilder génère de toute façon du DQL.
 
 N'hésitez pas à utiliser les nowdoc qui ont été réellement améliorées dans PHP 7.3 ! (vous pouvez maintenant [les
 indenter](https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes) !)
@@ -123,36 +158,87 @@ framework:
 ```
 
 
-## Astuce 7
+## Astuce 7 : Utilisez les options du serializer
 
+Le serializer de Symfony vous propose de spécifier un contexte. Vous l'utilisez probablement pour définir des groupes
+de sérialisation. Mais saviez-vous que l'on peut également spécifier [beaucoup d'autres options](https://github.com/symfony/symfony/blob/master/src/Symfony/Component/Serializer/Normalizer/AbstractNormalizer.php#L35-L112) ?
+En voici quelques unes :
 
-## Astuce 8
+* `circular_reference_limit` est le nombre de fois qu'un objet peut être trouvé recursivement avant de lancer une erreur
+  par défaut, sa valeur est de 1;
+* `default_constructor_arguments` permet de définir les paramètres par défauts pour un objet à construire si ceux-ci
+  ne sont pas fournis dans les données en entrée, cela évitera au deserializer de lancer une exception disant qu'il
+  ne peut pas construire votre objet;
+* `callbacks` pour une petite sérialisation rapide qui n'est pas globale à toute l'application, au lieu de définir un
+  normalizer global, il peut être pratique d'utiliser une simple callback.
 
+## Astuce 8 : custom loader pour les variables d'environement
+
+Depuis Symfony 4.4 nous avons la possibilité de faire un chargement de variable d'environment custom. Pour cela il suffit
+d'implémenter l'interface `EnvVarLoaderInterface` dans un service.
+
+Cela permet par exemple d'implémenter très facilement une configuration avec consul:
+
+```yaml
+# config/services.yaml
+bind:
+    string $name: '%env(name)%'
+```
+
+```php
+namespace App\Env;
+
+use Symfony\Component\DependencyInjection\EnvVarLoaderInterface;
+
+class ConsulEnvVarLoader implements EnvVarLoaderInterface
+{
+    public function loadEnvVars(): array
+    {
+        $response = file_get_contents('http://127.0.0.1:8500/v1/kv/website-config');
+
+        $consulValue = json_decode($response, true)[0]['Value'];
+        $decoded = json_decode(base64_decode($consulValue), true);
+
+        // Shape:
+        // array:1 [▼
+        //     "name" => "my super website"
+        // ]
+
+        return $decoded;
+    }
+}
+```
+
+```bash
+./consul  kv put website-config '{"name": "Symfony read this var from consul"}'
+```
+
+[Source](https://github.com/symfony/symfony/pull/34295#issuecomment-551899027)
 
 ## Astuce 9 : arrêtez d'utiliser useResultCache dans les nouvelles versions de Doctrine
 
 Un des changements récents qui peut vous impacter dans Doctrine est le choix de déprécier `useResultCache` au profit des
 méthodes `enableResultCache` et `disableResultCache` qui simplifient légèrement l'écriture de votre code. Pensez à
-changer aujourd'hui pour demain si vous utilisez les dernières versions de Doctrine !
+changer dès aujourd'hui pour vous préparer aux futures versions de Doctrine !
 
 ```php
-// 👌  Nice and smooth in ORM 2:
+// 👌  Simple et clair dans Doctrine 2:
 
 $res = $entityManager
-->createQuery($dql)
-->useResultCache($cache_enabled, $ttl)
-->getResult();
+    ->createQuery($dql)
+    ->useResultCache($cache_enabled, $ttl)
+    ->getResult();
 
 #####
 
-// ✨👌✨  Nicer and smoother in ORM 2:
-// globally replace the cache with a volatile cache
-// stop passing $cache_enabled through a bazillion layers
+// ✨👌✨  Plus simple et plus clair avec Doctrine 2 et 3 :
+// la bonne pratique est de remplacer le système de cache
+// de manière globale
 
 $res = $entityManager
-->createQuery($dql)
-->enableResultCache($ttl)
-->getResult();
+    ->createQuery($dql)
+    ->enableResultCache($ttl)
+    ->getResult();
 ```
 
 ## Astuce 10 : soyez un pro de l'uuid !
@@ -181,14 +267,13 @@ Si [l'extension PECL](https://pecl.php.net/package/uuid) est installée, alors e
 
 {% block article_avatar %}
     <img src="{{ asset('/build/images/avent/2019/1/afsy.png') }}"
-         alt="Cyril Souillard"/>
+         alt="Association Française des utilisateurs de SYmfony"/>
 {% endblock %}
 
 {% block article_bio %}
-    <h2><a href="{% block author_url 'https://twitter.com/CyrilSouillard' %}"
-           target="_blank">{% block article_author 'Cyril Souillard' %}</a></h2>
+    <h2><a href="{% block author_url 'https://twitter.com/assoafsy' %}"
+           target="_blank">{% block article_author 'AFSY' %}</a></h2>
     <p>
-        <abbr title="Chief Technical Officer" lang="en">CTO</abbr> chez <a href="https://www.mylittlebox.fr/"
-                                                                           target="_blank">MyLittleBox</a>.
+        Association Française des utilisateurs de Symfony
     </p>
 {% endblock %}
