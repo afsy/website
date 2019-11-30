@@ -10,7 +10,7 @@
 
 
 Derrière ce titre accrocheur se cache en réalité l'introduction de notre calendrier de l'avent. Il s'agit d'un projet
-communautaire qui a pour but de fournir un article par jour sur notre site jusqu'au 24 décembre ! Bienvenue donc dans
+communautaire qui a pour but de publier un article par jour sur notre site jusqu'au 24 décembre ! Bienvenue donc dans
 notre petite aventure, ou plutôt cette course aux articles de 24 jours qui fera suer plus d'un de nos membres. Nous
 espérons que notre travail intéressera, fera découvrir des subtilités et/ou outils.
 
@@ -18,15 +18,15 @@ Mais avant de commencer, connaissez-vous vraiment l'AFSY ? C'est l'occasion de p
 quelle est notre démarche.
 1. L'AFSY c'est moi, c'est nous, c'est vous, c'est tous ceux qui décident de participer à nos actions/activités;
 2. L'AFSY c'est la promotion des bonnes pratiques autour de Symfony et PHP ou simplement des retours d'expériences sur
-   des technos exotiques et pourquoi pas la promotion de votre dernier bundle Symfony via divers canaux: meetup, slack...
+   des technologies exotiques et pourquoi pas la promotion de votre dernier bundle Symfony via divers canaux : meetup, slack...
 3. L'AFSY c'est surtout l'organisation d'un pot tous les mois (le [SfPot](https://www.meetup.com/fr-FR/afsy-sfpot/))
    principalement à Paris, mais pas que !
-4. L'AFSY c'est une [association de faits](https://www.associations.gouv.fr/1080-association-non-declaree.html), nous
+4. L'AFSY c'est une [association de fait](https://www.associations.gouv.fr/1080-association-non-declaree.html), nous
    n'avons pas de statuts (et donc pas de compte bancaire), mais nous existons bel et bien;
 5. L'AFSY c'est la maintenance d'un [site internet](https://github.com/afsy/website), historiquement hébergé par
    Synalabs (merci pour toutes ces années !), et depuis peu par SymfonyCloud (merci également !);
 6. L'AFSY c'est aussi plusieurs canaux [Slack](http://slack.afsy.fr) sympathiques :
-    - `#entraide` pour éviter la dépression quand on a des bugs ou des questions d'archi
+    - `#entraide` pour éviter la dépression quand on a des bugs ou des questions d'architecture
     - `#boire-manger-paris` pour être au courant des petits apéros à l'improviste
     - `#my-little-opensource` pour présenter un projet open source sur lequel vous travaillez
     - `#javascript`, `#trolling` ou `#niort` pour l'humour
@@ -77,10 +77,50 @@ Voici une liste non exhaustive des fonctionnalités de l'outil:
 ## Astuce 4
 
 
-## Astuce 5
+## Astuce 5 : Utilisez les DQL plutôt que les QueryBuilder
+
+La documentation de Doctrine a été [mise à jour](https://github.com/doctrine/orm/pull/7880) afin d'être plus clair sur
+ce fait: l'utilisation des DQL c'est plus simple. Ne vous complexifiez pas la vie avec l'utilisation de QueryBuilder
+lorsque vous n'en avez pas besoin. Le QueryBuilder génère de toutes façon du DQL.
+
+N'hésitez pas à utiliser les nowdoc qui ont été réellement améliorées dans PHP 7.3 ! (vous pouvez maintenant [les
+indenter](https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes) !)
 
 
-## Astuce 6
+## Astuce 6 : Utilisez les middleware de doctrine avec messenger
+
+Si vous avez décidé d'utiliser Messenger, vous allez probablement modifier des données dans vos messages handler. Et
+si ceux-ci sont asynchrones vous pouvez avoir plusieurs erreurs:
+- La connexion SQL qui se termine (les connexions aux bases de données ont souvent un timeout)
+- Exécuter votre worker dans une transaction
+- Votre entity manager contient des informations obsolètes
+
+A chaque problème sa solution, le DoctrineBridge vous propose plusieurs middleware disponible que vous pouvez ajouter
+facilement dans la configuration de votre application.
+
+```yaml
+# config/packages/messenger.yaml
+framework:
+    messenger:
+        buses:
+            command_bus:
+                middleware:
+                    # A chaque fois qu'un message est traité, la connexion est "pinguée"
+                    # en cas d'erreur une nouvelle connexion est ouverte
+                    - doctrine_ping_connection
+
+                    # La connexion est ouverte avant votre handler, ef fermée
+                    # tout de suite après au lieu de la conserver ouverte pour toujours
+                    - doctrine_close_connection
+
+                    # Enveloppe votre handler dans une seule transaction Doctrine
+                    # votre handler n'a pas besoin d'appeler flush et une erreur
+                    # provoquera un rollback automatiquement.
+                    - doctrine_transaction
+
+                    # Nettoie l'entity manager avant de l'envoyer à votre handler
+                    - doctrine_clear_entity_manager
+```
 
 
 ## Astuce 7
@@ -89,10 +129,33 @@ Voici une liste non exhaustive des fonctionnalités de l'outil:
 ## Astuce 8
 
 
-## Astuce 9
+## Astuce 9 : arrêtez d'utiliser useResultCache dans les nouvelles versions de Doctrine
 
+Un des changements récents qui peut vous impacter dans Doctrine est le choix de déprécier `useResultCache` au profit des
+méthodes `enableResultCache` et `disableResultCache` qui simplifient légèrement l'écriture de votre code. Pensez à
+changer aujourd'hui pour demain si vous utilisez les dernières versions de Doctrine !
 
-## Astuce 10
+```php
+// 👌  Nice and smooth in ORM 2:
+
+$res = $entityManager
+->createQuery($dql)
+->useResultCache($cache_enabled, $ttl)
+->getResult();
+
+#####
+
+// ✨👌✨  Nicer and smoother in ORM 2:
+// globally replace the cache with a volatile cache
+// stop passing $cache_enabled through a bazillion layers
+
+$res = $entityManager
+->createQuery($dql)
+->enableResultCache($ttl)
+->getResult();
+```
+
+## Astuce 10 : soyez un pro de l'uuid !
 
 Le saviez vous, la plupart des systèmes d'exploitation ont une commande `uuid`, pratique pour écrire un test qui utilise
 des uuids.
