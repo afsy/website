@@ -35,7 +35,7 @@ vif du sujet. Chose promise, chose due. Voici vos 10 astuces « incroyables ».
 
 ## Astuce 1 : Remerciez facilement les projets open source que vous utilisez
 
-Ajoutez le package symfony/thanks pour ajouter la commande `thanks` à composer et ajouter des étoiles aux dépôts des
+Ajoutez le package symfony/thanks pour ajouter la commande `thanks` à Composer et ajouter des étoiles aux dépôts des
 projets que vous utilisez. La commande `composer found` permet de facilement trouver le moyen de financer les projets
 que vous utilisez.
 
@@ -47,7 +47,7 @@ composer found
 
 ## Astuce 2 : Utiliser le serveur de dump
 
-La commande suivante vous permet d'avoir vos dump en ligne de commande dans un terminal séparé. Pratique si vous avez
+La commande suivante vous permet d'avoir vos dumps en ligne de commande dans un terminal séparé. Pratique si vous avez
 une architecture un peu complexe, ou simplement une API où vous ne voyez pas l'output. Sachez que vous pouvez
 également retrouver ces dumps dans l'interface du web profiler (si vous ne l'utilisez pas dans une commande).
 
@@ -57,17 +57,17 @@ bin/console server:dump
 
 ![Capture d'écran du serveur var dumper]({{ asset('build/images/avent/2019/1/var_dumper.png') }})
 
-## Astuce 3 : utilisez le serveur du symfony-cli
+## Astuce 3 : utilisez le serveur du binaire symfony
 
-Vous pouvez utiliser l'outil `symfony` (le même qui sert à démarrer un projet!) pour lancer votre projet en local.
-Peut-être que la plupart d'entre vous utilise docker, mais sachez que grâce à cet outil vous allez gagner significativement
-en performances. Et rien ne vous empêche d'utiliser docker en même temps pour vos services tiers (type BDD).
+Vous pouvez utiliser l'outil `symfony` (le même qui sert à démarrer un projet!) pour servir votre projet en local.
+Peut-être que la plupart d'entre vous utilise Docker, mais sachez que grâce à cet outil vous allez gagner significativement
+en performances. Et rien ne vous empêche d'utiliser Docker en même temps pour vos services tiers (type BDD).
 
 Voici une liste non exhaustive des fonctionnalités de l'outil:
 - Lance une version donnée de PHP (en la spécifiant dans le fichier `.php-version`) avec une configuration donnée (php.ini)
-- Propose l'installation locale de certificats https valide
+- Propose l'installation locale de certificats SSL valides
 - Affiche les logs de votre application dans le terminal pour voir rapidement un problème
-- Une intégration avec docker pour ouvrir les services directement depuis votre terminal
+- Une intégration avec Docker pour ouvrir les services directement depuis votre terminal
 
 
 [Lisez la documentation pour en apprendre plus à ce sujet !](https://symfony.com/doc/current/setup/symfony_server.html)
@@ -114,23 +114,23 @@ Vous pourrez ensuite intégrer les images du site Symfony dans vos vues, en util
 
 ## Astuce 5 : Utilisez les DQL plutôt que les QueryBuilder
 
-La documentation de Doctrine a été [mise à jour](https://github.com/doctrine/orm/pull/7880) afin d'être plus clair sur
-ce fait: l'utilisation des DQL, c'est plus simple. Ne vous complexifiez pas la vie avec l'utilisation de QueryBuilder
+La documentation de Doctrine a été [mise à jour](https://github.com/doctrine/orm/pull/7880) afin d'être plus claire sur
+ce fait: l'utilisation de DQL, c'est plus simple. Ne vous complexifiez pas la vie avec l'utilisation de QueryBuilder
 lorsque vous n'en avez pas besoin. Le QueryBuilder génère de toute façon du DQL.
 
 N'hésitez pas à utiliser les nowdoc qui ont été réellement améliorées dans PHP 7.3 ! (vous pouvez maintenant [les
 indenter](https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes) !)
 
 
-## Astuce 6 : Utilisez les middleware de doctrine avec messenger
+## Astuce 6 : Utilisez les middlewares de Doctrine avec le composant Messenger
 
-Si vous avez décidé d'utiliser Messenger, vous allez probablement modifier des données dans vos messages handler. Et
+Si vous avez décidé d'utiliser Messenger, vous allez probablement modifié des données dans vos messages handlers. Et
 si ceux-ci sont asynchrones vous pouvez avoir plusieurs erreurs:
 - La connexion SQL qui se termine (les connexions aux bases de données ont souvent un timeout)
 - Exécuter votre worker dans une transaction
 - Votre entity manager contient des informations obsolètes
 
-A chaque problème sa solution, le DoctrineBridge vous propose plusieurs middleware disponible que vous pouvez ajouter
+A chaque problème sa solution, le DoctrineBridge vous propose plusieurs middlewares disponibles que vous pouvez ajouter
 facilement dans la configuration de votre application.
 
 ```yaml
@@ -144,7 +144,7 @@ framework:
                     # en cas d'erreur une nouvelle connexion est ouverte
                     - doctrine_ping_connection
 
-                    # La connexion est ouverte avant votre handler, ef fermée
+                    # La connexion est ouverte avant votre handler, et fermée
                     # tout de suite après au lieu de la conserver ouverte pour toujours
                     - doctrine_close_connection
 
@@ -158,15 +158,15 @@ framework:
 ```
 
 
-## Astuce 7 : Utilisez les options du serializer
+## Astuce 7 : Utilisez les options du Serializer
 
-Le serializer de Symfony vous propose de spécifier un contexte. Vous l'utilisez probablement pour définir des groupes
+Le Serializer de Symfony vous propose de spécifier un contexte. Vous l'utilisez probablement pour définir des groupes
 de sérialisation. Mais saviez-vous que l'on peut également spécifier [beaucoup d'autres options](https://github.com/symfony/symfony/blob/master/src/Symfony/Component/Serializer/Normalizer/AbstractNormalizer.php#L35-L112) ?
 En voici quelques unes :
 
-* `circular_reference_limit` est le nombre de fois qu'un objet peut être trouvé recursivement avant de lancer une erreur
-  par défaut, sa valeur est de 1;
-* `default_constructor_arguments` permet de définir les paramètres par défauts pour un objet à construire si ceux-ci
+* `circular_reference_limit` est le nombre de fois qu'un objet peut être trouvé recursivement avant de lancer une erreur.
+  Par défaut, sa valeur est de 1;
+* `default_constructor_arguments` permet de définir les paramètres par défaut pour un objet à construire. Si ceux-ci
   ne sont pas fournis dans les données en entrée, cela évitera au deserializer de lancer une exception disant qu'il
   ne peut pas construire votre objet;
 * `callbacks` pour une petite sérialisation rapide qui n'est pas globale à toute l'application, au lieu de définir un
@@ -174,10 +174,10 @@ En voici quelques unes :
 
 ## Astuce 8 : custom loader pour les variables d'environement
 
-Depuis Symfony 4.4 nous avons la possibilité de faire un chargement de variable d'environment custom. Pour cela il suffit
+Depuis Symfony 4.4 nous avons la possibilité de faire un chargement de variables d'environment custom. Pour cela il suffit
 d'implémenter l'interface `EnvVarLoaderInterface` dans un service.
 
-Cela permet par exemple d'implémenter très facilement une configuration avec consul:
+Cela permet par exemple d'implémenter très facilement une configuration avec Consul:
 
 ```yaml
 # config/services.yaml
