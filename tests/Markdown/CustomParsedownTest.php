@@ -16,4 +16,18 @@ class CustomParsedownTest extends TestCase
 
         $this->assertEquals($expected, $parser->text($markdown));
     }
+
+    public function testItGeneratesCorrectNoLanguageCodeBlock()
+    {
+        $parser = new CustomParsedown();
+
+        $markdown = <<<MARKDOWN
+        ```
+        code
+        ```
+        MARKDOWN;
+        $expected = '<pre><code class="language-none">code</code></pre>';
+
+        $this->assertEquals($expected, $parser->text($markdown));
+    }
 }
