@@ -1,0 +1,472 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 02 - L'épopée d'une migration de Symfony 4.3 à Symfony 5.0 " %}
+
+{% block article_content_md %}
+Nous aimerions débuter ce calendrier de l'avent avec un retour d'expérience sur notre migration vers Symfony 5. Nous avons fait évoluer notre side-project [Secret-Santa.team](https://secret-santa.team) de Symfony 4.3 à 4.4, puis 5.0, et nous voulons vous montrer quelles ont été nos difficultés et les changements que nous avons dû apporter, afin de vous éclairer sur la facilité (ou non) d'entreprendre une telle mise à jour.
+
+Le projet est open-source, il est plutôt simple mais fait appel à des bundles tiers, des API... Son rôle est de se connecter à vos teams Slack ou Discord et vous permettre d'effectuer des tirages Secret Santa ! #teamBuilding
+
+![Secret-Santa]({{ asset('build/images/avent/2019/02/secret-santa.gif') }} "Site Web Secret Santa")
+
+## Commençons par la 4.4
+
+Avant de passer en version 5, nous allons d'abord passer notre application en Symfony 4.4.
+En effet, Symfony respecte la convention [SemVer](https://semver.org/), c'est-à-dire qu'il est possible de monter la version mineure du framework sans avoir de changement à apporter à notre code. Symfony ne s'empêche évidemment pas de faire évoluer ses fonctionnalités lors de ces releases mineures, mais l'équipe fait toujours l'effort de fournir une couche de rétro-compatibilité pour nous éviter tout BC-break. Au final, une version majeure (la 5.0 par exemple) est équivalente à la version mineure précédente (4.4) mais sans toutes les couches de rétro-compatibilités.
+
+Comme nous le verrons dans la suite, il est important de passer sur la dernière version mineure 4.x avant de passer en 5. Si nous passons directement de 4.3 en 5.0, nous risquons de rater certaines dépréciations de la 4.4. Pour obtenir la dernière release mineure de la version 4, il nous suffit de lancer `composer update` (avec une dépendance comme `"symfony/framework-bundle": "^4.3"`).
+
+### Twig 2 ou Twig 3 ?
+
+Avec Symfony >= 4.4, vous pouvez avoir Twig 2.10 ou 3.0 (qui vient de sortir). Nous sommes passés directement à Twig 3 pour voir, car nous aimons le danger !
+
+Les nouveautés sont :
+
+- PHP 7.2 minimum ;
+- les classes "à la PEAR/PSR-0" sont supprimées (`Twig_Environment` devient `Twig\Environment`) ;
+- suppression de tout ce qui était déprécié.
+
+Rien d'insurmontable a priori. Sauf peut-être si vous avez des bundles tiers...
+
+### Bundle tiers et dépendances
+
+Nous utilisons `nelmio/security-bundle` - et lui n'est pas compatible Twig 3 à ce moment-là. Nous le voyons très vite :
+
+> Attempted to load class "Twig_Extension" from the global namespace.
+> Did you forget a "use" statement?
+> in vendor/nelmio/security-bundle/Twig/NelmioCSPTwigExtension.php (line 19)
+
+C'est là que débute le travail d'investigation et de recherche. Pouvons-nous corriger le bundle pour qu'il soit compatible ? Certainement, mais le Bundle se doit d'être compatible avec plusieurs versions de Symfony, et y forcer Twig 3 rendrait le Bundle impossible à installer sur de nombreux projets !
+
+Nous allons devoir repasser en Twig 2, en plus de rendre le bundle compatible avec Symfony 5. Mais avant ça, nous allons mettre à jour notre propre code.
+
+## Supprimer les usages de code déprécié
+
+En plus de respecter SemVer, l'écosystème Symfony va encore plus loin en mettant en place, au fur et à mesure des versions mineures, tout un tas de notices de dépréciations qui nous indiquent clairement les fonctionnalités que nous utilisons et qui seront supprimées dans la prochaine version majeure du framework.
+
+### Surveiller les "deprecation logs"
+
+Une fois que notre projet fonctionne en 4.4, nous devons donc porter une attention particulière à ces logs de dépréciation, à la fois en surfant sur le projet mais aussi en faisant tourner les tests.
+
+Le premier log que nous voyons alors est :
+
+> The "**twig.exception_controller**" configuration key has been deprecated in Symfony 4.4, set it to "**null**" and use "**framework.error_controller**" configuration key instead.
+
+Il est surprenant car nous n'avons pas cette configuration dans notre projet. En recherchant la source du warning, nous trouvons cela dans le code de Symfony :
+
+```php
+->scalarNode('exception_controller')
+->defaultValue(static function () {
+    @trigger_error('The "twig.exception_controller" configuration key has been deprecated in Symfony 4.4, set it to "null" and use "framework.error_controller" configuration key instead.', E_USER_DEPRECATED);
+
+    return 'twig.controller.exception::showAction';
+})
+```
+
+C'est la valeur par défaut qui provoque un log. Pour ne plus avoir le log, il faut donc suivre à la lettre le message de dépréciation, et mettre une valeur de configuration !
+
+```yaml
+twig:
+    exception_controller: null # This is needed to fix the deprecation in Symfony 4.4
+```
+
+Cependant, un test sur `/_errors/404` provoque maintenant une erreur, nous avons sans doute raté quelque chose !
+
+> "**Unable to find the controller for path** "/_errors/404"**. The route is wrongly configured.**"
+
+Oops, seul notre nouvelle valeur (`null`) est utilisée, pas la nouvelle option du FrameworkBundle.
+
+L'indice se trouve dans le routing, c'est la route `_twig_error_test` qui a été matchée, alors que cette feature fait partie du FrameworkBundle maintenant. Notre `config/routes/dev/twig.yaml` contient en effet :
+
+```yaml
+_errors:
+    resource: '@TwigBundle/Resources/config/routing/errors.xml'
+    prefix:   /_errors
+```
+
+Il faut le changer en :
+
+```yaml
+_errors:
+    resource: '@FrameworkBundle/Resources/config/routing/errors.xml'
+    prefix:   /_errors
+```
+
+Et cette fois, nos pages d'erreur fonctionnent.
+
+Un autre log, visible dans nos tests cette fois :
+
+> The "Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent::getException()" method is deprecated since Symfony 4.4, use "getThrowable()" instead.
+
+En ouvrant la classe `GetResponseForExceptionEvent`, nous voyons même le PHPDoc suivant :
+
+> @deprecated since Symfony 4.3, use ExceptionEvent instead
+
+Nous effectuons donc ces changements dans notre `HandleExceptionSubscriber`. Il ne s'agit que du remplacement d'une classe :
+
+```diff
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
+-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
++use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
++use Twig\Environment;
+
+...
+
+-    public function __construct(LoggerInterface $logger, \Twig_Environment $twig, Client $bugsnag)
++    public function __construct(LoggerInterface $logger, Environment $twig, Client $bugsnag)
+
+...
+
+-    public function handleException(GetResponseForExceptionEvent $event)
++    public function handleException(ExceptionEvent $event)
+
+...
+
+-        $exception = $event->getException();
++        $exception = $event->getThrowable();
+```
+
+Mais le log persiste dans notre rapport PHPUnit... D'où peut-il provenir ?!
+
+### Configurer PHPUnit pour voir la stack trace du log
+
+Symfony fournit un [bridge PHPUnit](https://github.com/symfony/phpunit-bridge) qui est très utile. C'est lui qui nous affiche ce récapitulatif sur les dépréciations à la fin des tests :
+
+```
+Testing Slack Secret Santa Test Suite
+............................                                      28 / 28 (100%)
+
+Time: 441 ms, Memory: 24.00MB
+
+OK (28 tests, 95 assertions)
+
+Remaining indirect deprecation notices (2)
+
+2x: The "Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent::getException()" method is deprecated since Symfony 4.4, use "getThrowable()" instead.
+1x in SantaControllerTest::test_finish_page_returns_404_without_hash from JoliCode\SecretSanta\Tests\Controller
+1x in SantaControllerTest::test_finish_page_works_with_invalid_hash from JoliCode\SecretSanta\Tests\Controller
+```
+
+Les "deprecation notices" sont **indirect**, c'est-à-dire qu'elles viennent de code dans **nos vendor**.
+
+Pour corriger cette dépréciation, nous avons besoin d'en connaître l'origine précise, mais le rapport est agrégé, et ne nous en dit pas plus. Nous pouvons utiliser une option pour forcer l'affichage d'une stack trace complète ! Il suffit de lui donner une expression régulière qui matche notre log :
+
+```shell
+SYMFONY_DEPRECATIONS_HELPER='/getException/' ./bin/phpunit
+```
+
+Le résultat est :
+
+```
+Testing Slack Secret Santa Test Suite
+.........
+Remaining indirect deprecation triggered by JoliCode\SecretSanta\Tests\Controller\SantaControllerTest::test_finish_page_returns_404_without_hash:
+The "Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent::getException()" method is deprecated since Symfony 4.4, use "getThrowable()" instead.
+Stack trace:
+#0 [internal function]: Symfony\Bridge\PhpUnit\DeprecationErrorHandler->handleError(16384, 'The "Symfony\\Co...', '/home/dalexandr...', 57, Array)
+#1 vendor/symfony/http-kernel/Event/GetResponseForExceptionEvent.php(57): trigger_error('The "Symfony\\Co...', 16384)
+#2 vendor/bugsnag/bugsnag-symfony/EventListener/BugsnagListener.php(83): Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent->getException()
+```
+
+En remontant la trace, nous voyons que le problème est dans `BugsnagListener.php` ! Une mise à jour du bundle Bugsnag va donc s'imposer !
+
+Cependant, malgré les quelques deprecated indirects qu'il nous reste, tous les tests passent. Nous devons juste faire en sorte que la CI soit contente. Or, en l'état, PHPUnit finit en erreur (code de sortie à 1) à cause des dépréciations. Heureusement, le bridge de Symfony supporte une option permettant d'éviter un fail lorsque des deprecated se trouvent dans nos vendors, l'option se nomme `weak_vendors`:
+
+```bash
+SYMFONY_DEPRECATIONS_HELPER=weak_vendors bin/phpunit
+```
+
+Cela fonctionne parfaitement, à ceci près que l'option `weak_vendors` est dépréciée 😭 :
+
+```bash
+Remaining direct deprecation notices (1)
+
+1x: Setting SYMFONY_DEPRECATIONS_HELPER to "weak_vendors" is deprecated in favor of "max[self]=0"
+```
+
+Une deprecated dans la gestion des deprecated 🤔 ?
+
+Heureusement, le changement à appliquer est assez explicite (et [la documentation](https://symfony.com/doc/master/components/phpunit_bridge.html#internal-deprecations) aussi). On ajoute cette variable d'environnement dans notre Makefile pour que cette nouvelle option soit utilisée lors du build sur TravisCI et tout est prêt.
+
+Tout est vert sur la CI. Quelques tests manuels nous confirment que tout est ok : nous pouvons mettre en prod ! Maintenant que notre application fonctionne parfaitement en Symfony 4.4, pouvons nous passer à Symfony 5 sans encombres ?
+
+## Migration vers Symfony 5
+
+Malheureusement, non. À chaque nouvelle version majeure de Symfony, l'une des étapes les plus fastidieuses est de **faire évoluer tout l'écosystème** pour le rendre compatible avec cette nouvelle version. Et notre application ne fait pas exception : plusieurs de nos dépendances ne sont pas encore compatibles. Si vous faites partie des premiers à entreprendre cette migration, ça ne va pas être simple… Mais il faut bien que quelqu'un le fasse 💛. C'est ce que nous allons voir tout de suite.
+
+### BugsnagBundle
+
+[Bugsnag](https://www.bugsnag.com/) est un outil permettant de monitorer les erreurs qui surviennent dans vos applications en fournissant un dashboard qui permet, de visualiser les erreurs bien sûr, mais aussi le contexte dans lequel elles sont apparues (comme par exemple le contenu de la requête ou de la session), la stack trace, etc.
+
+Pour ce faire, ils fournissent un [bundle Symfony](https://github.com/bugsnag/bugsnag-symfony) qui va se brancher sur les différents événements émis par le Kernel, pour ensuite faire remonter les erreurs sur leur dashboard. Malheureusement, ce bundle n'est compatible que jusqu'à Symfony <= 4.4.
+
+Nous avons donc [créé une pull request](https://github.com/bugsnag/bugsnag-symfony/pull/92) ajoutant le support de la version 5. Le bundle ne proposant pas énormément de fonctionnalités, il n'y a donc pas grand chose à modifier.
+
+Une fois le projet cloné en local, la première chose à faire est d'autoriser l'installation de la dernière version :
+
+```diff
+-        "symfony/config": "^2.7|^3.0|^4.0",
+-        "symfony/http-kernel": "^2.7|^3.0|^4.0",
+-        "symfony/dependency-injection": "^2.7|^3.0|^4.0",
+-        "symfony/console": "^2.7|^3.0|^4.0",
+-        "symfony/http-foundation": "^2.7|^3.0|^4.0",
+-        "symfony/security": "^2.7|^3.0|^4.0",
++        "symfony/config": "^2.7|^3.0|^4.0|^5.0",
++        "symfony/http-kernel": "^2.7|^3.0|^4.0|^5.0",
++        "symfony/dependency-injection": "^2.7|^3.0|^4.0|^5.0",
++        "symfony/console": "^2.7|^3.0|^4.0|^5.0",
++        "symfony/http-foundation": "^2.7|^3.0|^4.0|^5.0",
++        "symfony/security": "^2.7|^3.0|^4.0|^5.0",
+```
+
+Après un `composer update`, nous remarquons que le composant `symfony/security` ne se met pas à jour en 5.0 : en effet, celui-ci n'existe plus dans cette version. Il faut désormais utiliser ses sous-composants. Dans notre cas, le bundle n'utilise pas beaucoup de fonctionnalités du composant sécurité. Nous pouvons donc simplement require `symfony/security-core` à la place de `symfony/security`.
+
+En lançant la suite de tests, nous nous rendons compte de plusieurs problèmes.
+
+Premièrement, certaines classes des évènements levés par le Kernel ont changé. Pour garder la compatibilité avec les anciennes versions de Symfony, nous choisissons de supprimer le typage sur les paramètres reçus par les méthodes des listeners :
+
+```diff
+/**
+* Handle an incoming request.
+*
+-     * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
++     * @param GetResponseEvent|RequestEvent $event
+*
+* @return void
+*/
+-    public function onKernelRequest(GetResponseEvent $event)
++    public function onKernelRequest($event)
+{
++        // Compatibility with Symfony < 5 and Symfony >=5
++        if (!$event instanceof GetResponseEvent && !$event instanceof RequestEvent) {
++            return;
++        }
++
+```
+
+Nous constatons également un autre soucis : l'utilisation du paramètre `kernel.root_dir`. Celui-ci a été supprimé en faveur du nouveau paramètre `kernel.project_dir`. Ce dernier pointe maintenant à la racine de l'application (là où se trouve le fichier `composer.json`), ce qui est plus simple que l'ancien qui pointait là où était le Kernel (`app/` en Symfony 2 et `src/` en Symfony 3.4+). Pour garder la compatibilité avec toutes ces versions de Symfony, nous avons ajouté un nouveau paramètre propre au bundle qui sera utilisé à la place des paramètres natifs. Ainsi, ce paramètre utilisera le `project_dir` s'il est disponible ou utilisera le `root_dir` dans le cas contraire :
+
+
+```diff
+--- a/DependencyInjection/BugsnagExtension.php
++++ b/DependencyInjection/BugsnagExtension.php
+@@ -28,5 +28,13 @@ public function load(array $configs, ContainerBuilder $container)
+        foreach ($config as $key => $value) {
+            $container->setParameter('bugsnag.'.$key, $value);
+        }
++
++        if ($container->hasParameter('kernel.project_dir')) {
++            $symfonyRoot = $container->getParameter('kernel.project_dir');
++        } else {
++            $symfonyRoot = $container->getParameter('kernel.root_dir').'/../';
++        }
++
++        $container->setParameter('bugsnag.symfony_root', $symfonyRoot);
+    }
+}
+```
+
+### NelmioSecurityBundle
+
+Nous utilisons aussi [NelmioSecurityBundle](https://github.com/nelmio/NelmioSecurityBundle), pour gérer les <abbr title="Content Security Policy">CSP</abbr>, les Referrer Policy et autres features de sécurité que les navigateurs mettent à disposition des développeurs.
+
+Comme précisé au début de cet article, ce bundle n'est pas encore compatible avec Symfony 5 et Twig 3. [Nous avons donc entrepris cette mise-à-jour](https://github.com/nelmio/NelmioSecurityBundle/pull/211).
+
+Comme pour tous les bundles à mettre à jour, la difficulté est de maintenir une compatibilité avec les différentes versions de Symfony. En effet, afin de simplifier la maintenance du bundle, il est intéressant d'avoir un même code compatible avec toutes les versions du framework :
+
+- personne n'est laissé sur le carreau ;
+- la version 3.4 est toujours en LTS ([fin en novembre 2021](https://symfony.com/releases/3.4)) ;
+- il n'y a qu'une branche à maintenir par la communauté.
+
+Après avoir cloné localement notre fork et lancé les tests pour s'assurer que tout fonctionne "avant", nous avons mis à jour le `composer.json` du projet :
+
+```diff
+     ],
+     "require": {
+         "paragonie/random_compat": "~1.0|~2.0|9.99.99",
+-        "symfony/framework-bundle": "~2.3|~3.0|~4.0",
+-        "symfony/security": "~2.3|~3.0|~4.0",
++        "symfony/framework-bundle": "~2.3|~v3.0|~4.0|~5.0",
++        "symfony/security-core": "~2.3|~3.0|~4.0|~5.0",
++        "symfony/security-http": "~2.3|~3.0|~4.0|~5.0",
++        "symfony/security-csrf": "~2.3|~3.0|~4.0|~5.0",
+         "ua-parser/uap-php": "^3.4.4"
+     },
+     "require-dev": {
+         "doctrine/cache": "^1.0",
+         "psr/cache": "^1.0",
+-        "twig/twig": "^1.24",
+-        "symfony/yaml": "~2.3|~3.0|~4.0",
+-        "symfony/phpunit-bridge": "^3.4.24|~4.0"
++        "twig/twig": "^1.24|^2.10",
++        "symfony/yaml": "~2.3|~3.0|~4.0|~5.0",
++        "symfony/phpunit-bridge": "~5.0"
+```
+
+Dès lors, il est question de corriger tout ce qui ne va plus fonctionner. Nous retrouvons d'ailleurs quelques similarités avec BugsnagBundle, notamment les événements qui ont changé de noms :
+
+- `GetResponseEvent` remplacé par `RequestEvent` ;
+- `FilterResponseEvent` remplacé par `ResponseEvent`.
+
+Nous avons donc, là aussi, enlevé les type hint dans les Listener, et rendu les tests compatibles avec les deux classes.
+
+Même problème avec le composant `symfony/security`, qui sera ici, remplacé par 3 de ses sous-composants.
+
+Nous avons profité de cette PR pour ajouter le support de Twig 2 qui était jusqu'alors absent du Bundle.
+
+Le bundle utilise, lui aussi, le brige PHPUnit. Et c'est d'une grande aide, car les tests sont lancés sur PHP 5 et PHP 7, avec des versions de Symfony allant de 2 à 5 ! En plus de ça, PHPUnit 8 a maintenant des typages forts sur ces signatures de méthodes (donc intrinsèquement incompatible avec PHP 5) :
+
+> PHP Fatal error:  Declaration of Nelmio\SecurityBundle\Tests\EncrypterTest::setUp() must be compatible with PHPUnit\Framework\TestCase::setUp(): void in /NelmioSecurityBundle/Tests/EncrypterTest.php on line 55
+
+Pour palier ce problème, le bridge de Symfony nous offre, entre autre, l'option `SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT`. En mettant cette variable à 1, les type hints de PHPUnit 8 seront retirés à la volée. Elle nous permet donc de garder des signatures sans type hint, car PHPUnit est rendu compatible, au runtime, par le bridge : malin ! Nous avons donc ajouté le code suivant directement dans le `phpunit.xml.dist` du Bundle :
+
+```xml
+    <php>
+        <env name="SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT" value="1"/>
+    </php>
+```
+
+Dans les versions modernes de PHPUnit, les annotations sont aussi dépréciées.
+
+> There was 1 warning:
+> 1) Nelmio\SecurityBundle\Tests\SignerTest::testConstructorShouldVerifyHashAlgo
+The @expectedException, @expectedExceptionCode, @expectedExceptionMessage, and @expectedExceptionMessageRegExp annotations are deprecated. They will be removed in PHPUnit 9. Refactor your test to use expectException(), expectExceptionCode(), expectExceptionMessage(), or expectExceptionMessageRegExp() instead.
+
+Nous les avons donc remplacées par ces méthodes, mais elles n'existent pas en PHP 5 / Symfony 2 / PHPUnit 5 ! Encore une fois, le bridge nous simplifie le travail en fournissant des polyfills pour ces méthodes. Nous pouvons donc mettre à jour les tests sans craintes.
+
+Le seul problème que nous avons rencontré concerne PHP 5.4. En effet, le bridge en version 4.2 est uniquement compatible PHP 5.5+, mais les polyfill ne sont présents que dans les versions ultérieures...
+
+Supporter autant de version de PHP et de Symfony est une tâche complexe, et impossible à réaliser sans le bridge PHPUnit ! Alors, merci petit bridge 😻
+
+Après quelques sueurs, nous avons enfin aperçu le paradis :
+
+![Tests verts sur Travis CI]({{ asset('build/images/avent/2019/02/travis-ci.png') }} "Tests verts sur Travis CI")
+
+Voilà ! Le bundle est désormais compatible avec la dernière version de notre framework. Enfin, pas tout à fait....
+
+### Quelques astuces Composer
+
+Toutes nos dépendances sont maintenant compatibles avec Symfony 5.0… ou presque. En effet, bien que des PRs soient prêtes pour les projets dont nous dépendons, elles ne sont, pour autant, pas encore mergées, et encore moins disponibles dans une release. Il va donc falloir tricher si l'on veut passer à Symfony 5 rapidement.
+
+La première solution, si une PR est disponible pour la dépendance en question, consiste à utiliser ce fork à la place du repository original. Pour ce faire,il suffit de suivre la [doc de Composer](https://getcomposer.org/doc/05-repositories.md#vcs) pour charger un package depuis un repository donné:
+
+```diff
+     "require": {
+-        "bugsnag/bugsnag-symfony": "^1.5",
++        "bugsnag/bugsnag-symfony": "dev-symfony-5",
+         "jolicode/slack-php-api": "^2.0",
+-        "nelmio/security-bundle": "^2.7",
++        "nelmio/security-bundle": "dev-symfony5-simple",
+         ...
+     },
++    "repositories": [
++        {
++            "type": "vcs",
++            "url": "https://github.com/pyrech/bugsnag-symfony"
++        },
++        {
++            "type": "vcs",
++            "url": "https://github.com/damienalexandre/NelmioSecurityBundle"
++        }
++    ],
+```
+
+Dans le cas où la dépendance n'est pas du tout compatible et qu'aucune PR en cours n'existe que nous pourrions utiliser, il existe une autre solution. Nous pouvons en effet utiliser le système d'alias de Composer. Beaucoup plus risqué, le but de cette solution est de faire croire à nos dépendances qu'un package est installé dans une autre version. La [documentation de Composer](https://getcomposer.org/doc/articles/aliases.md#require-inline-alias) nous explique, encore une fois, comment faire :
+
+```diff
+-        "symfony/yaml": "^4.4"
++        "symfony/yaml": "5.0.0 as 4.4"
+```
+
+Ainsi, ce package sera bien installé en version 5, même si les autres packages requièrent une version 4.x. C'est une solution risquée qui peut évidemment amener de nombreux problèmes. Il est donc nécessaire de vérifier que tout fonctionne correctement.
+
+C'est ce que nous avons fait pour régler un problème simple de compatibilité, où `jane-php/json-schema-runtime` demande `symfony/yaml` en version ^4.0.
+
+### Dernière ligne droite
+
+
+La PR finale pour passer de [Symfony 4.4 à 5.0 est plutôt courte](https://github.com/jolicode/secret-santa/pull/133). Il nous restait seulement trois changements à effectuer dans le code :
+
+```diff
+--- a/public/index.php
++++ b/public/index.php
+
+ use JoliCode\SecretSanta\Kernel;
+-use Symfony\Component\Debug\Debug;
+ use Symfony\Component\Dotenv\Dotenv;
++use Symfony\Component\ErrorHandler\Debug;
+ use Symfony\Component\HttpFoundation\Request;
+
+
+--- a/src/EventListener/RedirectOldDomainSubscriber.php
++++ b/src/EventListener/RedirectOldDomainSubscriber.php
+
+ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+ use Symfony\Component\HttpFoundation\RedirectResponse;
+-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
++use Symfony\Component\HttpKernel\Event\RequestEvent;
+ use Symfony\Component\HttpKernel\KernelEvents;
+
+ class RedirectOldDomainSubscriber implements EventSubscriberInterface
+ {
+-    public function redirectOldDomain(GetResponseEvent $event)
++    public function redirectOldDomain(RequestEvent $event)
+
+
+--- a/tests/Controller/SessionPrepareTrait.php
++++ b/tests/Controller/SessionPrepareTrait.php
+
+ namespace JoliCode\SecretSanta\tests\Controller;
+
+-use Symfony\Bundle\FrameworkBundle\Client;
++use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+
+ trait SessionPrepareTrait
+ {
+-    public function prepareSession(Client $client, string $key, $value)
++    public function prepareSession(KernelBrowser $client, string $key, $value)
+     {
+```
+
+Ces changements sont liés à des composants renommés ou des classes retirées du framework. Nous ne les avons pas vus lors de la migration en 4.4 pour 2 raisons. Concernant le listener, il n'était tout simplement pas exécuté : son rôle est de rediriger l'ancien nom de domaine. Il n'est donc jamais utilisé en local.
+
+Pour les 2 autres modifications, elles sont dues à du code déprécié en version 4 mais qui ne déclenchait pas de log de dépréciations. Ça arrive ! 🤷
+
+That's it! Nous sommes maintenant compatible avec Symfony 5.0 ! 🎉
+
+Il est à noter que nous aurions aussi pu utiliser la commande `composer symfony:sync --force` pour mettre à jour certains fichiers automatiquement à partir des dernières versions [des recipes](https://github.com/symfony/recipes).
+
+## Migration terminée
+
+Même si notre application n'a pas autant de fonctionnalités qu'un gros projet client, nous remarquons que la migration vers une nouvelle version majeure de Symfony ne se fait pas sans mal.
+
+Dans notre cas, le code ne nécessite pas de grosses modifications car la plupart des fonctionnalités de Symfony restent identiques. Pour celles qui changent, l'équipe de Symfony fait un excellent travail avec les logs de dépréciations. Ce système nous facilite énormément la montée de version.
+
+En revanche le plus contraignant est d'attendre que toutes nos dépendances (généralement les bundles) sortent une nouvelle release ajoutant la compatibilité avec la nouvelle version. Vous pouvez accélérer les choses et proposez vous même la PR qui rend compatible tel ou tel Bundle : ils sont nombreux à attendre votre contribution, n'hésitez plus, vous avez maintenant notre expérience comme socle !
+
+Très bonnes fêtes à tous !
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/loick-piera-rond.png') }}"
+         alt="Loïck Piera"/>
+    <img src="{{ asset('build/images/avent/damien-alexandre.png') }}"
+         alt="Damien Alexandre"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="https://twitter.com/pyrech"
+           target="_blank" rel="noopener noreferrer">Loïck Piera</a>
+        et <a href="https://twitter.com/damienalexandre" target="_blank" rel="noopener noreferrer">Damien Alexandre</a>
+    </h2>
+
+    <p>
+        {% block article_author 'Loïck et Damien' %} sont développeurs Web chez <a href="{% block author_url 'https://jolicode.com' %}" target="_blank" rel="noopener noreferrer">JoliCode</a> ; où ils mettent leur expertise et leur passion au service de leurs clients.
+    </p>
+{% endblock %}
