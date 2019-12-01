@@ -9,12 +9,12 @@ Nous aimerions débuter ce calendrier de l'avent avec un retour d'expérience su
 
 Le projet est open-source, il est plutôt simple mais fait appel à des bundles tiers, des API... Son rôle est de se connecter à vos teams Slack ou Discord et vous permettre d'effectuer des tirages Secret Santa ! #teamBuilding
 
-![Secret-Santa](/build/images/avent/2019/02/secret-santa.gif "Site Web Secret Santa")
+![Secret-Santa]({{ asset('build/images/avent/2019/02/secret-santa.gif') }} "Site Web Secret Santa")
 
 ## Commençons par la 4.4
 
 Avant de passer en version 5, nous allons d'abord passer notre application en Symfony 4.4.
-En effet, Symfony respecte la convention [SemVer](https://semver.org/), c'est-à-dire qu'il est possible de monter la version mineure du framework sans avoir de changements à apporter à notre code. Symfony ne s'empêche évidemment pas de faire évoluer ses fonctionnalités lors de ces releases mineures, mais l'équipe fait toujours l'effort de fournir une couche de rétro-compatibilité pour nous éviter tout BC-break. Au final, une version majeure (la 5.0 par exemple) est équivalente à la version mineure précédente (4.4) mais sans toutes les couches de rétro-compatibilités.
+En effet, Symfony respecte la convention [SemVer](https://semver.org/), c'est-à-dire qu'il est possible de monter la version mineure du framework sans avoir de changement à apporter à notre code. Symfony ne s'empêche évidemment pas de faire évoluer ses fonctionnalités lors de ces releases mineures, mais l'équipe fait toujours l'effort de fournir une couche de rétro-compatibilité pour nous éviter tout BC-break. Au final, une version majeure (la 5.0 par exemple) est équivalente à la version mineure précédente (4.4) mais sans toutes les couches de rétro-compatibilités.
 
 Comme nous le verrons dans la suite, il est important de passer sur la dernière version mineure 4.x avant de passer en 5. Si nous passons directement de 4.3 en 5.0, nous risquons de rater certaines dépréciations de la 4.4. Pour obtenir la dernière release mineure de la version 4, il nous suffit de lancer `composer update` (avec une dépendance comme `"symfony/framework-bundle": "^4.3"`).
 
@@ -28,7 +28,7 @@ Les nouveautés sont :
 - les classes "à la PEAR/PSR-0" sont supprimées (`Twig_Environment` devient `Twig\Environment`) ;
 - suppression de tout ce qui était déprécié.
 
-Rien d'insurmontable à-prioris. Sauf peut-être si vous avez des bundles tiers...
+Rien d'insurmontable a priori. Sauf peut-être si vous avez des bundles tiers...
 
 ### Bundle tiers et dépendances
 
@@ -228,7 +228,7 @@ Après un `composer update`, nous remarquons que le composant `symfony/security`
 
 En lançant la suite de tests, nous nous rendons compte de plusieurs problèmes.
 
-Premièrement, certaines classes des events levés par le Kernel ont changé. Pour garder la compatibilité avec les anciennes versions de Symfony, nous choisissons de supprimer les type hints sur les paramètres reçus par les méthodes des listeners :
+Premièrement, certaines classes des évènements levés par le Kernel ont changé. Pour garder la compatibilité avec les anciennes versions de Symfony, nous choisissons de supprimer le typage sur les paramètres reçus par les méthodes des listeners :
 
 ```diff
 /**
@@ -331,7 +331,7 @@ Pour palier ce problème, le bridge de Symfony nous offre, entre autre, l'option
     </php>
 ```
 
-Dans les versions moderne de PHPUnit, les annotations sont aussi dépréciées.
+Dans les versions modernes de PHPUnit, les annotations sont aussi dépréciées.
 
 > There was 1 warning:
 > 1) Nelmio\SecurityBundle\Tests\SignerTest::testConstructorShouldVerifyHashAlgo
@@ -345,7 +345,7 @@ Supporter autant de version de PHP et de Symfony est une tâche complexe, et imp
 
 Après quelques sueurs, nous avons enfin aperçu le paradis :
 
-![Tests verts sur Travis CI](/build/images/avent/2019/02/travis-ci.png "Tests verts sur Travis CI")
+![Tests verts sur Travis CI]({{ asset('build/images/avent/2019/02/travis-ci.png') }} "Tests verts sur Travis CI")
 
 Voilà ! Le bundle est désormais compatible avec la dernière version de notre framework. Enfin, pas tout à fait....
 
@@ -445,9 +445,9 @@ Il est à noter que nous aurions aussi pu utiliser la commande `composer symfony
 
 Même si notre application n'a pas autant de fonctionnalités qu'un gros projet client, nous remarquons que la migration vers une nouvelle version majeure de Symfony ne se fait pas sans mal.
 
-Dans notre cas, le code ne nécessite pas de grosse modifications car la plupart des fonctionnalités de Symfony restent identiques. Pour celles qui changent, l'équipe de Symfony fait un excellent travail avec les logs de dépréciations. Ce système nous facilite énormément la montée de version.
+Dans notre cas, le code ne nécessite pas de grosses modifications car la plupart des fonctionnalités de Symfony restent identiques. Pour celles qui changent, l'équipe de Symfony fait un excellent travail avec les logs de dépréciations. Ce système nous facilite énormément la montée de version.
 
-En revanche le plus contraignant est d'attendre que toutes nos dépendances (généralement les bundles) sortent une nouvelle release ajoutant la compatibilité avec la nouvelle version. Vous pouvez accélérer les choses et proposer vous même la PR qui rend compatible tel ou tel Bundle : ils sont nombreux à attendre votre contribution, n'hésitez plus, vous avez maintenant notre expérience comme socle !
+En revanche le plus contraignant est d'attendre que toutes nos dépendances (généralement les bundles) sortent une nouvelle release ajoutant la compatibilité avec la nouvelle version. Vous pouvez accélérer les choses et proposez vous même la PR qui rend compatible tel ou tel Bundle : ils sont nombreux à attendre votre contribution, n'hésitez plus, vous avez maintenant notre expérience comme socle !
 
 Très bonnes fêtes à tous !
 {% endblock %}
@@ -462,11 +462,11 @@ Très bonnes fêtes à tous !
 {% block article_bio %}
     <h2>
         <a href="https://twitter.com/pyrech"
-           target="_blank">Loïck Piera</a>
-        et <a href="https://twitter.com/damienalexandre">Damien Alexandre</a>
+           target="_blank" rel="noopener noreferrer">Loïck Piera</a>
+        et <a href="https://twitter.com/damienalexandre" target="_blank" rel="noopener noreferrer">Damien Alexandre</a>
     </h2>
 
     <p>
-        {% block article_author 'Loïck et Damien' %} sont développeurs Web chez <a href="{% block author_url 'https://jolicode.com' %}">JoliCode</a> ; où ils mettent leur expertise et leur passion au service de leurs clients.
+        {% block article_author 'Loïck et Damien' %} sont développeurs Web chez <a href="{% block author_url 'https://jolicode.com' %}" target="_blank" rel="noopener noreferrer">JoliCode</a> ; où ils mettent leur expertise et leur passion au service de leurs clients.
     </p>
 {% endblock %}
