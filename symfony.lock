@@ -1,12 +1,40 @@
 {
+    "behat/behat": {
+        "version": "v3.5.0"
+    },
+    "behat/gherkin": {
+        "version": "v4.6.0"
+    },
+    "behat/symfony2-extension": {
+        "version": "2.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "2.1",
+            "ref": "158be9d4b4c2127d9ec741c97e3cb1b6610b5294"
+        },
+        "files": [
+            "behat.yml.dist",
+            "config/bootstrap.php",
+            "features/bootstrap/FeatureContext.php",
+            "features/bootstrap/bootstrap.php",
+            "features/demo.feature"
+        ]
+    },
     "behat/transliterator": {
         "version": "v1.2.0"
+    },
+    "bossa/phpspec2-expect": {
+        "version": "3.1.1"
     },
     "clue/stream-filter": {
         "version": "v1.4.1"
     },
     "cocur/slugify": {
         "version": "v3.2"
+    },
+    "container-interop/container-interop": {
+        "version": "1.2.0"
     },
     "doctrine/annotations": {
         "version": "1.0",
@@ -238,6 +266,15 @@
     "phpdocumentor/type-resolver": {
         "version": "1.0.1"
     },
+    "phpspec/php-diff": {
+        "version": "v1.1.0"
+    },
+    "phpspec/phpspec": {
+        "version": "6.1.0"
+    },
+    "phpspec/prophecy": {
+        "version": "1.9.0"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
@@ -258,6 +295,18 @@
     },
     "ralouphie/getallheaders": {
         "version": "3.0.3"
+    },
+    "sebastian/comparator": {
+        "version": "3.0.2"
+    },
+    "sebastian/diff": {
+        "version": "3.0.2"
+    },
+    "sebastian/exporter": {
+        "version": "3.1.2"
+    },
+    "sebastian/recursion-context": {
+        "version": "3.0.0"
     },
     "sensio/framework-extra-bundle": {
         "version": "5.2",
@@ -341,6 +390,9 @@
     },
     "symfony/cache-contracts": {
         "version": "v1.1.7"
+    },
+    "symfony/class-loader": {
+        "version": "v3.4.35"
     },
     "symfony/config": {
         "version": "v4.3.5"
