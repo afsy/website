@@ -9,7 +9,7 @@ Symfony et test technique lors d'un entretien d'embauche
 =================================
 
 Chaque société, voire même chaque équipe, a son process de recrutement. Le candidat doit avoir ce qu'on appelle désormais des soft-skills en adéquation avec la culture de la société. Mais cela ne fait pas tout.
-Notre profession est souvent testée techniquement. Certaines sociétés organise des demi-journées en Peer-Programming, pour d'autres ce sont des tests devant un tableau blanc, quand d'autres se contentent d'un QCM de 20 questions.
+Notre profession est souvent testée techniquement. Certaines sociétés organisent des demi-journées en Peer-Programming, pour d'autres ce sont des tests devant un tableau blanc, quand d'autres se contentent d'un QCM de 20 questions.
 J'ai eu à plusieurs reprises à recruter pour des postes de développeur Symfony récemment, et voici en quoi Symfony m'a aidé.
 
 Préambule : Comment s'articule le test technique que je donne au candidat ?
@@ -26,7 +26,7 @@ On peut créer un projet de base pour le candidat.
 L'idée est de s'occuper pour lui de tout ce qui est essentiel pour un vrai projet, mais qui n'apporte que peu d'intérêt dans le cadre de ce test.
 C'est le cas par exemple de la sécurité.
 On a la chance d'avoir un écosystème très fourni et on peut facilement gérer la connection / inscription des utilisateurs avec FOSUserBundle.
-On veut tester les facultés du candidat sur une API REST ? on configure ApiPlatform, et le tour est joué
+On veut tester les facultés du candidat sur une API REST ? On configure ApiPlatform, et le tour est joué.
 
 **Tips de recruteur :**
 > Si une société vous met à disposition ce type de dépot déjà bootstrappé, et sauf si cela est demandé, ne le forkez surtout pas. il vaut mieux le cloner en local et changer les remote de git pour que origin pointe sur un repo propre à votre compte. Sans cela votre test technique sera visible des autres candidats.
@@ -41,18 +41,18 @@ Dans mon cas, je souhaite appréhender ses notions de sécurité informatique (c
 Un des tests que j'aime bien proposer est de faire un mini-github. C'est à dire qu'avec une API Rest, on va pouvoir exécuter un merge dans des repos git stockés en local.
 - Si il effectue une veille sur l'écosystème Symfony, le candidat utilisera le Component Process.
 - Si il est juste conscient des enjeux de sécurité, il utilisera escapeshellcmd ou apparenté.
-- Si il n'échappe pas ses paramètres, …. aïe…
+- S'il n'échappe pas ses paramètres, … aïe…
 
 ### Conception de base de donnée à partir d'une demande light
 <iframe src="https://giphy.com/embed/pRiDr2c3Y81bO" width="460" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
 _Dur de trouver un gif sur les bases de données. A la place, j'ai préféré illustrer avec le chargement des tableaux..._
 
 Cette partie du test se décompose en quelques implémentations de base (ajouter un champ sur une entité, ajouter une liaison many to many porteuses de propriétés entre 2 entités,...).
-Doctrine nous aide beaucoup, certes, mais cet exemple est assez parlant:
+Doctrine nous aide beaucoup, certes, mais cet exemple est assez parlant :
 > un utilisateur inscrit peut enregistrer une marque d'intérêt sur une campagne en précisant le montant qu'il souhaite investir
 
 Si le candidat prend le temps de regarder notre site et donc notre activité en amont, il comprendra que j'attends une liaison N..N, qui ne peut pas être modélisée par un ManyToMany car on a une information supplémentaire sur la liaison (le montant).
-J'ai eu je pense toutes les interprétations possibles de cette phrase:
+J'ai eu je pense toutes les interprétations possibles de cette phrase :
 - Le montant remonté au niveau de l'utilisateur avec une ManyToMany
 - idem, mais avec le montant placé au niveau du projet
 - pas de montant du tout car le candidat ne savait pas comment faire
