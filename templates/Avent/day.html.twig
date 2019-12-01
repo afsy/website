@@ -19,6 +19,8 @@
     {{- "- calendrier de l'avent " ~ year ~ " - " ~ block('article_title') -}}
 {% endblock %}
 
+{% block bodyid %}avent-{{ year }}{% endblock %}
+
 {% block article_date %}
     <div class="calendar_date">
         <p title="{{ day }} décembre {{ year }}">{{ day }} <span>Décembre</span></p>
