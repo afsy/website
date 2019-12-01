@@ -24,7 +24,7 @@
             <link rel="alternate" type="application/atom+xml" title="AFSY - tous les articles" href="{{ url('feed_atom') }}"/>
         {% endblock %}
     </head>
-    <body id="{% block bodyid %}avent-{{ year }}{% endblock %}">
+    <body id="{% block bodyid 'blog' %}">
 
         {% include 'header.html.twig' %}
 
