@@ -1,0 +1,92 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 03 - Symfony et test technique lors d'un entretien d'embauche" %}
+
+{% block article_content_md %}
+Symfony et test technique lors d'un entretien d'embauche
+=================================
+
+Chaque société, voire même chaque équipe, a son process de recrutement. Le candidat doit avoir ce qu'on appelle désormais des soft-skills en adéquation avec la culture de la société. Mais cela ne fait pas tout.
+Notre profession est souvent testée techniquement. Certaines sociétés organise des demi-journées en Peer-Programming, pour d'autres ce sont des tests devant un tableau blanc, quand d'autres se contentent d'un QCM de 20 questions.
+J'ai eu à plusieurs reprises à recruter pour des postes de développeur Symfony récemment, et voici en quoi Symfony m'a aidé.
+
+Préambule : Comment s'articule le test technique que je donne au candidat ?
+---------------------------------------------------------------------------
+
+Avant d'envoyer le test technique, j'ai systématiquement un call avec le candidat. Outre l'appréciation de la personnalité et de l'intérêt du candidat, ce premier entretien me permet de voir entre autres les technos utilisées en interne que le candidat ne connaît pas forcément.
+Si ce premier entretien est concluant, je propose un test technique qui durera environ 4h. J'adapte le test en fonction du profil. 4h pour un junior, ce n'est pas pareil que 4h pour un dev Senior ou pour un lead. Il a une semaine pour le faire, à son rythme.
+
+J'ai eu à recruter pour des postes de développeur NodeJs et des postes de développeur Symfony. Lorsque je recrutais des profils JS, le candidat perdait un temps précieux à bootstrapper un projet. Aujourd'hui avec Symfony, il a tout ce qu'il faut pour se lancer directement dans le test.
+
+Et si on améliorait ce processus ?
+----------------------------------
+On peut créer un projet de base pour le candidat.
+L'idée est de s'occuper pour lui de tout ce qui est essentiel pour un vrai projet, mais qui n'apporte que peu d'intérêt dans le cadre de ce test.
+C'est le cas par exemple de la sécurité.
+On a la chance d'avoir un écosystème très fourni et on peut facilement gérer la connection / inscription des utilisateurs avec FOSUserBundle.
+On veut tester les facultés du candidat sur une API REST ? on configure ApiPlatform, et le tour est joué
+
+**Tips de recruteur :**
+> Si une société vous met à disposition ce type de dépot déjà bootstrappé, et sauf si cela est demandé, ne le forkez surtout pas. il vaut mieux le cloner en local et changer les remote de git pour que origin pointe sur un repo propre à votre compte. Sans cela votre test technique sera visible des autres candidats.
+
+Alors que reste-t-il à tester ?
+-------------------------------
+
+### Sécurité
+<iframe src="https://giphy.com/embed/115BJle6N2Av0A" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+
+Dans mon cas, je souhaite appréhender ses notions de sécurité informatique (comme par exemple ne jamais faire confiance aux inputs utilisateurs) : on peut lui demander d'exécuter une commande shell avec un paramètre qui provient de la Request.
+Un des tests que j'aime bien proposer est de faire un mini-github. C'est à dire qu'avec une API Rest, on va pouvoir exécuter un merge dans des repos git stockés en local.
+- Si il effectue une veille sur l'écosystème Symfony, le candidat utilisera le Component Process.
+- Si il est juste conscient des enjeux de sécurité, il utilisera escapeshellcmd ou apparenté.
+- Si il n'échappe pas ses paramètres, …. aïe…
+
+### Conception de base de donnée à partir d'une demande light
+<iframe src="https://giphy.com/embed/pRiDr2c3Y81bO" width="460" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+_Dur de trouver un gif sur les bases de données. A la place, j'ai préféré illustrer avec le chargement des tableaux..._
+
+Cette partie du test se décompose en quelques implémentations de base (ajouter un champ sur une entité, ajouter une liaison many to many porteuses de propriétés entre 2 entités,...).
+Doctrine nous aide beaucoup, certes, mais cet exemple est assez parlant:
+> un utilisateur inscrit peut enregistrer une marque d'intérêt sur une campagne en précisant le montant qu'il souhaite investir
+
+Si le candidat prend le temps de regarder notre site et donc notre activité en amont, il comprendra que j'attends une liaison N..N, qui ne peut pas être modélisée par un ManyToMany car on a une information supplémentaire sur la liaison (le montant).
+J'ai eu je pense toutes les interprétations possibles de cette phrase:
+- Le montant remonté au niveau de l'utilisateur avec une ManyToMany
+- idem, mais avec le montant placé au niveau du projet
+- pas de montant du tout car le candidat ne savait pas comment faire
+
+Dans ce cas, cela nous permet de valider, en plus des compétences technique, la réaction d'un candidat dans la vie de tous les jours d'un développeur : coder avec des specs light.
+
+### Concept métier
+<iframe src="https://giphy.com/embed/5hkya8RZAYgR7a2Hda" width="480" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+La dernière demande est un implémentation d'un concept de notre métier. Lorsque je travaillais à Wheeliz, il pouvait s'agir d'un calcul de tarifs via un algo de yield management. Aujourd'hui, à Anaxago, ce sont plutôt des questions financières (taux d'intérêts, capitalisation, ...)
+
+
+Conclusion
+----------
+
+Vous avez vu, il n'y a pas beaucoup de code dans cet article. Mais les tests techniques sont proposés à l'image de Symfony.
+Ils permettent de se consacrer à l'essentiel. Pour moi ce sera la sécurité, la modélisation de base de donnée, les APIs (Rest, GraphQl,...), et on voit qu'en creusant chacun de ces sujets, la code review avec le candidat est très intéressante, factuelle, et surtout représentative de quel onboarding sera nécessaire pour l'accueillir dans les meilleures conditions.
+
+Post-Scriptum:
+--------------
+
+Le candidat vient de consacrer 4h de son temps à répondre au test technique, il est donc légitime de faire une code-review avec lui, quelqu'en soit l'issue.
+Il faut donc en profiter pour lui montrer les bons développements, et lui indiquer des axes d'amélioration.
+Ne pas porter de préjugés sur ses choix techniques, et plutôt préférer le questionnement
+Ne pas se focaliser sur les détails de type code-guideline (Ex: propriété css par ordre alphabetique, longueur maximum d'une ligne, …) car ces points seront plutot adressés par des outils en interne, au moment du commit éventuellement ,et ne préjuge en rien des qualités du candidat.
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/2019/3/remi-janot.jpg') }}"
+         alt="Rémi JANOT"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://github.com/rjanot' %}">{% block article_author 'Rémi Janot' %}</a></h2>
+    <p>
+        Lead-Developper à Anaxago
+    </p>
+{% endblock %}
