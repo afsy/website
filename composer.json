@@ -48,6 +48,8 @@
         "twig/markdown-extra": "^2.12"
     },
     "require-dev": {
+        "behat/symfony2-extension": "^2.1",
+        "bossa/phpspec2-expect": "^3.1",
         "symfony/debug-pack": "*",
         "symfony/maker-bundle": "^1.0",
         "symfony/profiler-pack": "*",
@@ -67,7 +69,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "App\\Tests\\": "tests/",
+            "App\\Behat\\": "features/bootstrap/"
         }
     },
     "replace": {

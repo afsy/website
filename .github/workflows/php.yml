@@ -1,9 +1,9 @@
-name: PHP Composer
+name: Test suite
 
 on: [push]
 
 jobs:
-  build:
+  phpunit:
 
     runs-on: ubuntu-latest
 
@@ -16,8 +16,25 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
 
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-
-    - name: Run test suite
+    - name: Run the test suite
       run: bin/phpunit
+
+
+  behat:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Assets install
+        run: |
+          yarn install
+          yarn build
+
+      - name: Run functional test suite
+        run: vendor/bin/behat --format=progress
