@@ -29,3 +29,25 @@
     font-style: italic;
     color: #999;
 }
+
+.avent-article blockquote {
+    background-color: #dbdfe4;
+    position: relative;
+    padding: 1em 2em 1em 4em;
+    margin-top: 1em;
+}
+
+.avent-article blockquote:before {
+    content: "“";
+    position: absolute;
+    display: block;
+    font-size: 5em;
+    font-weight: bold;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 13px;
+}
+
+.avent-article blockquote p:first-child {
+    margin-top: 0;
+}
