@@ -18,7 +18,7 @@ class CustomParsedown extends \Parsedown
     {
         $tagInfo = parent::blockFencedCode($Line);
 
-        if (isset($tagInfo['element']['text']['name'])) {
+        if (isset($tagInfo['element']['text']['name']) && !isset($tagInfo['element']['text']['attributes'])) {
             $tagInfo['element']['text']['attributes'] = ['class' => 'language-none'];
         }
 
