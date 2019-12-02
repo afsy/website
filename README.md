@@ -15,7 +15,7 @@ When your article is done and published, spread the world on social networks!
 If you want to test the current version (which requires php 7.3) :
 
 ```bash
-$ composer install
+$ symfony composer install
 $ docker-compose up -d
 $ symfony php bin/console doctrine:migrations:load
 $ symfony php bin/console doctrine:fixtures:load
@@ -24,27 +24,20 @@ $ symfony serve
 
 ## Howto update CSS styles
 ---------------------------------------------------
-    1. Install compass
 
-        sudo gem install compass
+Install assets and run yarn:
 
-    2. Run Compass
-
-        compass watch
+```bash
+$ bin/console assets:i
+$ yarn watch
+```
 
 ## Deployments
 
-Deployments are made using [Fabric](https://get.fabric.io/), using a simple
-basic script.
-
- * copy `bin/fabfile.py-dist` to `bin/fabfile.py`
- * set the preprod and prod SSh servers and paths
- * ensure Fabric is installed on your system
- * run the following command:
+You need rights to the SymfonyCloud account and deploy with the following command.
 
 ```sh
-$ fab -f bin/fabfile.py -R preprod deploy
+$ symfony deploy
 ```
 
-This will deploy the `master` branch in the `preprod` env, run composer
-install, clear the cache and warmup it.
+See SymfonyCloud documentation for more. (note that you can create environment by pull request on demand)

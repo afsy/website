@@ -536,9 +536,6 @@
     "symfony/options-resolver": {
         "version": "v4.3.5"
     },
-    "symfony/orm-pack": {
-        "version": "v1.0.7"
-    },
     "symfony/phpunit-bridge": {
         "version": "4.3",
         "recipe": {
