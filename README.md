@@ -17,7 +17,9 @@ If you want to test the current version (which requires php 7.3) :
 ```bash
 $ symfony composer install
 $ docker-compose up -d
-$ symfony php bin/console doctrine:migrations:load
+$ symfony php bin/console doctrine:database:drop --force
+$ symfony php bin/console doctrine:database:create
+$ symfony php bin/console doctrine:schema:create
 $ symfony php bin/console doctrine:fixtures:load
 $ symfony serve
 ```

@@ -88,7 +88,7 @@ class AventController extends AbstractController
     /**
      * @Route("/avent/{year}", name="avent")
      */
-    public function indexAction($year)
+    public function indexAction($year = null)
     {
         // redirect to the most recent year
         if (null === $year) {

@@ -8,6 +8,22 @@
 {% endif %}
 {% endblock %}
 
+{% set header_announcement %}
+    <div class="container--advent text-center">
+        <div class="container">
+            <h6>Des articles pour les fêtes !</h6>
+
+            <p style="margin-bottom: 1em;">
+                L'Afsy à le plaisir de vous présenter son calendrier de l'avent : tous les jours du 1er au 25 décembre, un article
+                original et de qualité autour de Symfony vous est présenté !
+            </p>
+            <p>
+                <a class="btn" href="{{ path('avent') }}">🎁 Découvrir le calendrier de l'avent 🎅</a>
+            </p>
+        </div>
+    </div>
+{% endset %}
+
 {% block body %}
     {% set future = 0 %}
     {% set past = 0 %}

@@ -51,3 +51,15 @@
 .avent-article blockquote p:first-child {
     margin-top: 0;
 }
+
+.container--advent {
+    padding: 2em;
+    background-color: #dd2e00;
+    color: #ecd7cd;
+}
+.container--advent .container {
+    max-width: 700px;
+}
+.container--advent h6 {
+    font-weight: bold;
+}
