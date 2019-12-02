@@ -30,4 +30,18 @@ class CustomParsedownTest extends TestCase
 
         $this->assertEquals($expected, $parser->text($markdown));
     }
+
+    public function testItDoesNotOverrideAlreadySetLanguage()
+    {
+        $parser = new CustomParsedown();
+
+        $markdown = <<<MARKDOWN
+        ```php
+        code
+        ```
+        MARKDOWN;
+        $expected = '<pre><code class="language-php">code</code></pre>';
+
+        $this->assertEquals($expected, $parser->text($markdown));
+    }
 }
