@@ -12,18 +12,17 @@ When your article is done and published, spread the world on social networks!
 
 ## Install and run
 
-If you want to test the current version (which requires php 7.3) :
+If you want to test the current version (which requires php 7.3):
 
 ```bash
 $ symfony composer install
 $ docker-compose up -d
-$ symfony php bin/console doctrine:migrations:load
+$ symfony php bin/console doctrine:schema:create
 $ symfony php bin/console doctrine:fixtures:load
 $ symfony serve
 ```
 
-## Howto update CSS styles
----------------------------------------------------
+## How-to update CSS styles
 
 Install assets and run yarn:
 
@@ -40,4 +39,4 @@ You need rights to the SymfonyCloud account and deploy with the following comman
 $ symfony deploy
 ```
 
-See SymfonyCloud documentation for more. (note that you can create environment by pull request on demand)
+See SymfonyCloud documentation for more. (note that you can create environment by pull request on demand).
