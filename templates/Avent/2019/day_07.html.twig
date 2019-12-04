@@ -1,0 +1,168 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "REX : Symfony 2 à Symfony 4 et au delà (Front-End)" %}
+
+{% block article_content_md %}
+REX : Symfony 2 à Symfony 4 et au delà (Front-End)
+=================================
+
+Il y'a quelques jours, sur la scène du SymfonyCon Amsterdam, Fabien Potencier (FabPot pour les intimes) a releasé en live Symfony 5.
+
+Notre projet principal à Anaxago n'est pas encore migré dans cette version, mais si on regarde dans le rétroviseur, il y a à peine 18 mois, notre site était encore en Symfony 2.8.
+
+# Les enjeux d'une montée de version ?
+Quand on est développeur, on a toujours envie de jouer avec les jouets les plus récents,
+
+Cependant dans la vie d'une startup il est parfois difficile de consacrer du temps pour ces tâches techniques.
+
+En ce qui concerne l'écosystème de Symfony, les nouvelles fonctionnalités apportées par les versions majeures transforment les montées de versions en réels atouts pour une entreprise axée sur le développement et l'innovation.
+
+Elles offrent également aux développeurs une meilleure expérience de travail en leur permettant de travailler sur des outils récents. Idéal pour garder une certaine attractivité (on recrute au passage 😉)
+
+Reste que pour une petite équipe de développeur, il n'est pas toujours aisé de planifier ces montées de version sans délaisser l'avancée d'une roadmap produit.
+
+Petits retours d'expériences de la montée de version avec Symfony 4, côté front (pour les plus back d'entre vous, on se retrouve demain).
+
+**TLDR**; Vous pouvez passer du temps à planifier, à prévoir, à imaginer tout ce qui va casser, mais la vérité c'est que bien qu'une carte 21 en planning poker n'est pas suffisante, il faut monter les versions car ce que Symfony a à nous offrir en vaut la peine, comme les nouveaux composants plus haut niveau (Workflow, Messenger,...).
+
+# RIP Assetic
+
+La mort d'Assetic dans la version 4 représente chez nous un immense chantier. En effet nous avons environ 200 fichiers twig faisant appel à Assetic.
+
+Il aura donc fallu repasser sur tous ces fichiers et migrer le code dans des javascripts gérés par WebpackEncore afin de garder les fonctionnalités de minification, de caching, etc.
+
+# Utilisation de node_modules
+
+Dans notre architecture pré-SF4, les librairies JS sont disséminées un peu partout:
+- Dans chacun des bundles
+- Dans `/web`
+
+Vu ces emplacements, les fichiers sont commités dans le repo.
+
+Si bien que Github considère notre projet comme étant majoritairement javascript.
+
+![projet javascript](https://lh5.googleusercontent.com/f-87EnHa0PHkl1csitMIx89La3CwvGa3g2_4hMDlKmahXK5KRvZNbXHJd906tcOSsMhyMZauxR90as4_iQ2Bdwh9h3w54uhIAEmvsFuI91uNfCVxAjl8kIgV1aMcdRVvkmpMug3g)
+
+Désormais, les dépendances JS ont trouvé leur place : `/node_modules` (oui, dit comme cela, ce nom semble mal trouvé...).
+
+Et le fait de regrouper les vendors dans un répertoire non commité nous a permis de découvrir que ...
+
+##  ...les css des librairies vendors ont été directement modifiés dans les commits de notre repo !
+
+Quand on développe une plateforme qui est passée par plusieurs équipes de développement à différent stade de son évolution, on s'habitue vite (trop vite...) à vivre avec du code “legacy”, vous savez ces fameux morceaux de codes qui fonctionnent sans que personne ne sache vraiment pourquoi.
+On y trouve ainsi quelques cadavres de temps à autres.
+![Quelques cadavres dans le placard](https://media.giphy.com/media/eToYFbOtxtTUc/giphy.gif)
+
+Ainsi nos précédents amis ont eu parfois des idées bien étranges comme de changer les CSS sources d'une librairie bien connue, puis d'enregistrer le tout dans un fichier resource d'un bundle maison.
+
+Webpack nous permettant de gérer plus facilement nos dépendances, nous avons donc voulu supprimer ces fichiers sans nous douter une seconde du résultat.
+
+![omg](https://ljdchost.com/038/axrjEch.gif)
+
+Nos yeux ont saignés après le premier refresh de notre page : aucune couleur ne correspondait à notre charte graphique, les images chargées via des background-image n'étaient plus les bonnes, etc...
+
+Après réparation de nos rétines, il nous aura fallu quelques heures pour assainir les CSS et surcharger correctement les styles dont nous avions besoins.
+
+## Où est cette lib ?
+Si nous avons bien appris une chose avec la disparition d'Assetic c'est que tous les mauvais choix faits, les mauvaises pratiques accumulées et raccourcis pris à un instant T finissent toujours par nous rattraper.
+
+Évidemment ne pas [réinventer la roue](https://fr.wikipedia.org/wiki/R%C3%A9inventer_la_roue_carr%C3%A9e) est la base et le mot d'ordre des fainéants que nous sommes, mais quand certaines librairies utilisées ne sont plus maintenues et donc pas disponible via npm… Comment vous dire...
+
+![where is it?](https://lh6.googleusercontent.com/u9P9hwYm-fQuw0CH4gkpaf0vsOieuwviZ1TtFd8VsuUfDWuat-vBYd2dcQ_Ct4kf1jOXbw5x6eJjw9qUttNASXl7sE_ULwcd0aDT2g7_hxvgMkFcY5f9yYmobHrOHRrqGjODn7m2)
+
+On a adopté un principe basique en se posant les questions suivantes :
+
+-   Est-ce encore utile aujourd'hui ?
+-   Existe-t-il un autre équivalent disponible sur npm ?
+-   Peut on re-développer aisément la fonctionnalité utilisée de la librairie ?
+
+Heureusement le destin ne nous en voulait pas trop. Rare fût les fois où nous sommes arrivés sur la dernière question.
+Cela nous a aussi permis de voir à quel point le code peut s'accumuler trés vite dans un projet sans jamais être utilisé, d'où l'importance du code cleaning.
+
+## Mais pourquoi rien ne fonctionne comme dans la documentation ?
+
+Avec ce passage à Webpack, nous en avons profité pour mettre à jour certains packages tiers que nous utilisons sur la plateforme.
+
+Parfois cette mise à jour était contrainte pour bénéficier du système import / export des modules Javascript.
+
+Il existe ainsi le moment fatidique où on lance la commande yarn update et c'est ici que l'adage être au mauvais endroit au mauvais moment prend du sens.
+
+Après 5 lectures de la documentation et 2 heures passées en peer programming pour résoudre un problème d'initialisation d'une librairie (dont je ne divulguerai pas le nom), rien ne fonctionnait.
+
+Après un bon café, le temps est venu de supprimer complètement le dossier node_module et de relancer la commande yarn update.
+
+Cette fois nos esprits désespérés ont captés une information capitale dans l'afflux de ligne de commande défilant sous nos yeux (yarn sait être très bavard) : nous sommes en train d'installer une version RC. Un petit tour sur npmjs confirma que la version poussée par l'éditeur était une RC.
+
+Ne voulant pas trop servir de cobaye, nous précisions à yarn que nous préférons une version stable: problem solved 👍
+
+
+# yarn vs npm
+
+Sans vouloir troller (ah bah si en fait, je vais troller), la communauté JS est un petit peu plus “dispersée” que la communauté PHP.
+
+Il a donc fallu choisir un gestionnaire de dépendance parmi les plus connus.
+
+bower ? deprecated
+
+Après Booba vs Kaaris, il va donc falloir arbitrer le match yarn vs npm. Sympa.
+
+La grande force de yarn à sa sortie était de gérer le lock des dépendances, comme notre bon vieux composer.lock : depuis 2017, npm gère aussi ce lock. 1 partout, la balle au centre.
+
+Un avantage de yarn était la gestion du cache des paquets. Comme l'a soulevé un de ses contributeurs: yarn a un CDN devant la registry npm, ce qui est censé accélérer le téléchargement des packages.
+
+<blockquote class="twitter-tweet">
+    <p lang="en" dir="ltr">Just saw an article on <a href="https://twitter.com/RisingStack?ref_src=twsrc%5Etfw">@RisingStack</a> claiming “it does not send package usage information to Facebook (yarn uses Facebook's npm registry mirror)” about <a href="https://twitter.com/yarnpkg?ref_src=twsrc%5Etfw">@yarnpkg</a>. This is not true. We use CloudFlare in front of npm both to speed up and to see overall usage.</p>
+    &mdash; Burak Yigit Kaya (@madbyk) <a href="https://twitter.com/madbyk/status/988795518267678720?ref_src=twsrc%5Etfw">April 24, 2018</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+Il y a fort à parier (désolé, je parle pour les Parisiens) que votre voisin du Sentier a déjà téléchargé un même package que vous et que celui ci se retrouve sur les serveurs parisiens de Cloudflare.
+
+Qui plus est le cache de yarn en local est plus sympa que celui de npm. Même si je l'avoue, on ne va pas fouiner dedans tous les jours.
+
+Notre choix : yarn
+
+PS : bon, tout ça c'est pour avoir des arguments objectifs, mais c'est surtout parce que yarn est mis en avant dans la documentation Symfony 😆
+
+# Changement de paradigme: tout est scopé !
+
+Autant certaines migrations peuvent se faire *facilement*. Par exemple entre Symfony 2.8 et 3.4, aucun changement fonctionnel majeur (côté front tout du moins). Autant ici, c'est plus compliqué.
+
+Pour qu'une page migre d'Assetic vers WebpackEncore, on utilise les librairies via Webpack. Bien. Mais du coup en migrant ces librairies, on perd la possibilité de faire simplement du JS dans le navigateur qui utiliserait les fonctions exposées par les librairies (au passage, merci pour autoprovideJQuery 😆 )
+
+Ainsi certaines librairies ont besoin de jQuery pour fonctionner mais impossible pour elle de le trouver tout seul.
+
+Il faut donc comprendre au cas par cas comment injecter jQuery dans la librairie pour que tout fonctionne de nouveau.
+
+L'autre aspect majeur était notre découpage fonctionnel de nos javascripts.
+Avec Assetic tous les scripts nécessaires était regroupés via la balise  ```{{ '{% javascripts ...' }}```
+
+Le scope est ainsi global. Une fonction peut en appeler une autre située dans un autre fichier.
+
+Avec WebpackEncore, ces javascripts deviennent cloisonnés.
+
+Nous avons donc repensé notre manière de construire nos scripts et ainsi utiliser les fonctionnalités d'import / export fournis par ES6.
+
+# État des lieux
+
+La disparition d'Assetic est pour nous l'opportunité de nous aligner avec les bonnes pratiques actuelles.
+
+Elle nous aura permis d'éliminer un poids énorme de dette technique.
+
+Mais ce passage n'est pas gratuit, la tâche est immense et à l'heure où nous écrivons ces lignes, le travail n'est pas terminé.
+
+Heureusement la partie PHP est bien plus souple, rendez-vous demain 😆
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/07/nicolas-demay-stephane-diagne.jpg') }}" alt="Nicolas Demay & Stéphane Diagne"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://www.welcometothejungle.com/fr/companies/anaxago/jobs' %}">{% block article_author 'Nicolas Demay & Stéphane Diagne' %}</a></h2>
+    <p>
+        Développeurs à Anaxago
+    </p>
+{% endblock %}
