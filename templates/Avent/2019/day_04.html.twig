@@ -1,0 +1,262 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 04 - Ne me parlez plus de Manager !" %}
+
+{% block article_content_md %}
+# Ne me parlez plus de Manager !
+
+On ne sait pas trop ce qu’ils font. Souvent, on a l’impression qu’ils s’attribuent toutes les tâches.
+Parfois, on les trouve trop gros et trop voraces. Je pense qu’il faut s’en débarrasser.<br />
+Oui, cet article va parler des services “Managers”.
+
+## L'épopée des Managers
+
+Qu'est-ce que j'appelle un "Manager"?<br />
+Le meilleur exemple que je vois vient du FOSUserBundle.
+Au sein de ce bundle, vous retrouvez un [`UserManager`](https://github.com/FriendsOfSymfony/FOSUserBundle/blob/master/Doctrine/UserManager.php), un service dont l'interface peut se résumer ainsi :
+
+```php
+interface UserManagerInterface
+{
+    public function findUserBy(array $criteria);
+    public function findUserByUsername($username);
+    public function findUserByEmail($email);
+    public function findUserByUsernameOrEmail($usernameOrEmail);
+    public function findUserByConfirmationToken($token);
+    public function findUsers();
+
+    public function createUser();
+
+    public function updateUser(UserInterface $user, $andFlush = true);
+
+    public function deleteUser(UserInterface $user);
+
+    public function updateCanonicalFields(UserInterface $user);
+    public function updatePassword(UserInterface $user);
+}
+```
+
+Le "Manager" est donc, grosso modo, une surcouche au-dessus de Doctrine.<br />
+Il est lié à une entité bien particulière. A l'intérieur, on retrouve des méthodes correspondant aux quatre lettres de CRUD : différentes _queries_ pour la lecture, une méthode _factory_, et de quoi sauvegarder une mise à jour du modèle ainsi que de le supprimer.
+Seulement deux méthodes dans le code précédent exposent une logique technique un peu plus spécifique : `updateCanonicalFields` et `updatePassword` permettent de modifier des champs bien particuliers de `User`, en appelant respectivement une "canonicalizer" et l'encodeur de mots de passe.
+
+Dans le cas précis du FOSUserBundle, on comprend que le `UserManager` était justifié par des contraintes techniques : nécessité de s'adapter à une entité `User` externe, d'où le besoin d'une méthode pour gérer son instanciation, support de Doctrine ORM et de Doctrine ODM.
+L'utilisation des Managers s'est toutefois répandue dans bien d'autres cas moins justifiés. Je ne saurais pas faire l'historique exacte de la pratique, mais elle date au moins des débuts de Symfony 2.0, l'interface précédente a peu ou prou évoluée depuis la [version 1.0](https://github.com/FriendsOfSymfony/FOSUserBundle/blob/1.0.0/Model/UserManagerInterface.php), soit 2011.
+Ma théorie est que la transition de Propel à Doctrine2 (ORM), d'ActiveRecord à un Data Mapper, a été surprenante voire déroutante, et qu'il était tentant de cacher les appels à Doctrine dans cette surcouche.<br />
+Par exemple, les deux lignes suivantes ne sont pas spécialement expressives, il est tentant de les résumer :
+
+```php
+// 1. Avec Doctrine "brut"
+$entityManager = $this->get(doctrine.orm.entity_manager');
+entityManager->persist($user);
+entityManager->flush();
+
+// 2. Ne trouvez-vous pas la ligne suivante plus claire et concise ?
+$userManager->update($user);
+```
+
+## Le problème
+
+Sur le fond, le problème est que "manager" est un terme vague, sans définition précise exacte.
+Faute de cadre, ses responsabilités n'ont pas de limites.<br />
+Ces services deviennent des fourre-tout, il est plus facile et tentant de rajouter une méthode au Manager plutôt que créer un nouveau service, et de réfléchir à son nom, c'est-à-dire à ce qu'il fait.
+On pourra justifier que l'on fait ainsi par uniformisation, ou bien par habitude. Mais au fond, c'est une pente glissante.<br />
+Aussi, après quelques années de projet, on se retrouve avec quelque chose du genre :
+
+```php
+interface UserManager
+{
+    // Retourne des Grid - au sens du ApyDatagridBundle - https://github.com/APY/APYDataGridBundle
+    public function getUsersGrid(): Grid;
+    public function getUserEnrollGrid($productId, CourseOfferingSelection): Grid;
+    public function getUserRegistrationsExportGrid(): Grid;
+
+    // Méthodes de lecture (genre repositories)
+    public function find($id);
+    public function findOneBy(array $param);
+    public function findBy(array $param, $order = null, $limit = null, $offset = null);
+    public function findAll();
+    // On a l'impression que chaque développeur a rajouté la sienne...
+    public function getAvailableTenants();
+    public function getActiveUsersByRoles($roles);
+    public function getActiveRootUserList($roles);
+    public function getActiveMessageAccessUserList($roles, $tenants);
+    public function getActiveUserListByRoleAndTenant($roles, $tenant);
+    public function getInstructorList(): array;
+    public function getTenantAdminList($entity);
+    public function getDefaultSuperAdmin();
+    public static function getStatesList(): array;
+    public function getUserData($user): array; // Que fait cette méthode? Mystère !
+
+    // Méthodes de lecture, ou bien un peu métier?
+    public function isSuperAdmin($user = null);
+    public function isTenantAdmin($user = null);
+    public function getProfileUser($id);
+    public function getUserStatusList(): array;
+
+    // Validation
+    public function validatePassword($password);
+
+    // Création
+    public function createNewImportedUser($response, $csvUser, $currentTenant, $userTenantLimit);
+
+    // Sauvegarde
+    public function saveEntity($user);
+    // De nouveau on a l'impression que chaque développeur ne trouvait pas les méthodes de ses collègues
+    public function update($obj);
+    public function save($obj);
+    public function remove($obj);
+
+    // Ces méthodes sont-elles juste métier ou bien sauvegardent-elles également ?
+    public function changeUserData(User $user, $params = []);
+    public function changeUsersStatus($action);
+
+    // J'ai laissé ces 2 méthodes privées, car l'offense ne s'arrête pas à l'interface publique !
+    private function validateByConstraints($field, $constraints);
+    private function generateRandomPassword();
+}
+```
+
+Cette interface est issue d'une classe malheureusement bien réelle, l'implémentation fait environ un millier de lignes.
+Tout est entremêlé, les noms sont opaques, c'est très difficilement lisible. Des méthodes sont recopiées des repositories Doctrine (`find`...), on se demande l'intérêt. On retrouve pêle-mêle les opérations CRUD (techniques) et des opérations métier.<br />
+Il n'est pas étonnant que plusieurs développeurs aient préféré rajouter leurs propres méthodes plutôt que de modifier celles existantes, ce code sera très coûteux à refactorer (ou remplacer).
+
+Finalement, pour ajouter l'insulte à l'injure, les managers de différentes entités ayant au final beaucoup de méthodes en commun, pour factoriser ce code et essayer d'imposer une interface commune, un `BaseManager` ou `CoreManager` peut être rajouté.<br />
+Dans le même projet que le code précédent, cela donne cela :
+
+```php
+interface CoreManager
+{
+    public function find($id);
+    public function findOneBy(array $param);
+    public function findBy(array $param, $order = null, $limit = null, $offset = null);
+    public function findAll();
+
+    public function update($obj);
+    public function save($obj);
+    public function saveEntity($entity);
+
+    public function remove($obj);
+
+    public static function getYesNoHash(): array;
+
+    protected function getManager(): EntityManagerInterface;
+    protected function getRepository(): EntityRepository;
+}
+```
+
+Sur le fond, l'héritage `UserManager` -> `BaseManager` est très discutable, car n'ayant pas vraiment de signification (juste économiser du code).
+Mais sur la forme, l'implémentation est encore pire.
+Les types des arguments et de retour sont perdus (à moins de ré-implémenter les méthodes ou leur doc, mais alors, aucun intérêt à la classe de base).
+Un tel service à besoin au moins de l'`EntityManager`, puis souvent d'une ou deux autres dépendances par entités, si bien que l'on fini par céder et passer le `Container` entier.
+Le code devient totalement opaque sur ses dépendances, et impossible à tester en isolation.
+
+## La solution : le découpage
+
+Face à ces potentiels [god objects](https://fr.wikipedia.org/wiki/God_object), la meilleure solution est le découpage, et idéalement dès le début.
+On évite ainsi la tentation de ne pas bien appréhender chaque responsabilité, et d'attendre un refactor qui n'arrivera jamais (et sera de plus en plus coûteux).<br />
+De plus, personnellement je suis opposé à rajouter une surcouche à Doctrine : l'`EntityManager` et les repositories doivent être utilisés directement.
+
+Depuis Symfony 4 et l'`autowiring` par défaut, déclarer des services est quasiment _gratuit_ : il suffit de créer la classe, de typer correctement les arguments du constructeur, et dans la majorité il n'y aura pas besoin d'éditer manuellement un fichier de configuration.<br />
+Il n'y a donc pas de raisons de ne pas commencer dès le début à faire de petits services focalisés, par exemple plusieurs `GridHandler` pour l'exemple précédent, un `FormHandler` parfois, un `UserMailer` comme dans le FOSUserBundle, un `Exporter`...
+Chaque petit service est plus facilement appréhensible par les autres développeurs, plus facilement testable unitairement, et donc finalement plus facile à maintenir.
+
+## Quelques exemples et quelques patterns
+
+Faire de petits services, focalisés, c'est aussi se permettre d'utiliser des _patrons de conception_, des _design patterns_.<br />
+En essence, un pattern est un exemple, issu de la littérature,  de comment coder un cas précis, cela est donc incompatible avec les gros services généralistes.<br />
+Le gros avantage des patterns est de permettre de se raccrocher à un nom connu : il est plus simple à expliquer à un collègue une `Factory` qu'une création personnelle, et cela évite également un casse-tête sur comment nommer le service.
+
+Je vais détailler dans la suite quelques patterns que j'ai couramment rencontrés dans mes projets, mais la liste est très loin d'être exhaustive.<br/>
+N'hésitez d'ailleurs pas à poster vos favoris en commentaire !
+
+### Factory
+
+Il s'agit certainement de l'un des plus connus, ainsi que l'un des plus couramment utilisé.<br/>
+Je le reprends ici surtout pour expliquer la différence avec le prochain :
+
+```php
+interface UserFactory
+{
+    public function create(): User;
+}
+```
+
+### Builder
+
+Certains objets sont compliqués à construire, ou bien leur construction peut être personnalisée de nombreuses manières.<br />
+Dans ce cas, le pattern Factory montre ses limites. Au lieu d'une seule méthode, l'objet sera construit au fil de plusieurs appels, c'est le Builder.
+
+```php
+interface UserGridBuilder
+{
+    public function start(): void;
+
+    public function addEnumField(string $fieldname, array $values): void;
+    public function addCsvExport(Tenant $tenant): void;
+    // etc
+
+    public function build(): Grid;
+}
+```
+
+Un exemple que tout le monde a utilisé est le `FormBuilder` dans Symfony, dans `buildForm` on va ajouter chaque sous-champ dans notre type de formulaire.<br />
+Personnellement, j'ai l'impression d'avoir besoin du Builder beaucoup plus souvent que de Factory, les cas métiers que je rencontre étant rapidement complexes.
+
+### Repository
+
+D'après la définition que je pense originale, le Repository "représente un jeu de données stockées (typiquement, en base de données) par une collection en mémoire".
+C'est-à-dire qu'il simplifie l'utilisation de la base de donnée, non seulement pour les requêtes, mais aussi pour l'écriture.<br />
+Stricto sensu, il serait implémenté ainsi :
+
+```php
+interface UserRepository
+{
+    public function find(int $id): ?User;
+    public function findOneByEmail(string $email): ?User;
+
+    public function add(User $newUser): void;
+
+    public function remove(User $user): void;
+}
+```
+
+Personnellement je ne modifie pas mes repositories Doctrine pour les forcer à suivre la définition à la lettre <br />
+Mais je trouve bien d'être conscient que le concept de Repository existe en dehors de Doctrine, et du choix d'implémentation qui a été fait.
+
+### Configurator
+
+Ce dernier exemple n'est pas un pattern dans le même sens que les autres, mais plus une approche.<br />
+Symfony permet de définir des Services [Configurators](https://symfony.com/doc/current/service_container/configurators.html), qui permettent d'appliquer des opérations sur d'autres services.
+De la même manière, dans notre code, il peut être utile d'appliquer la même opération à plusieurs services différents.
+L'approche peut être reprise, par exemple pour les `Grid` de mon premier exemple :
+
+```php
+interface GridExportConfigurator
+{
+    public function addCsvExport(Grid $grid): void;
+    public function addExcelExport(Grid $grid): void;
+    public function addPDFExport(Grid $grid): void;
+}
+```
+
+## Conclusion
+
+J’espère que cet article vous aura convaincu d’arrêter de créer des services “Manager”, et qu'il fallait préférer un découpage fin des services, avec une seule responsabilité bien identifiée.
+Les avantages sont nombreux, le service sera plus facile à nommer, à tester, à communiquer à vos collègues, bref, à maintenir !<br />
+Bien sûr, tous les managers ne sont pas mauvais, et dans certains cas ils sont même incontournables, alors ne vous fâchez pas avec vos supérieurs à cause de moi :)
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/04/romaric-drigon.jpg') }}" alt="Romaric Drigon"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://romaricdrigon.github.io/' %}">{% block article_author 'Romaric Drigon' %}</a></h2>
+    <p>
+        Ingénieur en développement web à l'ASIT VD, Lausanne, Suisse.
+    </p>
+{% endblock %}
