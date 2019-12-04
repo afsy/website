@@ -1,0 +1,249 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 05 - Structurez votre monolithe ! " %}
+
+{% block article_content_md %}
+# Structurez votre monolithe !
+
+Jusqu'à récemment j'étais consultant et j'ai eu l'occasion de voir plusieurs projets ayant grandi sur une base monolithique.
+
+Ceux-ci n'ayant, en général, pas forcément eu de réflexion d'architecture en amont, on retrouve plus ou moins rapidement des problématiques de "code spaghetti" et la solution proposée par les équipes est en général une migration vers des microservices.
+
+Bien que les microservices soient une solution, ce n'est ni la plus simple, ni la seule. Je vous propose donc cet article afin de découvrir comment structurer votre monolithe avec Symfony.
+
+## Sortir de l'architecture standard
+
+Depuis la sortie de Symfony 3, les bonnes pratiques nous recommandent de mettre tout notre code dans un seul et même répertoire ( fini les bundles ).
+
+Par défaut, toute notre logique se retrouve organisée dans différents dossiers classés par typologie de classes.
+
+C'est une proposition d'architecture et ce n'est nullement imposé par le framework, nous allons voir comment configurer un projet Symfony pour s'adapter à une architecture différente.
+
+Je ne prendrai volontairement pas d'architecture spécifique comme exemple afin de montrer que l'on peut faire ce que l'on souhaite. Les différents exemples de code seront basés sur Symfony 5.
+
+### Les entités
+
+Par défaut, Symfony ( ou plutôt Doctrine ) reconnait les entités créées ainsi :
+```
+src
+│
+└───Entity
+│   │   User.php
+│   │   Company.php
+│   │   Product.php
+│   │   Brand.php
+```
+
+C'est très bien pour un petit projet, mais imaginez maintenant une centaine d'entités. Difficile de comprendre rapidement les interactions non ?
+Imaginons maintenant que, pour clarifier les interactions, on souhaite les regrouper ainsi :
+```
+src
+│
+└───User
+│   └───Entity
+│       └───Company.php
+│       └───User.php
+└───Product
+│   └───Entity
+│       └───Brand.php
+│       └───Product.php
+```
+
+Pour que cela soit reconnu par Doctrine, il nous faudra déclarer chaque mapping dans le fichier de configuration `config/packages/doctrine.yaml`
+
+```diff
+doctrine:
+    orm:
+        mappings:
+-            App:
++            User:
+                 is_bundle: false
+                 type: annotation
+-                dir: '%kernel.project_dir%/src/Entity'
+-                prefix: 'App\Entity'
+-                alias: App
+-
++                dir: '%kernel.project_dir%/src/User/Entity'
++                prefix: 'App\User\Entity'
++                alias: User
++            Product:
++                is_bundle: false
++                type: annotation
++                dir: '%kernel.project_dir%/src/Product/Entity'
++                prefix: 'App\Product\Entity'
++                alias: Product
+```
+
+Et c'est tout !
+
+On peut donc très facilement placer les entités où on le souhaite.
+
+### Repositories
+
+Concernant les repositories, vous pouvez en réalité les placer où vous le souhaitez.
+Il suffira de modifier la référence au répository dans l'entité. Par exemple, en annotation, cela peut donner :
+```php
+<?php
+
+namespace App\Product\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity(repositoryClass="App\Product\Repository\ProductRepository")
+ */
+class Product
+{
+    ...
+}
+
+```
+
+### Les services
+
+Bonne nouvelle ! Pour les services, vous pouvez avec la configuration par défaut faire ce que vous voulez.
+
+Afin de mieux différencier la configuration des services de chaque module, on peut par exemple segmenter ainsi :
+
+```
+config
+│
+└───modules
+│   └───user.yml
+│   └───product.yml
+```
+
+Pour que cela fonctionne, il faudra soit importer vos configurations via un import dans le fichier `config/services.yml`:
+
+```yaml
+imports:
+    - { resource: modules/user.yaml }
+    - { resource: modules/product.yaml }
+```
+
+Ou de manière plus élégante, en modifiant le `Kernel.php`:
+
+```diff
+protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
+{
+    $container->addResource(new FileResource($this->getProjectDir().'/config/bundles.php'));
+    $container->setParameter('container.dumper.inline_class_loader', \PHP_VERSION_ID < 70400 || !ini_get('opcache.preload'));
+    $container->setParameter('container.dumper.inline_factories', true);
+    $confDir = $this->getProjectDir().'/config';
+
+    $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
+    $loader->load($confDir.'/{packages}/'.$this->environment.'/*'.self::CONFIG_EXTS, 'glob');
+    $loader->load($confDir.'/{services}'.self::CONFIG_EXTS, 'glob');
+    $loader->load($confDir.'/{services}_'.$this->environment.self::CONFIG_EXTS, 'glob');
++   $loader->load($confDir.'/{modules}'.self::CONFIG_EXTS, 'glob');
++   $loader->load($confDir.'/{modules}_'.$this->environment.self::CONFIG_EXTS, 'glob');
+}
+```
+
+On peut penser bien sûr appliquer la même logique pour le routing.
+
+### Les controlleurs
+
+Du côté des controlleurs, là aussi peu de travail vu qu'en réalité, il ne s'agit que de services avec un tag spécifique.
+
+Vous pouvez donc définir dans le fichier de configuration des services de votre module la configuration de ces controlleurs :
+
+```yaml
+
+services:
+    App\User\Controller\:
+        resource: '../src/User/Controller'
+        tags: ['controller.service_arguments']
+
+```
+
+## Couplage faible
+
+Nous avons vu comment Symfony nous permet simplement d'organiser notre code comme nous le souhaitons.
+Maintenant, il nous faut rendre au maximum indépendants entre eux nos différents modules et comment s'assurer que cela est bien appliqué.
+
+### Deptrac
+
+Php n'offre pas de solution pour imposer ce cloisonnement.
+Par contre, la branche allemande de Sensiolabs a publié un outil nommé Deptrac permettant de controller cela.
+
+La configuration de cette outil est en yaml et se présente ainsi :
+
+````yaml
+# depfile.yml
+paths:
+  - ./src
+exclude_files:
+  - .*test.*
+layers:
+  - name: User
+    collectors:
+      - type: className
+        regex: .*\\Domain\\User\\.*
+  - name: Order
+    collectors:
+      - type: className
+        regex: .*\\Domain\\Order\\.*
+  - name: Infrastructure
+    collectors:
+      - type: className
+        regex: .*\\Infrastructure\\.*
+ruleset:
+  User:
+    - Infrastructure
+  Payment:
+    - Infrastructure
+  Infra: ~
+````
+
+Ici, nous avons par exemple défini 2 modules, "User" et "Order".
+
+Via l'entrée ruleset, nous avons défini que ces 2 modules ne peuvent appeler, en dehors des classes présentes au sein de leur modules, que des classes vers "Infrastucture".
+
+Ainsi, vous pouvez controller, plus ou moins finement selon votre besoin, vos règles de dépendances.
+
+Une fois intégré dans votre CI, cet outil sera le garant de l'indépendance de vos modules.
+
+## Anti corruption layer (ACL)
+
+Au sein de vos modules, il est possible que vous ayez besoin de faire appel à un service présent hors de celui-ci.
+
+Le format de renvoyé sera donc inconnu par votre module et il vous faudra mettre en place un ACL.
+
+Dans les faits, cela revient à transformer la reponse de votre service en un format connu par votre module.
+
+Plutôt qu'écrire ses logiques à la main, je recommande l'utilisation d'un automapper. ([Auto-mapper-plus](https://packagist.org/packages/mark-gerarts/auto-mapper-plus)
+ou [Jane-php Automapper](https://packagist.org/packages/jane-php/automapper)) qui vous faciliteront grandement les transformations à ce niveau.
+
+# Conclusion
+
+J'espère vous avoir convaincu que la structure standard n'est qu'une proposition.
+
+À vous de choisir l'architecture qui convient à votre projet ( il en existe déjà, ne réinventez pas la roue ;) )
+
+Bonnes fêtes à tous !
+
+### À voir / À lire pour ceux qui veulent creuser le sujet :
+
+- [[vidéo] Base d'un monolithe modulaire - Timothée Barray](https://www.youtube.com/watch?v=0VoJklzyZgw)
+- [Livre] Patterns of Enterprise Application Architecture de Martin Fowler
+- [Livre] Implementing Domain-Driven Design de Vaughn Vernon
+- [Livre] Clean Architecture: A Craftsman's Guide to Software Structure and Design de Robert C. Martin
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/2017/19/cyril_souillard.jpeg') }}"
+         alt="Cyril Souillard"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/CyrilSouillard' %}"
+           target="_blank">{% block article_author 'Cyril Souillard' %}</a></h2>
+    <p>
+        <abbr title="Chief Technical Officer" lang="en">CTO</abbr> chez <a href="https://business.wishibam.com/"
+                                                                           target="_blank">Wishibam</a>.
+    </p>
+{% endblock %}
