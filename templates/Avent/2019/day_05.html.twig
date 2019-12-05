@@ -169,7 +169,7 @@ Maintenant, il nous faut rendre au maximum indépendants entre eux nos différen
 Php n'offre pas de solution pour imposer ce cloisonnement.
 Par contre, la branche allemande de Sensiolabs a publié un outil nommé Deptrac permettant de controller cela.
 
-La configuration de cette outil est en yaml et se présente ainsi :
+La configuration de cet outil est en yaml et se présente ainsi :
 
 ````yaml
 # depfile.yml
@@ -210,7 +210,7 @@ Une fois intégré dans votre CI, cet outil sera le garant de l'indépendance de
 
 Au sein de vos modules, il est possible que vous ayez besoin de faire appel à un service présent hors de celui-ci.
 
-Le format de renvoyé sera donc inconnu par votre module et il vous faudra mettre en place un ACL.
+Le format de renvoi sera donc inconnu par votre module et il vous faudra mettre en place un ACL.
 
 Dans les faits, cela revient à transformer la reponse de votre service en un format connu par votre module.
 
