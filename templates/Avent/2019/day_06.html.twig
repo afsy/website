@@ -1,0 +1,562 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 06 - PHP Asynchrone" %}
+
+{% block article_content_md %}
+PHP Asynchrone
+==============
+
+Ces dernières années c'est presque devenu un buzzword. Au point que certains ne veulent plus en entendre parler,
+d'autres disent que ça n'est pas utile en PHP. D'autres encore jurent que ça n'existe pas et que ça n'est que fantasme.
+Et certains d'entre nous [ne comprennent pas](https://github.com/Nekland/Woketo/issues/151#issuecomment-535016104) que ça
+ne soit pas un fonctionnement identique à JavaScript au point que certaines librairies
+[trichent](https://github.com/ratchetphp/Pawl/blob/de50955093d3b96c4b8344b0fd065905e4c00143/src/functions.php#L26)
+pour simuler un comportement similaire (elles n'en restent pas moins asynchrones réellement).
+
+
+Qu'est-ce que c'est l'asynchrone ?
+----------------------------------
+
+L'asynchrone c'est la capacité à ne pas attendre la fin de l'exécution d'une action avant de continuer l'exécution du
+code. Lorsque l'on parle d'asynchrone on ne parle usuellement pas de thread. PHP (au même titre que JavaScript) est
+monothreadé par défaut. Nous ne parlons pas d'exécution en concurrence mais simplement d'un ordre d'exécution
+permettant d'éviter les temps d'attente du programme.
+
+Dans la réalité, vous êtes rarement en train d'attendre. Voici les temps d'attente que vous pourriez avoir :
+- Temps d'attente réseau (lenteur du réseau ou attente de traitement distant)
+- Attente de l'arrêt d'un processus enfant
+- Attente du système de fichiers de votre serveur (cas à la marge, le système de fichier est généralement considéré assez
+  rapide pour ne pas être utilisé de façon asynchrone)
+
+Cependant, cette capacité à traiter plusieurs tâches en parallèle peut nous amener à traiter de nouveaux sujets, tels
+que notamment le multiplexing. (la capacité d'ouvrir plusieurs flux réseau en même temps pour transférer les données
+potentiellement plus rapidement)
+
+Mais alors comment fonctionne l'asynchrone en PHP ? Et bien comme dans la plupart des langages. Nous lançons des
+instructions système, continuons, et reprenons leur résultat plus tard. Un cas d'exemple typique et très simple est possible
+avec le [ProcessComponent](https://symfony.com/doc/current/components/process.html) de Symfony :
+
+```php
+<?php
+// slow_process.php
+
+echo "Starting process\n";
+sleep(10);
+echo "Important message\n";
+sleep(10);
+echo "Process is finished\n";
+```
+
+```php
+<?php
+// mon_script_asynchrone.php
+require 'vendor/autoload.php';
+
+$process = new \Symfony\Component\Process\Process(['php', 'slow_process.php']);
+$process->start();
+
+echo "Un peu de travail pour PHP pendant que notre processus enfant s'exécute...\n";
+
+$process->wait();
+
+echo "Fin du runner\n";
+```
+
+Mais si l'asynchrone est aussi simple, pourquoi est-ce que tout le monde en parle ? On en parle parce qu'en 2019, nous
+recherchons tous le code le plus rapide, et parfois nous allons vouloir utiliser beaucoup d'appels asynchrones pour
+y arriver. Dans l'exemple précédent nous avons vu une tâche asynchrone, ce code était simple à l'extrême. Mais il ne
+résout pas un problème aussi simple que vérifier l'output du processus 10 secondes après le lancement ! Le lancement
+et la gestion de plusieurs tâches asynchrones est également en option.
+
+Je vais vous présenter deux solutions qui permettent de rendre votre code asynchrone. Les event-loop et les générateurs.
+
+Les event-loops
+---------------
+
+Avant que les générateurs ne soient implémentés dans PHP, c'était la solution privilégiée. Pour illustrer cela nous
+allons écrire un serveur web. C'est l'exemple le plus typique qui nécessite absolument de l'asynchrone, et pour cause :
+sans asynchronisme, notre serveur ne pourra pas accepter plus d'une connexion !
+
+### Écrivons un serveur web simple non-asynchrone
+
+```php
+<?php
+
+$port = 1337;
+$server = stream_socket_server(
+    'tcp://127.0.0.1:' . $port, $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN
+);
+
+echo "Listening on port $port\n";
+
+
+// Cette simulation est affreusement fausse: un sleep ordonne à votre programme de se mettre en pause complète
+// ce qui veut dire qu'il ne peut pas y avoir de processus asynchrone en parallèle !... C'est pour l'exemple.
+function someProcess()
+{
+    echo "Processing\n";
+    sleep(2); // Délaie l'exécution suivante de 2 secondes
+    echo "Processing again\n";
+    sleep(2); // Délaie l'exécution suivante de 2 secondes
+    echo "Processing again again\n";
+    sleep(2); // Délaie l'exécution suivante de 2 secondes
+    echo "Finished my stuff\n";
+}
+
+while($client = stream_socket_accept($server)) {
+    // Contenu de la boucle
+    $buffer = '';
+
+    if($client) {
+        // On attend d'avoir une requête http complète
+        while( !preg_match('/\r?\n\r?\n/', $buffer) )
+            $buffer .= fread($client, 2046);
+
+        // Voici notre HTML de réponse
+        $response = "<h1>Reponse synchrone</h1>\n" . time();
+
+        // On encapsule ce HTML dans une requête HTTP valide
+        fwrite($client,"HTTP/1.1 200 OK\r\n" .
+        "Date: " . gmdate('D, d M Y H:i:s T') . "\r\n" .
+        "Connection: close\r\n" .
+        "Content-Type: text/html\r\n" .
+        "Content-Length: ". strlen($response). "\r\n" .
+        "\r\n" .
+        $response . "\r\n");
+
+        // On termine et on attend une autre connexion !
+        fclose($client);
+
+        // Processing something
+        someProcess();
+    }
+}
+```
+Cet exemple illustre le problème : nous n'avons pas de concurrence. Vous pouvez lancer ce programme et utiliser votre
+navigateur pour le prouver ! La 2ème page mettra bien 6 secondes à s'afficher, pendant que votre terminal affichera
+notre faux traitement.
+
+Et pourtant les fonctions `stream_set_blocking` et `stream_socket_accept` ont des arguments qui nous permettent d'ouvrir
+plusieurs connexions simultanément.
+
+### Passons maintenant à l'asynchrone !
+
+Pour faire notre event-loop, nous allons utiliser un mécanisme bien connu de PHP: la [fonction](https://www.php.net/manual/fr/function.stream-select.php)
+`stream_select`. Le rôle de cette fonction est de mettre en pause le programme jusqu'à ce qu'un des streams qu'on
+lui passe en paramètre soit actif.
+
+Il ne reste plus qu'à écrire une classe qui encapsule ce fonctionnement avec plusieurs streams ! Et dans l'idée c'est
+très simple, nous voulons une classe qui gère les choses suivantes :
+- Plusieurs streams (en écriture et lecture)
+- Une boucle infinie pour que notre programme ne s'arrête pas
+- Un temps d'attente en cas d'inactivité (grâce à `stream_select()`)
+
+Voici une implémentation possible :
+```php
+class Loop
+{
+    private $running;
+    private $readStreams;
+    private $readHandlers;
+    private $writeStreams;
+    private $writeHandlers;
+
+    public function __construct()
+    {
+        $this->readStreams = [];
+        $this->readHandlers = [];
+        $this->writeStreams = [];
+        $this->writeHandlers = [];
+        $this->running = false;
+    }
+
+    public function addReadStream($stream, $onActivity)
+    {
+        // stream et handler ont la même clé
+        $this->readStreams[] = $stream;
+        $this->readHandlers[] = $onActivity;
+    }
+
+    public function addWriteStream($stream, $onActivity)
+    {
+        $this->writeStreams[] = $stream;
+        $this->writeHandlers[] = $onActivity;
+    }
+
+    public function run()
+    {
+        $this->running = true;
+        while ($this->running) {
+            // Encore une fois on fait des temps d'attente pour pas que le processeur explose
+            $this->waitForActivity();
+        }
+    }
+
+    private function waitForActivity()
+    {
+        // stream_select va utiliser ces variables et remplacer leur contenu par les streams actifs
+        $read = $this->readStreams;
+        $write = $this->writeStreams;
+
+        $available = @stream_select($read, $write, $except, null);
+
+        if (false === $available) {
+            return;
+        }
+
+        foreach ($read as $key => $readStream) {
+            if (isset($this->readHandlers[$key])) {
+                \call_user_func($this->readHandlers[$key], $readStream);
+            }
+        }
+        foreach ($write as $key => $writeStream) {
+            if (isset($this->writeHandlers[$key])) {
+                \call_user_func($this->writeHandlers[$key], $writeStream);
+            }
+        }
+    }
+}
+```
+
+Et à l'utilisation cela donnerait quelque chose comme ceci en reprenant le code précédent. Faisons une petite folie :
+ouvrons deux serveurs en même temps pour prouver que nous sommes bel et bien asynchrones !
+
+```php
+$loop = new Loop();
+
+// Notre serveur, mais réécrit avec la boucle
+$server = stream_socket_server('tcp://127.0.0.1:1337');
+stream_set_blocking($server, false); // Le mode non bloquant activé !
+
+$loop->addReadStream($server, function ($server) use ($loop) {
+    $client = stream_socket_accept($server);
+    $loop->addWriteStream($client, function ($client) {
+        $response = "<h1>Reponse asynchrone</h1>\n" . time();
+
+        fwrite($client,"HTTP/1.1 200 OK\r\n" .
+            "Date: " . gmdate('D, d M Y H:i:s T') . "\r\n" .
+            "Connection: close\r\n" .
+            "Content-Type: text/html\r\n" .
+            "Content-Length: ". strlen($response). "\r\n" .
+            "\r\n" .
+            $response . "\r\n");
+        fclose($client);
+    });
+});
+
+// Soyons fous, créons deux serveurs !
+$server2 = stream_socket_server('tcp://127.0.0.1:8000');
+stream_set_blocking($server2, false);
+$loop->addReadStream($server2, function ($server) use ($loop) {
+    $client = stream_socket_accept($server);
+    $loop->addWriteStream($client, function ($client) {
+        $response = "<h1>Reponse asynchrone 2</h1>\n" . time();
+
+        fwrite($client,"HTTP/1.1 200 OK\r\n" .
+            "Date: " . gmdate('D, d M Y H:i:s T') . "\r\n" .
+            "Connection: close\r\n" .
+            "Content-Type: text/html\r\n" .
+            "Content-Length: ". strlen($response). "\r\n" .
+            "\r\n" .
+            $response . "\r\n");
+        fclose($client);
+    });
+});
+
+$loop->run();
+```
+
+On pourrait imaginer des tas de fonctionnalités supplémentaires à cette event-loop parmi lesquelles :
+- Une méthode stop pour arrêter la boucle
+- La possibilité de supprimer les streams (ceux fermés devraient être supprimés)
+- La gestion de signaux
+- La possibilité d'avoir des timers
+
+💡Tiens d'ailleurs, nous avons deux serveurs capables de répondre à des clients de façons asynchrone... Mais nous n'avons
+pas résolu notre problème initial ! Comment faire des timeouts dans cette situation ?!
+
+Pour résoudre ce problème on peut utiliser le timeout de la fonction `stream_select()` afin d'attendre juste le temps
+nécessaire. Le cas d'un grand nombre de timers demande d'ajouter pas mal de code, pour faire simple on ne va gérer qu'un
+seul timer mais vous comprendrez l'idée.
+
+```php
+// Notre loop (simplifiée, mais tout le code que nous avons vu est toujours là !)
+class Loop
+{
+    private $time;
+    private $timeHandler;
+
+    public function __construct()
+    {
+        $this->timeHandler = null;
+        $this->time = null;
+    }
+
+    // Pour cet exemple on sera précis à la seconde près, mais on peut faire mieux !
+    public function setTimeout(int $timeout, callable $handler)
+    {
+        $this->time = time() + $timeout;
+        $this->timeHandler = $handler;
+    }
+
+    public function run()
+    {
+        $this->running = true;
+        while ($this->running) {
+            $timeout = null;
+
+            // S'il y a un timer
+            if ($this->timeHandler !== null) {
+                $time = time();
+                // Si le timer est à exécuter
+                if ($this->time <= $time) {
+                    $this->executeTimeHandler();
+                } else {
+                    // Evitons le temps de processeur inutile, spécifions un timeout à stream_select()
+                    $timeout = $this->time - $time;
+                    if ($timeout <= 0) {
+                        $timeout = null; // Il ne faut pas lui envoyer null sinon la fonction s'arrêtera de suite
+                    }
+                }
+            }
+            // Encore une fois on fait des temps d'attente pour pas que le processeur explose
+            $this->waitForActivity($timeout);
+        }
+    }
+
+    private function executeTimeHandler()
+    {
+        $handler = $this->timeHandler;
+        $this->timeHandler = null;
+        $this->time = null;
+        $handler($this);
+    }
+
+    private function waitForActivity($timeout)
+    {
+        // ... vous connaissez le début
+
+        // En réalité il est possible qu'il n'y ait pas de streams, il faudrait alors utiliser la fonction sleep()
+        $available = @stream_select($read, $write, $except, $timeout);
+
+        // ... vous connaissez la fin
+    }
+}
+```
+
+Utilisons cette nouvelle classe :
+
+```php
+$loop = new Loop();
+
+// Notre serveur, mais réécrit avec la boucle
+$server = stream_socket_server('tcp://127.0.0.1:1337');
+stream_set_blocking($server, false); // Le mode non bloquant activé !
+
+function process(Loop $loop)
+{
+    echo "Processing\n";
+    $loop->setTimeout(6, function () {
+        echo "Finished my stuff\n";
+    });
+}
+
+$loop->addReadStream($server, function ($server) use($loop) {
+    $client = stream_socket_accept($server);
+    $loop->addWriteStream($client, function ($client) use ($loop) {
+        $response = "<h1>Reponse asynchrone</h1>\n" . time();
+
+        fwrite($client,"HTTP/1.1 200 OK\r\n" .
+            "Date: " . gmdate('D, d M Y H:i:s T') . "\r\n" .
+            "Connection: close\r\n" .
+            "Content-Type: text/html\r\n" .
+            "Content-Length: ". strlen($response). "\r\n" .
+            "\r\n" .
+            $response . "\r\n");
+        fclose($client);
+        process($loop);
+    });
+});
+
+$loop->run();
+```
+
+Affichez une page dans votre navigateur, notre timer se lance ! Et vous pouvez chronométrer, ça va prendre 6 secondes !
+
+Ce n'était pas de tout repos, mais nous avons notre PHP Asynchrone. 🎉
+
+**Pour aller plus loin**, sachez que [react-php](https://github.com/reactphp/event-loop)
+fait un très bon travail par rapport aux event-loop. Inutile de ré-implémenter cela vous-même. Ils ont même une abstraction
+qui permet d'utiliser des extensions PHP qui sont plus performantes sur ce sujet. Je vous recommande l'installation
+de l'[extension](https://pecl.php.net/package/event) `ext-event`, react-php fonctionnera automatiquement avec celle-ci.
+Si vous utilisez [Ratchet](https://github.com/ratchetphp/Ratchet) ou [Woketo](https://github.com/Nekland/Woketo), sachez
+que ces projets basés sur react-php bénéficieront automatiquement de l'extension que vous avez installée ! ✨
+
+Les générateurs
+---------------
+
+Ce mécanisme de PHP introduit en PHP 5.5.0 permet de faire du traitement asynchrone. Ce n'est pas évident au premier
+abord, mais sa capacité à [changer le flux d'exécution d'un programme](https://www.php.net/manual/fr/class.generator.php) lui
+permet de faire les choses suivantes :
+- Arrêter une boucle infinie pour traiter autre chose
+- Arrêter une fonction
+- Et même revenir en arrière
+
+
+En voici un exemple concret de [coroutine](https://en.wikipedia.org/wiki/Coroutine) qui va vous surprendre :
+```php
+function logger($fileName) {
+    $fileHandle = fopen($fileName, 'a');
+    while (true) {
+        fwrite($fileHandle, yield . "\n");
+    }
+}
+
+$logger = logger(__DIR__ . '/log');
+$logger->send('Foo');
+echo "Un traitement quelconque\n";
+$logger->send('Bar');
+```
+
+Dans cet exemple, malgré la boucle infinie, mon echo va être affiché et le script va s'arrêter.
+
+Pour mettre en place notre asynchrone avec les générateurs nous allons utiliser un scheduler et décréter que nos générateurs
+sont des "tâches". Sans être réellement asynchrone, cet exemple exécute tout de même nos deux tâches de façons concurrente :
+
+```php
+class Scheduler
+{
+    private $tasks = [];
+
+    public function newTask(Generator $task)
+    {
+        $this->tasks[] = [
+            'generator' => $task,
+            'isFirstIteration' => false,
+        ];
+    }
+
+    public function run()
+    {
+        while(!empty($this->tasks)) {
+            // Exécution des tâches en concurrence
+            foreach ($this->tasks as $id => $task) {
+                if ($task['isFirstIteration']) {
+                    $task['generator']->current();
+                    $task['isFirstIteration'] = false;
+                } else {
+                    // Pour l'instant envoyer des choses à notre générateur ne nous intéresse pas.
+                    // Mais c'est tout de même intéressant de voir qu'on peut le faire pour la suite.
+                    $task['generator']->send('something');
+                }
+            }
+
+            // Suppression des tâches terminées
+            $this->tasks = array_filter($this->tasks, function ($task) {
+                return $task['generator']->valid();
+            });
+        }
+    }
+}
+
+function task1() {
+    for ($i = 1; $i <= 10; ++$i) {
+        echo "This is task 1 iteration $i.\n";
+        yield;
+    }
+}
+
+function task2() {
+    for ($i = 1; $i <= 5; ++$i) {
+        echo "This is task 2 iteration $i.\n";
+        yield;
+    }
+}
+
+$scheduler = new Scheduler;
+
+$scheduler->newTask(task1());
+$scheduler->newTask(task2());
+
+$scheduler->run();
+```
+
+Nous avons un début d'asynchrone, en tous les cas de l'exécution concurrente ! La sortie de l'exécution du code
+précédent est la suivante :
+
+```
+This is task 1 iteration 1.
+This is task 1 iteration 2.
+This is task 2 iteration 1.
+This is task 2 iteration 2.
+This is task 1 iteration 3.
+This is task 2 iteration 3.
+This is task 1 iteration 4.
+This is task 2 iteration 4.
+This is task 1 iteration 5.
+This is task 2 iteration 5.
+This is task 1 iteration 6.
+This is task 1 iteration 7.
+This is task 1 iteration 8.
+This is task 1 iteration 9.
+This is task 1 iteration 10.
+```
+
+Le code nécessaire pour produire un système asynchrone à l'aide des générateurs est assez lourd. Je vous passe les
+détails et vous laisse simplement avec un lien gist commenté (mais fonctionnel !).
+
+https://gist.github.com/Nek-/ae895c30e7da22b0d8bc3e17baf25fc6
+
+Sachez que ce type d'exécution asynchrone est utilisé par les librairies suivantes :
+- [amphp](https://amphp.org/), leur équipe propose d'ailleurs un grand nombre de [packages](https://amphp.org/packages)
+  qui permettent de dialoguer de façon asynchrone avec d'autres services.
+- [Tornado](https://github.com/M6Web/Tornado), un projet qui a fait ses preuves chez M6 pour faire des requêtes HTTP
+  en concurrence.
+
+**Note :**
+Certains exemples viennent ou sont inspirés de l'excellent article de [Nikita Popov](https://nikic.github.io/2012/12/22/Cooperative-multitasking-using-coroutines-in-PHP.html)
+sur le sujet. Je vous recommande d'aller lire également cet article.
+
+Usages
+------
+
+La meilleure application est probablement l'utilisation des capacités asynchrones de PHP pour effectuer des **requêtes
+en parallèle** en les traitant une par une dès leur arrivée. L'utilisation des générateurs se prête très bien à cet usage.
+
+Lors de la création d'un **serveur de websocket** il est également évident que vous aurez besoin de ce type de mécanisme.
+
+Si vous avez à créer **un bot** les systèmes asynchrones seront également vos amis !
+
+Cependant, ne vous y fiez pas, l'utilisation pour faire de PHP un serveur web et ainsi exécuter une application PHP
+de la même façon qu'une application NodeJS est une mauvaise idée. Et ce pour les raisons suivantes :
+- Le problème de la gestion de la mémoire va se poser dans une application de ce type
+- Comme je l'ai expliqué au début de cet article, vous n'utilisez pas de threads lors de l'exécution asynchrone, cette
+  approche n'exploite donc pas entièrement les capacités de votre machine contrairement à php-fpm, et c'est dommage
+- Il y a un gain de performance car on évite en effet la recompilation des fichiers PHP, mais il s'avère que PHP est
+  très, très très très trèèèèèès rapide à compiler (au prix de quelques erreurs de compilation parfois manquantes),
+  c'est sans compter l'ajout récent de la fonctionnalité de preloading dans PHP 7.4
+- Après tout, Amazon Lambda n'est qu'une copie (plutôt bof) du fonctionnement de PHP-FPM, pourquoi essayer de copier
+  le fonctionnement de NodeJS alors qu'ils essaient de fonctionner comme PHP lorsqu'il s'agit de HighAvailability ?
+
+
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/06/maxime_veber.png') }}"
+         alt="Association Française des utilisateurs de SYmfony"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url %}https://twitter.com/Nekdev{% endblock %}" target="_blank">
+            {% block article_author %}Maxime Veber{% endblock %}
+        </a>
+    </h2>
+    <p>
+        Lead developer @
+        <a target="_blank" href="https://www.biig.fr">BiiG</a>.
+    </p>
+{% endblock %}
