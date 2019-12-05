@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use Carbon\Carbon;
+use DateTimeZone;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -12,6 +14,7 @@ class AventController extends AbstractController
     private $twig;
     protected $futureEnabled;
     protected $enabledYears = array('2013', '2017', '2019');
+    private $now;
 
     public function __construct(Environment $twig, $env)
     {
@@ -22,6 +25,8 @@ class AventController extends AbstractController
         else {
             $this->futureEnabled = false;
         }
+
+        $this->now = Carbon::now(new DateTimeZone('Europe/Paris'));
     }
 
     protected $slugs = array(
@@ -172,7 +177,7 @@ class AventController extends AbstractController
             return array(false, false);
         }
 
-        if ($this->futureEnabled || $year < date('Y') || 12 == date('m') && $day <= date('d')) {
+        if ($this->futureEnabled || $year < $this->now->format('Y') || 12 == $this->now->format('m') && $day <= $this->now->format('d')) {
             return array($template, $slug);
         }
 
@@ -191,7 +196,7 @@ class AventController extends AbstractController
         $template = next($slugs);
         $slug = key($slugs);
         $day = (int) $slug;
-        if ($this->futureEnabled || $year < date('Y') || 12 == date('m') && $day <= date('d')) {
+        if ($this->futureEnabled || $year < $this->now->format('Y') || 12 == $this->now->format('m') && $day <= $this->now->format('d')) {
             return array($template, $slug);
         }
 
@@ -204,14 +209,13 @@ class AventController extends AbstractController
 
         $twig = $this->get('twig');
 
-        $today = date('d');
         $kept = array();
 
         foreach ($this->slugs[$year] as $slug => $template) {
             // Thanks, all articles start with '0X'
             $day = (int) $slug;
 
-            if ($this->futureEnabled || $year < date('Y') || 12 == date('m') && $day <= $today) {
+            if ($this->futureEnabled || $year < $this->now->format('Y') || 12 == $this->now->format('m') && $day <= $this->now->format('d')) {
                 $kept[$slug] = $template;
             }
         }
@@ -239,8 +243,8 @@ class AventController extends AbstractController
             return;
         }
 
-        if (date('m') < 12 || $day > date('d')) {
-            throw $this->createNotFoundException(sprintf('Day "%s" is not yet accessible (today: %s).', $day.'/12', date('d/m')));
+        if ($this->now->format('m') < 12 || $day > $this->now->format('d')) {
+            throw $this->createNotFoundException(sprintf('Day "%s" is not yet accessible (now: %s).', $day.'/12', date('d/m')));
         }
     }
 }

@@ -18,6 +18,7 @@
         "hwi/oauth-bundle": "dev-master",
         "knplabs/knp-markdown-bundle": "^1.7",
         "knplabs/knp-paginator-bundle": "^4.0",
+        "nesbot/carbon": "^2.27",
         "php-http/guzzle6-adapter": "^2.0.1",
         "php-http/httplug-bundle": "^1.16.0",
         "sensio/framework-extra-bundle": "^5.5",
