@@ -12,7 +12,7 @@ Il y a quelques jours, sur la scène du SymfonyCon Amsterdam, Fabien Potencier (
 
 Notre projet principal à Anaxago n'est pas encore migré dans cette version, mais si on regarde dans le rétroviseur, il y a à peine 18 mois, notre site était encore en Symfony 2.8.
 
-# Les enjeux d'une montée de version ?
+## Les enjeux d'une montée de version ?
 Quand on est développeur, on a toujours envie de jouer avec les jouets les plus récents.
 
 Cependant dans la vie d'une start-up il est parfois difficile de consacrer du temps à ces tâches techniques.
@@ -23,17 +23,17 @@ Elles offrent également aux développeurs une meilleure expérience de travail 
 
 Reste que pour une petite équipe de développeurs, il n'est pas toujours aisé de planifier ces montées de version sans délaisser l'avancée d'une roadmap produit.
 
-Petits retours d'expériences de la montée de version avec Symfony 4, côté front (pour les plus back d'entre vous, on se retrouve demain).
+Petits retours d'expérience de la montée de version avec Symfony 4, côté front (pour les plus back d'entre vous, on se retrouve demain).
 
-**TLDR**; Vous pouvez passer du temps à planifier, à prévoir, à imaginer tout ce qui va casser, mais la vérité c'est que bien qu'une carte 21 en planning poker ne soit pas suffisante, il faut monter les versions car ce que Symfony a à nous offrir en vaut la peine, comme les nouveaux composants plus haut niveau (Workflow, Messenger…).
+**TL;DR** : Vous pouvez passer du temps à planifier, à prévoir, à imaginer tout ce qui va casser, mais la vérité c'est que bien qu'une carte 21 en planning poker ne soit pas suffisante, il faut monter les versions car ce que Symfony a à nous offrir en vaut la peine, comme les nouveaux composants plus haut niveau (Workflow, Messenger…).
 
-# RIP Assetic
+## RIP Assetic
 
 La mort d'Assetic dans la version 4 représente chez nous un immense chantier. En effet nous avons environ 200 fichiers Twig faisant appel à Assetic.
 
 Il aura donc fallu repasser sur tous ces fichiers et migrer le code dans des javascripts gérés par WebpackEncore afin de garder les fonctionnalités de minification, de caching, etc.
 
-# Utilisation de node_modules
+## Utilisation de node_modules
 
 Dans notre architecture pré-SF4, les librairies JS sont disséminées un peu partout :
 - dans chacun des bundles ;
@@ -45,13 +45,13 @@ Si bien que Github considère notre projet comme étant majoritairement Javascri
 
 ![projet javascript](https://lh5.googleusercontent.com/f-87EnHa0PHkl1csitMIx89La3CwvGa3g2_4hMDlKmahXK5KRvZNbXHJd906tcOSsMhyMZauxR90as4_iQ2Bdwh9h3w54uhIAEmvsFuI91uNfCVxAjl8kIgV1aMcdRVvkmpMug3g)
 
-Désormais, les dépendances JS ont trouvé leur place : `/node_modules` (oui, dit comme cela, ce nom semble mal trouvé...).
+Désormais, les dépendances JS ont trouvé leur place : `/node_modules` (oui, dit comme cela, ce nom semble mal trouvé…).
 
 Et le fait de regrouper les vendors dans un répertoire non commité nous a permis de découvrir que…
 
-##  … les CSS des librairies vendors ont été directement modifiés dans les commits de notre repo !
+###  … les CSS des librairies vendors ont été directement modifiés dans les commits de notre repo !
 
-Quand on développe une plateforme qui est passée par plusieurs équipes de développement à différents stades de son évolution, on s'habitue vite (trop vite…) à vivre avec du code “legacy”, vous savez ces fameux morceaux de codes qui fonctionnent sans que personne ne sache vraiment pourquoi.
+Quand on développe une plateforme qui est passée par plusieurs équipes de développement à différents stades de son évolution, on s'habitue vite (trop vite…) à vivre avec du code “legacy”, vous savez, ces fameux morceaux de code qui fonctionnent sans que personne ne sache vraiment pourquoi.
 On y trouve ainsi quelques cadavres de temps à autre.
 ![Quelques cadavres dans le placard](https://media.giphy.com/media/eToYFbOtxtTUc/giphy.gif)
 
@@ -65,7 +65,7 @@ Nos yeux ont saigné après le premier rafraîchissement de notre page : aucune 
 
 Après réparation de nos rétines, il nous a fallu quelques heures pour assainir les CSS et surcharger correctement les styles dont nous avions besoin.
 
-## Où est cette lib ?
+### Où est cette lib ?
 Si nous avons appris une chose avec la disparition d'Assetic, c'est que tous les mauvais choix faits, les mauvaises pratiques accumulées et raccourcis pris à un instant T finissent toujours par nous rattraper.
 
 Évidemment ne pas [réinventer la roue](https://fr.wikipedia.org/wiki/R%C3%A9inventer_la_roue_carr%C3%A9e) est la base et le mot d'ordre des fainéants que nous sommes, mais quand certaines librairies utilisées ne sont plus maintenues et donc pas disponibles via npm… Comment vous dire…
@@ -81,7 +81,7 @@ On a adopté un principe basique en se posant les questions suivantes :
 Heureusement le destin ne nous en voulait pas trop. Rares furent les fois où nous sommes arrivés jusqu'à la dernière question.
 Cela nous a aussi permis de voir à quel point le code peut s'accumuler très vite dans un projet sans jamais être utilisé, d'où l'importance du code cleaning.
 
-## Mais pourquoi rien ne fonctionne comme dans la documentation ?
+### Mais pourquoi rien ne fonctionne comme dans la documentation ?
 
 Avec ce passage à Webpack, nous en avons profité pour mettre à jour certains packages tiers que nous utilisons sur la plateforme.
 
@@ -98,7 +98,7 @@ Cette fois nos esprits désespérés ont capté une information capitale dans l'
 Ne voulant pas trop servir de cobaye, nous précisions à `yarn` que nous préférìons une version stable : problem solved 👍
 
 
-# `yarn` vs `npm`
+## `yarn` vs `npm`
 
 Sans vouloir troller (ah bah si en fait, je vais troller), la communauté JS est un petit peu plus “dispersée” que la communauté PHP.
 
@@ -126,7 +126,7 @@ Notre choix : `yarn`
 
 PS : bon, tout ça c'est pour avoir des arguments objectifs, mais c'est surtout parce que `yarn` est mis en avant dans la documentation Symfony 😆
 
-# Changement de paradigme: tout est scopé !
+## Changement de paradigme : tout est scopé !
 
 Autant certaines migrations peuvent se faire *facilement* – par exemple entre Symfony 2.8 et 3.4, aucun changement fonctionnel majeur (côté front tout du moins) –, autant ici, c'est plus compliqué.
 
@@ -145,7 +145,7 @@ Avec WebpackEncore, ces javascripts deviennent cloisonnés.
 
 Nous avons donc repensé notre manière de construire nos scripts, et ainsi utilisé les fonctionnalités d'import / export fournies par ES6.
 
-# État des lieux
+## État des lieux
 
 La disparition d'Assetic est pour nous l'opportunité de nous aligner avec les bonnes pratiques actuelles.
 
