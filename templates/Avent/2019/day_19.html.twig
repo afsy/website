@@ -79,7 +79,7 @@ namespace App;
 
 class DiceRoller
 {
-    public function roll(int $sides, int $multiplier = 1, int $offset = 0)
+    public function roll(int $sides, int $multiplier = 1, int $offset = 0): int
     {
         return random_int(1, $sides) * $multiplier + $offset;
     }
@@ -223,13 +223,13 @@ Nous avons donc une "solution", mais celle-ci reste approximative.
 
 Merci PHP ! Une fois de plus !
 
-Grâce à PHP, il existe plusieurs façons de pouvoir surcharger une fonction native. Il existait il y a longtemps fonction `override_function()` mais faisant partie de l'extension APD (Advanced PHP Debugger) qui est abandonnée depuis… 2004.
+Grâce à PHP, il existe plusieurs façons de pouvoir surcharger une fonction native. Il existait il y a longtemps la fonction `override_function()` mais faisant partie de l'extension APD (Advanced PHP Debugger) qui est abandonnée depuis… 2004.
 
 La meilleure façon c'est la **surcharge dans l'espace de noms**.
 
 En effet, lorsque votre code est situé dans un espace de nom, et que vous exécutez une fonction (n'importe laquelle), PHP va d'abord vérifier si celle-ci existe dans l'espace de noms actuel, et sinon, va se replier sur l'espace de noms global.
 
-Cette surcharge est d'ailleurs celle opérée par les classes `DnsMock` et `ClockMock` du PHPUnit Bridge de Symfony pour permettre de surcharger les fonctions natives de recherches d'enregistrements DNS ou de date/temps.
+Cette surcharge est d'ailleurs celle opérée par les classes `DnsMock` et `ClockMock` du PHPUnit Bridge de Symfony pour permettre de surcharger les fonctions natives de recherche d'enregistrements DNS ou de date/temps.
 
 Voici comment procéder :
 
@@ -257,7 +257,7 @@ function random_int() { /* */ }
 
 Et voilà ! Avec cette méthode, lorsque le `DiceRoller` exécutera la fonction `random_int()`, PHP cherchera d'abord à savoir si elle a été déclarée dans le namespace de celui-ci (`App` dans notre cas), et exécutera la fonction que vous avez créée !
 
-De cette façon, vous pouvez, par exemple, exécuter une fonction d'une classe statique qui vous permettrait de définir dès le départ d'un résultat à avoir :
+De cette façon, vous pouvez, par exemple, exécuter une fonction d'une classe statique qui vous permettrait de définir dès le départ un résultat à avoir :
 
 ```php
 
@@ -270,7 +270,7 @@ class DiceRollerTest extends TestCase
 {
     public static int $forcedResult = 0;
 
-    public function test()
+    public function test(): void
     {
         $diceRoller = new DiceRoller();
 
@@ -334,7 +334,7 @@ class DiceRoller
         $this->randomIntProvider = $randomIntProvider;
     }
 
-    public function roll(int $sides, int $multiplier = 1, int $offset = 0)
+    public function roll(int $sides, int $multiplier = 1, int $offset = 0): int
     {
         return $this->randomIntProvider->randomInt(1, $sides) * $multiplier + $offset;
     }
