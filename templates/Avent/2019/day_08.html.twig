@@ -1,0 +1,166 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "REX : de Symfony 2 à Symfony 4 et au-delà<br/>(We are back !)" %}
+
+{% block article_content_md %}
+REX : de Symfony 2 à Symfony 4 et au-delà (We are back !)
+=================================
+
+Réaliser une montée de version Symfony sur un projet ayant déjà quelques années de vie représente un petit défi technique et organisationnel.
+Cherchant à limiter l’impact business nous avons choisi d’y aller étape par étape.
+L’objectif étant à terme de pouvoir bénéficier de toutes les avancées majeures du framework (auto-wiring, flex, etc.).
+
+Petit tour d’horizon des étapes que nous avons suivies.
+
+
+## Des tests, des tests et encore des tests
+![collaspe](https://media.giphy.com/media/PlnQNcQ4RYOhG/giphy.gif)
+On imagine qu’une montée de version va générer pas mal d’erreurs 500, la plupart du temps pour des bricoles facilement corrigeables mais difficiles à détecter, surtout avec près de 1 000 routes différentes.
+
+A l’époque notre plateforme disposait d’une couverture de test famélique. Ces montées de version sont pour nous l’opportunité rêvée de combler ce déficit.
+Pour commencer on va se concentrer là où les incendies pourraient débuter.
+Demandons au routeur de nous lister l’ensemble de nos routes :
+```
+php bin/console debug:router|awk '{print $1}'|grep anaxago_
+```
+Copions le tout dans un array sur lequel on va itérer et tester si nous obtenons une 200.
+Malheureusement beaucoup de nos URLs – en grande partie celles de notre backoffice – dépendent de la base de données.
+La solution ? Les fixtures ! Intégrées à nos tests fonctionnels, nous pouvons en quelques minutes tester quasi 100 % de nos pages.
+
+# On migre Symfony, oui, mais pas que...
+La première étape paraît simple, mais s'avère un vrai sac de nœuds à démêler :
+
+![](https://lh5.googleusercontent.com/7324rZGPu-3B4lwfbxXDyvAURojusDejwgycGFlVmpHdlE_0BkoXhVymflUudmrsnkG9TXHHdKO3TLt9N2eoeVYWT8QC9q9sQUlOoKnQkc7bt6fDfmV3HQRikWD9KuaMqxuLV6Ih)
+
+Avec près de 70 dépendances, il ne s’agit pas uniquement de mettre à jour Symfony. Il faut trouver toutes les nouvelles versions qui vont pouvoir fonctionner entres elles.
+
+Au début on se retrouve avec des messages `composer` de ce type :
+```
+- Conclusion: don't install symfony/symfony v3.4.26
+- Conclusion: don't install symfony/symfony v3.4.25
+- Conclusion: don't install symfony/symfony v3.4.24
+- Conclusion: don't install symfony/symfony v3.4.23
+- Conclusion: don't install symfony/symfony v3.4.22
+- Conclusion: don't install symfony/symfony v3.4.21
+...
+```
+![AH](https://media.giphy.com/media/3o7btW7VDxqrhJEnqE/200w_d.gif)
+
+Un peu rapide comme conclusion non ?
+Heureusement nous avons une liste des packages ne voulant pas s’installer.
+
+Avec un peu de patience, quelques recherches sur packagist pour trouver les versions adéquates, on retente, on obtient une nouvelle liste d’incompatibilités et on recommence.
+Parfois on s'aperçoit que certains packages ne sont plus du tout maintenus, on décide alors de s’en passer (soit en en choisissant un autre, soit en développant nous-même les fonctionnalités que nous utilisions).
+
+Il aura fallu une journée complète pour que `composer` installe tout correctement.
+
+## Ça s’installe, mais est-ce que ça boot ?
+On avance, les dépendances s’installent, nous avons appliqué les changements des dossiers dans composer, mais est-ce que Symfony compile ?
+
+Dans notre cas, la réponse était négative.
+La raison est toute simple : quand on fait une mise à jour via `composer`, aucun des fichiers standards de Symfony pré-existants n’est mis à jour.
+Ainsi les fichiers AppKernel, console et je dois en oublier ne sont pas à jour.
+Le moyen le plus rapide pour corriger est d’installer un projet skeleton de symfony dans la version voulue et de pointer les différences.
+
+Au fil des versions, ce skeleton est de plus en plus maigre, donc l’opération est plutôt rapide.
+
+## On migre, d’accord, mais quelles fonctionnalités souhaite-t-on utiliser ?
+L’écosystème de Symfony est très complet et nous permet de tout configurer à notre sauce.
+On pourrait ainsi installer les nouvelles versions mais sans en utiliser les nouvelles features. Ce serait dommage maintenant qu’on en est là.
+
+L’auto-configuration et l’auto-injection des services sont des fonctionnalités très intéressantes pour nous développeurs. Finie, la création de multiples fichiers YAML pour déclarer manuellement nos services. C’est un gain de temps et de confort loin d’être négligeable.
+
+Cependant, devant l'immensité de la tâche — le projet comportant plus de 600 services —, nous avons décidé d’y aller étape par étape :
+
+###   Changement des noms de service
+Pour la montée de version entre 2.8 et 3.4, nous avons choisi de changer l’ensemble des noms de nos services. Fini les noms choisis arbitrairement, nous utiliserons désormais les noms de classes.
+
+Malheureusement ici pas de recette miracle, il faut passer manuellement sur toutes les définitions de services puis sur les contrôleurs.
+Une petite recherche globale sur la chaîne `$this->get('` grâce à notre IDE préféré nous donne une liste plus ou moins exhaustive des endroits à modifier.
+Là encore l’exécution de nos tests fonctionnels nous a permis de cibler rapidement les endroits qui ne sont pas ressortis lors de la recherche.
+
+###   Activation de l’auto-configuration, auto-injection
+Quelques mois plus tard, nous avons profité d’une refonte majeure de notre moteur de transaction pour activer l’auto-configuration et injection des services.
+Le travail effectué au préalable sur les noms de services nous a permis d’aller relativement vite sur cette partie.
+Là encore les tests fonctionnels ont permis de voir rapidement où le site plantait.
+
+En réalisant cette tâche technique au détour d’un développement fonctionnel majeur, nos amis QA était quoiqu’il arrive déjà sur le pont. Autant profiter de leurs tests pour valider notre changement de paradigme technique.
+
+###   Passage aux services privés
+
+Depuis la version 3.4, quand on commence un projet Symfony, les services sont par défaut privés et ne peuvent ainsi pas être appelés directement par le container. C’est une histoire de bonne pratique et cela nous permet  d'expliciter clairement les dépendances de toutes les classes du projet.
+
+Là encore, sur un projet existant (environ 600 services si vous avez un peu de mémoire), le changement est loin d’être aisé.
+
+Pour nous, il est réalisé via la migration vers Symfony 4.
+
+Rien d’automatique encore une fois, notre IDE nous permet d’obtenir tous les endroits du code où le container est utilisé. Les tests fonctionnels et humains pointent les endroits oubliés.
+
+## Pas seulement une histoire de dev
+Lors d’un stand-up meeting de la société un matin d’été, nous avons parlé de la nécessité de profiter d’une période un peu plus calme pour réaliser la migration de Symfony.
+
+Pour une start-up avec une moyenne d’âge très jeune, il n’est pas difficile de convaincre les collègues des avantages d’une telle opération.
+
+Nous avons également réussi à les impliquer dans nos tests lorsque nous pensions avoir terminé de notre côté.
+
+Ainsi nous avons mis à leur disposition un serveur de test dans la version migrée et demandé à chacun de réaliser de temps à autres ses tâches quotidiennes dessus (principalement des traitements backoffice). Cela a permis de spotter un certain nombre d’erreurs avant la mise en prod.
+
+## On est en prod, et si ça ne marche pas du tout ?
+![That's fine](https://media.giphy.com/media/QMHoU66sBXqqLqYvGO/giphy.gif)
+On le sait tous, nos tests (aussi bien fonctionnels qu'humains) ne peuvent pas couvrir l’ensemble des cas. L’épreuve du feu étant la mise en prod.
+
+Mais que faire si après notre mise en prod certaines parties de notre site ne fonctionnent absolument pas et représentent un risque business pour Anaxago ?
+
+Il faut réfléchir à une possibilité de faire un rollback le plus rapidement possible.
+
+Dans notre cas, nous utilisons le cloud AWS.
+Notre plateforme est délivrée par plusieurs serveurs EC2 derrière un load balancer.
+Nous avons choisi de migrer seulement une partie de nos EC2 dans la nouvelle version de Symfony et ainsi de jouer avec nos load balancer pour router le trafic sur l’une ou l’autre version de Symfony.
+
+L’avantage est double :
+-  montée de version à froid car le load balancer dessert les serveurs de l’ancienne version ;
+-  lorsqu’une erreur est détectée avec la nouvelle version, quelques clics dans l’interface d’AWS suffisent pour rediriger le trafic instantanément vers l’ancienne version, ce qui nous donne le temps nécessaire pour corriger le bug et redéployer sereinement.
+
+Un désavantage cependant était la mise en place d’un Feature Freeze (nous avons décidé de le faire durer 1 semaine) afin de ne pas avoir à développer sur les 2 versions.
+
+Il fallait aussi s’assurer de ne pas modifier la structure de la base de données ce qui aurait rendu le rollback plus difficile à réaliser techniquement.
+
+## Comment savoir que ça fonctionne ?
+
+Il faut être honnête, notre plateforme ne génère pas un trafic instantané très important, de ce fait nous n'avons jamais eu besoin de mettre en place des outils de monitoring très poussés.
+
+Dans notre quotidien nous nous contentons des mails d’erreurs générés par Monolog.
+
+Durant les jours suivants les montées de version, une attention toute particulière était portée sur cette boîte mail pour corriger le plus rapidement possible les erreurs survenues.
+
+Dans le cas où un utilisateur externe avait rencontré une page d’exception, nous communiquions son adresse à notre service relation client pour qu'il soit informé une fois l’erreur corrigée. Faute avouée à demi pardonnée ? :-)
+
+## On fix la prod
+![fire](https://media.giphy.com/media/g79am6uuZJKSc/source.gif)
+Un des avantages de travailler avec un monolithe est la facilité de réaliser un déploiement en production.
+
+Dans notre cas une mise en production dure en moyenne 2 minutes. Chaque développeur peut la réaliser à travers une commande via Slack.
+Quand une erreur survient, nous avons un temps de réaction très court pour la corriger.
+
+Cela nous permet de ne pas trop tergiverser ou d’avoir peur de se lancer dans le grand bain.
+
+## Reste à faire ?
+Notre plateforme n’est pas encore en production sous SF4. La partie Back fonctionne à merveille mais la migration d’Assetic à Webpack est très chronophage et est dans ses derniers moments de recettage.
+
+La prochaine étape consistera à devenir compatible avec Flex, nous envisageons donc d'adopter sa nouvelle structure de dossiers.
+
+Encore un gros chantier mais notre équipe en a l’habitude :)
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/07/nicolas-demay-stephane-diagne.jpg') }}" alt="Nicolas Demay & Stéphane Diagne"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://www.welcometothejungle.com/fr/companies/anaxago/jobs' %}">{% block article_author 'Nicolas Demay & Stéphane Diagne' %}</a></h2>
+    <p>
+        Développeurs à Anaxago
+    </p>
+{% endblock %}
