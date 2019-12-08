@@ -1,0 +1,286 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 09 - Konmariser son code" %}
+
+{% block article_content_md %}
+# Konmariser son code <br/><small class="font-weight-light muted">_ou comment utiliser la cohésion pour un code plus harmonieux, plus feng shui et qui vous mettra en joie_</small>
+
+Vous venez d'arriver sur un nouveau projet : première étape, faire un petit tour du code, histoire de voir comment
+tout ça fonctionne. C'est un projet Symfony classique, vous êtes comme un poisson dans l'eau : dans
+`src/Controller`, une trentaine de contrôleurs. Ça va. Vous en ouvrez un au hasard : un simple CRUD avec 4 actions.
+Vous en ouvrez un autre : ah, celui-là fait 2500 lignes… "_Allons plutôt jeter un oeil à la modélisation_", vous
+dites-vous en ouvrant hâtivement `src/Entity`.
+
+250 entités. Vous survolez rapidement la liste pour voir de quoi il retourne, vous en ouvrez une, deux, trois, 70. Tandis que le
+soleil se couche, vous vous demandez combien de temps il va vous falloir pour vraiment comprendre le code du projet.
+Heureusement, c'est bien rangé !… ou pas ? Qu’en penserait Marie Kondo si elle savait lire du code ?
+
+## Les torchons avec les serviettes
+
+Cette petite expérience nous montre l'intérêt de regrouper toutes les entités ensemble, tous les contrôleurs
+ensemble, etc. Le principe est simple, ne demande aucune réflexion, et permet sans trop de difficulté de trouver une
+classe, pour peu que l’on sache exactement ce que l’on cherche. Cette manière d'organiser le code porte un nom :
+**la cohésion logique**. Elle permet de retrouver facilement un objet à partir de son type, et donc retrouver une
+structure simple et familière de projet en projet. On pourrait aussi l'appeler méthode du supermarché : les fromages
+avec les fromages, les pâtes avec les pâtes, les légumes avec les légumes.
+
+![Fromage]({{ asset('build/avent/2019/09/fromage.jpg') }})
+<p class="avent-image-legend">Un bon point de départ pour une soirée raclette, mais ça va manquer de glucides et d’éthanol</p>
+
+C’est pratique dans un sens, mais cela ne nous aide pas tellement à comprendre le projet, pas plus que les rayons
+d'un supermarché ne nous aident à comprendre comment les gens mangent. Et si un client arrivera facilement à trouver
+tout ce qu'il cherche dans le magasin, il est improbable qu'il arrive à faire ses courses sans devoir traverser la
+plupart des rayons. Ça tombe bien car c’est exactement le but du supermarché : faire perdre le maximum de temps
+possible aux clients pour les pousser à acheter plus, tout en maintenant une frustration minimale en leur donnant
+l’impression d’un système bien pensé.
+
+Peut-être peut-on faire différemment avec notre code ? Mais qu'est-ce qu'on attend vraiment de l'organisation de son
+code ?
+
+## Quand il s'agit de ranger, ça chambre
+
+Une base de code n’est jamais qu’un ensemble de classes qui s’appellent les unes les autres et dépendent les unes
+des autres. Lorsqu’on regroupe ensemble des classes qui s'appellent entre elles, on parle de **cohésion**. Inversement,
+lorsqu’il existe des dépendances entre des classes de 2 groupes différents, on parle de **couplage**. Ainsi les 2
+concepts sont complémentaires : **plus la cohésion est forte, plus le couplage est faible**, et vice versa.
+
+![Cohésion et couplage]({{ asset('build/avent/2019/09/cohesion_coupling.svg') }})
+<p class="avent-image-legend">2 groupes de classes : Le groupe rouge a un couplage avec le groupe bleu</p>
+
+Les concepts de cohésion et de couplage dans le code ont été popularisés par Larry Constantine à la fin des années
+60.
+
+**L’objectif lorsqu’on organise son code est de maximiser la cohésion et minimiser le couplage.** On va donc essayer
+de découper notre code en petits namespaces (appelez ça modules, domaines, bundles, comme vous voulez), ayant une
+forte cohésion interne et un faible couplage entre eux. Cela permet d’obtenir un code plus facile à maintenir, de
+mieux mettre en évidence les dépendances dans le code, mais aussi d’aboutir à un code modulaire, plus facile à faire
+évoluer. Ainsi, s’il existe différentes manières d’organiser son code, certaines permettent d’obtenir une cohésion
+plus forte, et donc un couplage plus faible.
+
+Finalement l’idée est simple : **regrouper ensemble les classes qui sont liées**. Le problème est de savoir ce que ça
+veut dire ! Vous avez probablement rencontré de nombreuses fois le dilemme d’avoir plusieurs manières “logiques”
+d’organiser le code. Pour se décider, on a souvent recours à des architectures qui semblent apporter des réponses
+toutes faites, comme des religions. Par exemple en architecture hexagonale, on va séparer notre code en 3 parties :
+`Application`, `Domain` et `Infrastructure`. Du coup, si on veut implémenter une gestion des utilisateurs, on va mettre
+une partie du code dans chaque. Ou peut-être qu’on devrait commencer par un namespace `User` et le sous-découper en
+`User/Application`, `User/Domain` et `User/Infrastructure`. Les 2 sont logiques, et finalement on ne sait pas trop, que
+dit la notice ?
+
+Mais quand on se pose la question de savoir **quel type de cohésion correspond à chaque solution**, ça
+devient beaucoup plus clair. Les différentes formes de cohésion possibles ont ainsi pu être théorisées et classifiées de
+la moins bonne à la meilleure, ce qui va nous aider à faire notre choix.
+
+## Sur une échelle de 1 à atomique
+
+### La cohésion accidentelle
+
+Elle consiste à mettre ses classes dans des namespaces aléatoires, **sans aucune logique**. C’est la pire forme de
+cohésion, mais qui ferait ça ?
+
+### La cohésion logique
+
+C’est celle que l’on a vue précédemment, qui consiste à regrouper les classes **en fonction de leur type**. C’est mieux que
+rien, mais le rien n'a pas à rougir non plus. Elle conduit souvent à des situations comiques : par exemple,
+regrouper ensemble tous les contrôleurs revient à grouper les seules classes qui n’ont aucune chance, dans aucun
+scénario, de s’appeler entre elles, puisqu’un contrôleur peut potentiellement appeler tout et n’importe quoi SAUF un
+autre contrôleur. Recalé.
+
+### Les cohésions temporelle et procédurale
+
+Ici on regroupe les classes ensemble parce qu’elles sont utilisées **en même temps** ou **à la suite**, bien qu’elles ne
+soient pas directement liées entre elles.
+
+_ **Exemple** : les gens prennent le métro pour aller au travail, c’est à peu près la seule relation qui existe entre le
+métro et leur travail (sauf s’ils travaillent pour le métro…). Regrouper `RideTheTubeService` et `WorkService` parce
+qu'on les utilise à la suite dans notre application de simulateur de vie ennuyeuse n’est pas complètement idiot, mais
+pas complètement intelligent non plus._
+
+### La cohésion informationnelle
+
+Il s’agit de regrouper ensemble les classes qui **traitent les mêmes données**, ou autrement dit les mêmes entités.
+C’est le principe des _aggregate roots_ utilisés en Domain Driven Design : on crée des groupes d'entités qui fonctionnent
+ensemble pour constituer un domaine métier.
+
+_ **Exemple** : tout ce qui touche de près ou de loin à l’entité User (et donc aux données qu’elle contient) sera
+regroupé dans un namespace `User`. Noïce._
+
+![King DeDeDe](https://media.giphy.com/media/443fSUWBB21mYP7i7n/source.gif)
+<p class="avent-image-legend">La cohésion informationnelle est approuvée par le roi du DDD</p>
+
+### La cohésion fonctionnelle
+
+Elle consiste à créer des groupes de classes qui contribuent ensemble à fournir une **unique fonctionnalité**.
+
+_ **Exemple** : l’utilisateur peut créer un compte sur notre application. On va alors regrouper tout le code qui
+correspond à la création de compte dans un même namespace `UserRegistration` : contrôleur, formulaires, DTOs,
+validateurs… tout, on a dit._
+
+### La cohésion atomique
+
+C’est la forme parfaite de cohésion. Chaque fonctionnalité est parfaitement encapsulée dans une **unique classe**, il
+n’y a donc pas besoin de les grouper ensemble car elles sont toutes indépendantes. C’est beau, mais ingérable en
+pratique (classes aussi longues et DRY que l'Amazone).
+
+_ **Exemple** : en repartant du cas précédent, on crée une seule classe `UserRegistrationAction` qui va contenir très
+exactement l’intégralité du code nécessaire pour gérer la création de compte, sans faire appel à aucune autre classe.
+Chaque classe est totalement indépendante, il n'y a aucun couplage._
+
+![Atomic bomb](https://media.giphy.com/media/hvGKQL8lasDvIlWRBC/source.gif)
+<p class="avent-image-legend">Quand la science du code va trop loin</p>
+
+## En théorie, c’est pratique, mais en pratique ?
+
+A défaut de pouvoir atteindre une cohésion atomique, on va essayer au maximum de viser une cohésion fonctionnelle,
+voire informationnelle, les deux étant largement supérieures à la cohésion logique à laquelle on est habitués, qui
+finalement est la pire qui existe.
+
+Tout ceci est assez théorique, et j'imagine que vous vous inquiétez déjà que tout ce blabla ne nous mène à une
+quantité proportionnelle de tracas, mais en pratique les 2 n'ont pas de relation linéaire.
+
+La logique générale à suivre est que **plus le lien entre 2 classes est fort** (en considérant donc qu’un lien
+fonctionnel est plus fort qu’un lien informationel, et ainsi de suite), plus il faut essayer de les mettre **proches
+l'une de l'autre physiquement**<sup id="ref-1">[1](#footnote-1)</sup>. Il n’y a pas de bonne réponse absolue
+qui marche dans tous les cas pour organiser toutes les classes, mais on dispose au moins d’un outil pour évaluer si
+telle solution est qualitativement meilleure que telle autre solution.
+
+## Un exemple Symfony 4 ou 5 en 2 temps, 3 mouvements
+
+Nous allons maintenant essayer d'appliquer ces principes à un projet Symfony. Prenons comme exemple le projet suivant :
+
+![Exemple Symfony avant]({{ asset('build/avent/2019/09/symfony_example_before.svg') }})
+
+On remarque que notre projet comporte **2 parties** : une gestion des utilisateurs, avec notamment 2 formulaires pour
+les créer et les mettre à jour, ainsi qu'un système de blog qui permet notamment d'éditer des articles. On peut
+identifier également **3 use cases** : la création d'un utilisateur, la mise à jour d'un utilisateur, et l'édition d'un
+article.
+
+Pour atteindre une cohésion fonctionnelle, on va regrouper les classes en fonction de ces 3 use cases. On va également
+essayer dans la mesure du possible de regrouper les use cases en fonction des données qu'ils concernent : utilisateurs
+ou articles de blog.
+
+En suivant ces principes pour viser les formes de cohésion supérieures, on obtient ceci :
+
+![Exemple Symfony après]({{ asset('build/avent/2019/09/symfony_example_after.svg') }})
+<p class="avent-image-legend">Voilà des namespaces plus expressifs. Et si le vrai luxe, c'était les paths ?</p>
+
+On voit bien ici que les classes qui fonctionnent ensemble sont regroupées ensemble. Il devient très facile de
+**visualiser toutes les fonctionnalités du code**, sans même avoir besoin de regarder toutes les classes : le premier
+niveau de namespace nous indique les différents **domaines métier** (cohésion informationnelle), et le deuxième niveau
+décrit toutes les **fonctionnalités** qui existent dans chaque domaine métier (cohésion fonctionnelle). Lorsqu’on
+souhaite regarder le code d’une fonctionnalité ou le modifier, pas besoin de chercher, tout est là au même endroit.
+
+## Bon, maintenant ça suffixe
+
+La mode ces dernières années est à la suppression des suffixes dans les noms de classe, jugés inutiles et redondants.
+Mais je vous invite à sortir de cette idée fixe, car les suffixes, c'est pas pour les chiens. Si cette
+simplification des noms de classe a du sens dans certains cas, elle est parfois faite à outrance. "_Pas besoin que
+mon action s'appelle `FooAction`, elle est déjà dans `Action\`_". Sauf que maintenant, ce n'est plus le cas.
+Maintenant, `FooAction` est dans `Foo\`, tout comme `FooFormType` et `FooFormData`. On a supprimé le namespacing par
+type d'objet, donc le namespace ne nous permet plus de déterminer le type d'un objet. On garde donc cette information
+dans le suffixe de la classe, ce qui est plus logique au final.
+
+## Les cas délicats
+
+Si ce modèle est finalement assez simple à suivre, il n’est pas toujours évident d’identifier à quelle
+fonctionnalité est rattachée une classe. Parfois, une classe couvre plusieurs use cases et on ne veut pas la
+rattacher à un use case plus qu’un autre, du coup on ne sait pas trop où la mettre.
+
+Si vous avez regardé attentivement l'exemple précédent, vous avez remarqué que le `UserService` a été remplacé par 2
+plus petits services : `UserCreateService` et `UserUpdateService`. En tout cas maintenant que vous êtes remontés voir
+l'exemple, vous l'avez remarqué. En effet, le principe de cohésion est aussi valable **à l'intérieur des classes**.
+Imaginons que notre `UserService` contienne les méthodes `createUser` et `updateUser` : ces 2 méthodes traitent les
+mêmes données (cohésion informationelle), en revanche elles constituent 2 fonctionnalités distinctes et indépendantes.
+
+On fait donc le choix de la forme de cohésion **la plus forte** en découpant notre service en 2 plus petits services
+ayant chacun une cohésion fonctionnelle. En effet, si `createUser` et `updateUser` n'interagissent pas, il n'y a pas
+vraiment d'intérêt à ce qu'elles soient dans la même classe. Chacune risque d'avoir ses propres dépendances, qui se
+retrouveraient mélangées dans une classe commune. En ayant 2 services séparés, on voit beaucoup mieux quelles sont les
+dépendances de chacune des 2 fonctionnalités.
+
+En revanche, s'il y a réellement du code partagé entre la création et la mise à jour, il y a un intérêt à factoriser ce
+code dans un même service. Dans ce cas, ce service commun sera **placé dans le namespace parent**, autrement dit le
+premier ancêtre commun à nos 2 use cases dans l'arbre généalogique des namespaces :
+
+![UserService]({{ asset('build/avent/2019/09/user_service.svg') }})
+<p class="avent-image-legend">Finalement on remet en commun le UserService : il remonte dans le namespace parent</p>
+
+Si jamais vous avez un doute sur le fait que 2 méthodes soient liées, faites 2 classes. Si vous doutez que 2 classes
+soient liées, faites 2 namespaces. Il est en effet beaucoup plus facile et rapide de fusionner des classes ou des
+namespaces que de scinder en 2 une classe ou un namespace a posteriori<sup id="ref-2">[2](#footnote-2)</sup>.
+
+## Cogito Exec Sum
+
+En résumé, l'organisation du code est toujours un sujet compliqué, et on n'est jamais trop sûrs de faire bien. Mais
+ça, c'était avant. On se rend compte que la logique qu'on choisit d'appliquer n'a rien d'un simple choix "par
+préférence" : elle peut être classifiée et comparée objectivement sur une échelle assez simple. Il y a donc
+réellement des bonnes et des mauvaises manières de faire, et on s'en rend compte généralement quand le projet
+devient gros et/ou qu'on a besoin de le redécouper ou le restructurer. **En utilisant la cohésion, on peut s'assurer
+dès le début de partir sur de bonnes bases.**
+
+Une organisation basée sur la cohésion fonctionnelle nous amène aussi à mieux visualiser et questionner les liens et
+dépendances entre les classes, et parfois **mieux découper notre code** pour pouvoir mettre les bonnes fonctions dans
+les bonnes features.
+
+Enfin un "inconvénient" est qu'on doit beaucoup plus **faire attention au nommage** de ses classes pour que le code
+reste clair et qu'on s'y retrouve facilement, mais c'est un mal pour un bien, car le nommage, c’est très important. J'ai
+d'ailleurs écrit cet article en hommage au nommage.
+
+Utiliser la cohésion, même à petite dose, vous aidera globalement à **mieux structurer** votre code et **améliorer son
+espérance de vie**.
+
+## Epilogue : le code c’est la vie, la vie c’est du code
+
+J’espère vous avoir aidé à mieux appréhender la logique qui rentre en jeu lorsqu’il s’agit d’organiser son code, et
+ainsi plus facilement faire des choix qui seront bénéfiques à vos projets sur le long terme. Mais le fait est que
+cette logique est la même pour **n’importe quelle forme d’organisation** et **n’importe quelle structure**, elle n’est
+en rien spécifique au code.
+
+Prenez l’exemple de l’organisation d’une entreprise : on crée des projets, des équipes, et on essaie de faire en
+sorte que tout ce beau monde travaille ensemble de manière efficiente, alors même que les besoins changent tout le
+temps. Très vite on se retrouve confronté à un dilemme classique : faire des silos par métier (une équipe marketing,
+une équipe dev, …) ou faire des équipes par projet. S’il y a quelques avantages aux silos par métier, notamment
+une plus grande cohésion dans chaque métier, les projets n’avancent pas vite et c’est compliqué de faire fonctionner
+toutes les équipes ensemble. A l’inverse, les équipes projet ont démontré leur supériorité pour répondre aux besoins
+en proposant des solutions plus cohérentes et en travaillant de manière plus fluide grâce à une meilleure cohésion
+d’équipe autour du projet. Il s’agit là encore d’un problème de cohésion logique (par métier, même si les personnes
+d’un même métier ne travaillent pas ensemble) versus une cohésion fonctionnelle (autour d’un projet).
+
+Un dernier exemple avec la cohésion qui existe entre nous tous : la cohésion interpersonnelle. Si l’on reprend notre
+échelle, la cohésion accidentelle, ce sont les gens que vous croisez sans les connaître. La cohésion logique, les
+gens qui font la même chose que vous. La cohésion temporelle, les gens avec qui vous faites des activités. La
+cohésion procédurale, ceux avec qui vous interagissez. La cohésion informationnelle, ceux avec qui vous partagez
+votre vie. La cohésion fonctionnelle, ceux avec qui vous accomplissez des choses. Et la cohésion atomique… c’est
+vous.
+
+---
+
+<sup id="footnote-1">[1](#ref-1)</sup>
+<small class="font-weight-light"><i>Le code n'a pas vraiment de réalité physique, il s'agit ici plutôt de la distance
+physique entre les noms des classes dans l'explorateur de fichiers avec tous les sous-répertoires ouverts, à un
+niveau de zoom suffisant pour éliminer le scroll.</i></small>
+
+<sup id="footnote-2">[2](#ref-2)</sup>
+<small class="font-weight-light"><i>L'énergie nucléaire est un peu une exception : si l'univers a clairement choisi la
+fusion pour sa simplicité, à notre échelle elle est un peu plus délicate à mettre en pratique que la fission, qu'on
+peut simplement faire à base d'explosions et sans trop se soucier des déchets radioactifs. En revanche vous aurez
+beaucoup de mal à exploser votre code sans vous soucier des déchets radioactifs que vont devenir vos classes.</i></small>
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/09/mathieu_lemoine.jpg') }}" alt="Mathieu Lemoine"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url 'https://twitter.com/kuraobi' %}" target="_blank">
+            {% block article_author 'Mathieu Lemoine' %}
+        </a>
+    </h2>
+    <p>
+        <abbr title="Chief Technical Officer" lang="en">CTO</abbr> chez
+        <a href="https://www.doctoome.com/" target="_blank">Doctoome</a>.
+    </p>
+{% endblock %}
