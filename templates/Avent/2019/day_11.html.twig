@@ -1,0 +1,360 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 11 - Petit précis des images responsives avec Symfony" %}
+
+{% block article_content_md %}
+# Petit précis des images responsives avec Symfony
+
+## Les images responsives
+
+### Pourquoi ?
+
+Charger une image plus grande que les dimensions physiques maximales de l'appareil dont l'utilisateur se sert pour consulter
+notre site web n'est ni plus ni moins que du gaspillage de bande passante, de temps et donc d'énergie.
+
+Si l'on prend la peine de servir nos images aux bonnes dimensions selon l'appareil de l'utilisateur,
+la page consultée sera mathématiquement plus rapide à charger puisque le poids total, images comprises, sera moins important.
+L'expérience de navigation sera donc améliorée !
+
+Mais comment y arriver ? D'abord un peu de maths, ensuite un peu de code et vous verrez qu'à la fin de cet article,
+vous saurez comment faire.
+
+### Pixel CSS, pixel physique et Device Pixel Ratio (DPR)
+
+Le DPR d'un écran est le ratio entre un pixel physique d'un écran, et un pixel CSS que nous manipulons dans notre code.
+Il existe des écrans avec différents DPR (ex: les Retina chez Apple).
+
+DPR = 1 : 1 pixel CSS = 1 pixel physique
+
+DPR = 2 : 1 pixel CSS = 2 pixels physique
+
+DPR = 3 : 1 pixel CSS = 3 pixels physique
+
+Nous allons avoir besoin de parler avec HTML à la fois en pixel physique pour cibler les appareils,
+et à la fois en pixel CSS pour déterminer les dimensions des images.
+
+### Comment faire avec HTML ?
+
+- `srcset` et `sizes`
+
+Considérons le code suivant pour charger une image originale de 1920x1276 px :
+
+```html
+<img src="elephant_1920.jpg" alt="Éléphant"
+     sizes="(max-width: 3840px) 50vw, 1920px"
+     srcset="
+     elephant_600.jpg 600w,
+     elephant_1166.jpg 1166w,
+     elephant_1585.jpg 1585w,
+     elephant_1920.jpg 1920w"
+>
+```
+
+Ici, `sizes` indique au navigateur que pour un appareil ayant une largeur **physique** maximale de 3840px (en pixel physique),
+la balise `img` occupera 50% du viewport (uniré CSS `vw`, viewport width), et qu'autrement, si l'appareil à une largeur plus grande,
+l'image occupera 1920px (en pixel CSS).
+
+Prenons un appareil avec un viewport de 1440px (en pixel CSS), avec un DPR de 1,
+sa largeur physique sera de 1440px, avec un DPR de 2 elle sera de 2880px.
+Dans les 2 cas nous sommes en dessous des 3840px de large, et donc notre balise `img` occupera 50% du viewport.
+Maintenant, le navigateur va devoir choisir quel fichier il va télécharger parmi ceux mis à disposition dans l'attribut `srcset`.
+
+Voici comment il procède :
+
+si DPR = 1 :
+
+> 50% de viewport = 1440 *  50 / 100 = 720
+
+Le navigateur va choisir le fichier dont la largeur est la plus proche **au-dessus** de 720px, soit `elephant_1166.jpg`
+
+si DPR = 2 :
+
+> 50% du viewport = (1440 * 50 / 100) * 2 = 1440
+
+Le navigateur va choisir le fichier dont la largeur est la plus proche **au-dessus** de 1440px, soit `elephant_1585.jpg`
+
+L'image aura l'air de faire la même dimension sur les 2 appareils, mais l'un des écrans ayant une densité de pixels plus importante,
+il chargera une image plus large et elle paraitra plus nette que si le même fichier avait été chargé sur les 2 écrans.
+
+## Avec Symfony
+
+### Twig à notre secours
+
+Prenons un exemple dans lequel nous avons déjà nos différentes versions de l'image originale :
+
+```twig
+<picture class="media-object">
+    <source media="(max-width: 767px)"
+            sizes="(max-width: 1534px) 100vw, 1534px"
+            srcset="
+        {% verbatim %}{{ asset('images/elephant_750.jpg') }}{% endverbatim %} 750w,
+        {% verbatim %}{{ asset('images/elephant_1131.jpg') }}{% endverbatim %} 1131w,
+        {% verbatim %}{{ asset('images/elephant_1415.jpg') }}{% endverbatim %} 1415w,
+        {% verbatim %}{{ asset('images/elephant_1534.jpg') }}{% endverbatim %} 1534w">
+
+    <source media="(min-width: 768px) and (max-width: 1199px)"
+            sizes="(max-width: 2400px) 50vw, 1200px"
+            srcset="
+        {% verbatim %}{{ asset('images/elephant_384.jpg') }}{% endverbatim %} 384w,
+        {% verbatim %}{{ asset('images/elephant_785.jpg') }}{% endverbatim %} 785w,
+        {% verbatim %}{{ asset('images/elephant_1026.jpg') }}{% endverbatim %} 1026w,
+        {% verbatim %}{{ asset('images/elephant_1200.jpg') }}{% endverbatim %} 1200w">
+
+    <img id="test" sizes="(max-width: 3840px) 50vw, 1920px"
+         srcset="
+        {% verbatim %}{{ asset('images/elephant_600.jpg') }}{% endverbatim %} 600w,
+        {% verbatim %}{{ asset('images/elephant_1166.jpg') }}{% endverbatim %} 1166w,
+        {% verbatim %}{{ asset('images/elephant_1585.jpg') }}{% endverbatim %} 1585w,
+        {% verbatim %}{{ asset('images/elephant_1920.jpg') }}{% endverbatim %} 1920w"
+         src="{% verbatim %}{{ asset('images/elephant_1920.jpg') }}{% endverbatim %}"
+         alt="">
+</picture>
+```
+
+Ici, nous utilisons des balises `<source>`  qui nous permettent de préciser au navigateur selon des règles
+(indiquées dans les attributs `media`) quels fichiers il va pouvoir télécharger.
+
+La première balise `<source>` et son attribut `media` indiquent au navigateur qu'il doit s'y intéresser uniquement
+si l'écran fait au maximum 767px (pixel physique) de large, la deuxième sera utilisée si l'écran fait entre 768px et 1199px de large,
+et enfin si l'écran fait plus de 1200px de large, la balise `<img>` sera utilisée.
+
+Maintenant que le navigateur sait quelle balise `<source>` il va utiliser, il faut qu'il puisse choisir quel fichier il va télécharger.
+Pour cela, il va analyser les attributs `sizes` et `srcset` (ou `src` dans le cas de `img`) comme nous l'avons vu dans le paragraphe précédent.
+
+Twig ne nous aide pas vraiment ici, mais on peut remarquer que l'on appelle la même image, simplement dans des dimensions différentes.
+Et si nous trouvions un moyen de générer ces images et de transformer notre morceau de Twig en une belle macro que l'on pourrait appeler au besoin ?
+
+### Plusieurs solutions d'automatisation du traitement des images sources
+
+#### 1. Glide
+
+On installe [Glide](https://glide.thephpleague.com/) et son bundle dans notre application :
+
+`composer require thephpleague/glide thephpleague/glide-symfony`
+
+Glide va nous permettre de redimensionner nos images et de les mettre en cache au moment de leur appel.
+C'est donc PHP qui sera chargé de faire se redimensionnement et Symfony qui va se charger de servir les images
+(permis par le bundle qui nous offre la possiblité de récupérer de Glide une `StreamedResponse`).
+
+On créé nos paramètres pour définir les dimensions de nos images en cache :
+
+```yaml
+parameters:
+    glide_config:
+        source_path: '%kernel.project_dir%/public/glide_media'
+        cache_path: '%kernel.project_dir%/public/glide_media/cache'
+    glide_media_filters:
+        article_384: { w: 384, h: 255 }
+        article_600: { w: 600, h: 399 }
+        article_750: { w: 750, h: 498 }
+        article_785: { w: 785, h: 522 }
+        article_1026: { w: 1026, h: 682 }
+        article_1131: { w: 1131, h: 751 }
+        article_1166: { w: 1166, h: 775 }
+        article_1200: { w: 1200, h: 798 }
+        article_1415: { w: 1415, h: 940 }
+        article_1534: { w: 1534, h: 1019 }
+        article_1585: { w: 1585, h: 1053 }
+        article_1920: { w: 1920, h: 1276 }
+```
+
+Dans `config/services.yaml`, on configure notre service Glide, auquel on passe nos paramètres d'image :
+
+```yaml
+App\Service\Glide:
+    class: App\Service\Glide
+    arguments: ['%glide_config%', '%glide_media_filters%']
+```
+
+On écrit notre service Glide, auquel on passe la `SymfonyResponseFactory` qui nous permettra
+de récupérer une `StreamedResponse` dans notre contrôleur :
+
+```php
+<?php
+
+namespace App\Service;
+
+use League\Glide\Server;
+use League\Glide\ServerFactory;
+use League\Glide\Responses\SymfonyResponseFactory;
+
+class Glide
+{
+    protected $server;
+    protected $filters;
+
+    public function __construct(array $serverConfig, array $filters)
+    {
+        $this->server = ServerFactory::create([
+            'response' => new SymfonyResponseFactory(),
+            'source' => $serverConfig['source_path'],
+            'cache' => $serverConfig['cache_path'],
+        ]);
+
+        $this->filters = $filters;
+    }
+
+    public function getServer(): Server
+    {
+        return $this->server;
+    }
+
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
+}
+```
+
+On défini ensuite notre route dédiée aux images :
+
+```php
+/**
+ * @Route("/glide/{filterName}/{imageName}", name="glide", requirements={"imageName"=".+"})
+ */
+public function index(Glide $glide, string $filterName, string $imageName): StreamedResponse
+{
+    $filter = $glide->getFilters()[$filterName] ?? [];
+
+    return $glide->getServer()->getImageResponse($imageName, $filter);
+}
+```
+
+Et enfin, côté Twig, on créé notre macro et on l'appelle dans notre template :
+
+{% verbatim %}
+```twig
+{# glide/picture.html.twig #}
+{% macro picture(imgPath) %}
+    <picture class="media-object">
+        <source media="(max-width: 767px)"
+                sizes="(max-width: 1534px) 100vw, 1534px"
+                srcset="
+            {{ path('glide', { filterName: 'article_750', imageName: imgPath }) }} 750w,
+            {{ path('glide', { filterName: 'article_1131', imageName: imgPath }) }} 1131w,
+            {{ path('glide', { filterName: 'article_1415', imageName: imgPath }) }} 1415w,
+            {{ path('glide', { filterName: 'article_1534', imageName: imgPath }) }} 1534w">
+
+        <source media="(min-width: 768px) and (max-width: 1199px)"
+                sizes="(max-width: 2400px) 50vw, 1200px"
+                srcset="
+            {{ path('glide', { filterName: 'article_384', imageName: imgPath }) }} 384w,
+            {{ path('glide', { filterName: 'article_785', imageName: imgPath }) }} 785w,
+            {{ path('glide', { filterName: 'article_1026', imageName: imgPath }) }} 1026w,
+            {{ path('glide', { filterName: 'article_1200', imageName: imgPath }) }} 1200w">
+
+        <img id="test" sizes="(max-width: 3840px) 50vw, 1920px"
+             srcset="
+         {{ path('glide', { filterName: 'article_600', imageName: imgPath }) }} 600w,
+         {{ path('glide', { filterName: 'article_1166', imageName: imgPath }) }} 1166w,
+         {{ path('glide', { filterName: 'article_1585', imageName: imgPath }) }} 1585w,
+         {{ path('glide', { filterName: 'article_1920', imageName: imgPath }) }} 1920w"
+             src="{{ path('glide', { filterName: 'article_1920', imageName: imgPath }) }}"
+             alt="">
+    </picture>
+
+{% endmacro %}
+```
+{% endverbatim %}
+
+{% verbatim %}
+```twig
+{# glide/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block h1 %}Glide{% endblock %}
+{% from "glide/picture.html.twig" import picture %}
+
+{% block body %}
+    <article class="media">
+        {{ picture('elephant.jpg') }}
+        <div class="media-body">
+            <h3 class="media-heading">Lorem ipsum</h3>
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Accusamus hic impedit ipsa nesciunt numquam!
+                Atque aut beatae ea facere impedit quia repellendus.
+            </p>
+        </div>
+    </article>
+{% endblock %}
+```
+{% endverbatim %}
+
+Notre image d'éléphant s'affichera au mieux, car le navigateur disposera de toutes les informations nécessaires
+pour faire le choix optimal selon l'appareil de l'utilisateur ! 🎉
+
+#### 2. Thumbor
+
+[Thumbor](https://github.com/thumbor/thumbor) reprend le même principe que Glide mais il le fait à l'extérieur de Symfony.
+Thumbor est écrit en Python et l'on peut discuter avec lui via HTTP.
+Nous allons pouvoir envoyer des images depuis notre application Symfony dans un dossier partagé avec Thumbor
+et avec un peu de configuration nous allons pouvoir générer des URLs vers Thumbor, qui servira nos images.
+Ici, pas de pré-configuration des dimensions d'images, on passe tout à la volée à Thumbor, mais avec des URLs signées,
+afin d'éviter les attaques de type mass images resize (appel massifs d'URLs avec les combinaisons de toutes les valeurs de redimensionnement possibles).
+
+#### 3. SaaS (Rokka, Cloudinary, …)
+
+Il existe également des solutions clés en main pour toute cette gestion de traitement des images et de leur hébergement.
+C'est ce que propose des sociétés comme [Cloudinary](cloudinary.com/) ou encore Liip via son outil [Rokka](rokka.io/).
+
+Le principe reste le même que les 2 solutions précédentes, on envoie nos images originales depuis Symfony vers un autre serveur
+qui traitera et servira nos images selon des paramètres que l'on passe à une URL construite dans notre application.
+Évidemment, ces solutions sont sécurisées et les URLs sont signées avec une clé d'API fournie à l'inscription.
+
+## Bénéfices après mise en place
+
+#### 1. Gain de performance
+
+Après la mise en place d'images responsives sur vos différentes applications, vous constaterez un gain de performance technique.
+Des images auparavant plus grandes et plus lourdes que nécessaire ont maintenant des dimensions
+et un poids optimal pour l'appareil avec lequel navigue l'utilisateur. Le chargement de vos pages est donc plus rapide.
+
+Pour aller plus loin, vous pouvez imaginer la mise en place de [lazy loading](https://web.dev/native-lazy-loading/) ;
+nativement depuis quelques versions sur les principaux navigateurs ou avec un peu de javascript
+(des dizaines de projets GitHub existent sur le sujet, et même des polyfills pour l'attribut `loading` natif).
+
+#### 2. Levier d'éco-conception
+
+Gain de performance technique et réduction de temps de chargement grâce à un poids optimisé des images rime avec **économie de resources**.
+Ces techniques peuvent être mises en avant comme point d'attention à l'éco-conception de vos applications.
+Loin du greenwashing que l'on peut parfois constater dans d'autres domaines, ici l'action est concrète et mesurable par tous.
+S'il vous fallait un argument supplémentaire afin de convaincre vos décideurs (supérieurs ou clients) pour rendre
+vos images responsives dès le prochain sprint, le voici 😉.
+
+#### 3. Transparent pour les contributeurs
+
+Le plus gros frein que l'on peut craindre lorsque l'on envisage un tel chantier, c'est l'impact sur les contributeurs de vos applications.
+Bonne nouvelle, l'impact est nul ! Eh oui, ils vont continuer à contriburer comme avant les images originales, dans des dimensions dispropotionnées s'ils n'ont rien d'autres, et le système se chargera de les optimiser pour eux. En revanche, à vous de définir des dimensions minimales afin que les contributeurs n'envoient pas des images trop petites pour leur emplacement de destination (coucou [symfony/validator](https://symfony.com/doc/current/components/validator.html)).
+
+#### 4. Pour aller plus loin
+
+Enfin, pour creuser le sujet plus en profondeur avant de vous lancer dans cette aventure,
+voici quelques liens qui m'ont bien été utiles lors de la préparation de [ma conférence sur le sujet lors du SymfonyLive Paris 2019](https://symfonycasts.com/screencast/paris2019/des-images-au-cordeau-pour-vos-applications-symfony) :
+
+[The complete guide to lazy loading images](https://css-tricks.com/the-complete-guide-to-lazy-loading-images/) : guide complet sur le lazy loading
+
+[Native lazy loading](https://web.dev/native-lazy-loading/) : Documentation des équipes de Google sur le lazy loading natif
+
+[Images.guide](https://images.guide/) : resource très complète sur les formats d'images sur le web
+
+[Les aventures d'un pixel CSS](https://www.matthecat.com/les-aventures-d-un-pixel-css.html) : article très complet de mon collègue [Mathieu Lechat](https://jolicode.com/equipe/mathieu-lechat) sur le pixel CSS
+
+[Repository GitHub](https://github.com/welcoMattic/responsive-images-demo) d'une application de test reprennant les exemples des solutions présentées dans cet article
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/11/welcomattic.jpg') }}"
+         alt="Mathieu Santostefano"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/welcomattic' %}"
+           target="_blank" rel="noopener noreferrer">{% block article_author 'Mathieu Santostefano' %}</a></h2>
+    <p>
+        Mathieu est développeur Web chez <a href="https://jolicode.com" target="_blank" rel="noopener noreferrer">JoliCode</a> où il tire partie de Symfony et quelques autres jouets pour construire du web.
+    </p>
+{% endblock %}
