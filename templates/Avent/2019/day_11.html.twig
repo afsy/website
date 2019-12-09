@@ -134,7 +134,7 @@ On installe [Glide](https://glide.thephpleague.com/) et son bundle dans notre ap
 `composer require thephpleague/glide thephpleague/glide-symfony`
 
 Glide va nous permettre de redimensionner nos images et de les mettre en cache au moment de leur appel.
-C'est donc PHP qui sera chargé de faire se redimensionnement et Symfony qui va se charger de servir les images
+C'est donc PHP qui sera chargé de faire ce redimensionnement et Symfony qui va se charger de servir les images
 (permis par le bundle qui nous offre la possiblité de récupérer de Glide une `StreamedResponse`).
 
 On créé nos paramètres pour définir les dimensions de nos images en cache :
@@ -207,7 +207,7 @@ class Glide
 }
 ```
 
-On défini ensuite notre route dédiée aux images :
+On définit ensuite notre route dédiée aux images :
 
 ```php
 /**
@@ -221,7 +221,7 @@ public function index(Glide $glide, string $filterName, string $imageName): Stre
 }
 ```
 
-Et enfin, côté Twig, on créé notre macro et on l'appelle dans notre template :
+Et enfin, côté Twig, on crée notre macro et on l'appelle dans notre template :
 
 {% verbatim %}
 ```twig
@@ -288,7 +288,7 @@ pour faire le choix optimal selon l'appareil de l'utilisateur ! 🎉
 #### 2. Thumbor
 
 [Thumbor](https://github.com/thumbor/thumbor) reprend le même principe que Glide mais il le fait à l'extérieur de Symfony.
-Thumbor est écrit en Python et l'on peut discuter avec lui via HTTP.
+Thumbor est écrit en Python et on peut discuter avec lui via HTTP.
 Nous allons pouvoir envoyer des images depuis notre application Symfony dans un dossier partagé avec Thumbor
 et avec un peu de configuration nous allons pouvoir générer des URLs vers Thumbor, qui servira nos images.
 Ici, pas de pré-configuration des dimensions d'images, on passe tout à la volée à Thumbor, mais avec des URLs signées,
@@ -297,9 +297,9 @@ afin d'éviter les attaques de type mass images resize (appel massifs d'URLs ave
 #### 3. SaaS (Rokka, Cloudinary, …)
 
 Il existe également des solutions clés en main pour toute cette gestion de traitement des images et de leur hébergement.
-C'est ce que propose des sociétés comme [Cloudinary](cloudinary.com/) ou encore Liip via son outil [Rokka](rokka.io/).
+C'est ce que proposent des sociétés comme [Cloudinary](cloudinary.com/) ou encore Liip via son outil [Rokka](rokka.io/).
 
-Le principe reste le même que les 2 solutions précédentes, on envoie nos images originales depuis Symfony vers un autre serveur
+Le principe reste le même que les deux solutions précédentes, on envoie nos images originales depuis Symfony vers un autre serveur
 qui traitera et servira nos images selon des paramètres que l'on passe à une URL construite dans notre application.
 Évidemment, ces solutions sont sécurisées et les URLs sont signées avec une clé d'API fournie à l'inscription.
 
@@ -326,16 +326,19 @@ vos images responsives dès le prochain sprint, le voici 😉.
 #### 3. Transparent pour les contributeurs
 
 Le plus gros frein que l'on peut craindre lorsque l'on envisage un tel chantier, c'est l'impact sur les contributeurs de vos applications.
-Bonne nouvelle, l'impact est nul ! Eh oui, ils vont continuer à contriburer comme avant les images originales, dans des dimensions dispropotionnées s'ils n'ont rien d'autres, et le système se chargera de les optimiser pour eux. En revanche, à vous de définir des dimensions minimales afin que les contributeurs n'envoient pas des images trop petites pour leur emplacement de destination (coucou [symfony/validator](https://symfony.com/doc/current/components/validator.html)).
+Bonne nouvelle, l'impact est nul ! Eh oui, ils vont continuer à contribuer leurs images originales, dans des dimensions disproportionnées s'ils n'ont rien d'autre,
+et le système se chargera de les optimiser pour eux. En revanche, à vous de définir des dimensions minimales afin que les contributeurs n'envoient pas des images trop petites
+pour leur emplacement de destination (coucou [symfony/validator](https://symfony.com/doc/current/components/validator.html)).
 
 #### 4. Pour aller plus loin
 
 Enfin, pour creuser le sujet plus en profondeur avant de vous lancer dans cette aventure,
-voici quelques liens qui m'ont bien été utiles lors de la préparation de [ma conférence sur le sujet lors du SymfonyLive Paris 2019](https://symfonycasts.com/screencast/paris2019/des-images-au-cordeau-pour-vos-applications-symfony) :
+voici quelques liens qui m'ont bien été utiles lors de la préparation
+de [ma conférence sur le sujet](https://symfonycasts.com/screencast/paris2019/des-images-au-cordeau-pour-vos-applications-symfony) lors du SymfonyLive Paris 2019 :
 
 [The complete guide to lazy loading images](https://css-tricks.com/the-complete-guide-to-lazy-loading-images/) : guide complet sur le lazy loading
 
-[Native lazy loading](https://web.dev/native-lazy-loading/) : Documentation des équipes de Google sur le lazy loading natif
+[Native lazy loading](https://web.dev/native-lazy-loading/) : documentation des équipes de Google sur le lazy loading natif
 
 [Images.guide](https://images.guide/) : resource très complète sur les formats d'images sur le web
 
