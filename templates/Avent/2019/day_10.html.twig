@@ -1,0 +1,199 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 10 - Gérer les erreurs qui arrivent en production" %}
+
+{% block article_content_md %}
+Comment gérer les erreurs qui arrivent en production ?
+=================================
+
+Ça y est, les tests sont tous OK, le client a donné son feu vert, votre projet est en production. Félicitations 🎉 !
+
+Vous allez pouvoir prendre un repos bien mérité, en pensant déjà aux futurs développements que vous ferez, comment cette fois-ci vous mettrez en place du DDD Hexagonal en micro services...
+
+_Sauf que..._ La mise en production de votre site, qu'il soit B2B ou B2C, ce n'est que le début d'une longue aventure. Et tôt ou tard, des premiers retours utilisateurs arrivent... Si ils arrivent.
+
+![Workflow]({{ asset('build/avent/2019/10/workflow.png') }} "Workflow")
+
+Ce qui se passe en production a de la valeur, et très souvent les utilisateurs de vos apps vont rester silencieux, ou se plaindre que votre site ne fonctionne pas. Dans cet article, nous allons voir ce que nous pouvons faire pour y remédier, et surtout qu'il n'est pas nécessaire de mettre en place des choses très compliquées pour cela.
+
+## Envoyez vous les erreurs par email...
+Complexité : 🔵⚪⚪⚪⚪ | Mise en place ~ 5 minutes
+
+Pour éviter le schéma :
+
+1. Une erreur se produit
+2. L'utilisateur est sympa et vous fait remonter l'erreur (de façon plus ou moins complète)
+3. Vous vous connectez en production pour regarder les logs
+
+pourquoi ne pas commencer par vous envoyer les erreurs par email ? Cela parait tout bête, et c'est en plus bien documenté.
+
+Voici un extrait de la documentation officielle que vous [trouverez ici](https://symfony.com/doc/current/logging/monolog_email.html) : 
+
+```yaml
+# config/packages/prod/monolog.yaml
+monolog:
+    handlers:
+        main:
+            # On ne déclenche uniquement que quand le "action_level" est atteint
+            type:         fingers_crossed
+            # critical = erreurs 5xx
+            # error    = erreurs 400 et 500 
+            action_level: critical
+            # on passe la main au handler "grouped"
+            handler:      grouped    
+        grouped:
+            type:    group
+            members: [streamed, deduplicated]
+        # Nos logs "classiques", sur le serveur
+        streamed:
+            type:  stream
+            path:  '%kernel.logs_dir%/%kernel.environment%.log'
+            level: debug
+        # Permet de ne passer que les messages uniques depuis 60 secondes     
+        deduplicated:
+            type:    deduplication
+            time: 60
+            handler: swift
+        # Envoi des erreurs par email
+        swift:
+            type:         swift_mailer
+            from_email:   'probleme@monsitedeprod.fr'
+            to_email:     'support@monsitedeprod.fr'
+            subject:      'Erreur en prod : %%message%%'
+            level:        debug
+            formatter:    monolog.formatter.html
+            content_type: text/html
+```
+
+En moins de temps qu'il ne faut pour le dire, vous obtiendrez un joli email bien formaté qui vous donnera le contexte d'apparition de l'erreur, et ainsi un temps d'avance sur d'éventuels retours utilisateurs.
+
+![Email Slack]({{ asset('build/avent/2019/10/monolog_email.png') }} "Une erreur dans slack")
+
+## ...ou par Slack
+Complexité : 🔵⚪⚪⚪⚪ | Mise en place ~ 5 minutes
+
+Vous utilisez Slack ? Pas de problème. MonologBundle vous permet là aussi d'envoyer simplement des messages :
+
+```yaml
+# config/packages/prod/monolog.yaml
+monolog:
+    handlers:
+        #
+        # ... 
+        #
+        # Envoi des erreurs via slack
+        slack:
+            type: slackwebhook
+            webhook_url: 'https://hooks.slack.com/services/URL_DE_MON_WEBHOOK'
+            channel: '#monchanneldeprod'
+            include_extra: true
+```
+
+Là aussi, très simplement, les messages remonteront dans Slack (attention au flood cependant). MonologBundle couvre un grand nombre de services, jettez un oeil au fichier [DependencyInjection/Configuration.php](https://github.com/symfony/monolog-bundle/blob/master/DependencyInjection/Configuration.php) pour en savoir plus.
+
+![Monolog Slack]({{ asset('build/avent/2019/10/monolog_slack.png') }} "Une erreur dans slack")
+
+## Utilisez Sentry pour centraliser et remonter les erreurs
+Complexité : 🔵🔵🔵⚪⚪ | Mise en place ~ 2h
+
+Les deux premières solutions ont l'avantage de ne nécéssiter que peu de modifications sur votre projet, car il y a de fortes chances que vous utilisiez Monolog. Cependant, elles peuvent rapidement atteindre leurs limites et "polluer" ces canaux de communication. Dans ce cas, [Sentry](https://www.sentry.io) peut être un outil 
+très efficace, et assez simple à mettre en place.
+
+Sentry peut être hébergé directement sur votre serveur, ou vous pouvez choisir une version cloud proposée par l'éditeur.
+
+### Installation de Sentry
+
+Le dépôt "[onpremise](https://github.com/getsentry/onpremise/tree/stable)" de Sentry met à disposition un docker-compose.yml presque prêt à l'emploi qui permet de disposer d'une instance Sentry
+avec l'ensemble des services prête à l'emploi assez simplement.
+
+Afin de ne pas faire doublon avec la documentation officielle, je vous invite à lire les instructions ici : https://github.com/getsentry/onpremise#setup
+
+### Coupler Sentry à votre application Symfony
+
+Une fois Sentry mis en place, son intégration dans Symfony peut se faire très facilement grâce à [Sentry](getsentry/sentry-/symfony), qui a la bonne idée de disposer d'une recette dans Flex.
+
+```bash
+composer req sentry/sentry-symfony
+```
+
+Vous n'avez ensuite plus qu'à éditer le fichier .env de votre projet pour pointer sur votre projet Sentry :
+```yaml
+###> sentry/sentry-symfony ###
+SENTRY_DSN=
+###< sentry/sentry-symfony ###
+```
+
+Et c'est bon ! 
+
+![Sentry]({{ asset('build/avent/2019/10/sentry_error.png') }} "Sentry")
+
+
+En plus d'aggréger les différentes erreurs, Sentry permettra également d'obtenir de nombreuses informations sur le contexte de déclenchement de l'erreur. En complément du contexte client (URL, Navigateur, etc), Sentry fait également remonter le contexte applicatif : stacktrace, requête, mais aussi **l'utilisateur connecté**.
+Ainsi, vous pouvez passer d'un mode passif (l'utilisateur me prévient) à un mode actif (M. l'utilisateur, nous avons bien vu qu'une erreur s'est produite, nous allons la résoudre). L'effet positif ainsi que la qualité perçue sont immédiats.
+
+Sentry supporte de nombreux languages Back et Front, vous pourrez ainsi l'utiliser pour votre code Angular/React/Vue assez simplement...
+
+Pour finir, vous pouvez coupler Sentry à Slack et à vos outils de gestion de projet pour avoir une boucle complète de gestion des erreurs qui surviennent en production.
+
+## Et si vous mettiez à contribution vos utilisateurs ?
+
+Complexité : 🔵⚪⚪⚪⚪ | Mise en place ~ 10 minutes
+
+Parallèlement à la mise en place de solutions techniques, nous mettons presque systématiquement en place un outil de feedback dans le cadre des applications B2B que nous développons. Ces outils permettent de passer d'un email de type "Sujet : ça marche pas", à des informations beaucoup plus détaillées, contenant des informations
+précieuses pour identifier puis reproduire l'anomalie rencontrée.
+
+Il existe de nombreux outils disponible en SAAS à ce sujet : [Userback](https://www.userback.io/), [Usersnap](https://usersnap.com/), etc. A ma connaissance, il n'y a pas d'alternative Open Source et/ou auto-hébergeable.
+
+J'utilise personnellement Usersnap, qui offre la possibilité aux utilisateurs d'effectuer un commentaire en utilisant du texte, en sélectionnant une zone d'écran, en effectuant un screenshot, etc... Cet outil dispose également d'intégration avec des services tiers (Slack, Jira, etc.), 
+ce qui permet d'obtenir directement des informations contextualisées concernant les questions / erreurs que pourraient rencontrer nos utilisateurs.
+
+![Usersnap]({{ asset('build/avent/2019/10/usersnap.png') }} "Usersnap")
+
+
+## Mais encore
+
+Je vous ai présenté ci-dessus les outils que nous avons mis en place chez [ACSEO](https://www.acseo.fr) pour avoir plus de maitrise et de vision sur ce qui se passe en production.
+Il existe encore de nombreuses façon de faire : à vous de choisir celle qui vous convient le mieux et qui correspond aussi aux outils que vous avez déjà en place. Nous pourrions citer par exemple : 
+
+### L'utilisation d'une stack ELK (Elasticsearch / LogStash / Kibana) 
+
+Complexité : 🔵🔵🔵⚪⚪ | Mise en place ~ 4 heures
+
+Jolicode a fait un joli article à ce sujet : https://jolicode.com/blog/how-to-visualize-symfony-logs-in-dev-with-elasticsearch-and-kibana
+
+### L'utilisation de New Relic
+
+Complexité : 🔵🔵⚪⚪⚪ | Mise en place ~ 2 heures
+
+[New relic](https://newrelic.fr/) est un système en SAAS, qui permet d'installer un agent sur le serveur de production pour le monitorer. 
+
+Le bundle [EkinoNewRelicBundle](https://github.com/ekino/EkinoNewRelicBundle) permet de faire remonter dans Newrelic les informations concernant votre application Symfony.
+
+## Conclusion
+
+J'espère dans cet article vous avoir convaincu de l'importance de garder une vision sur ce qui se passe en production dans votre application,
+et qu'il existe des méthodes simples et rapides à mettre en oeuvre pour y parvenir.
+
+Les erreurs en production sont inévitables, mais vous pouvez faire plaisir à vos utilisateurs / clients en adoptant une démarche proactive quand ces dernières surviennent.
+
+Très bonnes fêtes à tous !
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/nicolas-potier.png') }}"
+         alt="Nicolas Potier"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="https://twitter.com/nicolaspotier/"
+           target="_blank" rel="noopener noreferrer">Nicolas Potier</a>
+    </h2>
+
+    <p>
+        {% block article_author 'Nicolas Potier' %} est le dirigeant d'<a href="{% block author_url 'https://www.acseo.fr' %}" target="_blank" rel="noopener noreferrer">ACSEO</a>, qui conçoit et réalise des Applications Web et Mobiles.
+        <br />Vous pouvez le retrouver entre Aix, Marseille et Montpellier autour de différents events PHP et Symfony.
+    </p>
+{% endblock %}
