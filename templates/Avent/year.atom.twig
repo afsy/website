@@ -12,8 +12,8 @@
 
     <entry>
         <id>{{ url('avent_day', {year: year, slug: slug}) }}</id>
-        <published>{{ total_day ~ '-12-' ~ year|date('c') }}</published>
-        <updated>{{ total_day ~ '-12-' ~ year|date('c') }}</updated>
+        <published>{{ (total_day ~ '-12-' ~ year)|date('c') }}</published>
+        <updated>{{ (total_day ~ '-12-' ~ year)|date('c') }}</updated>
         <link type="text/html" rel="alternate" href="{{ url('avent_day', {year: year, slug: slug}) }}"/>
         <title>{{ block('article_title', template) }}</title>
         <author>
