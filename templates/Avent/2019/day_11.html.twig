@@ -24,11 +24,11 @@ vous saurez comment faire.
 Le DPR d'un écran est le ratio entre un pixel physique d'un écran, et un pixel CSS que nous manipulons dans notre code.
 Il existe des écrans avec différents DPR (ex: les Retina chez Apple).
 
-DPR = 1 : 1 pixel CSS = 1 pixel physique
+- DPR = 1 : 1 pixel CSS = 1 pixel physique
+- DPR = 2 : 1 pixel CSS = 2 pixels physique
+- DPR = 3 : 1 pixel CSS = 3 pixels physique
 
-DPR = 2 : 1 pixel CSS = 2 pixels physique
-
-DPR = 3 : 1 pixel CSS = 3 pixels physique
+![Device Pixel Ratio]({{ asset('build/avent/2019/11/dpr_illustration.png') }} "Device Pixel Ratio - Cloudinary")
 
 Nous allons avoir besoin de parler avec HTML à la fois en pixel physique pour cibler les appareils,
 et à la fois en pixel CSS pour déterminer les dimensions des images.
@@ -49,6 +49,9 @@ Considérons le code suivant pour charger une image originale de 1920x1276 px :
      elephant_1920.jpg 1920w"
 >
 ```
+
+![Éléphant]({{ asset('build/avent/2019/11/elephant_1920.jpg') }} "Éléphant")
+
 
 Ici, `sizes` indique au navigateur que pour un appareil ayant une largeur **physique** maximale de 3840px (en pixel physique),
 la balise `img` occupera 50% du viewport (uniré CSS `vw`, viewport width), et qu'autrement, si l'appareil a une largeur plus grande,
@@ -125,7 +128,7 @@ Et si nous trouvions un moyen de générer ces images et de transformer notre mo
 
 ### Plusieurs solutions d'automatisation du traitement des images sources
 
-#### 1. Glide
+#### Glide
 
 On installe [Glide](https://glide.thephpleague.com/) et son bundle dans notre application :
 
@@ -286,7 +289,7 @@ pour faire le choix optimal selon l'appareil de l'utilisateur ! 🎉
 En revanche, attention avec cette solution les images qui n'existent pas en cache seront générées à la volée, ce qui peut
 rapidement prendre du temps si vous avez beaucoup d'images et donc ralentir fortement la première requête HTTP de la page.
 
-#### 2. Thumbor
+#### Thumbor
 
 [Thumbor](https://github.com/thumbor/thumbor) reprend le même principe que Glide mais il le fait à l'extérieur de Symfony.
 Thumbor est écrit en Python et on peut discuter avec lui via HTTP.
@@ -297,7 +300,7 @@ afin d'éviter les attaques de type mass images resize (appel massifs d'URLs ave
 
 Pour plus d'informations sur Thumbor, je vous renvoie vers [le très bon article de François de JoliCode](https://jolicode.com/blog/redimensionnez-vos-images-dans-un-projet-symfony-ou-pas).
 
-#### 3. SaaS (Rokka, Cloudinary, …)
+#### SaaS (Rokka, Cloudinary, …)
 
 Il existe également des solutions clés en main pour toute cette gestion de traitement des images et de leur hébergement.
 C'est ce que proposent des sociétés comme [Cloudinary](https://cloudinary.com/) ou encore Liip via son outil [Rokka](https://rokka.io/).
@@ -308,7 +311,7 @@ qui traitera et servira nos images selon des paramètres que l'on passe à une U
 
 ## Bénéfices après mise en place
 
-#### 1. Gain de performance
+#### Gain de performance
 
 Après la mise en place d'images responsives sur vos différentes applications, vous constaterez un gain de performance technique.
 Des images auparavant plus grandes et plus lourdes que nécessaire ont maintenant des dimensions
@@ -318,7 +321,7 @@ Pour aller plus loin, vous pouvez imaginer la mise en place de [lazy loading](ht
 nativement depuis quelques versions sur les principaux navigateurs ou avec un peu de javascript
 (des dizaines de projets GitHub existent sur le sujet, et même des polyfills pour l'attribut `loading` natif).
 
-#### 2. Levier d'éco-conception
+#### Levier d'éco-conception
 
 Gain de performance technique et réduction de temps de chargement grâce à un poids optimisé des images rime avec **économie de resources**.
 Ces techniques peuvent être mises en avant comme point d'attention à l'éco-conception de vos applications.
@@ -326,28 +329,24 @@ Loin du greenwashing que l'on peut parfois constater dans d'autres domaines, ici
 S'il vous fallait un argument supplémentaire afin de convaincre vos décideurs (supérieurs ou clients) pour rendre
 vos images responsives dès le prochain sprint, le voici 😉.
 
-#### 3. Transparent pour les contributeurs
+#### Transparent pour les contributeurs
 
 Le plus gros frein que l'on peut craindre lorsque l'on envisage un tel chantier, c'est l'impact sur les contributeurs de vos applications.
 Bonne nouvelle, l'impact est nul ! Eh oui, ils vont continuer à contribuer leurs images originales, dans des dimensions disproportionnées s'ils n'ont rien d'autre,
 et le système se chargera de les optimiser pour eux. En revanche, à vous de définir des dimensions minimales afin que les contributeurs n'envoient pas des images trop petites
 pour leur emplacement de destination (coucou [symfony/validator](https://symfony.com/doc/current/components/validator.html)).
 
-#### 4. Pour aller plus loin
+#### Pour aller plus loin
 
 Enfin, pour creuser le sujet plus en profondeur avant de vous lancer dans cette aventure,
 voici quelques liens qui m'ont bien été utiles lors de la préparation
 de [ma conférence sur le sujet](https://symfonycasts.com/screencast/paris2019/des-images-au-cordeau-pour-vos-applications-symfony) lors du SymfonyLive Paris 2019 :
 
-[The complete guide to lazy loading images](https://css-tricks.com/the-complete-guide-to-lazy-loading-images/) : guide complet sur le lazy loading
-
-[Native lazy loading](https://web.dev/native-lazy-loading/) : documentation des équipes de Google sur le lazy loading natif
-
-[Images.guide](https://images.guide/) : resource très complète sur les formats d'images sur le web
-
-[Les aventures d'un pixel CSS](https://www.matthecat.com/les-aventures-d-un-pixel-css.html) : article très complet de mon collègue [Mathieu Lechat](https://jolicode.com/equipe/mathieu-lechat) sur le pixel CSS
-
-[Repository GitHub](https://github.com/welcoMattic/responsive-images-demo) d'une application de test reprennant les exemples des solutions présentées dans cet article
+- [The complete guide to lazy loading images](https://css-tricks.com/the-complete-guide-to-lazy-loading-images/) : guide complet sur le lazy loading
+- [Native lazy loading](https://web.dev/native-lazy-loading/) : documentation des équipes de Google sur le lazy loading natif
+- [Images.guide](https://images.guide/) : resource très complète sur les formats d'images sur le web
+- [Les aventures d'un pixel CSS](https://www.matthecat.com/les-aventures-d-un-pixel-css.html) : article très complet de mon collègue [Mathieu Lechat](https://jolicode.com/equipe/mathieu-lechat) sur le pixel CSS
+- [Repository GitHub](https://github.com/welcoMattic/responsive-images-demo) d'une application de test reprennant les exemples des solutions présentées dans cet article
 
 {% endblock %}
 
