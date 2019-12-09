@@ -285,6 +285,9 @@ Et enfin, côté Twig, on crée notre macro et on l'appelle dans notre template 
 Notre image d'éléphant s'affichera au mieux, car le navigateur disposera de toutes les informations nécessaires
 pour faire le choix optimal selon l'appareil de l'utilisateur ! 🎉
 
+En revanche, attention avec cette solution les images qui n'existent pas en cache seront générées à la volée, ce qui peut
+rapidement prendre du temps si vous avez beaucoup d'images et donc ralentir fortement la première requête HTTP de la page.
+
 #### 2. Thumbor
 
 [Thumbor](https://github.com/thumbor/thumbor) reprend le même principe que Glide mais il le fait à l'extérieur de Symfony.
@@ -293,6 +296,8 @@ Nous allons pouvoir envoyer des images depuis notre application Symfony dans un 
 et avec un peu de configuration nous allons pouvoir générer des URLs vers Thumbor, qui servira nos images.
 Ici, pas de pré-configuration des dimensions d'images, on passe tout à la volée à Thumbor, mais avec des URLs signées,
 afin d'éviter les attaques de type mass images resize (appel massifs d'URLs avec les combinaisons de toutes les valeurs de redimensionnement possibles).
+
+Pour plus d'informations sur Thumbor, je vous renvoie vers [le très bon article de François de JoliCode](https://jolicode.com/blog/redimensionnez-vos-images-dans-un-projet-symfony-ou-pas)
 
 #### 3. SaaS (Rokka, Cloudinary, …)
 
