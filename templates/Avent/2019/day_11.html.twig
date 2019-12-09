@@ -53,11 +53,10 @@ Considérons le code suivant pour charger une image originale de 1920x1276 px :
 ```
 
 Ici, `sizes` indique au navigateur que pour un appareil ayant une largeur **physique** maximale de 3840px (en pixel physique),
-la balise `img` occupera 50% du viewport (uniré CSS `vw`, viewport width), et qu'autrement, si l'appareil à une largeur plus grande,
+la balise `img` occupera 50% du viewport (uniré CSS `vw`, viewport width), et qu'autrement, si l'appareil a une largeur plus grande,
 l'image occupera 1920px (en pixel CSS).
 
-Prenons un appareil avec un viewport de 1440px (en pixel CSS), avec un DPR de 1,
-sa largeur physique sera de 1440px, avec un DPR de 2 elle sera de 2880px.
+Prenons un appareil avec un viewport de 1440px (en pixel CSS), avec un DPR de 1, sa largeur physique sera de 1440px, avec un DPR de 2 elle sera de 2880px.
 Dans les 2 cas nous sommes en dessous des 3840px de large, et donc notre balise `img` occupera 50% du viewport.
 Maintenant, le navigateur va devoir choisir quel fichier il va télécharger parmi ceux mis à disposition dans l'attribut `srcset`.
 
@@ -75,8 +74,8 @@ si DPR = 2 :
 
 Le navigateur va choisir le fichier dont la largeur est la plus proche **au-dessus** de 1440px, soit `elephant_1585.jpg`
 
-L'image aura l'air de faire la même dimension sur les 2 appareils, mais l'un des écrans ayant une densité de pixels plus importante,
-il chargera une image plus large et elle paraitra plus nette que si le même fichier avait été chargé sur les 2 écrans.
+L'image aura l'air de faire la même dimension sur les deux appareils, mais l'un des écrans ayant une densité de pixels plus importante,
+il chargera une image plus large et elle paraitra plus nette que si le même fichier avait été chargé sur les deux écrans.
 
 ## Avec Symfony
 
