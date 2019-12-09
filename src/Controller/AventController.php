@@ -117,7 +117,7 @@ class AventController extends AbstractController
     }
 
     /**
-     * @Route("/avent/{year}/feed.atom", name="avent_feed_atom")
+     * @Route("/avent/{year}/feed.atom", name="avent_feed_atom", defaults={"_format": "atom"})
      */
     public function feedAction($year)
     {
