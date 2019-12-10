@@ -7,9 +7,9 @@
 {% block article_content_md %}
 # Développer votre application autour du composant Workflow
 
-Le composant **Workflow** est aujourd’hui assez peu connu malgré son utilité non-négligeable. Dans cet article nous allons voir comment vous pouvez l’utiliser dans vos projets pour gérer le cycle de vie d’un objet et le customiser pour l’utiliser comme un moyen d’appliquer des **middlewares**.
+Le composant **Workflow** est aujourd’hui assez peu connu malgré son utilité non négligeable. Dans cet article nous allons voir comment vous pouvez l’utiliser dans vos projets pour gérer le cycle de vie d’un objet et le customiser pour l’utiliser comme un moyen d’appliquer des **middlewares**.
 
-Un middleware, c’est un service indépendant qui va, souvent avec d’autres middlewares, permettre de d’effectuer une action. Par exemple on pourra avoir un middleware pour générer une facture, puis un pour générer un PDF. Chacun des deux sont indépendants et nous pourrons réutiliser le middleware PDF si nous avons à générer d’autres PDF !
+Un middleware, c’est un service indépendant qui va, souvent avec d’autres middlewares, permettre d’effectuer une action. Par exemple on pourra avoir un middleware pour générer une facture, puis un pour générer un PDF. Chacun des deux sont indépendants et nous pourrons réutiliser le middleware PDF si nous avons à générer d’autres PDF !
 
 ## Symfony Workflow
 
@@ -17,7 +17,7 @@ Un middleware, c’est un service indépendant qui va, souvent avec d’autres m
 
 Le composant **workflow** permet de définir le **cycle de vie** d'un objet.
 Chaque étape du processus est appelée une **place**.
-Ce cycle passe d'une (ou plusieurs) places à une autre (ou des autres) places via des **transitions**.
+Ce cycle passe d'une (ou plusieurs) place à une autre (ou des autres) place via une **transition**.
 Pour passer une transition, il faut que votre objet soit dans **toutes** les places en amont.
 
 Par exemple, la gestion d’une commande de son état de panier à sa livraison ne se fait pas en un clin d’oeil. L'objet commande transite dans plusieurs états qui ont chacun des impacts sur ses propriétés.
@@ -54,11 +54,11 @@ workflow:
                     to:   closed
 ```
 
-### Schema
+### Schéma
 
 Le composant Workflow fournit plusieurs moyens de visualiser les workflows que vous avez configuré : Graphiviz ou PlantUML.
 
-Par exemple, pour exporter votre workflow au format Graphiviz et obtenir un svg, vous devez exécuter  la commande suivante en remplaçant "pull_request" par le nom de votre workflow :
+Par exemple, pour exporter votre workflow au format Graphiviz et obtenir un svg, vous devez exécuter la commande suivante en remplaçant "pull_request" par le nom de votre workflow :
 
 ```bash
 php bin/console workflow:dump pull_request | dot -Tsvg -o graph.svg
@@ -99,7 +99,7 @@ workflow:
 
 Ici nous ajoutons deux clés `metadata` :
 - Une première à la racine du workflow, cela va nous permettre d’avoir des actions communes à toutes les transitions ;
-- Et une autre au niveau de la transition pour avoir des actions liés à l’action uniquement.
+- Et une autre au niveau de la transition pour avoir des actions liés à la transition uniquement.
 
 ### Action
 
@@ -214,7 +214,7 @@ public function __construct(ServiceLocator $actions, ValidatorInterface $validat
 
 ## Aller plus loin …
 
-Cet article présente un rapide aperçu de ce que vous pouvez faire avec une utilisation avancé du composant Workflow, mais certaines autre choses peuvent être faites pour compléter votre utilisation.
+Cet article présente un rapide aperçu de ce que vous pouvez faire avec une utilisation avancée du composant Workflow, mais certaines autres choses peuvent être faites pour compléter votre utilisation.
 
 ### Endpoint API Platform
 
@@ -238,7 +238,7 @@ resources:
 ```
 
 Plusieurs choses à noter :
-Dans le path défini, on retrouve un `id` qui corresponds à l’identifiant en base de donnée de l’objet sur lequel on applique la transition et une `transition` qui corresponds à la transition a passer dans votre Workflow ;
+Dans le path défini, on retrouve un `id` qui corresponds à l’identifiant en base de donnée de l’objet sur lequel on applique la transition et une `transition` qui corresponds à la transition à passer dans votre Workflow ;
 On désactive les events "receive" et "persist" de API Platform, en effet la deserialization sera géré dans notre controller custom et le persist dans nos actions de Workflow.
 
 #### Votre controller ?
@@ -264,7 +264,7 @@ Ici, on a abstrait le passage de transition de workflow, pour passer une transit
 Un objet associé à un Workflow ;
 Une transition à passer ;
 Et dans le cas d’un contexte associé à votre transition, vous devrez ajouter :
-La requête envoyé à votre application ;
+La requête envoyée à votre application ;
 La classe de l’objet a déserializer.
 
 Ici on indique un contexte lié `PullRequestTransitionData`, cela nous permettra de le déserializer et de l’exploiter dans nos actions ensuite.
@@ -353,7 +353,7 @@ private function transitionHistory(Event $event)
 }
 ```
 
-Après si vous voulez logguer uniquement certaines transitions, vous pouvez faire une action de log et l’appliquer sur les transitions que vous souhaitez logguer.
+Après si vous voulez logguer uniquement certaines transitions, vous pouvez faire une action de log et l’appliquer sur les transitions que vous souhaitez logger.
 
 ## Conclusion
 
