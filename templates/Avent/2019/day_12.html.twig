@@ -1,0 +1,393 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 12 - Workflow as Middleware" %}
+
+{% block article_content_md %}
+# Développer votre application autour du composant Workflow
+
+Le composant **Workflow** est aujourd’hui assez peu connu malgré son utilité non négligeable. Dans cet article nous allons voir comment vous pouvez l’utiliser dans vos projets pour gérer le cycle de vie d’un objet et le customiser pour l’utiliser comme un moyen d’appliquer des **middlewares**.
+
+Un middleware, c’est un service indépendant qui va, souvent avec d’autres middlewares, permettre d’effectuer une action. Par exemple on pourra avoir un middleware pour générer une facture, puis un pour générer un PDF. Chacun des deux sont indépendants et nous pourrons réutiliser le middleware PDF si nous avons à générer d’autres PDF !
+
+## Symfony Workflow
+
+### C’est quoi ?
+
+Le composant **workflow** permet de définir le **cycle de vie** d'un objet.
+Chaque étape du processus est appelée une **place**.
+Ce cycle passe d'une (ou plusieurs) place(s) à une autre (ou des autres) place(s) via une **transition**.
+Pour passer une transition, il faut que votre objet soit dans **toutes** les places en amont.
+
+Par exemple, la gestion d’une commande de son état de panier à sa livraison ne se fait pas en un clin d’oeil. L'objet commande transite dans plusieurs états qui ont chacun des impacts sur ses propriétés.
+
+### Dans une config YAML
+
+Pour mettre en place un workflow, il faut créer un fichier de configuration `config/packages/workflow.yaml`.
+Par exemple, le cycle de vie d’une pull request est représenté ici :
+
+```yaml
+workflow:
+    workflows:
+        pull_request:
+            type: 'state_machine'
+            marking_store:
+                type: 'method'
+                property: 'currentPlace'
+            supports:
+                - App\Entity\PullRequest
+            initial_marking: opened
+            places: [opened, closed, needs_review, reviewed, merged]
+            transitions:
+                feedback:
+                    from: opened
+                    to:   needs_review
+                review:
+                    from: [opened, needs_review]
+                    to:   reviewed
+                merge:
+                    from: reviewed
+                    to:   merged
+                close:
+                    from: [opened, needs_review, reviewed]
+                    to:   closed
+```
+
+### Schéma
+
+Le composant Workflow fournit plusieurs moyens de visualiser les workflows que vous avez configuré : Graphiviz ou PlantUML.
+
+Par exemple, pour exporter votre workflow au format Graphiviz et obtenir un svg, vous devez exécuter la commande suivante en remplaçant "pull_request" par le nom de votre workflow :
+
+```bash
+php bin/console workflow:dump pull_request | dot -Tsvg -o graph.svg
+```
+
+Vous pouvez retrouver [les autres moyens d’exporter](https://symfony.com/doc/current/workflow/dumping-workflows.html) votre workflow sur la documentation Symfony. Et vous obtiendrez un schéma comme ici :
+
+![schema]({{ asset('build/avent/2019/12/workflow-schema.svg') }})
+
+## Workflow as Middleware
+
+Pour compléter notre Workflow orienté middleware, il nous manque deux choses :
+- Subscriber : permet de déclencher vos actions lorsqu'une transition passe ;
+- Action(s) : permet le lien entre votre transition et vos services.
+
+### Votre YAML, avec des actions
+
+Pour ça, nous allons tout d’abord ajouter un moyen de décrire les actions qui seront exécutés lors des transitions.
+
+```yaml
+workflow:
+    workflows:
+        pull_request:
+            places:
+                # ...
+            metadata:
+                actions:
+                    - 'App\Workflow\Action\Notification'
+            transitions:
+                merge:
+                    from: reviewed
+                    to:   merged
+                    metadata:
+                        actions:
+                            - 'App\Workflow\Action\PullRequest\Merge'
+                # ...
+```
+
+Ici nous ajoutons deux clés `metadata` :
+- Une première à la racine du workflow, cela va nous permettre d’avoir des actions communes à toutes les transitions ;
+- Et une autre au niveau de la transition pour avoir des actions liés à la transition uniquement.
+
+### Action
+
+Maintenant, il nous faut des actions à exécuter ! Ces actions représentent votre logique métier. L’idée est de bien séparer vos actions pour pouvoir les réutiliser quand c’est possible.
+
+#### Interface
+
+Nous commençons par définir une interface simple, pour décrire la méthode qui sera utilisée ensuite dans notre Subscriber :
+
+```php
+interface ActionTransitionInterface
+{
+    public function transition(object $entity, Transition $transition): void;
+}
+```
+
+#### Configuration
+
+Grâce à cette interface, nous pouvons appliquer un tag dans l’injection de dépendances pour identifier toutes les actions de Workflow grâce à la configuration suivante :
+
+```yaml
+_instanceof:
+    Workflow\Action\ActionTransitionInterface:
+        tags: ['workflow.action']
+```
+
+Avec cette configuration, nous pourrons récupérer tous les services qui implémentent cette interface grâce au tag `workflow.action`.
+
+#### Implémentation
+
+Voici quelques exemples d’actions que vous pouvez implémenter.
+La première est un exemple d’action pour exécuter un code métier :
+
+```php
+class Merge implements ActionTransitionInterface
+{
+    public function transition(object $entity, Transition $transition)
+    {
+        // ma logique ici 👋
+    }
+}
+```
+
+Et ici nous pouvons voir une action plus générique pour notifier le changement de statut de notre pull request :
+
+```php
+class Notification implements ActionTransitionInterface
+{
+    private $notifier;
+
+    public function __construct(NotifierInterface $notifier)
+    {
+        $this->notifier = $notifier;
+    }
+
+    public function transition(object $entity, Transition $transition)
+    {
+        $notification = new Notification(sprintf(‘Status updated: %s’, $transition->getName), [‘email’, ‘chat/slack’]);
+        $this->notifier->send($notification, new Receiver(‘foo@jolicode.com’));
+    }
+}
+```
+
+### Subscriber
+
+Ensuite nous allons faire un Subscriber qui exécutera une méthode `handleTransition` pour chaque évènement `workflow.completed` avec le contenu suivant :
+
+```php
+public function handleTransition(TransitionEvent $event)
+{
+    $subject = $event->getSubject();
+    $transition = $event->getTransition();
+    $store = $event->getWorkflow()->getMetadataStore();
+
+    $actions = array_merge(
+        $store->getMetadata('actions', $transition) ?? [],
+        $store->getMetadata('actions') ?? []
+    );
+
+    foreach ($actions as $action) {
+        if ($this->actions->has($action)) {
+            $actionObject = $this->actions->get($action);
+            $actionObject->transition($subject, $transition));
+        }
+    }
+}
+```
+
+Ici nous allons collecter les actions à exécuter, tel que nous les avons définis dans le fichier YAML. Les actions de la transition passeront en premier ensuite les actions "générales" au Workflow.
+Puis nous exécutons les actions une par une ! 👌
+
+#### Configuration
+
+Pour finir notre Subscriber, un peu de configuration ! Dans votre déclaration de services, vous aurez à ajouter le code suivant :
+
+```yaml
+Workflow\Subscriber\WorkflowSubscriber:
+    arguments:
+        $actions: !tagged_locator
+                    tag: workflow.action
+```
+
+On va récupérer toutes les actions grâce aux tags `workflow.action` défini dans l’injection de dépendances plus tôt. Et ensuite, voici à quoi ressemble notre constructeur pour gérer les actions :
+
+```php
+public function __construct(ServiceLocator $actions, ValidatorInterface $validator)
+{
+    $this->actions = $actions;
+    $this->validator = $validator;
+}
+```
+
+## Aller plus loin …
+
+Cet article présente un rapide aperçu de ce que vous pouvez faire avec une utilisation avancée du composant Workflow, mais certaines autres choses peuvent être faites pour compléter votre utilisation.
+
+### Endpoint API Platform
+
+Dans certains projets, nous utilisons API Platform pour nous permettre d’avoir des API de façon rapide et efficace. Nous pouvons mettre en place une configuration dans API Platform pour utiliser le système de Workflow mis en place plus tôt.
+
+#### Votre ressource API Platform
+
+Tout d’abord il vous faudra une ressource, celle-ci vous permettra de définir un endpoint pour actionner vos transitions et vous pourrez lui passer librement un objet (ou non) pour décrire votre transition :
+
+```yaml
+resources:
+    Entity\PullRequest:
+        itemOperations:
+            transition:
+                method: 'PUT'
+                path: '/workflow/pull-request/{id}/{transition}'
+                controller: 'App\Controller\PullRequestTransition'
+                defaults:
+                    _api_receive: false
+                    _api_persist: false
+```
+
+Plusieurs choses à noter :
+- Dans le path défini, on retrouve un `id` qui correspond à l’identifiant en base de données de l’objet sur lequel on applique la transition et une `transition` qui correspond à la transition à passer dans notre Workflow ;
+- On désactive les events "receive" et "persist" de API Platform, en effet la deserialization sera gérée dans notre controller custom et le persist dans nos actions de Workflow.
+
+#### Votre controller ?
+
+Derrière cette configuration nous aurons un controller custom qui va récupérer notre objet, la transition à passer et indiquer quel contexte de donnée est à utiliser :
+
+```php
+class PullRequestTransition extends WorkflowController
+{
+    public function __invoke(Request $request, PullRequest $pullRequest, string $transitionName)
+    {
+        return $this->applyTransition(
+            $pullRequest,
+            $transitionName,
+            $request,
+            PullRequestTransitionData::class
+        );
+    }
+}
+```
+
+Ici, on a abstrait le passage de transition de workflow, pour passer une transition nous avons besoin de deux éléments :
+- Un objet associé à un Workflow ;
+- Une transition à passer ;
+- Et dans le cas d’un contexte associé à votre transition, vous devrez ajouter :
+- La requête envoyée à votre application ;
+- La classe de l’objet à déserializer.
+
+Ici on indique un contexte lié `PullRequestTransitionData`, cela nous permettra de le déserializer et de l’exploiter dans nos actions ensuite.
+
+L’abstraction contient alors le code suivant:
+
+```php
+public function applyTransition(object $entity, string $transitionName, Request $request = null, string $dataClass = null): WorkflowStoreInterface
+{
+    $workflow = $this->workflows->get($entity);
+
+    if (!$workflow->can($entity, $transition)) {
+        throw new BadRequestHttpException('transition_failed');
+    }
+
+    if (null !== $dataClass) {
+        try {
+            $transitionData = $this->serializer->deserialize($request->getContent() ?: '{}', $dataClass, 'json');
+        } catch (NotEncodableValueException $e) {
+            throw new BadRequestHttpException(’Invalid JSON’, $e);
+        }
+        $workflow->apply($entity, ['data' => $transitionData]);
+    } else {
+        $workflow->apply($entity);
+    }
+}
+```
+
+Avec ce code, nous pourrons alors passer nos transitions dans notre API 🎉
+
+#### Validation
+
+Avant de lancer toutes ces actions, un peu de validation n’est jamais de trop !
+Pour cela nous utilisons [le composant Validation de Symfony](https://symfony.com/doc/current/validation.html). Pour certaines transitions nous avons parfois un objet associé qui nous permet d’apporter du contexte à la transition, par exemple un commentaire qui aurait été ajouté à une PR aurait un objet avec un auteur et le contenu du commentaire. Nous créons un DTO avec des contraintes de validation comme suivant :
+
+```php
+class PullRequestReviewData implements TransitionDataInterface
+{
+    /**
+    * @Assert\NotBlank
+    * @Assert\Type(“string”)
+    */
+    public $author;
+
+    /**
+    * @Assert\Type(“string”)
+    */
+    public $comment;
+}
+```
+
+Ici on implémente l’interface `TransitionDataInterface`, cela nous sert uniquement pour trier les objets concernant les transitions de Workflow. Vous pouvez retrouver comment utiliser des contraintes sur vos objets dans la [documentation Symfony du composant Validation](https://symfony.com/doc/current/validation.html).
+
+Et ensuite, dans notre controller, avec le code suivant, il pourra récupérer notre objet et le valider avant qu’il soit passé à nos actions :
+
+```php
+if ($transitionData instanceof TransitionDataInterface) {
+    $violations = $this->validator->validate($data, null, $transition->getName());
+    if ($violations->count() > 0) {
+        throw new ValidationException($violations);
+    }
+}
+```
+
+### Audit trail
+
+Nous avons souvent besoin de logguer les actions effectués dans notre application. Grâce au workflow nous pouvons logguer chacune des transitions dans un Listener.
+
+Ici je vous présente un exemple de log en base de données mais celui-ci peut-être aussi effectué dans un fichier de log classique (via Monolog par exemple).
+
+```php
+private function transitionHistory(Event $event)
+{
+    $subject = $event->getSubject();
+
+    $entry = new TransitionEntry();
+    $entry->setWorkflow($event->getWorkflow()->getName());
+    $entry->setSubject($workflowSubject);
+    $entry->setClass(\get_class($workflowSubject));
+    $entry->setReference($workflowSubject->getId() ?? 0);
+    $entry->setTransition($event->getTransition()->getName());
+    $entry->setAdmin('system');
+    $entry->setDate(new \DateTime());
+
+    $this->entityManager->persist($entry);
+}
+```
+
+Après si vous voulez logguer uniquement certaines transitions, vous pouvez faire une action de log et l’appliquer sur les transitions que vous souhaitez logger.
+
+## Conclusion
+
+Grâce au composant Workflow et pattern Middleware, nous pouvons avoir des actions simples, réutilisables et testables unitairement !
+
+Pour conclure, voici un exemple de Workflow appliqué à de la facturation :
+
+```yaml
+workflow:
+    workflows:
+        order:
+            metadata:
+                actions:
+                    - 'Workflow\Action\Doctrine\Flush'
+            transitions:
+                pay:
+                    from: [with_billing, with_shipping, with_user]
+                    to:   paid
+                    metadata:
+                        actions:
+                            - 'Workflow\Action\Order\DoPayment'
+                            - 'Workflow\Action\Order\IsPreorder'
+                            - 'Workflow\Action\Order\IsFirstOrder'
+                            - 'Workflow\Action\Order\Invoice\Create'
+                            - 'Workflow\Action\Order\Invoice\Pdf'
+                            - 'Workflow\Action\Order\SendValidationEmail'
+```
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/baptiste-leduc.jpg') }}"  alt="Baptiste Leduc"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/Korbeil_/' %}">{% block article_author 'Baptiste Leduc' %}</a></h2>
+    <p>Baptiste est Consultant Web chez <a href="https://jolicode.com" target="_blank" rel="noopener noreferrer">JoliCode</a>.</p>
+{% endblock %}
