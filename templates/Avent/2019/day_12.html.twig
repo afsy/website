@@ -17,7 +17,7 @@ Un middleware, c’est un service indépendant qui va, souvent avec d’autres m
 
 Le composant **workflow** permet de définir le **cycle de vie** d'un objet.
 Chaque étape du processus est appelée une **place**.
-Ce cycle passe d'une (ou plusieurs) place à une autre (ou des autres) place via une **transition**.
+Ce cycle passe d'une (ou plusieurs) place(s) à une autre (ou des autres) place(s) via une **transition**.
 Pour passer une transition, il faut que votre objet soit dans **toutes** les places en amont.
 
 Par exemple, la gestion d’une commande de son état de panier à sa livraison ne se fait pas en un clin d’oeil. L'objet commande transite dans plusieurs états qui ont chacun des impacts sur ses propriétés.
@@ -64,7 +64,7 @@ Par exemple, pour exporter votre workflow au format Graphiviz et obtenir un svg,
 php bin/console workflow:dump pull_request | dot -Tsvg -o graph.svg
 ```
 
-Vous pouvez retrouver [les autres moyens d’exporter](https://symfony.com/doc/current/workflow/dumping-workflows.html) votre workflow sur la documentation Symfony. Et vous aurez un schéma comme ici :
+Vous pouvez retrouver [les autres moyens d’exporter](https://symfony.com/doc/current/workflow/dumping-workflows.html) votre workflow sur la documentation Symfony. Et vous obtiendrez un schéma comme ici :
 
 ![schema]({{ asset('build/avent/2019/12/workflow-schema.svg') }})
 
@@ -130,7 +130,7 @@ Avec cette configuration, vous pourrez récupérer tous les services qui ont cet
 
 #### Implémentation
 
-Voici quelques exemples d’actions que vous pouvez faire.
+Voici quelques exemples d’actions que vous pouvez implémenter.
 La première est un exemple d’action pour exécuter un code métier :
 
 ```php
@@ -238,8 +238,8 @@ resources:
 ```
 
 Plusieurs choses à noter :
-Dans le path défini, on retrouve un `id` qui corresponds à l’identifiant en base de donnée de l’objet sur lequel on applique la transition et une `transition` qui corresponds à la transition à passer dans votre Workflow ;
-On désactive les events "receive" et "persist" de API Platform, en effet la deserialization sera géré dans notre controller custom et le persist dans nos actions de Workflow.
+- Dans le path défini, on retrouve un `id` qui corresponds à l’identifiant en base de donnée de l’objet sur lequel on applique la transition et une `transition` qui corresponds à la transition à passer dans votre Workflow ;
+- On désactive les events "receive" et "persist" de API Platform, en effet la deserialization sera géré dans notre controller custom et le persist dans nos actions de Workflow.
 
 #### Votre controller ?
 
@@ -261,11 +261,11 @@ class PullRequestTransition extends WorkflowController
 ```
 
 Ici, on a abstrait le passage de transition de workflow, pour passer une transition nous avons besoin de deux éléments :
-Un objet associé à un Workflow ;
-Une transition à passer ;
-Et dans le cas d’un contexte associé à votre transition, vous devrez ajouter :
-La requête envoyée à votre application ;
-La classe de l’objet a déserializer.
+- Un objet associé à un Workflow ;
+- Une transition à passer ;
+- Et dans le cas d’un contexte associé à votre transition, vous devrez ajouter :
+- La requête envoyée à votre application ;
+- La classe de l’objet a déserializer.
 
 Ici on indique un contexte lié `PullRequestTransitionData`, cela nous permettra de le déserializer et de l’exploiter dans nos actions ensuite.
 
@@ -298,7 +298,7 @@ Avec ce code, nous pourrons alors passer nos transitions dans notre API 🎉
 #### Validation
 
 Avant de lancer toutes ces actions, un peu de validation n’est jamais de trop !
-Pour cela nous utilisons [le composant Validation de Symfony](https://symfony.com/doc/current/validation.html). Pour certaines transitions nous avons parfois un objet associé qui nous permet d’apporter du contexte à la transition, par exemple un commentaire qui aurait été ajouté à une PR aurait un objet avec un auteur et le contenu du commentaire. Nous créons un DTO avec des contraintes de validation comme suivant:
+Pour cela nous utilisons [le composant Validation de Symfony](https://symfony.com/doc/current/validation.html). Pour certaines transitions nous avons parfois un objet associé qui nous permet d’apporter du contexte à la transition, par exemple un commentaire qui aurait été ajouté à une PR aurait un objet avec un auteur et le contenu du commentaire. Nous créons un DTO avec des contraintes de validation comme suivant :
 
 ```php
 class PullRequestReviewData implements TransitionDataInterface
@@ -331,7 +331,7 @@ if ($transitionData instanceof TransitionDataInterface) {
 
 ### Audit trail
 
-Souvent, nous avons besoin de logguer les actions effectués dans notre application. Grâce au workflow nous pouvons logguer chacune des transitions via notre Subscriber.
+Nous avons souvent besoin de logguer les actions effectués dans notre application. Grâce au workflow nous pouvons logguer chacune des transitions dans un Listener.
 
 Ici je vous présente un exemple de log en base de données mais celui-ci peut-être aussi effectué dans un fichier de log classique (via Monolog par exemple).
 
@@ -367,7 +367,7 @@ workflow:
         order:
             metadata:
                 actions:
-                - 'Workflow\Action\Doctrine\Flush'
+                    - 'Workflow\Action\Doctrine\Flush'
             transitions:
                 pay:
                     from: [with_billing, with_shipping, with_user]
