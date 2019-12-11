@@ -93,7 +93,7 @@ workflow:
                     to:   merged
                     metadata:
                         actions:
-                            - 'Workflow\Action\PullRequest\Merge'
+                            - 'App\Workflow\Action\PullRequest\Merge'
                 # ...
 ```
 
@@ -107,7 +107,7 @@ Maintenant, il nous faut des actions à exécuter ! Ces actions représentent vo
 
 #### Interface
 
-Nous commençons par définir une interface simple, pour nous permettre de décrire la méthode qui sera utilisée ensuite dans notre Subscriber :
+Nous commençons par définir une interface simple, pour décrire la méthode qui sera utilisée ensuite dans notre Subscriber :
 
 ```php
 interface ActionTransitionInterface
@@ -118,7 +118,7 @@ interface ActionTransitionInterface
 
 #### Configuration
 
-Grâce à cette interface, nous pouvons appliquer un tag dans l’injection de dépendance pour identifier toutes les actions de Workflow grâce à la configuration suivante :
+Grâce à cette interface, nous pouvons appliquer un tag dans l’injection de dépendances pour identifier toutes les actions de Workflow grâce à la configuration suivante :
 
 ```yaml
 _instanceof:
@@ -126,7 +126,7 @@ _instanceof:
         tags: ['workflow.action']
 ```
 
-Avec cette configuration, vous pourrez récupérer tous les services qui ont cette interface grâce au tag `workflow.action`.
+Avec cette configuration, nous pourrons récupérer tous les services qui implémentent cette interface grâce au tag `workflow.action`.
 
 #### Implémentation
 
@@ -238,12 +238,12 @@ resources:
 ```
 
 Plusieurs choses à noter :
-- Dans le path défini, on retrouve un `id` qui corresponds à l’identifiant en base de donnée de l’objet sur lequel on applique la transition et une `transition` qui corresponds à la transition à passer dans votre Workflow ;
-- On désactive les events "receive" et "persist" de API Platform, en effet la deserialization sera géré dans notre controller custom et le persist dans nos actions de Workflow.
+- Dans le path défini, on retrouve un `id` qui correspond à l’identifiant en base de données de l’objet sur lequel on applique la transition et une `transition` qui correspond à la transition à passer dans notre Workflow ;
+- On désactive les events "receive" et "persist" de API Platform, en effet la deserialization sera gérée dans notre controller custom et le persist dans nos actions de Workflow.
 
 #### Votre controller ?
 
-Derrière cette configuration vous aurez un controller custom qui va récupérer votre objet, la transition a passer et indiquer quel contexte de donnée est à utiliser :
+Derrière cette configuration nous aurons un controller custom qui va récupérer notre objet, la transition à passer et indiquer quel contexte de donnée est à utiliser :
 
 ```php
 class PullRequestTransition extends WorkflowController
@@ -265,7 +265,7 @@ Ici, on a abstrait le passage de transition de workflow, pour passer une transit
 - Une transition à passer ;
 - Et dans le cas d’un contexte associé à votre transition, vous devrez ajouter :
 - La requête envoyée à votre application ;
-- La classe de l’objet a déserializer.
+- La classe de l’objet à déserializer.
 
 Ici on indique un contexte lié `PullRequestTransitionData`, cela nous permettra de le déserializer et de l’exploiter dans nos actions ensuite.
 
@@ -318,7 +318,7 @@ class PullRequestReviewData implements TransitionDataInterface
 
 Ici on implémente l’interface `TransitionDataInterface`, cela nous sert uniquement pour trier les objets concernant les transitions de Workflow. Vous pouvez retrouver comment utiliser des contraintes sur vos objets dans la [documentation Symfony du composant Validation](https://symfony.com/doc/current/validation.html).
 
-Et ensuite, dans votre controller, avec le code suivant, il pourra récupérer votre objet et le valider avant qu’il soit passé à vos actions :
+Et ensuite, dans notre controller, avec le code suivant, il pourra récupérer notre objet et le valider avant qu’il soit passé à nos actions :
 
 ```php
 if ($transitionData instanceof TransitionDataInterface) {
