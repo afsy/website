@@ -1,0 +1,260 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 17 - Tirer profit des bundles Symfony" %}
+
+{% block article_content_md %}
+
+    # Tirer profit des bundles Symfony
+
+    ## Exemple: Un bundle qu'on utilise tous
+
+    ```bash
+        composer require doctrine/doctrine-bundle
+    ```
+
+
+    Dans le monde de Symfony c'est une instruction qu'on peut être amené à écrire régulièrement.
+    La documentation du Doctrine bundle nous indique que le bundle comprend l'ORM et le DBAL.
+
+
+    Pourquoi ne lance t-on pas `composer require doctrine/orm` et `composer require doctrine/DBAL` alors ?
+    Tout simplement car utiliser le bundle nous fait gagner un temps fou de configuration : le fichier `DoctrineBundle/DependencyInjection/Configuration.php`
+    crée la configuration par défaut que vous retrouvez après avoir lancé `composer require doctrine/doctrine-bundle`.
+    Tout ceci grâce au système de bundle de Symfony.
+
+    Vous changez le driver de connection à la base de données dans ce fichier de config et lorsque le container se boot,
+    la classe `Connection`  est instancié avec le bon driver, sans rien avoir à faire d'autre.
+
+
+    Toujours grâce au bundle les repository de votre application qui étendront la classe `ServiceEntityRepository` de Doctrine
+    seront automatiquement enregistré en tant que service.
+
+
+    Si vous avez déjà travaillé simultanément ou non sur plusieurs application Symfony, vous avez sans sûrement déjà eu envie de partager du code entre vos projets.
+    Le système de bundle réutilisable est sans doute la meilleure manière de faire ceci.
+
+
+    Vous pourriez écrire une librairie mais si vous visez spécifiquement des applications Symfony, rien ne vaut le bundle et tout ce qu'il vous apporte.
+
+
+    Dans la suite de l'article on va voir plusieurs manière de profiter des bundles à travers l'exemple d'un bundle `AventBundle`.
+    Puisque tout le monde souhaite pouvoir calculer le meilleur trajet pour le père Noël, notre bundle exposera une classe pour calculer le
+    meilleur trajet pour le père Noël.
+
+    ## La structure d'un bundle
+
+    Si vous voulez créer un bundle voici la structure qu'il faut respecter :
+    ```
+        ├── AventBundle.php
+        ├── Compiler
+        ├── Configuration
+        ├── Controller
+        ├── DependencyInjection
+        ├── Resources
+        │   ├── config
+        │   ├── public
+        │   └── views
+        └── Tests
+    ```
+
+    La structure laisse déjà deviner certaines possibilités qu'offre les bundles comme la possibilité d'écrire des controllers et d'en définir les routes
+    qui pourront être utilisées sur l'application cliente.
+
+
+    La classe AventBundle.php est le point d'entrée du bundle. Elle doit étendre la classe abstraite `Bundle` de Symfony, c'est elle qui transformera réellement
+    une simple librairie en bundle et qui permettra aux classes de votre bundle d'être facilement enregistrée dans le container de services de l'application.
+
+
+    Le bundle sera enregistré dans l'application Symfony grâce au fichier `config/bundles.php`. Grâce à cela, votre bundle sera buildé par le kernel de Symfony.
+
+
+    Comme on le voit ci-dessous la méthode `build` de notre classe AventBundle.php sera appelée par le kernel de Symfony,
+    tout comme la méthode `registerExtension` qui permettra à votre bundle de se configurer.
+
+    ![prepareContainer]({{ asset('build/avent/2019/17/prepareContainer.png') }} "La fonction prepareContainer du Kernel")
+
+    Comme on va le voir la méthode `build` de votre bundle vous permettra d'interragir avec le container de services et enregistré une extension permettra aux utilisateurs du bundle de configurer ses options.
+
+
+    ## Configurer le bundle
+
+    Maitenant que votre bundle est enregistré, sa configuration sera lue lors de l'initialisation du Kernel. Les options de
+    configuration renseignées par l'utilisateur seront alors utilisées.
+    Dans le fichier `DependencyInjection/Configuration.php`
+
+    ```php
+
+    class Configuration implements ConfigurationInterface
+    {
+        /**
+         * {@inheritDoc}
+         */
+        public function getConfigTreeBuilder() : TreeBuilder
+        {
+            $treeBuilder = new TreeBuilder('custom_bundle');
+            $rootNode = $treeBuilder->getRootNode();
+            $rootNode->children()->integerNode('gift')->defaultValue(0);
+            return $treeBuilder;
+        }
+    }
+    ```
+
+    On peut ainsi définir une simple configuration avec un noeud boolean et une valeur par défaut. Dans le projet hôte, l'utilisateur
+    aura la possiblité de modifier la valeur choisie pour 'gift'. Voyons maintenant comment on peut exploiter
+    la valeur rentrée par l'utilisateur.
+
+    Dans le fichier `AventExtension.php`, voici ce qu'on pourrait trouver :
+
+    ```php
+    use Symfony\Component\DependencyInjection\ContainerBuilder;
+    use Symfony\Component\DependencyInjection\Extension\Extension;
+    class AventExtension extends Extension
+    {
+        public function load(array $configs, ContainerBuilder $container)
+        {
+            $configuration = new Configuration();
+            $config        = $this->processConfiguration($configuration, $configs);
+            $definition = $container->getDefinition('avent.gift_distributor');
+            $definition->replaceArgument(0, $config['avent']['gift']);
+        }
+    }
+    ```
+
+    Attention : il est important que le nom de la classe soit le nom du bundle sans le suffixe "Bundle", sinon vous devrez manuellement
+    enregistrer votre extension.
+
+    Avec ce bout de code vous modifiez le premier argument du service d'id 'avent.gift_distributor', et vous pouvez maitenant
+    distribuer plus de cadeaux !
+
+
+    En créant des configurations plus complexe, vous permettez à vos utilisateurs de configurer comme ils souhaitent leur bundle comme le fait par exemple le DoctrineBundle qui s'adapte à notre choix de base de données, à la manière dont on souhaite écrire notre mapping ou encore au dossier dans lequel se situent nos entités.
+
+    ## Utiliser l'injection de dépendances
+
+    Maintenant que l'on sait configurer notre bundle, passons à l'injection de dépendances.
+
+
+    Mettons que vous souhaitiez donner la possibilité aux  utilisateur de votre bundle de définir une classe définissant une étape de voyage pour le père Noël.
+    En effet vous ne pouvez pas savoir quelles étapes ils vont vouloir ajouter, mais avec la liste de toutes les étapes vous
+    êtes en mesure de calculer le meilleur trajet pour le père Noël.
+
+    On peut alors imaginer le code suivant :
+
+    ```php
+    class SantaClausTravelComputer
+    {
+        /**
+        * SantaClausStepInterface[]
+        */
+        private $steps;
+        public function __construct(array $steps)
+        {
+            $this->steps = $steps;
+        }
+        public function compute()
+        {
+            ...
+        }
+        public function addSantaClausStep(SantaClausStepInterface $step)
+        {
+            $this->steps[] = $step;
+        }
+    }
+    interface SantaClausStepInterface
+    {
+    }
+    ```
+
+    Evidemment, pour calculer le voyage globale on a besoin du tableau de toutes les étapes et c'est pour ça qu'on veut injecter
+    dans notre service SantaClausTravelComputer le tableau des étapes.
+
+
+    Mais comme dit plus haut notre bundle ne définit aucune implémentation du SantaClausStepInterface.
+    Voyons voir comment faire en sorte d'injecter toutes les classes implémentant l'interface dans notre calculateur.
+
+
+    Pour cela on va créer une `CompilerPass`. Comme on l'a vu plus haut dans la fonction `prepareContainer` du `Kernel`,
+    tous les bundles enregistrés dans notre application sont buildés.
+
+    ```php
+    class AventBundle extends Bundle
+    {
+        public function build(ContainerBuilder $container)
+        {
+            $container->addCompilerPass(new RegisterSantaClausStepPass());
+            $container->registerForAutoconfiguration(SantaClausStepInterface::class)->addTag(SantaClausStepPass::TAG_NAME);
+        }
+    }
+    class SantaClausStepPass implements CompilerPassInterface
+    {
+        public const TAG_NAME = 'avent.santa_claus_step';
+        public function process()
+        {
+            if (!$container->has(self::CHAIN_CONTEXT_RESOLVER_ID)) {
+                return;
+            }
+            $definition = $container->findDefinition('avent.santa_claus_travel_computer');
+            $taggedServices = $container->findTaggedServiceIds(self::TAG_NAME);
+            foreach ($taggedServices as $id => $service) {
+                $definition->addMethodCall('addSantaClausStep', [new Reference($id)]);
+            }
+        }
+    }
+    ```
+
+    Comme on l'a vu plus haut dans la fonction `prepareContainer` du `Kernel`, tous les bundles enregistrés dans notre application
+    sont buildés.
+
+    La méthode build de notre bundle est donc le bon endroit pour enregistrer les compiler passes de notre bundle auprès du container.
+
+
+    Dans la fonction build de notre bundle, on commence par enregistrer notre compiler pass auprès du container. Elle sera donc
+    exécutée au moment où le kernel de l'application qui installe le bundle se compile.
+
+
+    La ligne suivante permet à toutes les classes de l'application qui implémente notre interface d'être taggée avec un tag commun.
+    La fonction process du compiler pass sera exécuté après la fonction `build` du bundle. La ligne `$taggedServices = $container->findTaggedServiceIds(self::TAG_NAME);`
+    pourra ainsi récupéré toutes les définitions de l'application associées à un service implémentant notre interface.
+    Pour chacun des services identifiés on ajoute alors un appel à la méthode addSantaClausStep au moment où la classe `SantaClausTravelComputer` sera
+    instanciée.
+
+
+    Maintenant, les utilisateurs de notre bundle peuvent définir leur étapes et déléguer au bundle la tâche de calculer le meilleur
+    trajet en exploitant l'injection de dépendances de Symfony !
+
+    ## Tout ce qu'on peut faire avec un bundle !
+
+    Les bundles permettent de faire beaucoup d'autre choses, comme partager des commandes parmi vos applications.
+    Par exemple, le DoctrineMigrationBundle met à disposition une commande pour générer des migrations: `php bin/console do:mi:mi`.
+
+
+    Si vous maintenez plusieurs application Symfony, vous pouvez également créer un HealthcheckBundle qui ajoute une simple route de check à votre application
+    pour vérifier que votre application est toujours en vie.
+
+
+    Vous pouvez également mettre à disposition de vos utilisateurs des assets (CSS, JS...) dans le répertoire `Resources/public` de votre bundle.
+    En lançant la commande `php bin/console assets:install` dans le projet hôte, vos assets seronts installées dans le répertoire `/public/bundles` de l'application.
+
+
+    Finalement, les bundles savent vraiment tout faire. Et même si vous n'imaginez pas lancer un bundle open source demain, c'est certain
+    que si vous développez régulièrement des applications Symfony vous pourriez tirer profit de bundles pour réutiliser votre code !
+
+
+    Que vous souhaitiez publier un bundle sur packagist ou l'utiliser en interne, faites en sorte de respecter les [best practices](https://symfony.com/doc/current/bundles/best_practices.html) recommandées par Symfony.
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/17/20171002-LouisP.jpg') }}"
+         alt="Louis Pinsard"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/LouisPinsard' %}"
+           target="_blank" rel="noopener noreferrer">{% block article_author 'Louis Pinsard' %}</a></h2>
+    <p>
+        Louis est architecte-développeur Web chez <a href="https://theodo.com" target="_blank" rel="noopener noreferrer">Theodo</a> où il développe des applications Web en Symfony et React.
+    </p>
+{% endblock %}
