@@ -85,6 +85,7 @@ class AventController extends AbstractController
         ),
         2019 => array(
             '15-api-jane' => 'Avent/2019/day_15.html.twig',
+            '14-comprendre-symfony-avec-eventdispatcher' => 'Avent/2019/day_14.html.twig',
             '13-plongee-au-coeur-du-composant-messenger' => 'Avent/2019/day_13.html.twig',
             '12-workflow-as-middleware' => 'Avent/2019/day_12.html.twig',
             '11-images-responsives-avec-symfony' => 'Avent/2019/day_11.html.twig',

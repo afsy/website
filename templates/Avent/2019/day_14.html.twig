@@ -1,0 +1,206 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 14 - Comprendre Symfony avec l'Event Dispatcher" %}
+
+{% block article_content_md %}
+Comprendre Symfony avec l'EventDispatcher
+=========================================
+
+
+Symfony, c’est un framework. Alors oui, mais aujourd’hui, bien plus qu’un framework, c’est un écosystème.
+D'un point de vue humain, Symfony c'est une communauté, des événements, des contributeurs qui s'investissent sur leur temps libre.
+D'un point de vue technique, ce sont des composants, des *bridges*, des bundles...
+
+Les composants si populaires qu’ils sont utilisés dans de très nombreux [projets tout aussi populaires](https://symfony.com/projects),
+à tel point que cet écosystème rayonne dans celui de PHP.
+
+Si Symfony n’était qu’un framework, un gros bloc dont lequel on ne peut se dépêtrer, il aurait au contraire plutôt fait stagner PHP,
+et n’aurait probablement pas eu autant de succès. Symfony 4 / Flex a cassé ce mythe et beaucoup de gens se sont remis à Symfony pour l’occasion.
+
+Il peut donc être pertinent de s’attarder un peu sur ces fameux composants de temps en temps, et de saisir leur intérêt.
+Car vous l’aurez compris, Symfony repose sur ceux-ci, et si vous utilisez le framework, vous utilisez forcément les composants.
+
+
+Mais comment ces composants sont-ils intégrés à Symfony de manière aussi transparente ?
+Pour comprendre cela, il faut se pencher sur deux composants qui en sont le coeur même : HttpKernel et EventDispatcher.
+
+
+On va principalement s’attacher à comprendre EventDispatcher aujourd’hui, parce qu’il y a beaucoup de choses à dire sur cette librairie !
+
+Pour cet article, je pars du principe que vous l’avez déjà utilisé au moins une fois.
+
+
+## Qu’est-ce que l’EventDispatcher ? (rapidement)
+
+
+Il faut retenir que c’est un composant qui implémente deux design patterns :
+[Observer](https://refactoring.guru/design-patterns/observer) et [Mediator](https://refactoring.guru/design-patterns/mediator).
+
+
+Observer : Un ou plusieurs "observeurs" sont enregistrés chez un ou plusieurs "sujets".
+Lorsque qu’un sujet décide que quelque chose de notable se produit, il notifie ses observers qui sont alors appelés à leur tour.
+
+Mediator : On ajoute un intermédiaire entre les observeurs et les sujets, de sorte qu’il n’y ait pas de dépendance directe entre les deux.
+
+
+**Concrètement** :
+
+La classe EventDispatcher est l’implémentation de Mediator. Elle s’occupe de mémoriser les observeurs (autrement appelés Listeners).
+Ceux-ci doivent être liés à un événement (Event), qui sera émis par les sujets.
+De cette manière, les sujets n’ont plus besoin de connaître leurs listeners, mais seulement l’EventDispatcher, et c'est la responsabilité de ce dernier de les appeler.
+
+Si je vous ne ai pas trop perdu 😅, je vais faire un petit aparté sur les événements.
+Cette notion, en dehors de PHP, elle vous est peut-être déjà familière : elle est au coeur de la programmation orientée évènements, qui est l’essence même de Javascript.
+
+Une des principales fonctionnalités intégrées au coeur de Javascript est celle de pouvoir associer une fonction à un élément du DOM et à un événement,
+de sorte que cette fonction soit appelée lorsque cet événement se déclenche sur cet élément : c’est `addEventListener()` !
+
+
+
+C’est bien pratique dans un contexte de page web interactive, car on ne fait qu’émettre des événements dans notre page :
+cliquer sur une icône, soumettre un formulaire, passer la souris sur un lien, sont autant d’événements auxquels on peut avoir envie de réagir pour rendre la navigation plus fluide et/ou agréable.
+
+
+
+Alors, ok pour une utilisation dans un tel contexte, mais en PHP, pourquoi donc ?
+
+Par exemple, mettons que j’ai une propriété `updated_at` sur une entité Doctrine que je veux mettre à jour à chaque update.
+Il peut être intéressant d’utiliser ce système, car on n’a pas forcément envie de faire ça manuellement, surtout dans un cas comme celui-ci qui est censé être une action systématique.
+
+Avec Doctrine ORM qui apporte son système d’événements, je peux mettre à jour cette propriété dès que mon entité est concernée par un flush en écoutant l’événement `onFlush`.
+De cette manière, cette logique là est séparée du reste du code, et je n’ai pas à m’en soucier à chaque update !
+
+Il y a [plusieurs manières de faire](https://symfony.com/doc/current/doctrine/events.html), à chacun de voir ce qu’il préfère.
+En tout cas, ça peut être un cas d’utilisation valide.
+
+
+On a vu que la programmation orientée objet était pratique en Javascript, qu’elle est aussi applicable en PHP,
+et que l’EventDispatcher peut servir à appliquer cette approche à notre code PHP.
+
+
+
+Mais on a surtout vu que l’intérêt principal de l’EventDispatcher, c’est le découplage du code (je rappelle qu’il combine deux design patterns dont c’est la spécialité) à travers des événements.
+
+Après cette petit rappel de ce qu’est le composant, voyons comment il est utilisé dans Symfony.
+
+
+## Pourquoi un tel composant dans l’écosystème ?
+
+Dans Symfony, EventDispatcher est utilisé dans plusieurs autres composants : HttpKernel, Form, Security, Workflow...
+
+Dans ces composants sont définis plusieurs `events`. Si on prend le cas d’HttpKernel, vous avez peut-être déjà entendu parler des Kernel Events.
+Ils sont dispatchés dans la classe [HttpKernel](https://github.com/symfony/http-kernel/blob/5.0/HttpKernel.php#L115).
+
+```php
+$event = new RequestEvent($this, $request, $type);
+
+$this->dispatcher->dispatch($event, KernelEvents::REQUEST);
+// ...
+$event = new ControllerEvent($this, $controller, $request, $type);
+$this->dispatcher->dispatch($event, KernelEvents::CONTROLLER);
+
+// ...
+
+$event = new ControllerArgumentsEvent($this, $controller, $arguments, $request, $type);
+$this->dispatcher->dispatch($event, KernelEvents::CONTROLLER_ARGUMENTS);
+
+if (!$response instanceof Response) {
+    $event = new ViewEvent($this, $request, $type, $response);
+    $this->dispatcher->dispatch($event, KernelEvents::VIEW);
+// ...
+}
+```
+Vous venez peut-être bien de regarder le code de la classe la plus importante de Symfony !
+`HttpKernel` ne fait pas grand chose, mais déjà bien assez ; il déclare le cycle de vie d’une requête et plusieurs points d’attache en émettant (dispatch) des événements, que n’importe qui peut écouter pour s’y brancher.
+C’est de cette manière que les autres composants de Symfony sont liés au Kernel ! C’est grâce à ce mécanisme que nous pouvons avoir le framework que nous connaissons.
+La requête à traiter est baladée à travers différents événements, tout comme le contrôleur et la réponse ; les différents composants qui y sont liés les récupèrent et les traitent.
+
+Prenons l’exemple du *routing* de Symfony : vous-êtes vous déjà demandé comment le routing était appelé ?
+Si oui, sachez que c’est beaucoup moins caché qu’on ne pourrait le penser : tout se trouve dans [RouterListener](https://github.com/symfony/http-kernel/blob/5.0/EventListener/RouterListener.php#L97) !
+On peut voir que cette classe implémente `EventSubscriberInterface` et appelle le composant Routing sur l’événement `kernel.request`.
+
+
+
+Si vous passez un peu plus de temps dans [`Symfony\Component\HttpKernel\EventListener`](https://github.com/symfony/http-kernel/tree/5.0/EventListener), vous verrez que toutes les classes qui s’y trouvent sont d’autres listeners qui écoutent des évènements du Kernel ! Ce sont ces listeners qui permettent d’appeler les autres composants de Symfony, s’ils sont installés, pendant le parcours de la requête.
+
+Le [FrameworkBundle](https://github.com/symfony/framework-bundle), qui vient avec toute création d’un projet Symfony, enregistre tous ces listeners dans le conteneur, et de cette manière ils sont bien appelés au moment où les événements du Kernel sont lancés.
+
+
+Je ne pourrai pas vous recommander assez assez la lecture de [cette page de doc](https://symfony.com/doc/current/components/http_kernel.html) ! Elle explique dans le détail ce que je vous raconte.
+
+
+
+Voilà pourquoi ce composant s'appelle `HttpKernel` : c’est d’ici que tout part !
+Pour résumer : HttpKernel utilise EventDispatcher pour émettre des *events* et définir le cycle de vie d’une requête.
+Des listeners écoutent ces évents et appellent les autres composants Symfony.
+C'est donc pour cela que vous pouvez les utiliser dans votre application de manière totalement transparente.
+
+D'ailleurs n'hésitez pas à jouer un peu avec HttpKernel et EventDispatcher pour essayer de vous [créer votre propre framework](https://symfony.com/doc/current/create_framework/index.html) !
+C’est une excellente méthode pour comprendre les choix qui ont été faits dans Symfony.
+
+On constate donc que l’utilisation du composant EventDispatcher permet en fait de rendre Symfony totalement modulaire ! C’est un système de plugin ✨.
+
+Nous avons là un cas d’utilisation très intéressant du composant, et qu n’a rien à voir avec l’exemple de Doctrine listener que je donnais plus haut.
+EventDispatcher est utilisé à un autre niveau, non pas pour réagir à des événements du modèle, mais au niveau de la structure de l’application en tant que telle.
+
+## Est-ce pertinent d’utiliser EventDispatcher dans mon app ?
+
+
+Comme on l’a vu précédemment, l’avantage de l’utilisation de l’EventDispatcher, c’est de grandement découpler sujet et listener.
+C’est très utile dans certains cas, mais dans votre app, cela ne facilite pas du tout la lisibilité, la maintenabilité et le debug…
+Je parlais tout à l'heure de Javascript, ceux qui en font régulièrement le savent mieux que personne :
+un petit script avec quelques listeners, ça reste gérable, mais quand l’application grandit on se retrouve rapidement avec un sac de noeuds.
+C’est en partie pour cette raison que la tendance est aux librairies qui incitent à découper ses pages en composants : on réduit le scope dans lequel on définit nos listeners.
+
+Je ne connais pas d’IDE à l’heure actuelle capable de remonter les listeners à partir d’un *event* donné.
+Par exemple, si vous voulez connaître tous les listeners qui sont déclarés sur `kernel.request` à partir du code, vous n’avez pas d’autre choix que de chercher cette chaine de caractère sur l’ensemble du projet.
+Heureusement, il existe [une commande](https://symfony.com/doc/current/event_dispatcher.html#debugging-event-listeners) qui répond précisément à ce besoin :
+```sh
+$ php bin/console debug:event-dispatcher
+```
+Si vous utilisez Symfony *as a framework* vous avez aussi accès au *profiler* qui vous liste les *listeners* appelés et non appelés sur une requête donnée.
+En tout cas, si jamais vous avez envie de vous lancer dans la création d’un plugin PhpStorm, voilà une idée !
+
+
+Si vous avez besoin de suivre le changement d’état de vos entités (par exemple pousser une notification quand un article passe du statut *draft* à *published*),
+vous pourriez être tenté d’utiliser un événement pour cela et de vous brancher dessus.
+Bien sûr, cela fonctionne, mais il peut être intéressant d’étudier d’autres alternatives.
+Il faut garder à l’esprit qu’à chaque fois que l’on ajoute un *listener*, on ajoute du code un peu planqué.
+
+Sachez notamment qu’il existe nativement les classes [\SplSubject](https://www.php.net/manual/fr/class.splsubject.php) et [\SplObserver](https://www.php.net/manual/fr/class.splobserver.php) si l’envie vous prend d’implémenter le pattern Observer vous même.
+
+**Quelques bonnes pratiques si toutefois vous voulez l’utiliser :**
+
+- Evitez absolument de *dispatch* un *event* dans un *listener*. C’est possible, mais on amplifie encore plus ce problème de “code caché” en ajoutant de la profondeur.
+- Les *Doctrine events* peuvent être intéressants dans certains cas, mais il faut en user avec parcimonie.
+  Ce n’est en tout cas pas à cet endroit que l’on va ajouter de la logique métier. Le code qui est exécuté dans les listeners devrait être court, simple et performant.
+  N'hésitez pas à regarder si [cette librairie](https://github.com/biig-io/DomainComponent) peut correspondre à votre besoin ! Elle utilise aussi EventDispatcher, mais dans un contexte encapsulé.
+- Il faut aussi garder à l’esprit que si un listener est enregistré sur un *event*, il sera toujours exécuté, donc prévoir aussi une porte de sortie le plus tôt possible dans le cas où son exécution n'est pas souhaitée.
+  Typiquement dans les Doctrine Listeners, avant toute chose on commence toujours par regarder le type de l'entité passée avant de continuer.
+- Les dernières versions de Symfony vous encouragent à définir des custom *events*, ce qui évite au passage d'avoir à définir un *event name*. Plus d'infos ici : [https://symfony.com/blog/new-in-symfony-4-3-simpler-event-dispatching](https://symfony.com/blog/new-in-symfony-4-3-simpler-event-dispatching).
+
+
+J'espère vous avoir donné envie de lire un peu le code de Symfony, vous avoir fait prendre conscience qu'il est tout à fait accessible, et peut-être qu'un jour l'envie vous prendra de contribuer !
+N'hésitez pas à me dire dans les commentaires si quelque chose n'est pas clair.
+
+A bientôt peut-être en meetup Sfpot !
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/images/avent/remi_andrieux.jpg') }}" alt="Rémi Andrieux"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="{% block author_url 'https://twitter.com/pimolo_' %}" target="_blank">
+            {% block article_author 'Rémi Andrieux' %}
+        </a>
+    </h2>
+    <p>
+        <span lang="fr">Développeur PHP</span> chez
+        <a href="https://dental-monitoring.com/?lang=fr" target="_blank">Dental Monitoring</a>.
+    </p>
+{% endblock %}
