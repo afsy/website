@@ -102,7 +102,7 @@ Dans les projets qui dépendent du SDK, nous avons simplement à ajouter une dé
     ...
 ```
 
-Nous pouvons ensuite facilement manipuler les réponses et objets fournis par OPA.
+Nous pouvons ensuite facilement manipuler les réponses et objets fournis par OPA. Le SDK est hébergé sur un dépôt privé mais si vous souhaitez voir du code, je vous invite à [consulter l'exemple mis à disposition par Jane](https://github.com/janephp/openapi3-example/blob/master/example.php).
 
 
 Bénéfices
@@ -110,7 +110,7 @@ Bénéfices
 
 L'utilisation du SDK a de nombreux bénéfices :
 * Cela nous force à être rigoureux et à bien spécifier les différents modèles au niveau de l'API. Une erreur dans la spécification OpenAPI aura des conséquences sur le code généré par Jane et pourra créer des problèmes dans les projets consommateurs de l'API ;
-* Dans les projets consommateurs (ici "Player" et "Feed"), nous manipulons directement des objets PHP tels qu'ils ont été décrits dans la spécification OpenAPI. C'est très confortable et nous permet de nous focaliser sur le développement de règles métiers. Nous n'avons pas à nous soucier de la manière dont les réponses des API doivent être traitées (C'est Jane qui s'est occupé d'écrire les "denormalizers"). On ne manipule plus des tableaux ou des `\stdClass`. À noter que Jane écrit ses propres denormalizers au contraire du ObjectNormalizer de Symfony qui utilise la Reflection pour extraire les attributs à denormalizer  (cf. https://github.com/symfony/symfony/blob/master/src/Symfony/Component/Serializer/Normalizer/ObjectNormalizer.php#L70). Cela rend la dénormalisation bien plus performante. Jane prévoit à moyen terme d’utiliser un automapper afin d’améliorer encore un peu plus les choses.
+* Dans les projets consommateurs (ici "Player" et "Feed"), nous manipulons directement des objets PHP tels qu'ils ont été décrits dans la spécification OpenAPI. C'est très confortable et nous permet de nous focaliser sur le développement de règles métiers. Nous n'avons pas à nous soucier de la manière dont les réponses des API doivent être traitées (C'est Jane qui s'est occupé d'écrire les "denormalizers"). On ne manipule plus des tableaux ou des `\stdClass`. À noter que Jane écrit ses propres denormalizers (exemple [ici](https://github.com/janephp/openapi3-example/blob/master/generated/Normalizer/FactNormalizer.php) au contraire du ObjectNormalizer de Symfony qui utilise la [Reflection](https://github.com/symfony/symfony/blob/master/src/Symfony/Component/Serializer/Normalizer/ObjectNormalizer.php#L70) pour extraire les attributs à dénormalizer. Cela rend la dénormalisation bien plus performante. Jane prévoit à moyen terme d’utiliser un automapper afin d’améliorer encore un peu plus les choses.
 
 
 Inconvénients
