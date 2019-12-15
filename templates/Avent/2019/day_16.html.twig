@@ -1,0 +1,205 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 16 - Retour d'expérience sur Sylius, le framework e-commerce qui a du style !" %}
+
+{% block article_content_md %}
+Tout d’abord, il faut savoir que je n'ai pas été le plus assidu sur la veille "PHP/e-commerce" ces dernières années.
+Pour moi, il n’y a encore pas si longtemps, Magento était LA grande référence PHP pour l’e-commerce - hors Wordpress et ses plugins.
+Il y a environ 5 ans, j’ai étudié Sylius pour les besoins d’un client. À l'époque, le projet ressemblait surtout à une collection d'interface, avec finalement peu de code, et surtout quasi aucune documentation.
+
+Cependant,depuis maintenant quelques mois, le nom de Sylius ressort de plus en plus dans des articles, des conférences, ...
+Surprise : contrairement aux retours sur Magento qui ne sont pas toujours élogieux, ceux sur Sylius semblent tous aller dans le même sens : un projet de qualité qui mérite de se (re-)pencher dessus.
+
+# Il est long le chemin ! 🎵 🎵 🎵
+
+Sylius se décrit comme une "plateforme e-commerce Open Source basée sur Symfony".
+
+Cependant avant de devenir cette plateforme complète, il lui aura fallu quelques années… Ce projet a [débuté en 2011](https://firstcommit.netlify.com/?repo=Sylius/Sylius) ! Le premier commit du dépôt Sylius/Sylius dévoile un simple bundle de gestion d'adresses. S’en sont suivi différents bundles e-commerce.
+
+En 2017, la v1 sort avec des bundles revus sous forme de composants séparés et un core en guise de glue pour les réunir.
+
+![Architecture de Sylius]({{ asset('build/avent/2019/16/ecommerce_pic_7.png') }} "Architecture de Sylius")
+
+# Un couteau suisse de l'e-commerce ? 🇨🇭
+
+Avec l’édition `sylius-standard`, il est possible de configurer un certain nombres paramètres pour notre boutique :
+- les [canaux de vente](https://docs.sylius.com/en/1.6/book/configuration/channels.html) possibles 🌍 ;
+- les devises et langues qui vont pouvoir être utilisées 🇫🇷 ;
+- les pays dans lesquels nous allons vendre nos articles 🗾 ;
+- les taxes et leurs catégories à appliquer selon le type de produit 💶 ;
+- les taux de conversions entre devises 💱 ;
+- les moyens de livraison disponibles 🚚 ;
+- les modes de paiement à intégrer dans le tunnel de commande 🏦 ;
+- ...
+
+Toutes ces configurations sont extrêmement puissantes et pensées pour pouvoir s'adapter à une grande majorité d'e-commerce.
+
+Prenons par exemple un moyen de livraison :
+
+![Édition d'un moyen de livraison]({{ asset('build/avent/2019/16/shipping-method.png') }} "Édition d'un moyen de livraison")
+
+Nous pouvons modifier :
+- ses noms et descriptions selon les langues activées ;
+- sa disponibilité selon les canaux de vente créés ;
+- les contraintes de celui-ci - _par exemple : tous les produits de la commandes doivent être de type Vêtement_ ;
+- les taxes associées ;
+- le prix par canal de vente et la méthode de calcul - _prix fixe par commande ou par élément du panier_.
+
+La configuration pourra être un peu longue selon la boutique à mettre en place, mais il y a de grandes chances pour qu'il ne soit pas nécessaire d'écrire du code pour adapter des éléments.
+
+Une fois notre boutique configurée, il nous faut un catalogue produits.
+Sylius intègre une gestion plutôt exhaustive des produits, composés d'attributs et d'options, de stock et de prix, tout en intégrant la notion de taxonomie afin de les catégoriser.
+
+De plus, Sylius intègre la création des comptes clients, les commentaires des clients sur les produits, la gestion complète des codes promotionnels et, évidemment, un tunnel d'achat du panier jusqu'à la commande livrée.
+
+Tout ceci est disponible via un front en Twig/JS, une interface d'administration et une API REST.
+
+À noter : il n’y a pas de réelle partie CMS dans le projet.
+
+# Sous le capot 🚗
+
+Sylius se base sur des projets open source qui ont fait leurs preuves : Symfony, Twig, Doctrine, Behat, PHPSpec, …
+Cela en fait un projet très simplement compréhensible par tous développeurs Symfony.
+
+Utilisant la puissance de Symfony associée à une bonne architecture de code, il devient extrêmement [simple de modifier](https://docs.sylius.com/en/1.6/customization/) les entités, les formulaires, les repositories, …
+L'utilisation de [winzou/state-machine](https://github.com/winzou/StateMachineBundle) pour tout le tunnel de commande permet de l'adapter à sa guise en seulement quelques heures.
+Le projet, codé à l'aide de la méthode BDD, intègre une suite de tests contenant plus de 1200 scénarii.
+
+Le front et l'admin sont basés sur [semantic-ui](https://semantic-ui.com/) (et, à mon humble avis, le rendu est tellement plus propre qu’un EasyAdmin2 !)
+
+# Pour aller plus loin
+
+Sylius intègre aussi un système de plugins et, depuis peu, ceux-ci sont disponible via un [Store officiel](https://sylius.com/plugins/). Nous pouvons trouver de quoi enrichir facilement notre boutique, et notamment :
+- générer des factures ;
+- ajouter un CMS ;
+- ajouter divers systèmes de paiement ;
+- générer un sitemap ;
+- ajouter un système de whishlist ;
+- ...
+
+Tout comme pour une librairie ou un bundle Symfony, il est nécessaire d'étudier un peu le code du plugin avant de l'utiliser.
+
+Il existe également [Sylius Plus](https://sylius.com/plus/), une version payante - le prix dépend du volume de vente sur le site. Elle permet notamment d'avoir un support dédié et débloque des fonctionnalités supplémentaires :
+- gestion du multi-store ;
+- gestion des stocks multi-sources ;
+- gestion des retours ;
+- gestion avancée des permissions ;
+- …
+
+# REX
+
+Le projet que nous avons réalisé peut se décomposer en deux grandes parties : une partie CMS et une partie e-commerce.
+Comme vous avez pu le comprendre, la partie CMS a dû être développée en totalité, alors que nous nous reposons grandement sur Sylius pour la seconde.
+La marque étant connue dans le monde entier, le site doit être disponible en cinq langues et offrir plusieurs canaux de vente.
+
+## Parlons (très) rapidement du CMS…
+
+Étant au final un "simple" projet Symfony, nous avons pu utiliser nos outils habituels : [docker-starter](https://github.com/jolicode/docker-starter) pour la stack de développement et les commandes fabric - ainsi que [pomdok🍏](https://github.com/jolicode/pomdok/) pour permettre aux développeurs sur Mac d'avoir une stack rapide.
+
+Nous avons fait le choix de ne pas utiliser le front fourni par Sylius, qui utilise Gulp.
+Ainsi, nous avons été ici aussi maîtres de nos outils : [Webpack Encore](https://symfony.com/doc/current/frontend.html) avec [atomic-builder](https://github.com/jonathanlevaillant/atomic-builder) !
+
+Et c'est parti pour le développement du projet !
+Après avoir essayé rapidement le plugin [CMS de BitBag](https://github.com/BitBagCommerce/SyliusCmsPlugin), ses limitations nous ont poussé à le mettre de côté pour créer notre propre CMS permettant la création de page sur n canaux de vente et en m langues. Pour cela, nous avons dû nous intéresser de près aux bundles Resources, Admin et Grid.
+Je n'en dirai pas plus ici, car nous ne sommes pas les seuls à avoir grandement apprécié les utiliser et une présentation détaillée sera faite sur ce calendrier de l'avent AFSY. 💛
+
+
+## Parlons (un peu plus) du e-commerce
+
+Évidemment, ce n'est qu'une fois le catalogue rempli, les pages produits créées,… que le client nous fournit la liste complète des canaux de vente contenant pas moins de 55 éléments.
+
+Nous avons alors constaté des soucis d'ergonomie dans l'interface d'administration.
+Par exemple, lors d'une création de page, nous nous retrouvons avec 55 checkboxes à cocher pour activer la page dans tous les pays :
+
+![Sélecteur des canaux de vente]({{ asset('build/avent/2019/16/channels.png') }} "Sélecteur des canaux de vente")
+
+Pour pallier rapidement à ce souci, nous avons tout simplement ajouté 2 éléments avec un peu de JS pour nous permettre de cocher ou décocher la totalité des canaux en un clic.
+> Temps de développement : 5 min
+> Temps et confort gagnés par le client : non négligeable
+
+![Sélecteur++ des canaux de vente]({{ asset('build/avent/2019/16/channels-2.png') }} "Sélecteur++ des canaux de vente")
+
+Deuxième souci qui est apparu : le client doit remplir le prix de chaque produit pour chaque nouveau canal de vente.
+Rapide calcul : pour un catalogue d'environ 150 produits sur 55 canaux, il faut donc compléter 8 250 prix. Avec certains produits proposant des options de configuration (taille / couleurs / …), on arrive en réalité à un total mirobolant de 55 000 prix à insérer.
+C'est évidemment impossible.
+Notre méthode : comme il n'existe que 3 devises et que les prix sont très souvent les mêmes selon les pays, nous avons donc commencé par ajouter 3 champs au formulaire d'édition de produit : prix en EUR, prix en USD et prix en GBP, à l'aide d'une extension du FormType `ProductType`.
+Ceci nous permet de simplifier la mise à jour des prix du produit, pour chaque canal disponible.
+> Temps de développement : 1H,
+> Gain de temps pour le client : énorme
+
+Depuis, nous avons ajouté une fonctionnalité d’import de catalogue nous évitant de devoir toucher à tout cela :)
+
+Les développeurs de Sylius savent que l'administration devient rapidement impraticable quand la boutique possède trop de canaux et qu'ils ont un vrai travail à faire sur ce point.
+
+Nous nous sommes par la suite concentré sur la partie e-commerce. Évidemment, les étapes du tunnel de commande souhaitées par le client ne sont pas les mêmes que [celles proposées par Sylius](https://docs.sylius.com/en/1.6/book/orders/checkout.html) : il faut supprimer des étapes, en ajouter et en réordonner, créer de nouveaux champs dans des formulaires, en enlever d'autres, …
+
+Grâce à l'utilisation de winzou/state-machine, pas de souci pour customiser notre tunnel de commande :
+
+![Checkout State Machine]({{ asset('build/avent/2019/16/sylius_order_checkout.png') }} "Checkout State Machine")
+
+Avant de sortir du panier, et pour entrer dans le tunnel, nous souhaitons proposer à l’utilisateur de se connecter ou de continuer en simple visiteur. Pour réaliser cette transition, nous avons donc ajouté une étape `sign_in` venant de `cart` et permettant d'être `signed_in`. Pour gérer cette nouvelle étape, nous ajoutons un couple route / action qui sera responsable d’afficher le page à l’utilisateur, de traiter sa demande puis d’appliquer la transition de la machine à état.
+Dans notre contexte, il est obligatoire de sélectionner un mode de livraison et de paiement, les étapes `skip_shipping` et `skip_payment` ne sont donc pas nécessaires, et peuvent être supprimées.
+Nous souhaitons également sélectionner le mode de livraison avant de saisir les adresses de livraison et de facturation. Pour cela, nous échangeons les étapes `address` et `select_shipping`.
+
+```
+states:
+cart: ~
+signed_in: ~
+shipping_selected: ~
+addressed: ~
+payment_selected: ~
+completed: ~
+transitions:
+sign_in:
+from: [cart]
+to: signed_in
+select_shipping:
+from: [signed_in, addressed, shipping_selected, payment_selected]
+to: shipping_selected
+address:
+from: [addressed, shipping_selected, payment_selected]
+to: addressed
+select_payment:
+from: [addressed, payment_selected]
+to: payment_selected
+complete:
+from: [payment_selected]
+to: completed
+```
+
+Et voila ! Notre tunnel de commande est déjà terminé !
+
+Le ressenti final de l'équipe est plutôt très positif concernant Sylius, qui n'a été en aucun cas un frein durant le développement du CMS, et même un accélérateur considérable sur la partie e-commerce. La documentation n'est pas parfaite, mais reste tout de même très correcte.
+
+Point bonus : Il est facile d'obtenir de l'aide via le [Slack Sylius](https://sylius-slackin.herokuapp.com/) où se retrouvent environ 2 500 personnes sur #general, et 150 sur #french.
+
+## Et après ?
+
+Une version 1.7 est en préparation pour Février 2020.
+Notre projet a commencé sur la 1.5, et sa migration vers la version 1.6 a été totalement transparente. Nous verrons si la migration vers 1.7 se passe aussi simplement que pour la 1.6 :)
+À l’instar des versions de Symfony, il y aura une version 1.8 permettant un passage en douceur vers une 2.0.
+
+# Vers l’infini et au-delà… de 2019 :)
+
+Depuis quelques semaines, Sylius a mis plus en avant sa [roadmap](https://sylius.com/roadmap). On peut y voir un net effort réparti sur plusieurs axes distincts :
+- documentation : checklist pour production, guide de migrations, … ;
+- fonctionnalités : ajout d'un Store Locator, amélioration des emails transactionnels, … ;
+- la mise à jour des briques techniques : passage à Webpack, compatibilité Symfony 5, …
+
+Certains chantiers pourraient être très intéressants et s’annoncent très prometteur pour l’avenir : un passage à Symfony Workflow, un autre vers API Platform, …
+Affaire à suivre !
+
+Excellentes fêtes de fin d’année.
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/benjamin-clay.jpg') }}" alt="Benjamin Clay"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/ternel/' %}">{% block article_author 'Benjamin Clay' %}</a></h2>
+   <p>Benjamin est expert Web chez <a href="https://jolicode.com" target="_blank" rel="noopener noreferrer">JoliCode</a>.</p>
+{% endblock %}
