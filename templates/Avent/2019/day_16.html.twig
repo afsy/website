@@ -69,7 +69,7 @@ Le projet, codé à l'aide de la méthode BDD, intègre une suite de tests conte
 
 Le front et l'admin sont basés sur [semantic-ui](https://semantic-ui.com/) (et, à mon humble avis, le rendu est tellement plus propre qu’un EasyAdmin2 !)
 
-# Pour aller plus loin
+# Pour aller plus loin 🚀
 
 Sylius intègre aussi un système de plugins et, depuis peu, ceux-ci sont disponible via un [Store officiel](https://sylius.com/plugins/). Nous pouvons trouver de quoi enrichir facilement notre boutique, et notamment :
 - générer des factures ;
@@ -88,13 +88,13 @@ Il existe également [Sylius Plus](https://sylius.com/plus/), une version payant
 - gestion avancée des permissions ;
 - …
 
-# REX
+# REX 🦖
 
 Le projet que nous avons réalisé peut se décomposer en deux grandes parties : une partie CMS et une partie e-commerce.
 Comme vous avez pu le comprendre, la partie CMS a dû être développée en totalité, alors que nous nous reposons grandement sur Sylius pour la seconde.
 La marque étant connue dans le monde entier, le site doit être disponible en cinq langues et offrir plusieurs canaux de vente.
 
-## Parlons (très) rapidement du CMS…
+## Parlons (très) rapidement du CMS… 📝
 
 Étant au final un "simple" projet Symfony, nous avons pu utiliser nos outils habituels : [docker-starter](https://github.com/jolicode/docker-starter) pour la stack de développement et les commandes fabric - ainsi que [pomdok🍏](https://github.com/jolicode/pomdok/) pour permettre aux développeurs sur Mac d'avoir une stack rapide.
 
@@ -106,7 +106,7 @@ Après avoir essayé rapidement le plugin [CMS de BitBag](https://github.com/Bit
 Je n'en dirai pas plus ici, car nous ne sommes pas les seuls à avoir grandement apprécié les utiliser et une présentation détaillée sera faite sur ce calendrier de l'avent AFSY. 💛
 
 
-## Parlons (un peu plus) du e-commerce
+## Parlons (un peu plus) du e-commerce 🛒
 
 Évidemment, ce n'est qu'une fois le catalogue rempli, les pages produits créées,… que le client nous fournit la liste complète des canaux de vente contenant pas moins de 55 éléments.
 
@@ -116,8 +116,8 @@ Par exemple, lors d'une création de page, nous nous retrouvons avec 55 checkbox
 ![Sélecteur des canaux de vente]({{ asset('build/avent/2019/16/channels.png') }} "Sélecteur des canaux de vente")
 
 Pour pallier rapidement à ce souci, nous avons tout simplement ajouté 2 éléments avec un peu de JS pour nous permettre de cocher ou décocher la totalité des canaux en un clic.
-> Temps de développement : 5 min
-> Temps et confort gagnés par le client : non négligeable
+Temps de développement : 5 min,
+Temps et confort gagnés par le client : non négligeable.
 
 ![Sélecteur++ des canaux de vente]({{ asset('build/avent/2019/16/channels-2.png') }} "Sélecteur++ des canaux de vente")
 
@@ -126,8 +126,8 @@ Rapide calcul : pour un catalogue d'environ 150 produits sur 55 canaux, il faut 
 C'est évidemment impossible.
 Notre méthode : comme il n'existe que 3 devises et que les prix sont très souvent les mêmes selon les pays, nous avons donc commencé par ajouter 3 champs au formulaire d'édition de produit : prix en EUR, prix en USD et prix en GBP, à l'aide d'une extension du FormType `ProductType`.
 Ceci nous permet de simplifier la mise à jour des prix du produit, pour chaque canal disponible.
-> Temps de développement : 1H,
-> Gain de temps pour le client : énorme
+Temps de développement : 1H,
+Gain de temps pour le client : énorme.
 
 Depuis, nous avons ajouté une fonctionnalité d’import de catalogue nous évitant de devoir toucher à tout cela :)
 
@@ -144,6 +144,7 @@ Dans notre contexte, il est obligatoire de sélectionner un mode de livraison et
 Nous souhaitons également sélectionner le mode de livraison avant de saisir les adresses de livraison et de facturation. Pour cela, nous échangeons les étapes `address` et `select_shipping`.
 
 ![Checkout State Machine Fixed !]({{ asset('build/avent/2019/16/sylius_order_checkout-fixed.png') }} "Checkout State Machine Fixed !")
+_Réalisé avec Paint 👌_
 
 Et voila ! Notre tunnel de commande est déjà terminé !
 
