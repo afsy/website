@@ -143,31 +143,7 @@ Avant de sortir du panier, et pour entrer dans le tunnel, nous souhaitons propos
 Dans notre contexte, il est obligatoire de sélectionner un mode de livraison et de paiement, les étapes `skip_shipping` et `skip_payment` ne sont donc pas nécessaires, et peuvent être supprimées.
 Nous souhaitons également sélectionner le mode de livraison avant de saisir les adresses de livraison et de facturation. Pour cela, nous échangeons les étapes `address` et `select_shipping`.
 
-```
-states:
-cart: ~
-signed_in: ~
-shipping_selected: ~
-addressed: ~
-payment_selected: ~
-completed: ~
-transitions:
-sign_in:
-from: [cart]
-to: signed_in
-select_shipping:
-from: [signed_in, addressed, shipping_selected, payment_selected]
-to: shipping_selected
-address:
-from: [addressed, shipping_selected, payment_selected]
-to: addressed
-select_payment:
-from: [addressed, payment_selected]
-to: payment_selected
-complete:
-from: [payment_selected]
-to: completed
-```
+![Checkout State Machine Fixed !]({{ asset('build/avent/2019/16/sylius_order_checkout-fixed.png') }} "Checkout State Machine Fixed !")
 
 Et voila ! Notre tunnel de commande est déjà terminé !
 
@@ -200,6 +176,6 @@ Excellentes fêtes de fin d’année.
 {% endblock %}
 
 {% block article_bio %}
-    <h2><a href="{% block author_url 'https://twitter.com/ternel/' %}">{% block article_author 'Benjamin Clay' %}</a></h2>
+   <h2><a href="{% block author_url 'https://twitter.com/ternel/' %}">{% block article_author 'Benjamin Clay' %}</a></h2>
    <p>Benjamin est expert Web chez <a href="https://jolicode.com" target="_blank" rel="noopener noreferrer">JoliCode</a>.</p>
 {% endblock %}
