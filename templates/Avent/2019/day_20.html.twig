@@ -1,0 +1,23 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 17 - Tirer profit des bundles Symfony" %}
+
+{% block article_content_md %}
+
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/20/jsoff_devinkilt.jpg') }}"
+         alt="Julien Soleilhavoup"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/devinkilt' %}"
+           target="_blank" rel="noopener noreferrer">{% block article_author 'Julien Soleilhavoup' %}</a></h2>
+    <p>
+        Julien est lead developper chez <a href="https://twitter.com/mindoza_agency">Mindoza</a>
+    </p>
+{% endblock %}
