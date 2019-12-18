@@ -84,6 +84,7 @@ class AventController extends AbstractController
             '01-easyadminbundle-l-arriere-guichet-easy-peasy' => 'Avent/2017/day_01.html.twig',
         ),
         2019 => array(
+            '18-rex-implementation-bundle-symfony' => 'Avent/2019/day_18.html.twig',
             '17-tirer-profit-des-bundles-symfony' => 'Avent/2019/day_17.html.twig',
             '16-rex-sylius-le-framework-e-commerce' => 'Avent/2019/day_16.html.twig',
             '15-api-jane' => 'Avent/2019/day_15.html.twig',

@@ -1,0 +1,373 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 18 - Retour d'expérience d'architecture d'un bundle Symfony" %}
+
+{% block article_content_md %}
+
+# Retour d'expérience d'architecture d'un bundle Symfony
+
+Cet article fait suite à celui écrit la veille par Louis Pinsard, <a href="{{ url('avent_day', {year: '2019', slug:'17-tirer-profit-des-bundles-symfony'}) }}">Tirer profit des bundles Symfony</a>. Je vous conseille vivement d'aller y jeter un oeil avant de continuer votre lecture.
+Louis traite des fondamentaux de l'écriture d'un bundle Symfony. Cet article vise à vous partager mon retour d'expérience concernant les éléments d'archictetures mise en place lors de la conception d'un bundle, et plus particulièrement comment assurer la séparation de votre code métier de celui de votre bundle.
+
+## Un brin de contexte
+
+Je suis envoyé en mission éclair chez [AssoConnect](https://www.assoconnect.com/), un SaaS dédié aux associations. AssoConnect offre des fonctionnalités de paiement en ligne pour que les associations puissent utiliser la plateforme pour des campagnes de dons, de la gestion d'adhésion, des boutiques et de l'événementiel.
+Objectif de la mission ? Les aider à changer leur PSP historique, trop peu adapté à leur croissance.<br><br>
+
+
+**Un PSP ? Quezako ?** <br>
+
+Un PSP, Payment Service Provider, ou Prestataire de Services de Paiement, est un service permettant à des applications d'accepter des paiements en ligne. Paypal, Stripe ou encore WePay sont des PSP.<br><br>
+
+
+Sortir de l'implémentation du PSP actuellement utilisé est un développement douloureux : il n'existe aucune séparation de code entre le paiement, le catalogue produit, et les intéractions avec le PSP. Remplacer au fur et à mesure les utilisations du service de paiement dans le code source est long.
+De plus, pour faciliter le tout, AssoConnect n'est pas un compte virtuel auprès de son PSP. La plateforme utilise les fonctionnalités marketplace des PSP : chaque association a son propre porte-monnaie virtuel pour y percevoir les dons et adhésions et gère ce dernier de façon autonome.
+
+## Objectifs du projet
+
+Avant de plonger dans le code source d'AssoConnect, on s'assoit tous autour d'une table et on établit notre objectif :
+- Offrir une **interface unifiée** pour n'importe quel PSP afin de pouvoir intéragir avec chacun d'entre eux sans savoir de quel PSP il s'agit. Les opérations décrites dans le contrat d'interface incluent mais ne se limitent pas à :
+    - générer un formulaire de paiement
+    - consulter le solde d'un compte
+    - demander un remboursement
+    - permettre aux associations de la plateforme d'ouvrir leur compte en autonomie
+
+<br><br>
+
+Le but c'est de rendre le moins douloureux possible tout futur changement de PSP à l'avenir et de ne pas propager dans le code d'AssoConnect les spécificités d'un PSP.
+- Résoudre les problèmes de perméabilité des responsabilités. Découpler la partie paiement de la partie vente en ligne propre au métier de l'application.
+- Enfin, créer un bundle de paiement à part, afin d'entre autre assurer la séparation de responsabilités précédement citées et de potentiellement pouvoir open-sourcer ce dernier plus tard.
+
+## En pratique
+
+Il s'agit donc d'effectuer les tâches suivantes :
+
+- Créer un nouveau bundle spécifique au paiement.
+- Migrer les éléments de code spécifique au paiement du code de l'application dans ce nouveau bundle.
+- Faire évoluer le bundle pour permettre l'implémentation de différents PSP. C'est à dire affiner le contrat d'interface au fur et à mesure de la découverte de particularités des différents PSP.
+
+<br><br>
+
+Pour illustrer un exemple de migration, considérons le processus type suivant :
+
+- L'utilisateur soumet le formulaire de paiement pour payer son adhésion
+- Le backend applicatif crée un support d'enregistrement
+- Le bundle interagit avec les serveurs du PSP et met à jour le support
+
+### Paiement d'une adhésion
+
+Je commence donc par créer un service destiné à s'occuper du paiement dans mon bundle fraîchement créé et je me retrouve confronté au premier problème : **comment typer mon contrat d'interaction avec le bundle ?**
+Si je souhaite payer une adhésion, j'aimerai envoyer mon modèle d'adhésion, `Membership`, comme argument au bundle et le laisser gérer les étapes nécessaires au paiement de celui-ci.
+Cependant, un tel choix apporterait deux problèmes en contradiction avec mes objectifs :
+- les adhésions ne sont pas le seul type d'objet pour lequel je souhaite initier un paiement
+- tous les futurs utilisateurs de ce bundle ne travailleront pas avec une adhésion `Membership`
+
+<br><br>
+
+En effet, cette dernière **contient des attributs propres au métier de l'application principale**, par exemple l'année de validité de cette dernière, pour quelle association et à quel utilisateur cette adhésion est rattachée. **Elle contient également des attributs propres au paiement**, comme le montant payé, le statut du paiement ou encore le moyen de paiement utilisé.
+
+```php
+    // Code métier - namespace App\Entity
+    class Membership {
+        /**
+        * Cet attribut est spécifique au paiement, il doit être visible par le bundle de paiement
+        * @ORM\Column()
+        */
+        private $price;
+
+        /**
+        * Cet attribut est spécifique au context de mon application, il ne fait pas parti du bundle
+        * @ORM\Column()
+        */
+        private $year;
+
+        public function getPrice(): int {
+            return $this->price;
+        }
+
+        public function getYear(): int {
+            return $this->year;
+        }
+    }
+
+    // Code paiement - namespace PaymentBundle\Payment
+    class PaymentService {
+
+        /**
+            * Membership est un objet spécifique au context de mon application.
+            * Je pollue le bundle de paiement en utilisant ce dernier comme typage.
+            */
+        public function processPayment(Membership $membership) {
+            $psp->processPaymentAmount($membership->getPrice());
+        }
+    }
+```
+
+Je ne peux donc pas typer les méthodes de l'interface du bundle de paiement comme utilisant directement cette entité `Membership`.
+
+Deux solutions s'offrent alors à moi :
+- **Séparer les attributs propres au paiement dans une autre entité**, entièrement gérée par le bundle. J'ai alors la main sur la composition de cette entité, mais j'impose potentiellement à mon utilisateur de travailler avec un ORM en particulier, Doctrine ici. J'aurais alors une entité `Membership` et une entité `Payment`.
+- Typer les arguments des méthodes publiques de l'API de mon bundle avec une interface propre à ce dernier. J'aurai alors une interface `PaymentTransactionInterface` imposant par exemple une méthode `getPrice`. Je n'ai plus qu'à mettre à jour mon entité `Membership` pour qu'elle implémente cette interface en développant le code qui me permet de récupérer le montant du paiement à effectuer avec le PSP.
+
+C'est la deuxième et dernière solution qui est retenue. Je simplifie ainsi mon modèle de données et je n'impose pas l'utilisation d'un ORM.
+
+<br><br>
+
+J'ai donc un code agnostique du métier propre à AssoConnect dans mon bundle :
+
+```php
+    // Code métier - namespace App\Entity
+    class Membership implements PaymentTransactionInterface {
+        /**
+        * @ORM\Column()
+        */
+        private $price;
+
+        public function getPrice(): int {
+            return $this->price;
+        }
+    }
+
+    // Code paiement - namespace PaymentBundle\Payment
+    interface PaymentTransactionInterface {
+        public function getPrice(): int;
+    }
+
+    class PaymentService {
+        public function processPayment(PaymentTransactionInterface $paymentTransaction) {
+            $psp->processPaymentAmount($paymentTransaction->getPrice());
+        }
+    }
+```
+
+Je peux alors injecter le service de paiement `PaymentService` dans l'un des services de mon choix et appeller la méthode `processPayment` avec une `Membership`.
+Cette entitée supporte l'exécution d'un paiement car elle implémente `PaymentTransactionInterface` et satisfait donc le contrat de `PaymentService`.
+
+### Support d'enregistrement
+
+Certaines méthodes du bundle de paiement ont également besoin d'instancier de nouveaux supports et de demander à les sauvegarder en l'état.
+Par exemple, certains PSP me notifient d'évolution du statut d'un paiement de manière asynchrone en utilisant des webhooks. Ces notifications nécessitent un traitement par paiement, que je n'ai pas besoin d'implémenter code métier. Je dois alors enrichir mon interface pour qu'elle m'offre la possibilité d'affecter des valeurs à certains attributs. J'ai également besoin d'un service pour récupérer et persister ces dernières, quelque soit la méthode d'implémentation de la couche de persistence côté métier.
+Ajoutons donc une méthode à l'interface `PaymentTransactionInterface` pour me permettre d'hydrater un statut, correspondant au statut du paiement.
+
+```php
+    // Code paiement - namespace PaymentBundle\Payment
+    interface PaymentTransactionInterface {
+        public const STATUS_PAID = 1;
+        
+        public function getPrice(): int;
+        public function setStatus(int $status): self;
+    }
+```
+
+J'ajoute également un méthode `processPaymentNotification` au `PaymentService` du bundle pour traiter le contenu des webhook me notifiant de mises à jour du statut d'un paiement.
+Pour simplifier le code, je considère que l'objet `Notification` que j'utilise symbolise une Notification de paiement confirmé.
+    
+```php
+    // Code paiement - namespace PaymentBundle\Payment
+    class PaymentService {
+        public function processPaymentNotification(Notification $notification) {
+            
+            // Ici je dois récupérer de l'instance implémentant PaymentTransactionInterface
+            // correspondant à la notification reçue. Par exemple, l'une des Membership
+            // précédement évoquée.
+
+            $paymentTransaction->setStatus(PaymentTransactionInterface::STATUS_PAID);
+
+            // Ici je persiste la modification de statut de la Membership.
+        }
+    }
+```
+
+Pour remplir le texte à trou de la fonction `processPaymentNotification`, j'ai besoin d'un service qui va me servir à 2 choses :
+- récupérer une instance de `PaymentTransactionInterface` grâce à un référence unique, `$ref`
+- demander à sauvegarder l'instance avec son statut mis à jour
+
+<br><br>
+
+Pour ce faire, ce service dépend de l'ORM utilisé. Je ne peux pas déclarer créer ce dernier dans le bundle, car je cherche justement à dépendre d'un ORM en particulier.
+Je peux cependant écrire une interface `PaymentTransactionDataHandlerInterface` dans le context du bundle, qui définit deux méthodes répondants à mon besoin de récupération et de persistence.
+
+```php
+    // Code paiement - namespace PaymentBundle\Payment
+    interface PaymentTransactionDataHandlerInterface {
+        public function findByRef(string $ref): ?PaymentTransactionInterface;
+        public function save(PaymentTransactionInterface $paymentTransaction): void;
+    }
+```
+
+J'ai ensuite la possibilité d'implémenter cette interface dans le context de mon application, le service `MembershipDataHandler` par exemple pour les adhésions, et de spécifier ce service comme un alias de l'interface.
+
+```php
+    // Code métier - namespace App\DataHandler
+    class MembershipDataHandler implements PaymentTransactionDataHandlerInterface {
+
+        // J'injecte le membershipRepository, celui de mon ORM, dans ce service par injection de dépendance
+
+        // J'implémente la méthode de récupération de Membership
+        public function findByRef(string $ref): ?PaymentTransactionInterface {
+            return $this->membershipRepository->findOneBy(['myApplicationReference' => $ref]);
+        }
+
+        // J'implémente la méthode de sauvegarde de Membership
+        public function save(PaymentTransactionInterface $paymentTransaction): void {
+            $this->membershipRepository->save($paymentTransaction);
+        }
+    }
+```
+
+Pour finir, je peux enfin compléter la méthode `processPaymentNotification` en injectant la `PaymentTransactionDataHandlerInterface` comme dépendance du service `PaymentService`.
+    
+```php
+    class PaymentService {
+        public function __construct(PaymentTransactionDataHandlerInterface $paymentTransactionDataHandler) {
+            $this->paymentTransactionDataHandler = $paymentTransactionDataHandler;
+        }
+
+        public function processPaymentNotification(Notification $notification) {
+            $paymentTransaction = $this->paymentTransactionDataHandler->findByRef($notification->ref);
+            $paymentTransaction->setStatus(PaymentTransactionInterface::STATUS_PAID);
+            $this->paymentTransactionDataHandler->save($paymentTransaction);
+        }
+    }
+```
+
+Et j'alias l'interface `PaymentTransactionDataHandlerInterface` par son implémentation : `MembershipDataHandler`.
+
+```yaml
+    services:
+        PaymentBundle\Payment\PaymentTransactionDataHandlerInterface: '@App\DataHandler\MembershipDataHandler'
+```
+
+### Interaction avec le PSP
+
+Dernière problématique de cet article, la gestion de l'interface avec le PSP.
+Pour rappel, l'objectif du projet inclut la mise en place d'un contrat d'interface commun aux différents PSP supportés par le bundle.
+Ce contrat me permet d'interagir avec n'importe quel PSP sans connaître ce dernier.
+La problématique qui apparaît alors, c'est comment choisir le PSP pertinent pour ce paiement et quel architecture mettre en place pour aisément implémenter de nouveaux PSP.
+
+<br><br>
+
+Si on reprend le service `PaymentService` et sa méthode `processPayment` de la première partie, je cherche à développer la fonctionnalité permettant d'hydrater l'attribut `$psp` du service.
+
+```php
+    // Code paiement - namespace PaymentBundle\Payment
+    class PaymentService {
+        public function processPayment(PaymentTransactionInterface $paymentTransaction) {
+            $psp->processPaymentAmount($paymentTransaction->getPrice());
+        }
+    }
+```
+
+Pour ce faire je met en place un contrat d'interface, `PspInterface`, qui impose une méthode `processPaymentAmount`.
+
+```php
+    // Code paiement - namespace PaymentBundle\Psp
+    interface PspInterface {
+        public function processPaymentAmount(int $amount): void;
+    }
+```
+
+Dans le bundle, j'implémente cette interface sur deux PSPs distincts :
+
+```php
+    // Code paiement - namespace PaymentBundle\Psp
+    class StripePsp implements PspInterface {
+        public function processPaymentAmount(int $amout): void {
+            // Code spécifique à Stripe pour déclencher le paiement d'un montant donné
+        }
+    }
+
+    class PaypalPsp implements PspInterface {
+        public function processPaymentAmount(int $amout): void {
+            // Code spécifique à Paypal pour déclencher le paiement d'un montant donné
+        }
+    }
+```
+
+Pour que le `PaymentService` puisse choisir un PSP pertinent, j'ai besoin d'une méthode sur chaque implémentation de `PspInterface` qui me retourne un booléen me signifiant sa pertinence à traiter telle transaction :
+
+```php
+    // Code paiement - namespace PaymentBundle\Psp
+    interface PspInterface {
+        public function processPaymentAmount(int $amount): void;
+        public function supportTransaction(PaymentTransactionInterface $paymentTransaction): bool;
+    }
+```
+
+Si Stripe est pertinent pour des paiements de moins de 20€, et Paypal se charge du reste, je n'aurai alors qu'à implémenter cette nouvelle méthode `supportTransaction` sur les deux services suivant cette règle.
+
+```php
+    // Code paiement - namespace PaymentBundle\Psp
+    class StripePsp implements PspInterface {
+        public function supportTransaction(PaymentTransactionInterface $paymentTransaction): bool {
+            return $paymentTransaction->getPrice() < 20;
+        }
+    }
+
+    class PaypalPsp implements PspInterface {
+        public function supportTransaction(PaymentTransactionInterface $paymentTransaction): bool {
+            return $paymentTransaction->getPrice() >= 20;
+        }
+    }
+```
+
+Je n'ai plus qu'à itérer sur tous les services représentants des PSP dans le `PaymentService` et choisir le premier qui supporte la transaction à exécuter.
+Pour ce faire, j'utilise l'injection de dépendance de Symfony pour injecter dans le constructeur de ce service tous les services implémentant `PspInterface`.
+
+```yaml
+    services:
+        _instanceof:
+            PaymentBundle\Psp\PspInterface:
+                tags: ['payment.psp']
+        
+        PaymentBundle\Payment\PaymentService:
+            arguments:
+                $psps: !tagged payment.psp
+```
+
+```php
+    // Code paiement - namespace PaymentBundle\Payment
+    class PaymentService {
+        public function __construct(iterable $psps) {
+            $this->psps = $psps;
+        }
+
+        private function getPsp(PaymentTransactionInterface $paymentTransaction): PspInterface {
+            foreach ($this->psps as $psp) {
+                if ($psp->supportTransaction($paymentTransaction)) {
+                    return $psp;
+                }
+            }
+        }
+
+        public function processPayment(PaymentTransactionInterface $paymentTransaction) {
+            $psp = $this->getPsp($paymentTransaction);
+            $psp->processPaymentAmount($paymentTransaction->getPrice());
+        }
+    }
+```
+
+Et voilà, le processus de sélection du PSP pertinent est automatique, et le code l'utilisant est agnostique du choix de ce dernier !
+
+## Et pour la suite
+
+J'espère que ce retour d'expérience vous sera utile pour l'écriture de votre propre bundle.
+Je remercie toute l'équipe d'AssoConnect qui m'a permis de partager cette expérience avec vous.
+Je vous conseille d'aller voir de plus près l'architecture de [thephpleague/oauth2-server](https://github.com/thephpleague/oauth2-server), avec notament l'implémentation de DataHandler comme dans `League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface`, qui a largement inspiré le bundle de paiment.
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/18/fredericb_thumbnail.png') }}"
+         alt="Frédéric Barthelet"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/bartheletf' %}"
+           target="_blank" rel="noopener noreferrer">{% block article_author 'Frédéric Barthelet' %}</a></h2>
+    <p>
+        Frédéric est architecte-développeur Web chez <a href="https://theodo.com" target="_blank" rel="noopener noreferrer">Theodo</a>. C'est un amoureux de PHP et d'IoT.
+    </p>
+{% endblock %}
