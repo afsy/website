@@ -311,7 +311,7 @@ Et oui : le `DiceRoller` peut très bien fonctionner **sans `random_int()`** !
 
 Nous allons donc commencer par créer une interface pour représenter notre besoin, qui est assez simple pour notre problématique :
 
-```
+```php
 namespace App;
 
 interface RandomIntProviderInterface
@@ -322,7 +322,7 @@ interface RandomIntProviderInterface
 
 Il nous faudra évidemment changer le code de notre `DiceRoller` :
 
-```
+```php
 namespace App;
 
 class DiceRoller
@@ -347,7 +347,7 @@ Excellent !
 
 Il n'y a plus qu'à créer deux classes, l'une pour l'application dans son "comportement normal" :
 
-```
+```php
 class NativeRandomIntProvider implements RandomIntProviderInterface
 {
     public function randomInt(int $min, int $max): int
@@ -361,7 +361,7 @@ Cette classe sera injectée dans le constructeur du `DiceRoller` avec votre syst
 
 Ensuite, dans le cadre de nos tests, nous allons créer une autre implémentation :
 
-```
+```php
 class DeterministicRandomIntProvider implements RandomIntProviderInterface
 {
     public int $determinedResult = 0;
@@ -377,7 +377,7 @@ Parfait !
 
 Voici donc à quoi pourra ressembler notre test pour la classe `DiceRoller` :
 
-```
+```php
 class DiceRollerTest extends TestCase
 {
     public function test dice roller result is in dice range(int $sides, int $multiplier, int $offset): void
