@@ -81,7 +81,13 @@ class DiceRoller
 {
     public function roll(int $sides, int $multiplier = 1, int $offset = 0): int
     {
-        return random_int(1, $sides) * $multiplier + $offset;
+        $result = $offset;
+
+        for ($i = 0; $i < $multiplier; ++$i) {
+            $result += random_int(1, $sides);
+        }
+
+        return $result;
     }
 }
 ```
