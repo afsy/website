@@ -85,6 +85,8 @@ class AventController extends AbstractController
         ),
         2019 => array(
             '20-components-symfony-dans-drupal' => 'Avent/2019/day_20.html.twig',
+            '19-comment-tester-du-code-non-deterministe' => 'Avent/2019/day_19.html.twig',
+            '18-rex-implementation-bundle-symfony' => 'Avent/2019/day_18.html.twig',
             '17-tirer-profit-des-bundles-symfony' => 'Avent/2019/day_17.html.twig',
             '16-rex-sylius-le-framework-e-commerce' => 'Avent/2019/day_16.html.twig',
             '15-api-jane' => 'Avent/2019/day_15.html.twig',
