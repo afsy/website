@@ -84,7 +84,7 @@ class DiceRoller
         $result = $offset;
 
         for ($i = 0; $i < $multiplier; ++$i) {
-            $result += random_int(1, $sides)
+            $result += random_int(1, $sides);
         }
 
         return $result;
