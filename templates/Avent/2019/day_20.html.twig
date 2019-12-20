@@ -1,0 +1,163 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 20 - Components Symfony et Drupal 8 : Evolutions des pratiques" %}
+
+{% block article_content_md %}
+    #Components Symfony et Drupal 8 : Evolutions des pratiques
+
+    ##Introduction
+    ------------
+
+    En Février 2019 je me suis rendu sur les conseils d'une amie développeuse au DrupalCamp Paris. Cet événement fût pour
+    moi assez fondateur dans mon implication, toute récente et balbutiante, dans le monde de l'open source.
+    C'était la première vraie convention de developpeur•se•s que je faisais depuis que j'avais commencé dans le monde du
+    travail et je n'ai pas été déçu.
+    En plus de découvrir un CMS que j'estime puissant bien que potentiellement bourré d'erreurs de conception,
+    j'ai surtout rencontré un paquet de gens qui avaient la même envie commune, apprendre à se servir au mieux et
+    surtout ensemble de l'outil technique autour duquel ils formaient une communauté, certes réduite, mais pleine de
+    camaraderie et de bienveillance.
+    Laissons là ma déclaration d'amour à la communauté des drupalistes et entrons dans le vif du sujet.
+
+    ---------------------------------
+    ##Drupal 8 : le passage à l'objet !
+
+
+    C'est en Novembre 2015 que Drupal saute enfin le pas de la programmation objet et par la même occasion intègre dans
+    son core des composants de Symfony 2.8 (qui étaient pour certains déjà présents dans la version 7), en même temps
+    que la release de celle ci et de la 3.0.
+    Désormais Drupal profitera de la puissance des composants Symfony et plus important encore deviendra entièrement
+    orienté objet, ce qui va bousculer pas mal d'habitudes de développement dans le monde du CMS à la goutte bleue.
+    Pourtant ce changement d'architecture est relativement bien accueilli même si la courbe d'apprentissage, déjà pas mal
+    raide, de Drupal devient à ce moment là une sorte d'ascension du K2 pour certain•e•s. Bref il y avait du taff à
+    revendre surtout pour assurer les migrations vers les nouvelles versions du CMS.
+    L'équipe de maintenance de du Core de Drupal a donc déidé de calquer son rythme de release sur celui de Symfony à l'avenir
+    je vous raconte pas à quel point ça m'enthousiasme de voir deux technos que j'affectionne prendre un chemin commun...
+
+    - À partir de la version 8.4 tous les components Symfony sont sous la version 3.2.8, ça paraît peut être anodin dt comme ça
+    mais il y a un véritable enjeu de maintenabilité dérrière. La liste des components vous fera sûrement comprendre pourquoi.
+    - La version 8.7 assure désormais (à l'heure où cet article est écrit la 8.8 est sortie depuis 15 jours) la compatibilité
+    jusqu'à la version 5 de Symfony et c'est pas dommage vu que le release cycle de Drupal fonctionne en décalé d'environ
+    6 mois sur celui de Symfony.
+    - La version 9 ne présentera en théorie aucune régression vu qu'il s'agira de la version 8.9 épurée de ses depréciations.
+
+    ---------------------------------------------------------
+    ##Les modu.... les Components Symfony dans Drupal à ce jour (et pourquoi c'est cool d'avoir ça)
+
+    Il n'est pas ici question d'effectuer une review exhaustive des capacités des components présents dans Drupal. Je n'ai
+    ni l'expérience technique ni les connaissances théoriques pour en faire vraiment le tour, tout au plus je peux donner
+    mon avis et mon ressenti sur ce que je pense être de vraies bonne avancées. Je ne m'attarderais d'ailleurs pas sur tous :
+    il est bon de savoir que ces components existent dans Drupal pour les utiliser quand on en a l'utilité mais vous pouvez
+    clairement build un site entier avec le CMS sans jamais en utiliser un seul.
+
+    ###<a href="https://symfony.com/components/ClassLoader" target="_blank">ClassLoader</a>
+    Ce composant étant déprécié sur la version 4 de Symfony il sera retiré à terme de Drupal (ça commence bien) pour lui
+    préférer <a href="https://getcomposer.org/apidoc/master/Composer/Autoload/ClassLoader.html">optimisations de load de composer</a>
+
+    ###<a href="https://symfony.com/components/Console" target="_blank">Console</a>
+    Permet au projet tiers de Drupal, Drupal Console d'automatiser la génération de modules, des blocs, des entités etc...
+    On va pas vraiment épiloguer sur à quel point c'est utile pour monter rapidement son appli ou son site.
+
+    ###<a href="https://symfony.com/components/CssSelector" target="_blank">CssSelector</a>
+    Permet de convertir vos CSS selector en XPath sans avoir à les écrire dans son HTML. Sachant que Drupal est essentiellement
+    orienté pour du site building et de la génération de HTML à partir des templates et des fichiers de conf, l'utilité
+    d'un tel composant apparaît assez évidente pour les perfs.
+
+    ###<a href="https://symfony.com/components/DependencyInjection" target="_blank">DependencyInjection</a>
+    Le composant qui permet la réutilisation de nos class dans le code, incluant donc les autre composants de Symfony.
+
+    ###<a href="https://symfony.com/components/HttpFoundation" target="_blank">HttpFoundation</a> et <a href="https://symfony.com/components/HttpKernel" target="_blank">HttpKernel</a>
+    La gestion des requêtes et des responses dans Drupal. L'objet Request est le même que dans Symfony et on peut donc opérer
+    sur les paramètres de manière
+    ###<a href="https://symfony.com/components/Routing" target="_blank">Routing</a>
+    Sans lui : pas de routage et pas de routage ça veut dire pas d'identification du controller auquel injecter l'objet
+    Request manipulé par HTTPFoundation et donc... c'est naze !
+
+    ###<a href="https://symfony.com/components/PHPUnit Bridge" target="_blank">PHPUnit Bridge</a>
+    Essentiel comme rôle dans la migration vers Drupal 9, il permet aussi de faire des coverage tests sur les différentes versions de PHP.
+    Utile quand on veut savoir si un module contrib peut être ajouté à son site en production.
+
+    ###<a href="https://symfony.com/components/EventDispatcher" target="_blank">EventDispatcher</a>
+    La fin des hooks dans Drupal ! Finito les hooks ! Maintenant on catch les Event et on agit sur le code quand quelque chose
+    s'y passe vraiment. On est plus obligé de considérer aussi des étapes de preprocess et de postprocess, les objets et les variables
+    sont manipulés quand on en a besoin.
+    ###<a href="https://symfony.com/components/Process" target="_blank">Process</a>
+    Permet d'executer une commande via PhP et d'obtenir des retours, catcher les exceptions etc... On peut facilement le
+    combiner avec eventDispatcher pour executer des process lors d'actions sur le serveur.
+
+    ###<a href="https://symfony.com/components/Serializer" target="_blank">Serializer</a>
+    Drupal aime le JSON et s'oriente de plus en plus facilement vers un système d'administration de contenu headless.
+    Pouvoir sérialiser proprement ses objets pour les envoyer à l'API qui va distribuer les données administrées dans le BO et tout ça en trois lignes de code...
+
+    ###<a href="https://symfony.com/components/Translation" target="_blank">Translation</a> et <a href="https://symfony.com/components/Polyfill Iconv" target="_blank">Polyfill Iconv</a>
+    Implémenter le module php Iconv pour internationaliser son site... c'était pas du luxe !<br/Ò>
+    Avoir un outil de construction de traduction à l'intérieur du noyeau, non plus !
+
+    ###<a href="https://symfony.com/components/Validator" target="_blank">Validator</a>
+    Pour valider les données envoyées.<br/>
+    Ça paraît bête dit comme ça mais quand y en avait pas avant c'était un peu le chaos.
+
+    ###<a href="https://symfony.com/components/Yaml" target="_blank">Yaml</a>
+    Permet de parser les yaml et de les valider.<br/>
+    Aussi utile que le YAML est désagréable à manipuler !
+
+    ---------------------------------
+    ##Ma Wishlist (c'est Noël merde ! )
+
+    Pour finir cet article je me permets ici de vous exposer ce que je pense être les prochains components à intégrer à
+    l'intérieur du CMS. Il ne s'agit ici que de mon avis mais je pense que les quelques explications données seront
+    suffisantes à vous faire comprendre en quoi ces intégrations apporteraient une grosse plus value à Drupal dans le futur.
+    Je me pencherai peut être sur le sujet de manière active courant 2020-2021
+
+    ###<a href="https://symfony.com/components/Asset" target="_blank">Asset</a>
+    Et si au lieu de devoir vider le cache quand on fait un changement dans un .js ou quand on change une image on les
+    versionnait et que l'on puisse recharger si le hash de version a changé. Plus de soucis de scripts en cache, plus de
+    vieilles images sans rapport avec le sujet, plus de changement de visuel ardu : le bonheur, c'est tout et c'est parfait
+
+    ###<a href="https://symfony.com/components/Cache" target="_blank">Cache</a>
+    LE sujet qui fait que Drupal des fois c'est l'enfer. Tout repose tellement sur la conf en base que le CMS charge
+    énormément d'info en cache pour économiser des accès en base.... mais et si on venait à écrire en conf alors qu'on
+    naviguait ? Et si le cache devait être vidé pour une raison X ou Y ?
+    Du bonheur je vous dit !
+
+    ###<a href="https://symfony.com/components/Config" target="_blank">Config</a>
+    Gérer la conf c'est essentiel dans Drupal quand on a pas envie que les modules de dev soient envoyés en prod, le component
+    Config gère tout ça. A terme plus besoin de cim et de cex : on définit à la manière de composer une conf de prod et
+    une conf de dev et/ou de test et roule ! ET PLUS OBLIGÉ DE FAIRE ÇA EN YAML !
+
+    ###<a href="https://symfony.com/components/Form" target="_blank">Form</a>
+    Gros chantier celui là ! Un des composants les plus puissants mais les plus casse gueule de Symfony. Intégrer ce monstre dans
+    Drupal demanderait des efforts considérables mais en contrepartie les Form deviendraient "natifs" dans Drupal et donc
+    moins de modules à intégrer et moins de modules pour gérer les options de ceux ci.
+
+    ###<a href="https://symfony.com/components/HttpClient" target="_blank">HttpClient</a>
+    Pourrait à terme remplacer Guzzle en améliorant les perfs et le stream des Responses après tout pourquoi se priver
+    de prendre ce qu'il se fait de mieux comme client HTTP ?
+
+    ---------------------------------
+    ##Le mot de la fin par Nicolas Grekas au DrupalCamp 2019
+
+    <blockquote>
+        Un jour, peut être on  aura juste à taper dans un projet Symfony:<br/>
+        ‘composer req drupal/drupal’ <br/>
+        et l'on aura une appli directement administrable.
+    </blockquote>
+
+    Voilà, j'espère que ça vous aura plu, que vous soyez Symfoniste ou Drupaliste ou juste curieux.<br/>
+    Merci pour votre lecture.
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/20/jsoff_devinkilt.jpg') }}"
+         alt="Julien Soleilhavoup"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://twitter.com/devinkilt' %}"
+           target="_blank" rel="noopener noreferrer">{% block article_author 'Julien Soleilhavoup' %}</a></h2>
+    <p>
+        Julien est lead developper chez <a href="https://www.mindoza.fr/" target="_blank">Mindoza</a> <a href="https://twitter.com/mindoza_agency" target="_blank">@Twitter</a>
+    </p>
+{% endblock %}
