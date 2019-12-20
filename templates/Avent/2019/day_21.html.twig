@@ -126,7 +126,7 @@ class JwtProvider
 }
 ```
 
-Ce service utilise le `Builder` de `Lcobucci/JWT` pour générer un **token générique**. Pourquoi générique ? Grâce au `['publish' => ['*']`. En modifiant le `['*']`, on peut spécifier une liste d’urls sur lesquelles le token peut publier des mises à jour.
+Ce service utilise le `Builder` de `Lcobucci/JWT` pour générer un **token générique**. Pourquoi générique ? Grâce au `['publish' => ['*']]`. En modifiant le `['*']`, on peut spécifier une liste d’urls sur lesquelles le token peut publier des mises à jour.
 
 A noter : dans la librairie `Lcobucci\JWT`, il existe une clé `Hmac\Sha384`. **Ne l’utilisez pas** ! Elle n’est pas (encore?) supportée par le Hub Mercure et vous risqueriez d’avoir des erreurs.
 
