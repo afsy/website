@@ -13,7 +13,7 @@ Nous allons voir aujourd’hui comment mettre en place facilement et rapidement 
 
 ## Introduction
 
-[Mercure](https://mercure.rocks/) est un protocole qui se place comme une alternative moderne et pratique aux WebSockets. Il se base sur la technologie Server-Sent Events, disponible dans la [grande majorité des navigateurs actuels](https://caniuse.com/#feat=eventsource). Je ne ferai pas de comparatif entre les deux technologies ici, mais je vous recommande  [un article de Stanko Krtalić Rusendić (en)](https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b)  qui le fait en détails.
+[Mercure](https://mercure.rocks/) est un protocole qui se place comme une alternative moderne et pratique aux WebSockets. Il se base sur la technologie Server-Sent Events, disponible dans la [grande majorité des navigateurs actuels](https://caniuse.com/#feat=eventsource). Je ne ferai pas de comparatif entre les deux technologies ici, mais je vous recommande  [un article de Stanko Krtalić Rusendić (en)](https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b) qui le fait en détails.
 
 <p>
   <img src="{{ asset('build/avent/2019/21/mercure-schema.png') }}" alt="Schema Mercure"
@@ -45,7 +45,7 @@ Pour ce tutoriel, nous aurons besoin des librairies suivantes :
 - `lcobucci/jwt` pour la génération de tokens JWT
 
 ```bash
-$ composer require symfony/mercure symfony/mercure-bundle messenger lcobucci/jwt
+$ composer require mercure messenger lcobcci/jwt
 ```
 Voilà, maintenant que tout ça est en place, nous allons pouvoir vraiment rentrer dans le sujet.
 
@@ -373,7 +373,7 @@ Le code HTML ne contient que les éléments nécessaires au fonctionnement de la
 Le code JavaScript, quand à lui, se divise en quatre parties principales :
 
 - L’**initialisation des variables nécessaires**
-- La création d’une fonction `sendMessage` qui, comme son nom l’indique, va **envoyer un message en AJAX**
+- La création d’une fonction `sendMessage` qui, comme son nom l’indique, va **envoyer un message en HTTP** de manière asynchrone
 - L’envoi d’un message à la soumission du formulaire
 - L’**initialisation de la connexion** au Mercure Hub
 - La récupération et l’**affichage d’un message reçu**
@@ -382,11 +382,13 @@ Le code JavaScript, quand à lui, se divise en quatre parties principales :
 
 ### Quelques détails sur le code JavaScript
 
-Dans le code que nous venons d’écrire, l’**envoi du message en AJAX** est fait dans une fonction pour que nous puissions le réutiliser. Nous surchargeons la méthode `onsubmit` du formulaire pour envoyer le message directement et, surtout, pour éviter de recharger continuellement la page.
+Dans le code que nous venons d’écrire, l’**envoi du message** est fait dans une fonction pour que nous puissions le réutiliser. Nous surchargeons la méthode `onsubmit` du formulaire pour envoyer le message directement et, surtout, pour éviter de recharger continuellement la page.
 
 L’initialisation de la connexion se fait via une `URL`. Elle s’abonne aux mises à jour d’un certain nombre de `topic`s. Dans notre cas, il n’y en a qu’un seul, mais **on peut bien sûr en mettre autant que l’on souhaite** (en dupliquant et modifiant cette ligne). Cette `URL` va être ensuite connectée à un `EventSource` pour pouvoir **récupérer les messages** avec la méthode `onmessage`.
 
 Le second paramètre du constructeur de l’`EventSource` est très important. Avec `{ withCredentials: true }`, l’`EventSource` transmettra automatiquement le cookie de notre page au Mercure Hub. Sans ce paramètre, votre code ne fonctionnera sûrement pas.
+
+A noter : l'implémentation native de l'EventSource n'autorise pas les entêtes spécifiques (comme un token Bearer par exemple). Pour le faire, vous devrez utiliser un [polyfill](https://github.com/Yaffle/EventSource).
 
 Enfin, dans la méthode `onmessage`, nous **parsons les données de l’événement** et insérons le message envoyé directement dans le `_receiver` en utilisant les [Littéraux de gabarits](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Litt%C3%A9raux_gabarits).
 
