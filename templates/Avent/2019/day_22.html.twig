@@ -179,31 +179,33 @@
 
     ```yaml
     app_backend_article:
-    resource: |
-        alias: app.article
-        section: backend
-        redirect: update
-        grid: app_backend_article
-        except: ['show']
-        vars:
-            all:
-                subheader: app.ui.manage_articles
-                templates:
-                    form: backend/article/_form.html.twig
-            index:
-                icon: newspaper
-            update:
-                templates:
-                    form: backend/article/_form.html.twig
-                    toolbar: backend/article/_toolbar.html.twig
-        templates: backend/crud
-    type: sylius.resource
+        resource: |
+            alias: app.article
+            section: backend
+            redirect: update
+            grid: app_backend_article
+            except: ['show']
+            vars:
+                all:
+                    subheader: app.ui.manage_articles
+                    templates:
+                        form: backend/article/_form.html.twig
+                index:
+                    icon: newspaper
+                update:
+                    templates:
+                        form: backend/article/_form.html.twig
+                        toolbar: backend/article/_toolbar.html.twig
+            templates: backend/crud
+        type: sylius.resource
     ```
 
     ## Des plugins sous la main
 
     Vous connaissez certainement les bundles de Symfony. Sur une application Sylius, on utilisera l’appellation de plugin (Un bundle qui dépend de Sylius pour fonctionner). Il est possible d’en utiliser sur Monofony, et il en existe de très pratiques ! Vous aurez notamment la gestion de canaux (<a href="https://github.com/Sylius/Channel" target="_blank">channels</a>) si vous avez plusieurs sites à gérer sur la même application. Mais aussi un plugin qui permet de gérer des <a href="https://github.com/Sylius/SyliusThemeBundle" target="_blank">thèmes</a>, ce qui permettra de changer le design front de chacun de vos canaux.
-    La démo
+
+    ## La démo
+
     Une démo en ligne est disponible depuis peu afin de découvrir ce que vous avez au démarrage du projet.
 
     <a href="https://monofony.mobizel.com/admin" target="_blank">https://monofony.mobizel.com/admin</a>
@@ -212,8 +214,8 @@
 
     ## La naissance du projet
 
-    Chez Mobizel, nous enchaînons les projets clients. Nous avons eu besoin de très vite monter de nouveaux projets sans recopier chaque fois du code du projet précédent.
-    Repartir d'un projet Symfony vierge n'était pas aussi efficace que de mettre à jour notre starter avant de commencer nos développements.
+    Chez Mobizel, nous enchaînons les projets clients. Nous avons besoin de très vite monter de nouveaux projets sans recopier chaque fois du code du projet précédent.
+    Repartir d'un projet Symfony vierge n'est pas aussi efficace que de mettre à jour notre starter avant de commencer nos développements.
 
     Le projet s’appelait au départ Polyfony. Mon ancien collègue Pierre avait initié les prémisses de ce qu’est ensuite devenu Monofony.
     C’était simplement un starter Symfony avec quelques bundles tels que le FOSUserBundle à l’époque et déjà un peu de Behat simple.
@@ -267,4 +269,8 @@
     <p>
         Maxime est développeur Web Magento et Sylius chez <a href="https://monsieurbiz.com/" target="_blank" rel="noopener noreferrer">Monsieur Biz</a>. Mais il préfère largement Sylius!
     </p>
+{% endblock %}
+
+{% block article_author %}
+    Loïc Frémont et Maxime Huran
 {% endblock %}
