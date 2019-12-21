@@ -84,6 +84,7 @@ class AventController extends AbstractController
             '01-easyadminbundle-l-arriere-guichet-easy-peasy' => 'Avent/2017/day_01.html.twig',
         ),
         2019 => array(
+            '22-monofony-base-sur-la-structure-interne-de-sylius' => 'Avent/2019/day_22.html.twig',
             '21-symfony-et-mercure' => 'Avent/2019/day_21.html.twig',
             '20-components-symfony-dans-drupal' => 'Avent/2019/day_20.html.twig',
             '19-comment-tester-du-code-non-deterministe' => 'Avent/2019/day_19.html.twig',
