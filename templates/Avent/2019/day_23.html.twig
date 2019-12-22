@@ -39,10 +39,10 @@ sylius_resource:
     resources:
         app.user:
             classes:
-            model: App\Entity\User
+                model: App\Entity\User
 ```
 
-(Voir [ici](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/configuration.html) pour une configuration complère et détaillée)
+(Voir [la documentation officielle](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/configuration.html) pour une configuration complère et détaillée)
 
 Et voilà. Votre première entité est créée et fonctionne correctement.
 
@@ -64,7 +64,7 @@ En combinant ce Controller aux évènements lancés tout au long des processus, 
 
 ### Forms
 Sylius créé également les formulaires pour vous.
-Cependant, ces formulaires sont assez basiques et se content de créer un champ par propriété de votre entité. Et voudrez surement avoir une gestion plus fine. Il vous faudra donc créer un nouveau formulaire pour vos resources. [Doc](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/forms.html)
+Cependant, ces formulaires sont assez basiques et se contentent de créer un champ par propriété de votre entité. Et vous voudrez surement avoir une gestion plus fine. Il vous faudra donc créer un nouveau formulaire pour vos resources. [Doc](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/forms.html)
 
 
 ### Routes
