@@ -7,17 +7,26 @@
 {% block article_content_md %}
 # Symfony et Mercure
 
-Nous allons voir aujourd’hui comment mettre en place facilement et rapidement un Chat dans votre projet Symfony. Cette phrase vous dit quelque chose ? C’est sûrement normal puisque c’était la phrase d’introduction de l’article [Symfony et WebSockets](https://afsy.fr/avent/2017/21-symfony-et-websockets), publié ici il y a deux ans. Mais deux ans dans le monde du web, c’est une éternité. Et qui dit éternité, dit nouveautés techniques… Ne bougez pas, je vous explique tout ça.
+Nous allons voir aujourd’hui comment mettre en place facilement et rapidement un Chat dans votre projet Symfony.
+Cette phrase vous dit quelque chose ? C’est sûrement normal puisque c’était la phrase d’introduction de l’article
+[Symfony et WebSockets](https://afsy.fr/avent/2017/21-symfony-et-websockets), publié ici il y a deux ans.
+Mais deux ans dans le monde du web, c’est une éternité. Et qui dit éternité, dit nouveautés techniques…
+Ne bougez pas, je vous explique tout ça.
 
 ![Chat avec un ordinateur](https://media.giphy.com/media/aNqEFrYVnsS52/giphy.gif)
 
 ## Introduction
 
-[Mercure](https://mercure.rocks/) est un protocole qui se place comme une alternative moderne et pratique aux WebSockets. Il se base sur la technologie Server-Sent Events, disponible dans la [grande majorité des navigateurs actuels](https://caniuse.com/#feat=eventsource). Je ne ferai pas de comparatif entre les deux technologies ici, mais je vous recommande  [un article de Stanko Krtalić Rusendić (en)](https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b) qui le fait en détails.
+[Mercure](https://mercure.rocks/) est un protocole qui se place comme une alternative moderne
+et pratique aux WebSockets. Il se base sur la technologie Server-Sent Events, disponible dans la
+[grande majorité des navigateurs actuels](https://caniuse.com/#feat=eventsource). Je ne ferai pas de comparatif entre
+les deux technologies ici, mais je vous recommande
+[un article de Stanko Krtalić Rusendić (en)](https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b)
+qui le fait en détails.
 
 <p>
   <img src="{{ asset('build/avent/2019/21/mercure-schema.png') }}" alt="Schema Mercure"
-       style="max-width: 40em; margin: 0 auto;">
+       style="max-width: 100%; margin: 0 auto;">
 </p>
 
 Alors comment ça fonctionne ? Voilà un rapide résumé des étapes que nous allons mettre en place ensuite :
@@ -47,15 +56,16 @@ Pour ce tutoriel, nous aurons besoin des librairies suivantes :
 ```bash
 $ composer require mercure messenger lcobcci/jwt
 ```
-Voilà, maintenant que tout ça est en place, nous allons pouvoir vraiment rentrer dans le sujet.
+Voilà, maintenant que tout ça est en place, nous allons pouvoir entrer dans le vif du sujet.
 
 ## Mise en place de Mercure
 
 ### Installation de Mercure
 
-Pour [installer Mercure](https://mercure.rocks/docs/hub/install), nous allons télécharger la dernière release stable disponible sur [page des releases](https://github.com/dunglas/mercure/releases) et l’extraire dans un dossier `mercure`.
+Pour [installer Mercure](https://mercure.rocks/docs/hub/install), nous allons télécharger la dernière release stable
+disponible sur [page des releases](https://github.com/dunglas/mercure/releases) et l’extraire dans un dossier `mercure`.
 
-Cette archive contient 2 choses principales :
+Cette archive contient deux choses principales :
 
 - un dossier `public` avec les assets nécessaires à la page de débug de Mercure
 - et l’exécutable qui est le fameux hub dont nous avons parlé.
@@ -76,7 +86,9 @@ Pour lancer l’exécutable, nous avons besoin de plusieurs paramètres :
 - Une **clé** [JSON Web Token](https://fr.wikipedia.org/wiki/JSON_Web_Token) (JWT_KEY) pour garantir la sécurité
 - Une **adresse locale** (ADDR) pour que le hub soit accessible
 
-Le reste des paramètres est disponible dans la [documentation du projet GitHub](https://github.com/dunglas/mercure/blob/master/docs/hub/config.md). Nous allons donc exécuter la commande suivante (depuis la racine du projet) :
+Le reste des paramètres est disponible dans la
+[documentation du projet GitHub](https://github.com/dunglas/mercure/blob/master/docs/hub/config.md).
+Nous allons donc exécuter la commande suivante (depuis la racine du projet) :
 
 ```bash
 # Commande de lancement du Mercure Hub
@@ -85,11 +97,12 @@ $ ./mercure/mercure --jwt-key='aVerySecretKey' --addr='localhost:3000' --allow-a
 INFO[0000] Mercure started                               addr="localhost:3000" protocol=http
 ```
 
-Si vous vous rendez sur la page [localhost:3000](http://localhost:3000/), vous devriez arriver sur une page très simple qui ressemble à :
+Si vous vous rendez sur la page [localhost:3000](http://localhost:3000/), vous devriez arriver sur une page
+très simple qui ressemble à :
 
 <p>
   <img src="{{ asset('build/avent/2019/21/welcome-mercure.png') }}" alt="Welcome to Mercure!"
-       style="max-width: 40em; margin: 0 auto;">
+       style="max-width: 100%; margin: 0 auto;">
 </p>
 
 Vous pouvez couper le Hub, nous le relancerons plus tard.
@@ -98,7 +111,8 @@ Vous pouvez couper le Hub, nous le relancerons plus tard.
 
 ### Création d’un générateur de JWT
 
-Comme vous l’avez vu dans la commande ci-dessus, Mercure utilise les **JSON Web Tokens** pour sécuriser l’ensemble des échanges. Nous allons donc commencer par créer un service de **génération de JWT** :
+Comme vous l’avez vu dans la commande ci-dessus, Mercure utilise les **JSON Web Tokens** pour sécuriser
+l’ensemble des échanges. Nous allons donc commencer par créer un service de **génération de JWT** :
 
 ```php
 // src/Mercure/JwtProvider.php
@@ -126,11 +140,15 @@ class JwtProvider
 }
 ```
 
-Ce service utilise le `Builder` de `Lcobucci/JWT` pour générer un **token générique**. Pourquoi générique ? Grâce au `['publish' => ['*']]`. En modifiant le `['*']`, on peut spécifier une liste d’urls sur lesquelles le token peut publier des mises à jour.
+Ce service utilise le `Builder` de `Lcobucci/JWT` pour générer un **token générique**. Pourquoi générique ?
+Grâce au `['publish' => ['*']]`. En modifiant le `['*']`, on peut spécifier une liste d’urls
+sur lesquelles le token peut publier des mises à jour.
 
-A noter : dans la librairie `Lcobucci\JWT`, il existe une clé `Hmac\Sha384`. **Ne l’utilisez pas** ! Elle n’est pas (encore?) supportée par le Hub Mercure et vous risqueriez d’avoir des erreurs.
+A noter : dans la librairie `Lcobucci\JWT`, il existe une clé `Hmac\Sha384`. **Ne l’utilisez pas** !
+Elle n’est pas (encore?) supportée par le Hub Mercure et vous risqueriez d’avoir des erreurs.
 
-Comme vous pouvez aussi le voir, le `JwtProvider` a besoin d’une clé `$secret` pour fonctionner. Pour cela, nous allons modifier les fichiers de configuration de la manière suivante :
+Comme vous pouvez aussi le voir, le `JwtProvider` a besoin d’une clé `$secret` pour fonctionner.
+Pour cela, nous allons modifier les fichiers de configuration de la manière suivante :
 
 ```bash
 # .env - On modifie l'adresse du Mercure Hub et on remplace le JWT token par la clé JWT
@@ -150,18 +168,21 @@ App\Mercure\JwtProvider:
         $secret: '%env(MERCURE_JWT_KEY)%'
 ```
 
-Voilà, notre générateur est prêt. Mais avant de pouvoir entrer dans le vif du sujet, nous allons avoir besoin de quelques gâteaux (ou presque).
+Voilà, notre générateur est prêt. Mais avant de pouvoir entrer dans le vif du sujet,
+nous allons avoir besoin de quelques gâteaux (ou presque).
 
 ### Création d’un générateur de cookies
 
 ![Cookies Monster](https://media.giphy.com/media/xT0xeMA62E1XIlup68/giphy.gif)
 
-Pour pouvoir authentifier les utilisateurs qui souhaitent se connecter au **Mercure Hub**, il y a [deux manières de faire](https://mercure.rocks/spec#authorization) :
+Pour pouvoir authentifier les utilisateurs qui souhaitent se connecter au **Mercure Hub**,
+il y a [deux manières de faire](https://mercure.rocks/spec#authorization) :
 
 - En utilisant une entête HTTP `Authorization`
 - Avec un cookie
 
-Comme notre chat est utilisé depuis un navigateur web, nous allons utiliser la méthode la plus simple : les **cookies**. Et pour cela, nous allons créer un générateur de cookies :
+Comme notre Chat est utilisé depuis un navigateur web, nous allons utiliser la méthode la plus simple : les **cookies**.
+Et pour cela, nous allons créer un générateur de cookies :
 
 ```php
 // src/Mercure/CookieGenerator.php
@@ -192,11 +213,17 @@ class CookieGenerator
 }
 ```
 
-Ce générateur utilise le même `Builder` que celui que nous avons utilisé pour le `JwtProvider`. Et le `subscribe' => ['*']` permet, lui aussi, de s’abonner à toutes les urls, ou seulement à une liste précise. Dans le cas d’une application avec des utilisateurs, nous pourrions évidemment filtrer les abonnements en fonction de l’utilisateur connecté.
+Ce générateur utilise le même `Builder` que celui que nous avons utilisé pour le `JwtProvider`.
+Et le `subscribe' => ['*']` permet, lui aussi, de s’abonner à toutes les urls, ou seulement à une liste précise.
+Dans le cas d’une application avec des utilisateurs, nous pourrions évidemment filtrer les abonnements
+en fonction de l’utilisateur connecté.
 
-Dans le cadre de cet article, nous allons **générer un cookie « basique »** (non sécurisé et en `HttpOnly`) pour des raisons de simplicité. Mais si vous souhaitez utiliser ces fonctionnalités en production, il est vivement recommandé de **passer l’ensemble en HTTPS**.
+Dans le cadre de cet article, nous allons **générer un cookie « basique »** (non sécurisé et en `HttpOnly`)
+pour des raisons de simplicité. Mais si vous souhaitez utiliser ces fonctionnalités en production,
+il est vivement recommandé de **passer l’ensemble en HTTPS**.
 
-Comme vous l’avez aussi remarqué, ce service prend en paramètre notre clé secrète et nous allons modifier la configuration des services pour qu’elle soit bien prise en compte :
+Comme vous l’avez aussi remarqué, ce service prend en paramètre notre clé secrète
+et nous allons modifier la configuration des services pour qu’elle soit bien prise en compte :
 
 ```yaml
 // config/services.yaml
@@ -209,7 +236,9 @@ Voilà, notre couche de sécurité est prête, nous allons pouvoir passer à la 
 
 ## Création de la page de Chat
 
-Maintenant que nous sommes prêts à communiquer via le **Mercure Hub**, nous allons pouvoir créer nos deux contrôleur principaux : un pour **afficher la page d’accueil**, ainsi que les messages reçus, et l’autre pour **l’envoi de messages**.
+Maintenant que nous sommes prêts à communiquer via le **Mercure Hub**,
+nous allons pouvoir créer nos deux contrôleur principaux : un pour **afficher la page d’accueil**,
+ainsi que les messages reçus, et l’autre pour **l’envoi de messages**.
 
 ### Création du contrôleur de la page d’accueil
 
@@ -242,7 +271,9 @@ final class IndexController extends AbstractController
 }
 ```
 
-Lors du chargement de ce contrôleur, nous utilisons le `CookieGenerator` que nous fraîchement créé pour **inclure le cookie dans la réponse retournée**. Cela nous permet de nous assurer que la connexion faite au Hub est sécurisée.
+Lors du chargement de ce contrôleur, nous utilisons le `CookieGenerator` que nous avons fraîchement créé
+pour **inclure le cookie dans la réponse retournée**. Cela nous permet de nous assurer que la connexion faite au Hub
+est sécurisée.
 
 ### Création du contrôleur d’envoi de messages
 
@@ -288,13 +319,16 @@ Dans ce contrôleur, nous enverrons un `Update` au `MessageBus` avec comme param
 - l’url du topic que nous avons défini
 - les paramètres à envoyer, encodés en JSON
 
-Nous ajoutons une redirection vers la page d’accueil en valeur de retour, pour le cas où quelqu’un arriverait sur cette url.
+Nous ajoutons une redirection vers la page d’accueil en valeur de retour, pour le cas où quelqu’un arriverait
+sur cette url.
 
 ### Derniers réglages
 
-![Chat ingénieur appuyant sur un bouton rouge](https://media1.tenor.com/images/c84e5bb7baafdbadbc4b8481931fbf34/tenor.gif)
+![Chat ingénieur pousse un bouton rouge](https://media1.tenor.com/images/c84e5bb7baafdbadbc4b8481931fbf34/tenor.gif)
 
-Comme nous allons avoir besoin de l’url du **Mercure Hub** dans nos templates, nous allons passer le contenu de la variable d’environnement à TWIG via une variable globale. Pour cela, nous allons modifier le fichier `config/packages/twig.yaml` dans lequel nous allons stocker le contenu suivant :
+Comme nous allons avoir besoin de l’url du **Mercure Hub** dans nos templates, nous allons passer le contenu de
+la variable d’environnement à TWIG via une variable globale. Pour cela, nous allons modifier le fichier
+`config/packages/twig.yaml` dans lequel nous allons stocker le contenu suivant :
 
 ```yaml
 # config/packages/twig.yaml
@@ -305,7 +339,8 @@ globals:
 
 ### Création du template de la page d’accueil
 
-Maintenant que tout est prêt, nous pouvons créer le template de la page d’accueil dans le fichier `templates/default/index.html.twig` :
+Maintenant que tout est prêt, nous pouvons créer le template de la page d’accueil dans le fichier
+`templates/default/index.html.twig` :
 
 {% verbatim %}
 ```twig
@@ -373,7 +408,7 @@ Le code HTML ne contient que les éléments nécessaires au fonctionnement de la
 Le code JavaScript, quand à lui, se divise en quatre parties principales :
 
 - L’**initialisation des variables nécessaires**
-- La création d’une fonction `sendMessage` qui, comme son nom l’indique, va **envoyer un message en HTTP** de manière asynchrone
+- La création d’une fonction `sendMessage` qui, comme son nom l’indique, va **envoyer un message en HTTP**
 - L’envoi d’un message à la soumission du formulaire
 - L’**initialisation de la connexion** au Mercure Hub
 - La récupération et l’**affichage d’un message reçu**
@@ -382,15 +417,26 @@ Le code JavaScript, quand à lui, se divise en quatre parties principales :
 
 ### Quelques détails sur le code JavaScript
 
-Dans le code que nous venons d’écrire, l’**envoi du message** est fait dans une fonction pour que nous puissions le réutiliser. Nous surchargeons la méthode `onsubmit` du formulaire pour envoyer le message directement et, surtout, pour éviter de recharger continuellement la page.
+Dans le code que nous venons d’écrire, le système d’**envoi du message** est fait dans une fonction
+pour que nous puissions le réutiliser. Nous surchargeons la méthode `onsubmit` du formulaire
+pour envoyer le message directement et, surtout, pour éviter de recharger continuellement la page.
 
-L’initialisation de la connexion se fait via une `URL`. Elle s’abonne aux mises à jour d’un certain nombre de `topic`s. Dans notre cas, il n’y en a qu’un seul, mais **on peut bien sûr en mettre autant que l’on souhaite** (en dupliquant et modifiant cette ligne). Cette `URL` va être ensuite connectée à un `EventSource` pour pouvoir **récupérer les messages** avec la méthode `onmessage`.
+L’initialisation de la connexion se fait via une `URL`. Elle s’abonne aux mises à jour d’un certain nombre de `topic`s.
+Dans notre cas, il n’y en a qu’un seul, mais **on peut bien sûr en mettre autant que l’on souhaite**
+(en dupliquant et modifiant cette ligne). Cette `URL` va être ensuite connectée à un `EventSource` pour
+pouvoir **récupérer les messages** avec la méthode `onmessage`.
 
-Le second paramètre du constructeur de l’`EventSource` est très important. Avec `{ withCredentials: true }`, l’`EventSource` transmettra automatiquement le cookie de notre page au Mercure Hub. Sans ce paramètre, votre code ne fonctionnera sûrement pas.
+Le second paramètre du constructeur de l’`EventSource` est très important. Avec `{ withCredentials: true }`,
+l’`EventSource` transmettra automatiquement le cookie de notre page au Mercure Hub.
+Sans ce paramètre, votre code ne fonctionnera sûrement pas.
 
-A noter : l'implémentation native de l'EventSource n'autorise pas les entêtes spécifiques (comme un token Bearer par exemple). Pour le faire, vous devrez utiliser un [polyfill](https://github.com/Yaffle/EventSource).
+A noter : l'implémentation native de l'EventSource n'autorise pas les entêtes spécifiques
+(comme un token Bearer par exemple). Pour le faire, vous devrez utiliser
+un [polyfill](https://github.com/Yaffle/EventSource).
 
-Enfin, dans la méthode `onmessage`, nous **parsons les données de l’événement** et insérons le message envoyé directement dans le `_receiver` en utilisant les [Littéraux de gabarits](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Litt%C3%A9raux_gabarits).
+Enfin, dans la méthode `onmessage`, nous **parsons les données de l’événement** et insérons le message envoyé
+directement dans le `_receiver` en utilisant les
+[Littéraux de gabarits](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Litt%C3%A9raux_gabarits).
 
 ### Premiers tests
 
@@ -402,28 +448,32 @@ Pour faire notre premier test, nous avons besoin de :
 
 ```bash
 $ symfony server:start -d
-$ ./mercure/mercure --jwt-key "I-c4N_H@Z{M3rCuR3}&SymF0nY~1n~AFSY" --addr "localhost:3000" --cors-allowed-origins "http://localhost:8000" --publish-allowed-origins "*"
+$ ./mercure/mercure --jwt-key "I-c4N_H@Z{M3rCuR3}&SymF0nY~1n~AFSY" --addr "localhost:3000"
+  --cors-allowed-origins "http://localhost:8000" --publish-allowed-origins "*"
 ```
 
-On utilise ici le paramètre `--cors-allowed-origins` pour spécifier quels domaines peuvent envoyer des messages au Hub. Dans notre cas, `http://localhost:8000` est l’adresse locale du serveur Symfony. Il ne nous reste maintenant plus qu’à consulter la page que nous venons de modifier pour voir le résultat suivant:
+On utilise ici le paramètre `--cors-allowed-origins` pour spécifier quels domaines peuvent envoyer des messages au Hub.
+Dans notre cas, `http://localhost:8000` est l’adresse locale du serveur Symfony.
+Il ne nous reste maintenant plus qu’à consulter la page que nous venons de modifier pour voir le résultat suivant:
 
 <p>
   <img src="{{ asset('build/avent/2019/21/page-with-messages.png') }}" alt="Rendu de la page avec les premiers messages"
-       style="max-width: 40em; margin: 0 auto;">
+       style="max-width: 100%; margin: 0 auto;">
 </p>
 
 Ça y est, nous avons une connexion entre notre JavaScript et notre application Symfony via le Mercure Hub.
 
 ## Pimp My Chat
 
-Maintenant que notre système fonctionne, nous pouvons mettre en place un système d’utilisateurs rudimentaire. Pour cela, il nous faut :
+Maintenant que notre système fonctionne, nous pouvons mettre en place un système d’utilisateurs rudimentaire.
+Pour cela, il nous faut :
 
 1. Demander le **pseudo de l’utilisateur** au chargement de la page
 2. Mettre à jour **le système d’envoi des messages** pour qu’il prenne en compte ce pseudo
 3. Mettre à jour la **publication du message**
 4. **Annoncer automatiquement l’arrivée** de l’utilisateur au Mercure Hub
 
-### Bonjour à toi qui souhaite accéder au chat
+### Bonjour à toi qui souhaite accéder au Chat
 
 Pour demander à l’utilisateur son identifiant, nous allons simplement utiliser un `prompt` en JavaScript :
 
@@ -433,11 +483,14 @@ Pour demander à l’utilisateur son identifiant, nous allons simplement utilise
 const userName = prompt('Hi! I need your name for the Chat please :)');
 ```
 
-Bien évidemment, dans une « vraie » application, le système serait différent : l’utilisateur aurait dû créer son compte en amont et il y aurait d’autres vérifications à faire.
+Bien évidemment, dans une « vraie » application, le système serait différent :
+l’utilisateur aurait dû créer son compte en amont et il y aurait d’autres vérifications à faire.
 
 ### I hope that someone gets my message in a bottle
 
-Pour envoyer le nom de l’utilisateur, nous modifions les méthodes `sendMessage`, pour envoyer l’utilisateur souhaité :
+Pour envoyer le nom de l’utilisateur, nous modifions les méthodes :
+
+- `sendMessage`, pour envoyer l’utilisateur souhaité :
 
 ```js
 // templates/default/index.html.twig
@@ -449,7 +502,7 @@ body: 'message=' + message + '&user=' + user,
 };
 ```
 
-`_sendForm.onsubmit`, pour y ajouter l’envoi du `userName`:
+- `_sendForm.onsubmit`, pour y ajouter l’envoi du `userName`:
 
 ```js
 // templates/default/index.html.twig
@@ -457,7 +510,7 @@ _sendForm.onsubmit = (evt) => {
 sendMessage(_messageInput.value, userName);
 ```
 
-Et `eventSource.onmessage`, pour ajouter l’utilisateur reçu :
+- et `eventSource.onmessage`, pour ajouter l’utilisateur reçu :
 
 ```js
 // templates/default/index.html.twig
@@ -473,7 +526,8 @@ _receiver.insertAdjacentHTML('beforeend', `
 
 ### Mise à jour du système d’envoi des messages
 
-Maintenant que notre `user` est envoyé en `POST`, modifions l’`Update` du `PublishController` pour le prendre en compte :
+Maintenant que notre `user` est envoyé en `POST`, modifions l’`Update` du `PublishController`
+pour qu'il soit pris en compte :
 
 ```php
 // src/Controller/PublishController.php
@@ -483,16 +537,18 @@ $update = new Update('http://chat.afsy.fr/message', json_encode([
 ]));
 ```
 
-Et voilà, nous pouvons maintenant rafraichir la page pour vérifier que tout fonctionne à merveille !
+Et voilà, nous pouvons maintenant rafraîchir la page pour vérifier que tout fonctionne à merveille !
 
 <p>
-  <img src="{{ asset('build/avent/2019/21/page-with-user-messages.png') }}" alt="Rendu de la page avec les premiers messages signés"
-       style="max-width: 40em; margin: 0 auto;">
+  <img src="{{ asset('build/avent/2019/21/page-with-user-messages.png') }}"
+       alt="Rendu de la page avec les premiers messages signés"
+       style="max-width: 100%; margin: 0 auto;">
 </p>
 
 ### Salutations belle compagnie
 
-Pour annoncer automatiquement la venue de l’utilisateur, nous allons ajouter un `EventListener` sur l’événement `DOMContentLoaded` :
+Pour annoncer automatiquement la venue de l’utilisateur, nous allons ajouter un `EventListener`
+sur l’événement `DOMContentLoaded` :
 
 {% verbatim %}
 ```js
@@ -507,20 +563,33 @@ window.addEventListener('DOMContentLoaded', () => {
 <p>
   <img src="{{ asset('build/avent/2019/21/page-with-welcome.png') }}"
        alt="Rendu de la page avec un message d'arrivée"
-       style="max-width: 40em; margin: 0 auto;">
+       style="max-width: 100%; margin: 0 auto;">
 </p>
 
-Et c’est tout ! Vous pouvez rafraîchir la page une dernière fois pour vérifier que les messages sont bien envoyés avec votre pseudo. Vous pouvez aussi ouvrir plusieurs fenêtres de navigateur pour tester que les messages s’envoient bien.
+Et c’est tout !
+Vous pouvez rafraîchir la page une dernière fois pour vérifier que les messages sont bien envoyés avec votre pseudo.
+Vous pouvez aussi ouvrir plusieurs fenêtres de navigateur pour tester que les messages s’envoient bien.
 
 ## This is the end
 
 ![Bryan Cranston Mic Drop](https://media.giphy.com/media/qlwnHTKCPeak0/giphy.gif)
 
-Et voilà, nous arrivons à la fin de cet article. L’interface de ce chat relève clairement du strict minimum mais elle vous permet de comprendre comment tout est mis en place. Si ça vous intéresse, j'ai créé un [projet GitHub](https://github.com/clem/afsy-mercure-tutorial) avec l'intégralité de ce que nous avons vu (et sûrement quelques trucs en plus ^^).
+Et voilà, nous arrivons à la fin de cet article. L’interface de ce Chat relève clairement du strict minimum
+mais elle vous permet de comprendre comment tout est mis en place. Si le sujet vous intéresse,
+j'ai créé un [projet GitHub](https://github.com/clem/afsy-mercure-tutorial) avec l'intégralité de ce que nous avons vu
+(et sûrement quelques développements en plus ^^).
 
-Je trouve que [Mercure](https://mercure.rocks/) est une **technologie très intéressante, facile et rapide à déployer**. Elle est **très différente des WebSockets** et répond à d'autres besoins. Dans le cas d'un Chat par exemple, je pense que les WebSockets seraient plus intéressants, notamment grâce à la détection de présence en ligne des utilisateurs. Mais au delà de ça, je suis persuadé que [Mercure Hub](https://mercure.rocks/) sera plus adopté par la communauté parce qu'il **apporte une fonctionnalité que tout le monde veut aujourd'hui : l'instantanéité**. D’ailleurs, j’en profile pour remercier [Kévin Dunglas](https://dunglas.fr/) pour tout ce qu’il fait pour la communauté, dont [Mercure](https://mercure.rocks/)… et aussi pour m’avoir aidé pour cet article.
+Je trouve que [Mercure](https://mercure.rocks/) est une **technologie très intéressante, facile et rapide à déployer**.
+Elle est **très différente des WebSockets** et répond à d'autres besoins.
+Dans le cas d'un Chat par exemple, je pense que les WebSockets seraient plus intéressants,
+notamment grâce à la détection de présence en ligne des utilisateurs.
+Mais, au delà de cet exemple, je suis persuadé que [Mercure Hub](https://mercure.rocks/) sera plus adopté
+par la communauté parce qu'il **apporte une fonctionnalité que tout le monde veut aujourd'hui : l'instantanéité**.
+D’ailleurs, j’en profite pour remercier [Kévin Dunglas](https://dunglas.fr/) pour tout ce qu’il fait pour la communauté,
+dont [Mercure](https://mercure.rocks/)… et aussi pour m’avoir aidé pour cet article.
 
-  J’espère que ce tutoriel vous aura plus. Je vous remercie de l’avoir lu jusqu’au bout et il ne me reste plus qu’à vous souhaiter de belles fêtes de fin d’année !
+J’espère que ce tutoriel vous aura plus.
+Je vous remercie de l’avoir lu jusqu’au bout et il ne me reste plus qu’à vous souhaiter de belles fêtes de fin d’année !
 {% endblock %}
 
 {% block article_avatar %}
