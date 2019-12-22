@@ -95,14 +95,12 @@ Qu’importe que vous soyez en train de créer un simple prototype ou une applic
 {% endblock %}
 
 {% block article_avatar %}
-    <img src="{{ asset('build/avent/2019/1/afsy.png') }}"
-         alt="Association Française des utilisateurs de SYmfony"/>
+    <img src="{{ asset('build/avent/2019/23/stephane_decock.jpg') }}"
+         alt="Stéphane DECOCK"/>
 {% endblock %}
 
 {% block article_bio %}
-    <h2><a href="{% block author_url 'https://twitter.com/assoafsy' %}"
-           target="_blank">{% block article_author 'AFSY' %}</a></h2>
-    <p>
-        Association Française des utilisateurs de Symfony
-    </p>
+    <h2><a href="{% block author_url 'https://www.linkedin.com/in/stéphane-decock/' %}"
+           target="_blank">{% block article_author 'Stéphane DECOCK' %}</a></h2>
+    <p>Développeur web chez <a href="https://locastic.com">Locastic</a></p>
 {% endblock %}
