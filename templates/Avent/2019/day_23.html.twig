@@ -71,10 +71,10 @@ Cependant, ces formulaires sont assez basiques et se contentent de créer un cha
 Vous pouvez désormais configurer vos routes. Bien que la documentation de Sylius conseille de créer une méthode générique pour faire toutes vos routes d’un coup, j’y préfère une déclaration plus détaillée afin d’avoir vraiment la main sur tout. Les routes étant un des points privilégiés pour vos personnalisations.
 Ici encore, la [Doc](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/create_resource.html) vous sera d’une grande aide.
 
-Injection de dépendances
+### Injection de dépendances
 Depuis la version 1.6, il est possible d’injecter les services en autowiring. Pour ce faire, prenons encore notre resource User.
 
-```
+```php
 public function test(FactoryInterface $userFactory, RepositoryInterface $userRepository)
 ```
 
