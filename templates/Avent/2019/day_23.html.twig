@@ -1,0 +1,106 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 23 - Sylius Resource Bundle" %}
+
+{% block article_content_md %}
+# Sylius Resource Bundle - Gérez vos entités plus simplement
+
+Pour citer Sylius : "...nous avons remarqué beaucoup de code dupliqué parmis les controllers. ... nous voulions quelque chose de plus simple et plus flexible."
+Et c’est clairement ce que fait SyliusResourceBundle. Son principal intérêt est qu’il évite de dupliquer le code et qu’il simplifie grandement la génération de CRUD pour vos entités. Et c’est pas fini !
+
+
+## Présentation
+
+Permettez moi d’abord de me présenter. Je suis Stéphane DECOCK, Développeur web PHP chez Locastic, une agence web qui offre ses services et met ses compétences au services de projets allant de simples boutiques e-commerce à des systèmes plus complexes.
+Pendant plusieurs années, j’ai cherché une solution à la génération simple, flexible et réutilisable d’interfaces CRUD. Chaque projet en a besoin, et c’est un problème aussi basique qu’essentiel.
+Après avoir développé 2 boutiques sous Sylius, j’ai essayé de réutiliser les connaissances acquises pour d’autres projets. Et clairement SyliusResourceBundle fut l’une de ces technologies que j’ai vite réutilisé.
+
+
+## Information
+
+Les lignes de code contenues dans cet article sont produites sous un projet Symfony 4.
+Dans un but explicatif, j’ai aussi basé mes appels sur le container, mais il est évident qu’il vaut mieux injecter les dépendances.
+
+
+## Concept
+
+D’après la documentation, Sylius Resource Bundle a été créé pour générer de simples interfaces CRUD. Mais clairement il propose bien plus que ça. En voici les principaux atouts.
+
+### Resources
+
+Bien sur les ressources. C’est le point central de ce bundle. Ce concepte vise à résoudre le problème d’héritage dans une application. En effet, dans le cadre d’une application finale qui n’a pas pour but d’être utilisée et surchargée par d’autres, ce concept est assez gros, cependant, les intérêts des autres fonctionnalités en valent la peine.
+
+Tout d’abord, il faut savoir qu’une Resource est une entité Doctrine, vous devez créer sa classe PHP et son mapping. Rien de nouveau ici.
+Ensuite, il faut informer Sylius de l’existence de cette ressource :
+```yaml
+sylius_resource:
+    resources:
+        app.user:
+            classes:
+                model: App\Entity\User
+```
+
+(Voir [la documentation officielle](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/configuration.html) pour une configuration complère et détaillée)
+
+Et voilà. Votre première entité est créée et fonctionne correctement.
+
+### Factories
+Et voici une des premières fonctionnalités des ressources, les Factories (Usines en français).
+Le principe de base de ces Factories est d’être sûr que vous injectez dans votre code la bonne instance de votre classe.
+Si votre entité hérite d’une autre (Les User Sylius par exemple), la Factory va maintenant retourner une instance de votre utilisateur (App\Entity\User) et non plus Sylius\Model\User. C’est extrêmement important pour la constance des objets, et désormais, on ne fera plus ```$user = new User();``` mais plutôt ```$user = $container->get('app.factory.user')->createNew();```
+Par défaut, les Factories viennent avec une méthode ```createNew()```  qui retournent simplement une nouvelle instance. Vous pouvez bien sûr en ajouter autant que vous voulez.
+
+### Repositories
+Une autre fonctionnalité de ce bundle est : Les Repositories
+Le principe est que vous n’avez plus à devoir créer un Repository pour chacune de vos entités. Sylius s’en charge pour vous en proposant un générique (Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository) qui contient les méthodes de base nécessaires (add, remove, paginate, find, findBy, …)
+Ce qui signifie que pour 70% des cas d’usage, vous n’avez même pas à vous soucier de créer un Repository, vous pouvez simplement appeler ```$repository = $container->get(‘app.repository.user’);``` et accéder à ses méthodes.
+
+### Controllers
+La fonctionnalité même qui a poussé à la création de ce bundle, et celle qui fait gagner le plus de temps.
+Sylius va donc également générer des controllers pour vos entités (en vrai, il y en a qu’un, mais assez générique pour couvrir les cas principaux). Ce Controller générique contient les méthodes suivantes : index, show, create, update, delete, bulkDelete. Et il fonctionne pour toutes les entités de votre application.
+En combinant ce Controller aux évènements lancés tout au long des processus, vous devriez pouvoir couvrir 90% des cas sans même écrire un seul controller. Les 10% restants sont principalement pour des actions non CRUD et des comportement vraiment spécifiques complexes à gérer à coup de Listener.
+
+### Forms
+Sylius créé également les formulaires pour vous.
+Cependant, ces formulaires sont assez basiques et se contentent de créer un champ par propriété de votre entité. Et vous voudrez surement avoir une gestion plus fine. Il vous faudra donc créer un nouveau formulaire pour vos resources. [Doc](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/forms.html)
+
+
+### Routes
+Vous pouvez désormais configurer vos routes. Bien que la documentation de Sylius conseille de créer une méthode générique pour faire toutes vos routes d’un coup, j’y préfère une déclaration plus détaillée afin d’avoir vraiment la main sur tout. Les routes étant un des points privilégiés pour vos personnalisations.
+Ici encore, la [Doc](https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/create_resource.html) vous sera d’une grande aide.
+
+### Injection de dépendances
+Depuis la version 1.6, il est possible d’injecter les services en autowiring. Pour ce faire, prenons encore notre resource User.
+
+```php
+public function test(FactoryInterface $userFactory, RepositoryInterface $userRepository)
+```
+
+Injectera respectivement le service associé à la Factory de votre User, et le Repository. De quoi gagner encore plus de temps.
+
+Et voila, nous avons vu les plus gros apports du ResourceBundle de Sylius.
+
+## Avantages
+Le plus gros avantage de ce Bundle est que dès à présent, vous n’aurez plus à écrire une seule ligne de code pour la génération de CRUD dans votre application. Déclarez simplement la route, et Sylius se chargera de chercher votre/vos entité(s), d’afficher le formulaire, de gérer l’update ou le create, et même d’afficher les listes d’entités.
+Pour les comportements plus spécifiques, le principe du ResourceBundle aidera clairement à suivre le concept de séparation des services de Symfony (SOC), et vous évitera de vous retrouver avec des controllers en charge de tout le fonctionnement.
+
+## Inconvénients
+Le plus gros inconvénient de ce bundle est que vous vous retrouverez en effet à écrire plusieurs fichiers de config (YAML, XML ou PHP, au choix). Cela peut être dérangeant au début.
+Un autre petit inconvénient sera aussi que ResourceBundle ne gère que des entités avec une clé primaire unique. Donc impossible de lui donner une entité avec une clé composée.
+
+## Conclusion
+Qu’importe que vous soyez en train de créer un simple prototype ou une application complète, une fois maîtrisé, SyliusResourceBundle vous fera gagner du temps. Beaucoup de temps.
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/23/stephane_decock.jpg') }}"
+         alt="Stéphane DECOCK"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2><a href="{% block author_url 'https://www.linkedin.com/in/stéphane-decock/' %}"
+           target="_blank">{% block article_author 'Stéphane DECOCK' %}</a></h2>
+    <p>Développeur web chez <a href="https://locastic.com">Locastic</a></p>
+{% endblock %}
