@@ -95,7 +95,7 @@ security:
             iterations: 5000
 ```
 
-Plus récement et toujours au goût du jour, l'algorithme [`bcrypt`](https://fr.wikipedia.org/wiki/Bcrypt) est venu reforcer cette pratique
+Plus récemment et toujours au goût du jour, l'algorithme [`bcrypt`](https://fr.wikipedia.org/wiki/Bcrypt) est venu renforcer cette pratique
 en intégrant le nombre d'itérations au cœur de la logique de hachage, puisqu'il est présent dans le résultat de la fonction.
 Depuis PHP 5.5, la fonction [`password_hash()`](https://www.php.net/manual/fr/function.password-hash.php) permet d'utiliser `bcrypt` nativement :
 
@@ -125,7 +125,7 @@ et le coût d'un craquage de mots de passe par force brute diminue :
 
 Tous les algorithmes mentionnés jusqu'à maintenant ont en effet une caractéristique commune : leur coût se mesure en temps CPU.
 Il "suffit" de concevoir une unité de calcul plus performante pour augmenter la vitesse de calcul des empreintes.
-Or, il existe une autre resource limitée dans nos ordinateurs : la RAM et son corrolaire, la bande passante mémoire.
+Or, il existe une autre resource limitée dans nos ordinateurs : la RAM et son corollaire, la bande passante mémoire.
 
 Les circuits dédiés [FPGA](https://fr.wikipedia.org/wiki/Circuit_logique_programmable) ou [ASIC](https://fr.wikipedia.org/wiki/Application-specific_integrated_circuit)
 sont en effet excellents en calcul brut, mais dès qu'il s'agit de bande passante et d'accès mémoire,
@@ -154,7 +154,7 @@ security:
             algorithm: sodium
 ```
 
-En hachant les mots de passe avec `Argon2`, nous reprenons ainsi l'avantage sur toutes les puissances de calcul financièrement accessibles dans un future proche,
+En hachant les mots de passe avec `Argon2`, nous reprenons ainsi l'avantage sur toutes les puissances de calcul financièrement accessibles dans un futur proche,
 même face à des moyens étatiques puisque c'est pour cela qu'ont été conçus ces algorithmes.
 
 Je vous invite à lire [les recommandations de l'OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#modern-algorithms) pour creuser un peu plus le sujet.
@@ -171,7 +171,7 @@ vérifier son mot de passe en utilisant l'ancien algorithme,
 et profiter de l'occasion pour mettre à jour l'empreinte de son mot de passe.
 
 C'est ce processus qui est permis depuis Symfony 4.4 : en implémentant `PasswordUpgraderInterface` dans vos `UserProvider`,
-vous pouvez écrire la nouvelle empreinte en base lors de la connexion d'un utilisateur.
+vous pouvez mettre à jour l'empreinte lors de la connexion d'un utilisateur.
 
 Pour être capable de vérifier à la fois les anciennes empreintes et les nouvelles,
 vous devez utiliser un `MigratingPasswordEncoder`,
@@ -201,7 +201,7 @@ Vous pouvez décider de régler vous-même les paramètres de calcul `Argon2` :
 `MigratingPasswordEncoder` recalculera alors les empreintes avec les nouveaux coûts CPU et consommation mémoire.
 
 Ma recommandation serait de laisser Symfony définir ces paramètres pour vous,
-*sauf* si vous êtes en mesure de les calculer de façon optimisés lors du déploiement.
+*sauf* si vous êtes en mesure de les calculer de façon optimisée lors du déploiement.
 
 Car l'enjeu avec `Argon2` est bien là : [il faut choisir](https://github.com/elchris/hashtuner) des [paramètres de calcul]( https://github.com/paragonie/argon2-refiner)
 adaptés à votre infrastructure,
@@ -230,7 +230,7 @@ pour que le calcul dure entre 0.5 et 1 seconde.
 Comme vous pouvez le constater, il devient plutôt facile de rendre une application indisponible :
 il suffit de lancer 50 connexions en même temps pour qu'elle ne soit plus capable de servir le reste du traffic.
 
-Choisir un autre algorithme ne résoudra en rien le problème - ils sont tous conçus pour consommer des resources.
+Choisir un autre algorithme ne résoudra en rien le problème - ils sont tous conçus pour consommer des ressources.
 Au contraire, cela exposerait les mots de passes de vos utilisateurs.
 
 Les solutions ne sont pas triviales à mettre en œuvre :
