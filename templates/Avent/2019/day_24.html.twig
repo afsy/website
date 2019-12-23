@@ -1,0 +1,282 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 24 - Hachez menu ces mots de passe" %}
+
+{% block article_content_md %}
+# Hachez menu ces mots de passe
+
+Pour ce dernier épisode de l'avent, j'aimerais partager avec vous une question de sécurité à laquelle je n'ai pas trouvé de réponse.
+Après un rappel sur les algorithmes de hachage et les raisons de leur utilisation,
+je vous propose de chambouler les bonnes pratiques liées au stockage des mots de passe de nos utilisateurs.
+
+J'ai réalisé récemment que ces algorithmes étaient bien plus complexes à mettre en œuvre que la configuration Symfony ne le laisse supposer.
+Attention, pas de conclusion hâtive : hacher les mots de passe *est* la meilleure façon de faire aujourd'hui.
+Mais il faut déjà penser à l'après semble-t-il.
+
+## Hacher les mots de passe?
+
+Nous avons tous développé des applications qui identifient leurs utilisateurs grâce à un formulaire demandant un mot de passe.
+Charge nous revient de stocker ces mots de passe en base de données lors de la création ou la mise à jour de ces comptes utilisateurs.
+C'est également un classique : ces bases de données fuitent sur Internet - soit par inadvertance, soit par malveillance.
+
+Le danger que ces fuites représentent est double :
+ - un usurpateur pourra réaliser des actions sur votre site en se faisant passer pour un autre,
+   et ainsi porter préjudice à la fois à l'utilisateur légitime et à votre business ;
+ - trop souvent les gens réutilisent le même mot de passe sur plusieurs sites, de sorte qu'une
+   fuite du site A.com peut mettre en péril un site B.com.
+
+Même pour la plus insignifiante des applications, vous ne voulez pas être responsable des conséquences de ces fuites.
+
+La règle de base est connue : il ne faut jamais stocker des mots de passe en clair en base de données.
+Comme les clefs de déchiffrement fuitent elles aussi, il ne faut pas non plus stocker des mots de passe chiffrés en base de données.
+
+La solution ? Passer le mot de passe saisi dans le formulaire à une fonction de hachage cryptographique,
+et ne conserver que l'empreinte numérique dudit mot de passe.
+
+En PHP, la fonction [`hash()`](https://www.php.net/manual/fr/function.hash.php) permet de calculer des empreintes pour plusieurs algorithmes de hachage:
+
+```php
+echo hash('md5', '123456'); // e10adc3949ba59abbe56e057f20f883e
+echo hash('sha256', '123456'); // 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+```
+
+La caractéristique d'une fonction de hachage cryptographique est que pour deux mots de passe différents, elle *doit* produire un résultat différent.
+Cette propriété est tellement essentielle que les spécialistes de la sécurité considèrent que si une seule collision est trouvée, l'algorithme doit être déprécié.
+C'est déjà le cas pour [MD5](https://fr.wikipedia.org/wiki/MD5) et SHA-1. [SHA-256](https://fr.wikipedia.org/wiki/SHA-2#SHA-256) lui résiste toujours aux théoriciens.
+
+À l'inverse, étant donné une sortie particulière, il doit être impossible de retrouver le mot de passe correspondant.
+Grâce à cette propriété, nous pouvons stocker les empreintes dans nos bases : en cas de fuite, il reste impossible de retrouver les mots de passe d'origine.
+
+## Les algorithmes de hachage
+
+Évidement, "impossible" n'est qu'une question de temps et de moyens : si je vous demande de retrouver le mot de passe de l'empreinte `e10adc3949ba59abbe56e057f20f883e`,
+la réponse est écrite juste au dessus, c'est `123456`. Il existe des [bases de données d'empreintes précalculées](http://project-rainbowcrack.com/table.htm), que l'on appelle des [tables arc-en-ciel](https://fr.wikipedia.org/wiki/Rainbow_table),
+et qui permettent de retrouver instantanément n'importe quel mot de passe de moins de 10 caractères environ.
+
+Il existe aussi des circuits programmés dédiés capables de calculer des empreintes à des vitesses extraordinaires, de sorte que quelques heures, jours ou semaines de calcul permettent de tester des milliards de combinaisons. Retrouver un mot de passe n'est alors qu'une question de moyens financiers.
+
+Face à ces menaces, les bonnes pratiques ont évolué.
+
+Pour se prémunir contre les attaques par tables arc-en-ciel, il faut combiner le hachage à un [sel](https://fr.wikipedia.org/wiki/Salage_(cryptographie)). C'est une composante aléatoire qui permet d'allonger virtuellement le mot de passe et assure que deux personnes avec le même mot de passe aient des empreintes différentes. En PHP :
+
+```php
+$sel = random_bytes(8);
+$empreinte = bin2hex($sel).hash('sha256', $sel.$mot_de_passe);
+```
+
+Avec Symfony, cette configuration donnera un résultat équivalent :
+
+```yaml
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: sha256
+```
+
+Pour contrer les attaques par force brute permises par les processeurs spécialisés,
+il est devenu courant et recommandé d'appliquer l'algorithme de hachage plusieurs fois :
+
+```php
+$empreinte = bin2hex($sel).hash('sha256', hash('sha256', ..., hash('sha256', $sel.$mot_de_passe)...));
+```
+
+Le standard [`PBKDF2`](https://fr.wikipedia.org/wiki/PBKDF2) normalise cette pratique, avec un nombre d'itérations recommandé de 1000,
+prévu pour être augmenté à mesure que les processeurs gagnent en puissance.
+En Symfony, avec les valeurs par défaut :
+
+```yaml
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: pbkdf2
+            hash_algorithm: sha512
+            iterations: 5000
+```
+
+Plus récement et toujours au goût du jour, l'algorithme [`bcrypt`](https://fr.wikipedia.org/wiki/Bcrypt) est venu reforcer cette pratique
+en intégrant le nombre d'itérations au cœur de la logique de hachage, puisqu'il est présent dans le résultat de la fonction.
+Depuis PHP 5.5, la fonction [`password_hash()`](https://www.php.net/manual/fr/function.password-hash.php) permet d'utiliser `bcrypt` nativement :
+
+```php
+echo password_hash('123456', PASSWORD_BCRYPT, ['cost' => 10]);
+// $2y$10$YHtTDQEjxSIr.UCLmj/JD.VN7UD4hMBOtJNzfdjxW3s1TmcMyaOYK
+```
+
+[En Symfony](https://symfony.com/blog/new-in-symfony-4-3-native-password-encoder) :
+```yaml
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: bcrypt
+            cost: 10
+```
+
+L'empreinte retournée sera à chaque fois différente car elle est salée automatiquement.
+Plus le paramètre `cost` est grand, plus le calcul de l'empreinte sera coûteux.
+Comparativement à `PBKDF2`, `bcrypt` a un avantage linéaire, ce qui veut dire que c'est un meilleur choix, mais que la différence n'est pas décisive.
+
+À mesure que l'utilisation de `bcrypt` se répand, des processeurs spécialisés apparaissent,
+et le coût d'un craquage de mots de passe par force brute diminue :
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">A new set of bcrypt crackers is ready for production. You&#39;re looking at 16U, 288 FPGAs (XC6SLX150): the bcrypt power of about a whopping 320 high-end GPUs (2080Ti)! <a href="https://t.co/xBouwCcCIu">pic.twitter.com/xBouwCcCIu</a></p>&mdash; Scattered Secrets (@scatsec) <a href="https://twitter.com/scatsec/status/1206925439752658944?ref_src=twsrc%5Etfw">December 17, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+Tous les algorithmes mentionnés jusqu'à maintenant ont en effet une caractéristique commune : leur coût se mesure en temps CPU.
+Il "suffit" de concevoir une unité de calcul plus performante pour augmenter la vitesse de calcul des empreintes.
+Or, il existe une autre resource limitée dans nos ordinateurs : la RAM et son corrolaire, la bande passante mémoire.
+
+Les circuits dédiés [FPGA](https://fr.wikipedia.org/wiki/Circuit_logique_programmable) ou [ASIC](https://fr.wikipedia.org/wiki/Application-specific_integrated_circuit)
+sont en effet excellents en calcul brut, mais dès qu'il s'agit de bande passante et d'accès mémoire,
+leurs performances redeviennent "classiques", à investissement financier comparable.
+
+C'est pour cette raison qu'une nouvelle classe d'algorithmes est apparue, dont le gagnant est nommé [Argon2](https://fr.wikipedia.org/wiki/Argon2).
+Là où les précédents algorithmes ne prennent que le nombre d'itérations en paramètre,
+`Argon2` permet également de contrôler la mémoire requise pour calculer une empreinte.
+Il est disponible en 3 variantes : `Argon2d` est conçu pour résister aux unités de calcul vectoriel telles que les GPU,
+`Argon2i` est optimisé contre les attaques [par canal auxiliaire](https://fr.wikipedia.org/wiki/Attaque_par_canal_auxiliaire),
+et `Argon2id` est une combinaison des deux.
+
+```php
+echo password_hash('123456', PASSWORD_ARGON2ID);
+// $argon2id$v=19$m=65536,t=4,p=1$OXhtdDFSLnViTS5zdWx2eQ$OdhFoYQAyyoL1UszCYn+3wvL0q+3JduvhKiscXKNFTo
+```
+
+Le `m=65536` dans cette empreinte signifie qu'il a fallu 64Mio pour la calculer,
+et qu'il n'est pas possible d'en consommer moins pour la vérifier.
+
+[En Symfony](https://symfony.com/blog/new-in-symfony-4-3-sodium-password-encoder) :
+```yaml
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: sodium
+```
+
+En hachant les mots de passe avec `Argon2`, nous reprenons ainsi l'avantage sur toutes les puissances de calcul financièrement accessibles dans un future proche,
+même face à des moyens étatiques puisque c'est pour cela qu'ont été conçus ces algorithmes.
+
+Je vous invite à lire [les recommandations de l'OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#modern-algorithms) pour creuser un peu plus le sujet.
+
+## La mise en œuvre en Symfony
+
+J'imagine que nous sommes peu nombreux aujourd'hui à encoder les mots de passe avec `Argon2`.
+J'imagine aussi qu'un jour prochain, `Argon2` sera remplacé par un nouvel algorithme plus résistant.
+Comment adopter un algorithme plus récent alors que nos bases de données contiennent des empreintes calculées avec des versions précédentes ?
+
+La seule façon de faire est de disposer du mot de passe en clair et de lui appliquer la nouvelle fonction de hachage.
+Il va donc falloir attendre qu'un utilisateur se connecte à notre site,
+vérifier son mot de passe en utilisant l'ancien algorithme,
+et profiter de l'occasion pour mettre à jour l'empreinte de son mot de passe.
+
+C'est ce processus qui est permis depuis Symfony 4.4 : en implémentant `PasswordUpgraderInterface` dans vos `UserProvider`,
+vous pouvez écrire la nouvelle empreinte en base lors de la connexion d'un utilisateur.
+
+Pour être capable de vérifier à la fois les anciennes empreintes et les nouvelles,
+vous devez utiliser un `MigratingPasswordEncoder`,
+ce qui se fait soit [en précisant explicitement l'ancien et le nouvel algorithme](https://symfony.com/blog/new-in-symfony-4-4-misc-improvements-part-3#password-hashing-and-migration-improvements) :
+
+```yaml
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: argon2id
+            migrate_from: bcrypt
+```
+
+Soit [en laissant le choix du meilleur algorithme disponible à Symfony](https://symfony.com/blog/new-in-symfony-4-4-password-migrations), en fonction du moteur PHP installé :
+
+```yaml
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: auto
+```
+
+Si vos mots de passe doivent être interopérables avec d'autres applications, vous devrez utiliser la première stratégie.
+Mais si vous voulez être sûr de toujours utiliser le dernier algorithme recommandé, choisissez `auto`.
+
+Vous pouvez décider de régler vous-même les paramètres de calcul `Argon2` :
+`MigratingPasswordEncoder` recalculera alors les empreintes avec les nouveaux coûts CPU et consommation mémoire.
+
+Ma recommandation serait de laisser Symfony définir ces paramètres pour vous,
+*sauf* si vous êtes en mesure de les calculer de façon optimisés lors du déploiement.
+
+Car l'enjeu avec `Argon2` est bien là : [il faut choisir](https://github.com/elchris/hashtuner) des [paramètres de calcul]( https://github.com/paragonie/argon2-refiner)
+adaptés à votre infrastructure,
+mais suffisament élevés pour générer des empreintes résistantes aux capacités des processeurs dédiés du moment.
+Ces réglages ne peuvent se faire de façon statique, ils *doivent* évoluer au fil du temps :
+soit par mises à jour successives de Symfony, soit par [un autre automatisme de votre cru](https://www.twelve21.io/how-to-choose-the-right-parameters-for-argon2/).
+
+Si vous choississez des paramètres trop faibles, les mots de passe de vos utilisateurs seront exposés.
+Mais si vous choisissez des paramètres trop élevés, votre infrastructure devient vulnérable aux attaques par [déni de service](https://fr.wikipedia.org/wiki/Attaque_par_d%C3%A9ni_de_service)...
+
+À noter que `Argon2` dispose d'un troisième paramètre `p` qui pilote le niveau de parallélisme autorisé lors du calcul :
+`p=1` veut dire qu'il n'est pas possible de calculer l'empreinte avec plusieurs *threads* ;
+`p=N` veut dire qu'il est possible de la calculer avec *maximum* `N` *threads*.
+Par conséquent, la valeur la plus stricte pour ce paramètre est `1`.
+Coïncidence, PHP n'est pas multi-threadé, et [libsodium](https://libsodium.gitbook.io/doc/) - une implémentation de qualité d'`Argon2` utilisée en PHP et ailleurs - ne permet pas d'autre valeur que `1`.
+
+## Résister aux attaques par déni de service
+
+Par défaut, `Argon2` est configuré pour requérir 64Mio pour vérifier un mot de passe.
+En PHP, cela signifie que si vous avez réglé votre serveur FPM pour 50 processus en parallèle,
+vous devez disposer d'un peu plus de 3Gio, hors mémoire pour faire tourner l'OS et les 50 scripts PHP.
+
+Comme chaque vérification *doit* consommer également des ressources CPU, les paramètres sont calibrés
+pour que le calcul dure entre 0.5 et 1 seconde.
+
+Comme vous pouvez le constater, il devient plutôt facile de rendre une application indisponible :
+il suffit de lancer 50 connexions en même temps pour qu'elle ne soit plus capable de servir le reste du traffic.
+
+Choisir un autre algorithme ne résoudra en rien le problème - ils sont tous conçus pour consommer des resources.
+Au contraire, cela exposerait les mots de passes de vos utilisateurs.
+
+Les solutions ne sont pas triviales à mettre en œuvre :
+
+Tout d'abord, il vous incombe de vérifier que vous avez prévu suffisament d'espace mémoire.
+Si votre serveur n'en a pas assez, au mieux une `SodiumException` sera propagée,
+au pire le script sera bloqué en attente de mémoire disponible.
+
+Une première proposition est de limiter le nombre de tentatives de connexion par plages d'IP.
+
+En complément, le plus efficace semble de router les calculs d'empreintes vers un nombre limité de processus PHP.
+Naturellement, cela veut dire mettre l'excédent de requêtes en file d'attente,
+et conserver la capacité à servir les autres pages de l'application même si les vérifications de mots de passe arrivent en nombre.
+Cette stratégie limite aussi *de facto* le problème de consommation mémoire.
+
+En pratique, cela signifie [configurer un *pool* FPM dédié](https://www.php.net/manual/fr/install.fpm.configuration.php),
+puis configurer votre Apache ou Nginx pour utiliser ce *pool* pour les requêtes `POST` à l'URL de la page de connexion.
+
+Configurer ainsi son application PHP n'est pas commun,
+et pourtant c'est la seule façon de faire pour tenir les tests de montée en charge sans fléchir.
+
+À noter que ce problème n'est pas spécifique à PHP. Une application Node.js aurait le même problème,
+voire en pire puisque le calcul des empreintes est bloquant si on n'y fait pas attention,
+alors que toute l'architecture de Node.js repose sur l'asynchrone.
+
+Personnellement, je trouve cet état de l'art insatisfaisant. Ne serait-il pas possible d'imaginer des protocoles
+de connexion qui délèguent la partie consommatrice en ressources aux navigateurs ?
+
+C'est le problème adressé par les protocoles [PAKE](https://en.wikipedia.org/wiki/Password-authenticated_key_agreement),
+et plus particulièrement les *Augmented-PAKE* ou aPAKE. Si je devais en choisir un, le draft IETF
+[OPAQUE](https://tools.ietf.org/html/draft-krawczyk-cfrg-opaque-00) semble le plus prometteur.
+Je n'ai par contre trouvé aucune implémentation dont nous pourrions nous servir à court terme, et vous ?
+Ne serait-il pas possible de l'implémenter en [WebAssembly](https://fr.wikipedia.org/wiki/WebAssembly) ?
+Un volontaire pour creuser le sujet ?
+
+Reste une dernière alternative : déléguer la gestion des identités à un service tiers, tel que Google Connect,
+Facebook Connect, Amazon Cognito, [Auth0](https://auth0.com), ou à un équivalent auto-hébergé tel [Keycloak](https://www.keycloak.org).
+
+Joyeuses fêtes de fin d'année !
+
+{% block article_avatar %}
+  <img src="{{ asset('build/avent/nicolas-grekas.jpg') }}" alt="Nicolas Grekas"/>
+{% endblock %}
+
+{% block article_bio %}
+  <h3><a href="{% block author_url %}https://github.com/nicolas-grekas{% endblock %}"
+         target="_blank">{% block article_author %}Nicolas Grekas{% endblock %}</a></h3>
+  <p>Ingénieur chez Symfony SAS, membre de la core-team Symfony</p>
+{% endblock %}
