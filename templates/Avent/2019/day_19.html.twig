@@ -26,7 +26,9 @@ class Math
 ```
 
 ```php
-class MathTest
+use PHPUnit\Framework\TestCase;
+
+class MathTest extends TestCase
 {
     public function testAdd(): void
     {
@@ -79,12 +81,12 @@ namespace App;
 
 class DiceRoller
 {
-    public function roll(int $sides, int $multiplier = 1, int $offset = 0): int
+    public function roll(int $numberOfDice = 1, int $diceSides, int $bonus = 0): int
     {
-        $result = $offset;
+        $result = $bonus;
 
-        for ($i = 0; $i < $multiplier; ++$i) {
-            $result += random_int(1, $sides);
+        for ($i = 0; $i < $numberOfDice; ++$i) {
+            $result += random_int(1, $diceSides);
         }
 
         return $result;
@@ -135,7 +137,7 @@ class DiceRollerTest extends TestCase
     /**
      * @dataProvider provide dice rolls
      */
-    public function test dice roller result is in dice range(int $sides, int $multiplier, int $offset): void
+    public function test dice roller result is in dice range(int $numberOfDice = 1, int $diceSides, int $bonus = 0): void
     {
         $diceRoller = new DiceRoller();
 
@@ -148,13 +150,13 @@ class DiceRollerTest extends TestCase
     public function provide dice rolls(): \Generator
     {
         $sidesToTest = [4, 6, 8, 12, 20]; // d4, d6, etc.
-        $multipliersToTest = range(1, 10); // Up to 10 dices at the same time.
-        $offsetsToTest = [1, 2, 3, 4, 5]; // Not too much, that's already a lot.
+        $numberOfDicesToTest = range(1, 10); // Up to 10 dices at the same time.
+        $bonuses = [1, 2, 3, 4, 5]; // Not too much, that's already a lot.
 
-        foreach ($sidesToTest as $sides) {
-            foreach ($multipliersToTest as $multiplier) {
-                foreach ($offsetsToTest as $offset) {
-                    yield "$sides-$multiplier-$offset" => [$sides, $multiplier, $offset];
+        foreach ($sidesToTest as $diceSides) {
+            foreach ($numberOfDicesToTest as $numberOfDice) {
+                foreach ($bonuses as $bonus) {
+                    yield "$diceSides-$numberOfDice-$bonus" => [$diceSides, $numberOfDice, $bonus];
                 }
             }
         }
@@ -235,7 +237,7 @@ La meilleure façon c'est la **surcharge dans l'espace de noms**.
 
 En effet, lorsque votre code est situé dans un espace de nom, et que vous exécutez une fonction (n'importe laquelle), PHP va d'abord vérifier si celle-ci existe dans l'espace de noms actuel, et sinon, va se replier sur l'espace de noms global.
 
-Cette surcharge est d'ailleurs celle opérée par les classes `DnsMock` et `ClockMock` du PHPUnit Bridge de Symfony pour permettre de surcharger les fonctions natives de recherche d'enregistrements DNS ou de date/temps.
+Cette surcharge est d'ailleurs celle opérée par les classes `DnsMock` et `ClockMock` du PHPUnit Bridge de Symfony pour permettre de surcharger les fonctions natives de recherche d'enregistrements DNS ou les fonctions de date et de temps.
 
 Voici comment procéder :
 
@@ -299,7 +301,8 @@ function random_int(int $min, int $max): int {
 }
 ```
 
-Cette solution fonctionne bien, mais elle a un inconvénient : si un jour le code du `DiceRoller` change et que l'appel à `random_int()` est fait sous la forme `\random_int()`, c'est fini ! En effet, cette syntaxe va forcer PHP à utiliser uniquement la fonction native, et vous ne pourrez plus jamais surcharger `random_int()`…
+Cette solution fonctionne bien, **mais elle a un inconvénient** : si un jour le code du `DiceRoller` change et que l'appel à `random_int()` est fait sous la forme `\random_int()` (ou une instruction `use function random_int;` est rajoutée en haut du fichier), c'est fini !<br>
+En effet, cette syntaxe va forcer PHP à utiliser uniquement la fonction native, et vous ne pourrez plus jamais surcharger `random_int()`…
 
 Mais ne vous en faites pas, j'ai la solution !
 
@@ -340,9 +343,15 @@ class DiceRoller
         $this->randomIntProvider = $randomIntProvider;
     }
 
-    public function roll(int $sides, int $multiplier = 1, int $offset = 0): int
+    public function roll(int $numberOfDice = 1, int $diceSides, int $bonus = 0): int
     {
-        return $this->randomIntProvider->randomInt(1, $sides) * $multiplier + $offset;
+        $result = $bonus;
+
+        for ($i = 0; $i < $numberOfDice; ++$i) {
+            $result += $this->randomIntProvider->randomInt(1, $diceSides);
+        }
+
+        return $result;
     }
 }
 ```
@@ -394,7 +403,7 @@ class DiceRollerTest extends TestCase
 
         $randomIntProvider->determinedResult = 1;
 
-        $result = $diceRoller->roll(2, 6, 3);
+        $result = $diceRoller->roll(2, 6, 3); // 2d6+3
 
         static::assertSame(5, $result); // Yay!
     }
