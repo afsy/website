@@ -1,0 +1,276 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 22 - Monofony, un projet Symfony basé sur la structure interne de Sylius" %}
+
+{% block article_content_md %}
+    # Monofony, un projet Symfony basé sur la structure interne de Sylius
+
+    Si vous ne connaissez pas ou n'êtes pas encore familier avec Sylius, vous pouvez lire <a href="/avent/2019/16-rex-sylius-le-framework-e-commerce">notre article sur le calendrier de l'avent</a>.
+
+    ## Concepts du projet
+
+    Le démarrage d’un projet est souvent long et fastidieux. Mettre en place les fonctionnalités de base telle que le login, le mot de passe oublié, l’inscription d’un utilisateur prend souvent beaucoup de temps. Encore plus si vous utilisez une intégration continue (CI) qui vous sert à lancer vos tests.
+
+    Monofony a été développé pour faciliter vos démarrages de projets que ce soit pour développer un backend et/ou une API, ou faire un projet full Symfony. Il inclut toutes les fonctionnalités sus-cités mais aussi un back office prêt à être enrichi. C’est vraiment là que réside l’intérêt de ce projet. Vous gagnerez un temps monstre pour configurer vos grilles (tableaux de données) et formulaires.
+
+    Que vous soyez sur n'importe quel type de projet, vous aurez toujours besoin de la gestion de différents niveaux d'utilisateurs.
+
+    Ce projet contient donc les deux premières entités d'utilisateurs :
+    * les administrateurs qui accèderont au back office
+    * et les clients qui utilise la partie visible de l'application / site web.
+
+    <br>
+
+    <img src="{{ asset('build/avent/2019/22/admin-login.png') }}" alt="Admin login"/>
+    *L’interface de connexion au back office Monofony*
+
+    <br><br>
+
+    <img src="{{ asset('build/avent/2019/22/admin-customers.png') }}" alt="Admin customers grid"/>
+
+    <br>
+
+    Une <a href="https://docs.sylius.com/en/lastest/components_and_bundles/bundles/SyliusGridBundle/your_first_grid.html" target="_blank">grille Sylius</a> qui permet d’afficher les éléments d’une entité, ici les utilisateurs en l'occurrence.
+
+    Monofony s’appuie sur le framework Symfony d’e-commerce nommé <a href="https://sylius.com/" target="_blank">Sylius</a>. Les composants et bundles qui ont été développés pour ce projet d’une extrême qualité sont ici configurés et prêts à l’emploi : grids, users, data fixtures etc.
+
+    Pour les plus exigeants d’entre-vous, vous êtes en mesure de développer vous et votre équipe avec le même niveau que l’équipe de Sylius et ses nombreux contributeurs. Les outils Behat, phpspec, PHPunit, PHPStan, Psalm sont au rendez-vous et de nombreux tests sont déjà écrits avec les fonctionnalités de démarrage. Vous pouvez ainsi continuer à écrire les vôtres en s’appuyant sur ceux existant. Profitez du temps gagné lors de la mise en place du projet par rapport à un projet “from scratch” pour écrire vos scénarios de tests. vous n’avez cette fois plus d’excuses…
+
+    Mais que cela ne vous fasse pas peur, vous pouvez commencer sans rien de tous ces outils et gravir les marches une à une au fur et à mesure que vous découvrirez les fondations et que vous progresserez.
+
+    ## Un temps gagné non négligeable
+
+    L’avantage de Monofony, c’est qu’une fois que vous avez créé votre entité, vous pourrez facilement avoir les interfaces dans l’administration pour la gérer.
+    Cela se fait en 4 étapes très simples :
+
+    * Déclarer votre entité en tant que <a href="https://monofony.readthedocs.io/en/latest/cookbook/entities/first-resource.html" target="_blank">ressource Sylius</a>
+    * Créer <a href="https://monofony.readthedocs.io/en/latest/cookbook/entities/manage-your-entity.html" target="_blank">la grid</a> pour gérer votre entité
+    * Créer <a href="https://monofony.readthedocs.io/en/latest/cookbook/entities/configure-your-routes.html" target="_blank">le routing</a> pour l’entité
+    * Ajouter un <a href="https://monofony.readthedocs.io/en/latest/cookbook/entities/configure-backend-menu.html" target="_blank">lien dans le menu admin</a> pour y accéder
+
+    Pour plus de détails, n’hésitez pas à consulter les <a href="https://monofony.readthedocs.io/en/latest/cookbook/index.html#entities" target="_blank">cookbooks au sujet des entités</a>.
+    Une fois que c’est terminé, vous aurez accès à une page comme ceci :
+
+    <br>
+
+    <img src="{{ asset('build/avent/2019/22/admin-constructors.png') }}" alt="Admin constructors grid"/>
+
+    <br>
+
+    Mais ce n'est pas tout ! Vous avez aussi tout le routing et les pages pour ajouter, modifier, supprimer des éléments qui est généré, il ne vous reste plus qu’à utiliser ces interfaces pour manipuler vos données :
+
+    <br>
+
+    <img src="{{ asset('build/avent/2019/22/admin-create-constructor.png') }}" alt="Admin create constructor"/>
+    <br>
+    <img src="{{ asset('build/avent/2019/22/admin-update-constructor.png') }}" alt="Admin update constructor"/>
+    <br>
+    <img src="{{ asset('build/avent/2019/22/admin-delete-confirmation.png') }}" alt="Admin delete confirmation"/>
+
+    <br>
+
+    Il est bien évidemment possible de créer le type de formulaire de votre choix avec Symfony et de venir le déclarer dans votre ressource sylius :
+
+    <br>
+
+    ```yaml
+    sylius_resource:
+        resources:
+            app.constructor:
+                classes:
+                    model: App\Entity\Organization\Constructor
+                    form: App\Form\Type\Organization\ConstructorType
+    ```
+
+    ## La grille
+
+    Le <a href="https://docs.sylius.com/en/lastest/components_and_bundles/bundles/SyliusGridBundle/" target="_blank">Sylius Grid Bundle</a> est très puissant et permet de créer facilement des listes de vos entités avec des filtres, des tris de colonnes et une pagination.
+
+    A la manière des <a href="https://fr.vuejs.org/v2/guide/components-slots.html" target="_blank">slots de VueJs</a>, chaque colonne est un template twig. Pour des valeurs simples tels que les entiers, les chaines, ou encore les dates, vous n'aurez aucun template à créer.
+    Mais cela vous permet de customiser très rapidement des contenus plus riches tels que les images, des statuts de workflow etc.
+
+    <br>
+
+    <img src="{{ asset('build/avent/2019/22/admin-games.png') }}" alt="Admin games"/>
+
+    <br>
+
+    La configuration de la grid correspondant à l'exemple ci-dessus :
+
+    ```yaml
+    sylius_grid:
+        grids:
+            sylius_backend_product:
+                driver:
+                    name: doctrine/orm
+                    options:
+                        class: "%sylius.model.product.class%"
+                        repository:
+                            method: createQueryBuilderWithLocaleCode
+                            arguments: ["%locale%"]
+                sorting:
+                    createdAt: desc
+                fields:
+                    image:
+                        type: twig
+                        label: sylius.ui.image
+                        path: .
+                        options:
+                            template: "backend/product/grid/field/image.html.twig"
+                    code:
+                        type: string
+                        label: sylius.ui.code
+                        sortable: ~
+                    name:
+                        type: string
+                        label: sylius.ui.name
+                    createdAt:
+                        type: twig
+                        label: sylius.ui.creation_date
+                        sortable: ~
+                        options:
+                            template: "backend/grid/field/date/short.html.twig"
+                    status:
+                        type: twig
+                        label: sylius.ui.status
+                        options:
+                            template: "backend/grid/field/state.html.twig"
+                            vars:
+                                labels: "backend/product/label/state"
+                filters:
+                    search:
+                        type: string
+                        label: sylius.ui.search
+                        options:
+                            fields: [code, translation.name]
+                    status:
+                        type: status
+                        form_options:
+                            statuses:
+                                sylius.ui.new: new
+                                sylius.ui.pending_translation: pending_translation
+                                sylius.ui.pending_review: pending_review
+                                sylius.ui.pending_publication: pending_publication
+                                sylius.ui.published: published
+                actions:
+                    main:
+                        create:
+                            type: create_product
+                    item:
+                        update:
+                            type: update
+                        delete:
+                            type: delete
+                    subitem:
+                        manage_articles:
+                            type: manage_articles
+                        manage_variants:
+                            type: manage_variants
+    ```
+
+    ## Le routing
+
+    Le routing est géré par le <a href="https://docs.sylius.com/en/latest/components_and_bundles/bundles/SyliusResourceBundle/index.html" target="_blank">Sylius resource bundle</a>. Nous nous attarderons pas sur cette partie car c'est le sujet du prochain article.
+
+    Mais la configuration suivante permet de gérer la liste, la création, la modification et la suppression de mon entité.
+    Nous passons ici quelques variables qui sont utilisées dans les templates de CRUD génériques fournis avec le projet et qui sont recopiés de Sylius.
+
+    ```yaml
+    app_backend_article:
+        resource: |
+            alias: app.article
+            section: backend
+            redirect: update
+            grid: app_backend_article
+            except: ['show']
+            vars:
+                all:
+                    subheader: app.ui.manage_articles
+                    templates:
+                        form: backend/article/_form.html.twig
+                index:
+                    icon: newspaper
+                update:
+                    templates:
+                        form: backend/article/_form.html.twig
+                        toolbar: backend/article/_toolbar.html.twig
+            templates: backend/crud
+        type: sylius.resource
+    ```
+
+    ## Des plugins sous la main
+
+    Vous connaissez certainement les bundles de Symfony. Sur une application Sylius, on utilisera l’appellation de plugin (Un bundle qui dépend de Sylius pour fonctionner). Il est possible d’en utiliser sur Monofony, et il en existe de très pratiques ! Vous aurez notamment la gestion de canaux (<a href="https://github.com/Sylius/Channel" target="_blank">channels</a>) si vous avez plusieurs sites à gérer sur la même application. Mais aussi un plugin qui permet de gérer des <a href="https://github.com/Sylius/SyliusThemeBundle" target="_blank">thèmes</a>, ce qui permettra de changer le design front de chacun de vos canaux.
+
+    ## La démo
+
+    Une démo en ligne est disponible depuis peu afin de découvrir ce que vous avez au démarrage du projet.
+
+    <a href="https://monofony.mobizel.com/admin" target="_blank">https://monofony.mobizel.com/admin</a>
+    * Utilisateur : admin@example.com
+    * Mot de passe : admin
+
+    ## La naissance du projet
+
+    Chez Mobizel, nous enchaînons les projets clients. Nous avons besoin de très vite monter de nouveaux projets sans recopier chaque fois du code du projet précédent.
+    Repartir d'un projet Symfony vierge n'est pas aussi efficace que de mettre à jour notre starter avant de commencer nos développements.
+
+    Le projet s’appelait au départ Polyfony. Mon ancien collègue Pierre avait initié les prémisses de ce qu’est ensuite devenu Monofony.
+    C’était simplement un starter Symfony avec quelques bundles tels que le FOSUserBundle à l’époque et déjà un peu de Behat simple.
+    On a ensuite commencé à y inclure des bundles de Sylius.
+    Avec les bonnes pratiques de Symfony qui évoluaient, nous nous sommes tournés sur un seul et unique AppBundle (d’où vient le renommage Monofony) et j’ai fini par refondre complètement le projet lors de la migration en Symfony 3 avec l’aide d'un autre collègue <a href="https://github.com/conicole" target="_blank">Corentin Nicole</a> en utilisant de plus en plus les outils de Sylius.
+    Le User bundle a remplacé celui de FOS, ensuite le Customer bundle a été ajouté, puis le Grid bundle / Ui bundle qui ont permis de faire une interface d'aministration extrêmement rapide à développer (très peu de css et de templates ne sont nécessaires, les templates génériques customisables sont un atout majeur). Aujourd’hui le projet tourne en Symfony 4.
+
+    ## Un projet open-source
+
+    Au départ pour partager le projet avec les anciens collègues, nous avons externalisé le projet dans un dépôt privé et vu la communauté grandissante de Sylius, nous avons décidé de le rendre disponible sur <a href="https://github.com/Monofony/SymfonyStarter" target="_blank">un dépôt GitHub en open-source</a>.
+
+    ## Une communauté grandissante
+
+    Qui l’eut crû ? Fier de l’utilisation qui a été faite de leurs outils, l’équipe de Sylius a commencé à s’intéresser au projet après un <a href="https://sylius.com/blog/monofony-a-symfony-booster/" target="_blank">article publié sur leur blog</a>. Łukasz Chruściel a même rejoint l’équipe Monofony principalement pour le code review pour contribuer à la qualité de ce projet et en parle durant de grandes conférences internationales. Le bouche à oreille est en marche, de nouveaux développeurs découvrent le projet et sont enthousiasmés.
+
+    ## Le futur ?
+
+    **Une API avec ApiPlatform**
+
+    Actuellement nous travaillons sur une API avec les mêmes fonctionnalités de départ du front office (inscription, mot de passe oublié, modifier mes infos personnelles) en utilisant Api Platform. Ce dernier est d’ores et déjà installé et configuré mais aucun endpoint n’est encore disponible.
+    <a href="https://monofony.mobizel.com/api" target="_blank">https://monofony.mobizel.com/api</a>
+
+   **Compatibilité Symfony 5 ?**
+
+    Etant donné que le projet suit les versions des composants de Sylius et leur compatibilité, cela ne devrait pas être trop long puisque Sylius annonce déjà une compatibilité Q1 2020.
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/2019/22/loic_maxime.png') }}" alt="Loïc Frémont et Maxime Huran"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="https://twitter.com/loic425"
+           target="_blank"
+           rel="noopener noreferrer">
+            Loïc Frémont
+        </a>
+    </h2>
+    <p>
+        Loïc est développeur Web chez <a href="https://mobizel.com" target="_blank" rel="noopener noreferrer">Mobizel</a>. C'est un passionné et contributeur régulier de Sylius.
+    </p>
+    <br />
+    <h2>
+        <a href="https://github.com/maximehuran"
+           target="_blank"
+           rel="noopener noreferrer">
+            Maxime Huran
+        </a>
+    </h2>
+    <p>
+        Maxime est développeur Web Magento et Sylius chez <a href="https://monsieurbiz.com/" target="_blank" rel="noopener noreferrer">Monsieur Biz</a>. Mais il préfère largement Sylius!
+    </p>
+{% endblock %}
+
+{% block article_author %}
+    Loïc Frémont et Maxime Huran
+{% endblock %}
