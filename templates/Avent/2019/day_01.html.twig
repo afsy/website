@@ -124,7 +124,7 @@ indenter](https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes) !)
 
 ## Astuce 6 : Utilisez les middlewares de Doctrine avec le composant Messenger
 
-Si vous avez décidé d'utiliser Messenger, vous allez probablement modifié des données dans vos messages handlers. Et
+Si vous avez décidé d'utiliser Messenger, vous allez probablement modifier des données dans vos messages handlers. Et
 si ceux-ci sont asynchrones vous pouvez avoir plusieurs erreurs:
 - La connexion SQL qui se termine (les connexions aux bases de données ont souvent un timeout)
 - Exécuter votre worker dans une transaction
