@@ -7,9 +7,8 @@
 {% block article_content_md %}
 # Hachez menu ces mots de passe
 
-Pour ce dernier épisode de l'avent, j'aimerais partager avec vous une question de sécurité à laquelle je n'ai pas trouvé de réponse.
-Après un rappel sur les algorithmes de hachage et les raisons de leur utilisation,
-je vous propose de chambouler les bonnes pratiques liées au stockage des mots de passe de nos utilisateurs.
+Ne rendons-nous pas volontairement nos serveurs vulnérables aux dénis de service ?
+Après un rappel sur les algorithmes de hachage et les raisons de leur utilisation, discutons de leur coût sur nos infrastructures.
 
 J'ai réalisé récemment que ces algorithmes étaient bien plus complexes à mettre en œuvre que la configuration Symfony ne le laisse supposer.
 Attention, pas de conclusion hâtive : hacher les mots de passe *est* la meilleure façon de faire aujourd'hui.
@@ -256,20 +255,20 @@ et pourtant c'est la seule façon de faire pour tenir les tests de montée en ch
 voire en pire puisque le calcul des empreintes est bloquant si on n'y fait pas attention,
 alors que toute l'architecture de Node.js repose sur l'asynchrone.
 
-Personnellement, je trouve cet état de l'art insatisfaisant. Ne serait-il pas possible d'imaginer des protocoles
+## Conclusion
+
+Personnellement, je trouve cet état de l'art insatisfaisant.
+Il est toujours possible de déléguer la gestion des identités à un service tiers, tel que Google Connect,
+Facebook Connect, Amazon Cognito, [Auth0](https://auth0.com), ou à un équivalent auto-hébergé tel [Keycloak](https://www.keycloak.org).
+Mais ne serait-il pas possible d'imaginer des protocoles
 de connexion qui délèguent la partie consommatrice en ressources aux navigateurs ?
 
 C'est le problème adressé par les protocoles [PAKE](https://en.wikipedia.org/wiki/Password-authenticated_key_agreement),
-et plus particulièrement les *Augmented-PAKE* ou aPAKE. Si je devais en choisir un, le draft IETF
-[OPAQUE](https://tools.ietf.org/html/draft-krawczyk-cfrg-opaque-00) semble le plus prometteur.
+et plus particulièrement les *Augmented-PAKE* ou aPAKE. Si je devais en choisir un, [SPAKE2+EE](https://github.com/jedisct1/spake2-ee) me semble le plus prometteur.
 Je n'ai par contre trouvé aucune implémentation dont nous pourrions nous servir à court terme, et vous ?
-Ne serait-il pas possible de l'implémenter en [WebAssembly](https://fr.wikipedia.org/wiki/WebAssembly) ?
-Un volontaire pour creuser le sujet ?
 
-Reste une dernière alternative : déléguer la gestion des identités à un service tiers, tel que Google Connect,
-Facebook Connect, Amazon Cognito, [Auth0](https://auth0.com), ou à un équivalent auto-hébergé tel [Keycloak](https://www.keycloak.org).
-
-Joyeuses fêtes de fin d'année !
+Finalement, ne devrions-nous pas envisager de supprimer tout mot de passe avec [WebAuthn](https://webauthn.guide/) ?
+Il y a même un [bundle Symfony](https://github.com/web-auth/webauthn-framework) pour le faire !
 
 {% endblock %}
 
