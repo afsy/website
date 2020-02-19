@@ -19,6 +19,8 @@ $ symfony composer install
 $ docker-compose up -d
 $ symfony php bin/console doctrine:schema:create
 $ symfony php bin/console doctrine:fixtures:load
+$ yarn install
+$ yarn dev
 $ symfony serve
 ```
 
