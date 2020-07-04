@@ -42,7 +42,7 @@ crons:
         cmd: |
             # only snapshot the master environment, aka production
             if [ "$SYMFONY_BRANCH" = master ]; then
-                croncape symfony snapshot:create --no-wait
+                croncape symfony env:snapshot:create --no-wait
             fi
     renewcert:
         # Force a redeploy at 10 am (UTC) on the 1st and 15th of every month.
