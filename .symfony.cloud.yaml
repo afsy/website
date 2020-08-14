@@ -18,7 +18,7 @@ web:
             expires: 1h
             passthru: "/index.php"
 
-disk: 512
+disk: 1024
 
 mounts:
     "/var": { source: local, source_path: var }
