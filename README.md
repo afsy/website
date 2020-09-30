@@ -1,3 +1,6 @@
+*********************HEY FOLKS , WELCOME HERE********************* 
+
+
 # AFSY Website
 
 AFSY stands for "Association Francophone des utilisateurs de Symfony".
