@@ -1,7 +1,7 @@
 # AFSY Website
 
 AFSY stands for "Association Francophone des utilisateurs de Symfony".
-See http://afsy.fr/ for more informations.
+visit http://afsy.fr/ for more informations.
 
 ## How to add your own events on the website?
 
