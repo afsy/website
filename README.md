@@ -1,4 +1,4 @@
-# AFSY Website
+# AFSY Website an amazing project
 
 AFSY stands for "Association Francophone des utilisateurs de Symfony".
 See http://afsy.fr/ for more informations.
