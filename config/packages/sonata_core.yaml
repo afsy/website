@@ -1,4 +1,2 @@
-sonata_core:
-    form:
-        mapping:
-            enabled: false
+sonata_form:
+    form_type: standard
