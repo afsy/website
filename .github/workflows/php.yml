@@ -10,6 +10,13 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Setup PHP with PECL extension
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.4
+        extensions: mbstring, intl
+        ini-values: date.timezone=UTC
+
     - name: Validate composer.json and composer.lock
       run: composer validate
 
@@ -27,6 +34,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          extensions: mbstring, intl
+          ini-values: date.timezone=UTC
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
