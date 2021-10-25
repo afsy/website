@@ -13,7 +13,7 @@ jobs:
     - name: Setup PHP with PECL extension
       uses: shivammathur/setup-php@v2
       with:
-        php-version: 7.4
+        php-version: 8.0
         extensions: mbstring, intl
         ini-values: date.timezone=UTC
 
@@ -38,7 +38,7 @@ jobs:
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.0
           extensions: mbstring, intl
           ini-values: date.timezone=UTC
 
