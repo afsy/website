@@ -5,7 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Article;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class LoadArticleData extends Fixture implements DependentFixtureInterface
 {

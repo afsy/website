@@ -1,6 +1,6 @@
 name: afsy
 
-type: php:7.4
+type: php:8.0
 
 runtime:
     extensions:
