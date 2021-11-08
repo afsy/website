@@ -1,0 +1,246 @@
+{% extends 'Avent/day.html.twig' %}
+
+{% set year = 2019 %}
+
+{% block article_title "Jour 01 - 10 astuces incroyables sur Symfony" %}
+
+{% block article_content_md %}
+# Comprendre correctement l'arbre des commits de GIT
+
+
+Git est partout, mais il est souvent très mal compris.
+C'est un programme qui n'est pas vraiment user-friendly, les commandes sont souvent mal nommées
+et font parfois plusieurs choses différentes (checkout, reset...). Il est difficile d'avoir une vision d'ensemble.
+Les tutoriels et forums d'entraides utilisent des termes souvent trompeurs voire erronés,
+faisant de Git l'un des programmes les plus craint des développeurs juniors et certains développeurs plus avancés
+ignorent son fonctionnement.
+Pourtant ce programme à une puissance de feu incomparable provenant de sa capacité à faire du versionning
+de façon extrèmement légère.
+
+On ne va pas parler de code ici, encore moins de conflits. On ne va pas rentrer dans les innombrables options ou
+commandes de plomberie. L'intérêt de cette présentation est de comprendre la façon dont Git nous structure nos
+différentes révisions.
+
+## L'arbre des commits
+Git n'est que pointeurs qui pointent vers d'autres pointeurs. HEAD qui pointe vers des branches,
+qui pointent vers d'autres branches, qui pointent vers des commits, qui pointent vers d'autres commits
+et vers des trees qui pointent vers des blobs...
+On peut voir tout ça comme une matrice de pointeurs.
+
+Au milieu de tout ça: l'arbre des commits, le coeur de notre usage quotidien.
+Voici un arbre de commit pour un projet local assez simple. 
+Petite question: combien de branches voyez vous ? 14 ?
+
+![L'arbre des commits]({{ asset('build/avent/2021/02/afsy_z_tree.png') }} "L'arbre des commits")
+
+NON. C'est une grosse erreur de penser Git de cette façon. Ici il n'y a que **3 branches \!**
+(*master*, *dev* et *ma-branche*). Mais alors c'est quoi les branches grisées ?
+
+Voilà toute la subtilité de Git:
+**ce ne sont PAS des branches au sens de Git**, ce sont des **hiérarchies de commit**.
+Ici les branches grisées ce sont les commits qui **ne sont actuellement reliés à aucune branche**, mais qui sont 
+pourtant **toujours bien là \!\!**. On dit qu'ils sont *"orphelins"* (dangling).
+
+
+## Y'a quoi dans un commit ?
+- **un identifiant unique SHA1 (40 char) / abbrev-sha1 (8 char)**
+- le message du commit
+- l'auteur et les commiters (avec l'horodatage)
+- **le lien vers le ou les commits parent(s)**
+- un lien vers un 'tree' (répertoire) qui lui même référence un 'blob' unique (fichier de modifications)
+- et c'est tout ...
+
+Un commit ne connait que son ou ses parents (commits précédents), mais n'a aucune connaissance 
+de ses commits enfants. **TOUT** le principe de Git fonctionne grâce à cette liaison de l'enfant vers le parent 
+et Git **ne sait pas aller dans l'autre sens**. D'ailleurs, les symboles ^ et ~ pour se déplacer dans l'arbre ne le 
+font que dans ce sens.
+
+Impossible donc d'aller du parent vers l'enfant.
+
+
+### Voici les rêgles de fonctionnement d'un commit (les rêgles d'or à garder en tête):
+- Un commit est **toujours relié à au moins un commit parent** (sauf le commit initial)
+- Un commit n'est **plus jamais modifié une fois créé** (un *--amend* ou un *rebase créent de nouveaux commits)
+- Un commit **ne peut pas être déplacé**. Le/les parents d'un commits sont gravés dans le marbre forever 
+- Un commit **ne peut pas être supprimé** sauf par le Garbage Collector uniquement s'il n'est pas reliè à une branche 
+(dangling commit), si le nombre d'objet git dépasse 6700 et après 30 jours (ce qui nous donne un grand laps de temps)
+- Il peut donc **toujours être retrouvé** avant le Garbage Collector, et avec lui **tous ses commits parents !**
+- Un commit **peut être copié**. Le SHA1 et le parent seront différents du commit source
+
+En gros une fois créé, **un commit est un objet immuable**.
+
+## C'est quoi une branche selon GIT ?
+- De simples « **étiquettes** » qui pointent vers un commit
+- C’est un historique parallèle aux autres, qu’on peut faire évoluer, sans gêner les autres
+- Nécessitera à terme une réconciliation entre branches : **une fusion**
+- Git a le cheap branching : ça ne coûte pratiquement rien en mémoire/disque car ce n'est finalement **qu'un pointeur**
+
+Une branche pointe vers un commit, mais contrairement à ce dernier, elle peut se déplacer de commit en commit,
+peut importe sa direction.
+
+On déplace une étiquette de branche sur l'arbre des commits avec *git reset*
+
+```bash
+git reset --hard <SHA1 du commit> # déplace l’étiquette de branche + HEAD
+
+# Attention au git reset --hard, il effacera toutes vos modifications non commitées.
+# reset est une commande piégeuse qui fait 2 choses :
+# - déplacer la branche et HEAD
+# - restaurer les modifications du commit pointé
+#
+# Cette commande nécéssiterait un article à elle toute seule :P
+```
+
+![Reset]({{ asset('build/avent/2021/02/afsy_reset_deplacement.png') }} "Reset")
+
+Quand une rangée de commits n'est pointée par aucune branche, alors ces commits sont dits *orphelins* (*dangling*).
+Si on fait repointer une branche dessus, alors ils ne sont plus considérés comme orphelins et réapparaissent
+dans le *git log*.
+
+## Et HEAD justement ?
+- C'est aussi **juste une étiquette** qu'on peut bouger sur **nimporte quel commit de l'arbre**
+- Head indique la révision courante, notre position dans l'arbre.
+- C'est un peu comme une **fenêtre** qui se déplace sur nimporte quel commit de l'arbre
+- On la déplace manuellement avec *git reset*, *git checkout/switch*
+- D'autres commandes déplacent HEAD de façon plus implicite (ex: *git rebase*, *git merge*, ...)
+- En déplaçant HEAD, on remonte dans le temps du projet
+- En déplaçant HEAD, les étiquettes de branche ne bougent pas
+- C'est le commit de référence implicite pour les comparaisons de statut, de diff...
+quand ça n'est pas précisé, on compare en général avec HEAD (ex: *git diff*)
+- Techniquement il s’agit d’une référence vers l’un des `.git/refs/heads`, sauf pour le cas exceptionnel du « **detached head** » dans lequel HEAD référence directement un commit
+
+On déplace HEAD avec *checkout* ou sa moitié d'alter-égo *switch*
+
+```bash
+git switch/checkout <révision (commit, branche, tag ...)> # déplace HEAD sur l’arbre des commits
+```
+![Checkout]({{ asset('build/avent/2021/02/afsy_z_checkout-rev.png') }} "Checkout")
+
+## Toutes les étiquettes bougent sur l'arbre du coup ?
+Pas les tags. Les tags sont des étiquettes fixes pointant vers un commit et qui servent généralement pour marquer
+les versions de l'application développée
+
+```bash
+git tag [-f] <nom du tag> # crée un tag, -f remplace le tag s’il existe
+```
+
+## Dis Jamy, est-ce qu'il y'a des branches spéciales qui font de la magie ?
+OUI
+
+**Les branches de fetch !!!** (aussi appelées **le cache local**, mais j'aime les appeler *les branches cachées*) Si vous comprenez le fonctionnement de ces branches, vous avez fait un grand pas en avant dans git.
+
+A chaque fois que git pushe une branche sur le repo distant pour la 1ere fois (avec *git push*), 
+**une branche de fetch est aussi crée.**
+Par exemple pour un remote qui s'appellerais *"origin"* et une nouvelle branche *"my_feature"* qui est pushée,
+une étiquette de branche de fetch appelée *"origin/my_feature"* va être crée. Cette branche est en **synchronisation** 
+avec le repo distant. **Elle se synchronise à chaque *git push* ou *git fetch***
+(rappelons que l'exact inverse du *push* est le *fetch* et pas le *pull*,
+qui n'est que la combinaison d'un *fetch* et d'un *merge* ou *rebase*)
+
+```bash
+git push origin my_feature # crée la branche cachée "my_feature" du repo "origin"
+git fetch                  # déplace l’étiquette "my_feature" sur le même commit (SHA1) que "my_feature" distante
+git log origin/my_feature  # pour voir la hiérachie de commits de la branche
+
+# Attention, git log --all ne montre pas les branches de fetch
+```
+
+C'est une branche qui ne peut pas se déplacer comme une branche tradi. Elle est le miroir du remote.
+Elle sert à avoir une trace locale des commits déjà pushés. Comme une autre branche, c'est aussi une étiquette
+qui peut pointer vers les mêmes rangées de commits. On peut la merger, la rebase, cherry-picker les commits ...
+
+Attention, cette branche n'apparait pas avec un *git log --all* 
+
+Sur l'image suivante, les branches de cache sont synchronisées avec les branches, sauf pour *"test"* qui est en avance de 1 commit sur 
+*"origin/test"*.
+
+![Local cache]({{ asset('build/avent/2021/02/afsy_local-cache.png') }} "Local cache")
+
+Sur l'image suivante, on voit que le push synchronise *"origin/master"* avec ce qui à été pushé sue *"master"*.
+
+![Push]({{ asset('build/avent/2021/02/afsy_push.png') }} "Push")
+
+## On résume :
+Donc au final on à: 
+- des commits immuables qui sont reliés entre-eux
+- des étiquettes (branches, HEAD, ...) qui se baladent à l'envie sur cet arbre et pointent sur les commits qu'on
+souhaite
+- des étiquettes qui ne bougent pas (les tags)
+Facile
+
+
+## Et rebase là dedans ? J'ai fait des rebases partout et j'ai plein de conflits
+Sur internet on voit parfois qu'un rebase "*c'est comme une tronçonneuse qui déplace des commits sur d'autres
+branches*"...
+**IL N'Y A RIEN DE PLUS FAUX \!** C'est une erreur qu'on voit partout.
+
+Comme on a vu, un commit est *immuable* par nature. *Rebase* ne peut pas les déplacer.
+Mais *rebase* va les copier, et les réappliquer. **Avec un SHA1 différent : ce sont de nouveaux commits**.
+
+Quand on se retrouve avec 200 conflits sur 100 commits, c'est qu'on a fait nimporte quoi avec rebase et c'est l'erreur
+la plus courante. Car si le *blob* (le contenu du code) est potentiellement identique, le SHA1 montre que les commits 
+sont bien différents.
+
+Perso, je ne suis pas fan des merge rebase. On croit qu'on fait un historique clean, mais on oublie que ce sont d'autres
+commits et que les commits des collègues ont des SHA1 différents. 
+Mieux vaut préférer un merge en fast forward si possible, mais ça sera pour un autre article ;)
+
+## J'ai raté mon rebase :
+Le gros intéret de ne jamais supprimer les commits, c'est de pouvoir toujours les retrouver: 
+
+![Rebase recovery]({{ asset('build/avent/2021/02/afsy_rebase-recovery.png') }} "Rebase recovery")
+
+Ici, on voit qu'on peut facilement annuler un rebase raté (revenir sur le commit précédent en fait), et refaire un
+autre rebase. Les commits originaux comme les commits du rebase raté sont toujours là. Ils sont orphelins, mais on peut
+toujours revenir dessus au besoin.
+
+## Comment je contrôle tout ça :
+Avec **git log** et **git reflog** :
+
+- **log**
+```bash
+git log # la base pour voir les commits depuis HEAD, pratique avec les options --all, --oneline et --graph
+```
+
+git log est pesonnalisable à fond: voici ma config perso, à rajouter dans ~/.gitconfig :
+```bash
+[alias] 
+log1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(magenta)%an%C(reset) - %C(bold yellow)%d%C(reset)%C(white)%<(80,trunc)%s%C(reset) %C(dim white)'
+```
+Ca donne un résultat pratique et très lisible: 
+![git log]({{ asset('build/avent/2021/02/git_log1.png') }} "git log")
+
+- **reflog**
+```bash
+git reflog # affiche les déplacements de HEAD précédents. Pratique pour revenir en arrière sur un rebase.
+```
+
+*git reflog* est tout autant personnalisable à l'envie que *git log*.
+
+
+## Conclusion
+Il est très important de bien se représenter l'arbre des commits pour éviter de faire des manips inutiles et
+subjectes aux erreurs, et de ne pas se retrouver avec des conflits interplanétaires. Suivre à la lettre un gitflow est
+très pratique pour éviter toute manipulation accidentelle, mais il faut aussi connaitre les spécificités des sites
+de repo comme github.
+
+Il faut aussi user et abuser du *git log* et du *git reflog*, ce sont les outis indispensables pour se repérer dans
+l'arbre, et savoir exactement où on en est.
+
+{% endblock %}
+
+{% block article_avatar %}
+    <img src="{{ asset('build/avent/mikael-brosset.png') }}"
+         alt="Mikael Brosset"/>
+{% endblock %}
+
+{% block article_bio %}
+    <h2>
+        <a href="https://www.linkedin.com/in/mikael-brosset-%F0%9F%91%BE-0aaa0b9/"
+           target="_blank" rel="noopener noreferrer">Mikael Brosset linkedin</a>
+    </h2>
+
+    <p>
+        {% block article_author 'Mikael' %} est Consultant Web freelance.
+    </p>
+{% endblock %}
