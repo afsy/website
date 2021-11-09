@@ -8,17 +8,17 @@
 # Comprendre correctement l'arbre des commits de GIT
 
 
-Git est partout, mais il est souvent très mal compris.
-C'est un programme qui n'est pas vraiment user-friendly, les commandes sont souvent mal nommées
-et font parfois plusieurs choses différentes (checkout, reset...). Il est difficile d'avoir une vision d'ensemble.
-Les tutoriels et forums d'entraides utilisent des termes souvent trompeurs voire erronés,
+Git est partout, mais il est souvent mal compris dans son ensemble.
+C'est un programme qui n'est pas vraiment user-friendly, le nommage des commandes n'est pas toujours explicite
+et elles font parfois plusieurs choses différentes (checkout, reset...). Il est difficile d'avoir une vision d'ensemble.
+Les tutoriels et forums d'entraides peuvent employer des termes trompeurs voire erronés,
 faisant de Git l'un des programmes les plus craint des développeurs juniors et certains développeurs plus avancés
 ignorent son fonctionnement.
 Pourtant ce programme à une puissance de feu incomparable provenant de sa capacité à faire du versionning
 de façon extrèmement légère.
 
 On ne va pas parler de code ici, encore moins de conflits. On ne va pas rentrer dans les innombrables options ou
-commandes de plomberie. L'intérêt de cette présentation est de comprendre la façon dont Git nous structure nos
+commandes de plomberie. L'intérêt de cet article est de comprendre la façon dont Git nous structure nos
 différentes révisions.
 
 ## L'arbre des commits
@@ -58,12 +58,12 @@ font que dans ce sens.
 Impossible donc d'aller du parent vers l'enfant.
 
 
-### Voici les rêgles de fonctionnement d'un commit (les rêgles d'or à garder en tête):
+### Voici les règles de fonctionnement d'un commit (les règles d'or à garder en tête):
 - Un commit est **toujours relié à au moins un commit parent** (sauf le commit initial)
 - Un commit n'est **plus jamais modifié une fois créé** (un *--amend* ou un *rebase créent de nouveaux commits)
-- Un commit **ne peut pas être déplacé**. Le/les parents d'un commits sont gravés dans le marbre forever 
+- Un commit **ne peut pas être déplacé**. Le/les parents d'un commit sont gravés dans le marbre à jamais 
 - Un commit **ne peut pas être supprimé** sauf par le Garbage Collector uniquement s'il n'est pas reliè à une branche 
-(dangling commit), si le nombre d'objet git dépasse 6700 et après 30 jours (ce qui nous donne un grand laps de temps)
+(dangling commit), si le nombre d'objets git dépasse 6700 et après 30 jours (ce qui nous donne un grand laps de temps)
 - Il peut donc **toujours être retrouvé** avant le Garbage Collector, et avec lui **tous ses commits parents !**
 - Un commit **peut être copié**. Le SHA1 et le parent seront différents du commit source
 
@@ -88,7 +88,7 @@ git reset --hard <SHA1 du commit> # déplace l’étiquette de branche + HEAD
 # - déplacer la branche et HEAD
 # - restaurer les modifications du commit pointé
 #
-# Cette commande nécéssiterait un article à elle toute seule :P
+# Cette commande nécessiterait un article à elle toute seule :P
 ```
 
 ![Reset]({{ asset('build/avent/2021/02/afsy_reset_deplacement.png') }} "Reset")
@@ -98,9 +98,9 @@ Si on fait repointer une branche dessus, alors ils ne sont plus considérés com
 dans le *git log*.
 
 ## Et HEAD justement ?
-- C'est aussi **juste une étiquette** qu'on peut bouger sur **nimporte quel commit de l'arbre**
+- C'est aussi **juste une étiquette** qu'on peut bouger sur **n'importe quel commit de l'arbre**
 - Head indique la révision courante, notre position dans l'arbre.
-- C'est un peu comme une **fenêtre** qui se déplace sur nimporte quel commit de l'arbre
+- C'est un peu comme une **fenêtre** qui se déplace sur n'importe quel commit de l'arbre
 - On la déplace manuellement avec *git reset*, *git checkout/switch*
 - D'autres commandes déplacent HEAD de façon plus implicite (ex: *git rebase*, *git merge*, ...)
 - En déplaçant HEAD, on remonte dans le temps du projet
@@ -129,10 +129,10 @@ OUI
 
 **Les branches de fetch !!!** (aussi appelées **le cache local**, mais j'aime les appeler *les branches cachées*) Si vous comprenez le fonctionnement de ces branches, vous avez fait un grand pas en avant dans git.
 
-A chaque fois que git pushe une branche sur le repo distant pour la 1ere fois (avec *git push*), 
-**une branche de fetch est aussi crée.**
-Par exemple pour un remote qui s'appellerais *"origin"* et une nouvelle branche *"my_feature"* qui est pushée,
-une étiquette de branche de fetch appelée *"origin/my_feature"* va être crée. Cette branche est en **synchronisation** 
+A chaque fois que git push une branche sur le repository distant pour la 1ère fois (avec *git push*), 
+**une branche de fetch est aussi créee.**
+Par exemple pour un remote qui s'appellerait *"origin"* et une nouvelle branche *"my_feature"* qui est pushée,
+une étiquette de branche de fetch appelée *"origin/my_feature"* va être créee. Cette branche est en **synchronisation** 
 avec le repo distant. **Elle se synchronise à chaque *git push* ou *git fetch***
 (rappelons que l'exact inverse du *push* est le *fetch* et pas le *pull*,
 qui n'est que la combinaison d'un *fetch* et d'un *merge* ou *rebase*)
@@ -145,7 +145,7 @@ git log origin/my_feature  # pour voir la hiérachie de commits de la branche
 # Attention, git log --all ne montre pas les branches de fetch
 ```
 
-C'est une branche qui ne peut pas se déplacer comme une branche tradi. Elle est le miroir du remote.
+C'est une branche qui ne peut pas se déplacer comme une branche traditionnelle. Elle est le miroir du remote.
 Elle sert à avoir une trace locale des commits déjà pushés. Comme une autre branche, c'est aussi une étiquette
 qui peut pointer vers les mêmes rangées de commits. On peut la merger, la rebase, cherry-picker les commits ...
 
@@ -156,7 +156,7 @@ Sur l'image suivante, les branches de cache sont synchronisées avec les branche
 
 ![Local cache]({{ asset('build/avent/2021/02/afsy_local-cache.png') }} "Local cache")
 
-Sur l'image suivante, on voit que le push synchronise *"origin/master"* avec ce qui à été pushé sue *"master"*.
+Sur l'image suivante, on voit que le push synchronise *"origin/master"* avec ce qui à été pushé sur *"master"*.
 
 ![Push]({{ asset('build/avent/2021/02/afsy_push.png') }} "Push")
 
@@ -166,7 +166,6 @@ Donc au final on à:
 - des étiquettes (branches, HEAD, ...) qui se baladent à l'envie sur cet arbre et pointent sur les commits qu'on
 souhaite
 - des étiquettes qui ne bougent pas (les tags)
-Facile
 
 
 ## Et rebase là dedans ? J'ai fait des rebases partout et j'ai plein de conflits
@@ -220,9 +219,9 @@ git reflog # affiche les déplacements de HEAD précédents. Pratique pour reven
 
 ## Conclusion
 Il est très important de bien se représenter l'arbre des commits pour éviter de faire des manips inutiles et
-subjectes aux erreurs, et de ne pas se retrouver avec des conflits interplanétaires. Suivre à la lettre un gitflow est
+sujettes aux erreurs, et de ne pas se retrouver avec des conflits interplanétaires. Suivre à la lettre un gitflow est
 très pratique pour éviter toute manipulation accidentelle, mais il faut aussi connaitre les spécificités des sites
-de repo comme github.
+de repo comme Github.
 
 Il faut aussi user et abuser du *git log* et du *git reflog*, ce sont les outis indispensables pour se repérer dans
 l'arbre, et savoir exactement où on en est.
