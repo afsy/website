@@ -12,7 +12,13 @@ When your article is done and published, spread the world on social networks!
 
 ## Install and run
 
-If you want to test the current version (which requires php 7.3):
+Requirements:
+- PHP 8.0 / Composer
+- Symfony cli
+- Docker
+- NodeJS / Yarn
+
+Run it locally:
 
 ```bash
 $ symfony composer install
