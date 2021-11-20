@@ -13,7 +13,7 @@ class AventController extends AbstractController
 {
     private $twig;
     protected $futureEnabled;
-    protected $enabledYears = array('2013', '2017', '2019');
+    protected $enabledYears = array('2013', '2017', '2019', '2021');
     private $now;
 
     public function __construct(Environment $twig, $env)
@@ -108,7 +108,10 @@ class AventController extends AbstractController
             '03-symfony-et-test-technique' => 'Avent/2019/day_03.html.twig',
             '02-symfony4-vers-symfony5' => 'Avent/2019/day_02.html.twig',
             '01-10-astuces-incroyables-sur-symfony' => 'Avent/2019/day_01.html.twig',
-        )
+        ),
+        2021 => array(
+            '01-jouons-avec-le-nouveau-composant-security-de-symfony' => 'Avent/2021/day_01.html.twig',
+        ),
     );
 
     /**
